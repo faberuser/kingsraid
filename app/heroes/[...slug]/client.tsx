@@ -6,12 +6,20 @@ import Profile from "@/components/heroes/profile"
 import Skills from "@/components/heroes/skills"
 import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
+import Costumes from "@/components/heroes/costumes"
+
+interface Costume {
+	name: string
+	path: string
+	displayName: string
+}
 
 interface SlugClientProps {
 	heroData: Hero
+	costumes: Costume[]
 }
 
-export default function SlugClient({ heroData }: SlugClientProps) {
+export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
 		<div className="py-10 px-20 w-full">
 			<Tabs defaultValue="profile" className="w-full mt-4">
@@ -41,7 +49,7 @@ export default function SlugClient({ heroData }: SlugClientProps) {
 				</TabsContent>
 
 				<TabsContent value="costumes" className="mt-4">
-					PLACEHOLDER
+					<Costumes heroData={heroData} costumes={costumes} />
 				</TabsContent>
 
 				<TabsContent value="models" className="mt-4">
