@@ -1,7 +1,8 @@
 FROM alpine/git AS git-stage
 WORKDIR /src
 COPY . .
-RUN git submodule update --init --recursive
+# Clone the submodule repository directly instead of using git submodule
+RUN git clone https://github.com/faberuser/kingsraid-data.git kingsraid-data
 
 FROM oven/bun:alpine AS base
 WORKDIR /usr/src/app
