@@ -3,6 +3,7 @@ import path from "path"
 import { Hero } from "@/model/Hero"
 import { notFound } from "next/navigation"
 import SlugClient from "./client"
+import { capitalize } from "@/lib/utils"
 
 async function getHeroData(heroName: string): Promise<Hero | null> {
 	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
@@ -22,19 +23,20 @@ async function getHeroData(heroName: string): Promise<Hero | null> {
 }
 
 interface SlugPageProps {
-	params: {
+	params: Promise<{
 		slug: string[]
-	}
+	}>
 }
 
 export default async function SlugPage({ params }: SlugPageProps) {
-	const heroName = params.slug?.[0]
+	const { slug } = await params
+	const heroName = slug?.[0]
 
 	if (!heroName) {
 		notFound()
 	}
 
-	const heroData = await getHeroData(heroName)
+	const heroData = await getHeroData(capitalize(heroName))
 
 	if (!heroData) {
 		notFound()

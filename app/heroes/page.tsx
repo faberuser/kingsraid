@@ -30,6 +30,7 @@ async function getHeroes(): Promise<Hero[]> {
 			const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
 			return { name: heroName, ...heroData }
 		})
+		.sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export default async function HeroesPage() {

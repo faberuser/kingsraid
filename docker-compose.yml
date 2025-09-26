@@ -1,0 +1,9 @@
+services:
+    app:
+        container_name: kingsraid
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - ${DOCKER_PORT:-3000}:3000
+        restart: unless-stopped
