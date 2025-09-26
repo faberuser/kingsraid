@@ -1,3 +1,8 @@
+FROM alpine/git AS git-stage
+WORKDIR /src
+COPY . .
+RUN git submodule update --init --recursive
+
 FROM oven/bun:alpine AS base
 WORKDIR /usr/src/app
 
@@ -14,11 +19,10 @@ RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
 RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
+# copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY . .
+COPY --from=git-stage /src .
 
 # build the application
 RUN bun run build
