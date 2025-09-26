@@ -7,6 +7,7 @@ import Skills from "@/components/heroes/skills"
 import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
+import Models from "@/components/heroes/models"
 
 interface Costume {
 	name: string
@@ -53,7 +54,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 				</TabsContent>
 
 				<TabsContent value="models" className="mt-4">
-					PLACEHOLDER
+					<Models heroData={heroData} />
 				</TabsContent>
 			</Tabs>
 		</div>
