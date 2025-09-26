@@ -116,7 +116,7 @@ export default function Gear({ heroData }: GearProps) {
 											>
 												{ut.name}
 											</div>
-											<div className="text-sm mb-3">{ut.description}</div>
+											<div className="mb-3">{ut.description}</div>
 
 											{/* UT Values */}
 											{ut.value && (
@@ -199,12 +199,12 @@ export default function Gear({ heroData }: GearProps) {
 
 								<div className="space-y-3">
 									<div>
-										<h4 className="font-medium text-sm">Requirement</h4>
-										<p className="text-sm">{heroData.sw.requirement}</p>
+										<h4 className="font-medium">Requirement</h4>
+										<div>{heroData.sw.requirement}</div>
 									</div>
 
 									<div>
-										<div className="font-medium text-sm">Effect</div>
+										<div className="font-medium ">Effect</div>
 										<div>{heroData.sw.description}</div>
 									</div>
 
@@ -218,7 +218,7 @@ export default function Gear({ heroData }: GearProps) {
 												{Object.entries(heroData.sw.advancement).map(([level, effect]) => (
 													<div
 														key={level}
-														className={`px-3 py-2 rounded border-l-4 ${classColorMapBg(
+														className={`px-3 py-2 rounded ${classColorMapBg(
 															heroData.infos.class
 														)}`}
 													>

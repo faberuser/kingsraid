@@ -83,7 +83,7 @@ export default function Perks({ heroData }: PerksProps) {
 					</Card>
 				))
 			) : (
-				<p className="text-center text-gray-500 py-8">No perk data available</p>
+				<div className="text-center text-gray-500 py-8">No perk data available</div>
 			)}
 		</div>
 	)

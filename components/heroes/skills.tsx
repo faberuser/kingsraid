@@ -65,7 +65,7 @@ export default function Skills({ heroData }: SkillsProps) {
 					</Card>
 				))
 			) : (
-				<p className="text-center text-gray-500 py-8">No skill data available</p>
+				<div className="text-center text-gray-500 py-8">No skill data available</div>
 			)}
 		</div>
 	)

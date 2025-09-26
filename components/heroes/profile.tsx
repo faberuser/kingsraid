@@ -43,28 +43,28 @@ export default function Profile({ heroData }: ProfileProps) {
 
 						<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
 							<div className="px-3 py-1 rounded border-l-4 border-blue-500">
-								<span className="font-semibold">Class</span>
-								<p>{infos.class}</p>
+								<div className="font-semibold">Class</div>
+								<div>{infos.class}</div>
 							</div>
 							<div className="px-3 py-1 rounded border-l-4 border-green-500">
-								<span className="font-semibold">Position</span>
-								<p>{infos.position}</p>
+								<div className="font-semibold">Position</div>
+								<div>{infos.position}</div>
 							</div>
 							<div className="px-3 py-1 rounded border-l-4 border-red-500">
-								<span className="font-semibold">Damage Type</span>
-								<p>{infos["damage type"]}</p>
+								<div className="font-semibold">Damage Type</div>
+								<div>{infos["damage type"]}</div>
 							</div>
 							<div className="px-3 py-1 rounded border-l-4 border-yellow-500">
-								<span className="font-semibold">Attack Range</span>
-								<p>{infos["attack range"]}</p>
+								<div className="font-semibold">Attack Range</div>
+								<div>{infos["attack range"]}</div>
 							</div>
 							<div className="px-3 py-1 rounded border-l-4 border-pink-500">
-								<span className="font-semibold">Gender</span>
-								<p>{infos.gender}</p>
+								<div className="font-semibold">Gender</div>
+								<div>{infos.gender}</div>
 							</div>
 							<div className="px-3 py-1 rounded border-l-4 border-indigo-500">
-								<span className="font-semibold">Race</span>
-								<p>{infos.race}</p>
+								<div className="font-semibold">Race</div>
+								<div>{infos.race}</div>
 							</div>
 						</div>
 					</div>
@@ -79,23 +79,23 @@ export default function Profile({ heroData }: ProfileProps) {
 						<Separator className="mb-4" />
 						<div className="space-y-3">
 							<div className="flex justify-between py-2">
-								<span className="font-medium ">Age</span>
-								<span>{infos.age}</span>
+								<div className="font-medium ">Age</div>
+								<div>{infos.age}</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
-								<span className="font-medium ">Height</span>
-								<span>{infos.height} cm</span>
+								<div className="font-medium ">Height</div>
+								<div>{infos.height} cm</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
-								<span className="font-medium ">Birthday</span>
-								<span>{infos["birth of month"]}</span>
+								<div className="font-medium ">Birthday</div>
+								<div>{infos["birth of month"]}</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
-								<span className="font-medium ">Constellation</span>
-								<span>{infos.constellation}</span>
+								<div className="font-medium ">Constellation</div>
+								<div>{infos.constellation}</div>
 							</div>
 						</div>
 					</CardContent>
