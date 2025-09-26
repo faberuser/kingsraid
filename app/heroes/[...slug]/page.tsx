@@ -1,38 +1,44 @@
-"use client"
+import fs from "fs"
+import path from "path"
+import { Hero } from "@/model/Hero"
+import { notFound } from "next/navigation"
+import SlugClient from "./client"
 
-import { useEffect, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+async function getHeroData(heroName: string): Promise<Hero | null> {
+	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
+	const filePath = path.join(heroesDir, `${heroName}.json`)
 
-export default function SlugPage() {
-	const [isLoading, setIsLoading] = useState(false)
-	const [currentPath, setCurrentPath] = useState("")
-	const [searchResults, setSearchResults] = useState([])
-
-	const pathname = usePathname()
-	const router = useRouter()
-
-	// set current path on load
-	useEffect(() => {
-		setCurrentPath(pathname === "/" ? "" : decodeURIComponent(pathname ?? ""))
-	}, [pathname])
-
-	// listen to back/forward button
-	useEffect(() => {
-		const handlePopState = () => {
-			setCurrentPath(window.location.pathname === "/" ? "" : decodeURIComponent(window.location.pathname ?? ""))
-		}
-
-		window.addEventListener("popstate", handlePopState)
-		return () => {
-			window.removeEventListener("popstate", handlePopState)
-		}
-	}, [])
-
-	function setNewPath(_path: string) {
-		setCurrentPath(_path)
-		const navigateTo = _path === "" ? "/" : _path
-		router.push(navigateTo)
+	if (!fs.existsSync(filePath)) {
+		return null
 	}
 
-	return <div className="p-4">TEST</div>
+	try {
+		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
+		return { name: heroName, ...heroData }
+	} catch (error) {
+		console.error(`Error loading hero data for ${heroName}:`, error)
+		return null
+	}
+}
+
+interface SlugPageProps {
+	params: {
+		slug: string[]
+	}
+}
+
+export default async function SlugPage({ params }: SlugPageProps) {
+	const heroName = params.slug?.[0]
+
+	if (!heroName) {
+		notFound()
+	}
+
+	const heroData = await getHeroData(heroName)
+
+	if (!heroData) {
+		notFound()
+	}
+
+	return <SlugClient heroData={heroData} />
 }

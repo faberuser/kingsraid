@@ -9,6 +9,7 @@ import {
 	SidebarMenuButton,
 } from "@/components/ui/sidebar"
 import { Home, UserRound, Amphora, ShieldHalf } from "lucide-react"
+import Link from "next/link"
 
 // Menu items.
 const items = [
@@ -56,10 +57,10 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 							{items.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton asChild className="py-6">
-										<a href={item.url} className="space-x-2 pl-5">
+										<Link href={item.url} className="space-x-2 pl-5">
 											<item.icon />
 											<span className="text-lg">{item.title}</span>
-										</a>
+										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
 							))}
