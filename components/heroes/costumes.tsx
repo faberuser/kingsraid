@@ -60,7 +60,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 
 	// Scroll wheel zoom
 	const handleWheel = useCallback((e: React.WheelEvent) => {
-		e.preventDefault()
+		// e.preventDefault()
 
 		const zoomSpeed = 0.1
 		const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed

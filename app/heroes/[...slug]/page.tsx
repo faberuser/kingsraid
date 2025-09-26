@@ -59,7 +59,7 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 
 			return {
 				name: nameWithoutExt,
-				path: `${costumePath}/${filename}`,
+				path: `${costumePath}/${encodeURIComponent(filename)}`,
 				displayName,
 			}
 		})
