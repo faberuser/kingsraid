@@ -22,7 +22,7 @@ interface SlugClientProps {
 
 export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
-		<div className="py-10 px-20 w-full">
+		<div className="py-0 px-2 sm:py-10 sm:px-20 w-full">
 			<Tabs defaultValue="profile" className="w-full mt-4">
 				<TabsList className="w-full">
 					<TabsTrigger value="profile">Profile</TabsTrigger>

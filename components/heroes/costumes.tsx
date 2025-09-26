@@ -187,20 +187,22 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				</Card>
 			)}
 
-			{/* Costume Grid */}
+			{/* Costume Container */}
 			<Card>
 				<CardContent>
 					<div className="text-xl font-semibold mb-4">Available Costumes</div>
-					<div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-						{costumes.map((costume) => (
-							<CostumeCard
-								key={costume.name}
-								costume={costume}
-								heroName={heroData.name}
-								isSelected={selectedCostume === costume.name}
-								onClick={() => setSelectedCostume(costume.name)}
-							/>
-						))}
+					<div className="flex items-center justify-center">
+						<div className="flex flex-row gap-4 flex-wrap w-full justify-center">
+							{costumes.map((costume) => (
+								<CostumeCard
+									key={costume.name}
+									costume={costume}
+									heroName={heroData.name}
+									isSelected={selectedCostume === costume.name}
+									onClick={() => setSelectedCostume(costume.name)}
+								/>
+							))}
+						</div>
 					</div>
 
 					{costumes.length === 0 && (
@@ -304,7 +306,7 @@ interface CostumeCardProps {
 function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProps) {
 	return (
 		<div
-			className={`border rounded w-48 h-48 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:scale-105 ${
+			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:scale-105 ${
 				isSelected ? "ring-2 ring-offset-2" : ""
 			}`}
 			onClick={onClick}

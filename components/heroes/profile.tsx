@@ -32,7 +32,7 @@ export default function Profile({ heroData }: ProfileProps) {
 
 					{/* Hero Basic Info */}
 					<div className="flex-grow">
-						<div className="mb-2">
+						<div className="mb-2 text-center sm:text-start">
 							<div className="text-3xl font-bold">{capitalize(heroData.name)}</div>
 							<div className={`text-lg font-semibold ${classColorMapText(infos.class)}`}>
 								{infos.title}

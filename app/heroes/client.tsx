@@ -51,8 +51,8 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 	}, [heroes, searchQuery, selectedClass, fuse])
 
 	return (
-		<div className="p-10">
-			<div className="flex flex-col text-start space-y-4 px-10">
+		<div className="p-0 pt-5 sm:p-10">
+			<div className="flex flex-col text-start space-y-4 px-4 sm:px-10">
 				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Heroes</div>
 					<div className="text-muted-foreground text-sm">Showing {filteredHeroes.length} heroes</div>
@@ -60,7 +60,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 
 				<Separator />
 
-				<div className="flex flex-row gap-4 items-center">
+				<div className="flex flex-col items-start xl:flex-row xl:items-center gap-4">
 					{/* Search Input */}
 					<div className="w-full max-w-sm">
 						<Input
@@ -95,7 +95,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 											className="inline"
 										/>
 									) : (
-										<div className="w-6 h-6 flex items-center justify-center text-xs font-bold border rounded">
+										<div className="w-4 h-4 flex items-center justify-center text-xs font-bold border rounded">
 											All
 										</div>
 									)}
