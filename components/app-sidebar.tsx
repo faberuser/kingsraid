@@ -7,9 +7,12 @@ import {
 	SidebarMenu,
 	SidebarMenuItem,
 	SidebarMenuButton,
+	SidebarHeader,
+	SidebarFooter,
 } from "@/components/ui/sidebar"
 import { Home, UserRound, Amphora, ShieldHalf } from "lucide-react"
 import Link from "next/link"
+import { ModeToggle } from "@/components/theme-toggle"
 
 // Menu items.
 const items = [
@@ -42,16 +45,13 @@ interface AppSidebarProps {
 export default function AppSidebar({ title }: AppSidebarProps) {
 	return (
 		<Sidebar className="dark:border-gray-600">
+			<SidebarHeader className="px-5 py-4 border-b">
+				<Link href="/" className="text-2xl font-bold">
+					{title}
+				</Link>
+			</SidebarHeader>
 			<SidebarContent className="ctscroll">
 				<SidebarGroup>
-					<SidebarGroupLabel>
-						<div
-							// onClick={() => setNewPath("")}
-							className="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-50"
-						>
-							<span className="text-base mt-1">{title}</span>
-						</div>
-					</SidebarGroupLabel>
 					<SidebarGroupContent className="mt-5">
 						<SidebarMenu>
 							{items.map((item) => (
@@ -68,6 +68,9 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 					</SidebarGroupContent>
 				</SidebarGroup>
 			</SidebarContent>
+			<SidebarFooter className="px-5 py-4 border-t">
+				<ModeToggle />
+			</SidebarFooter>
 		</Sidebar>
 	)
 }

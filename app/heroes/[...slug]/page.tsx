@@ -36,7 +36,9 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const heroData = await getHeroData(capitalize(heroName))
+	const decodedHeroName = decodeURIComponent(heroName)
+
+	const heroData = await getHeroData(capitalize(decodedHeroName))
 
 	if (!heroData) {
 		notFound()

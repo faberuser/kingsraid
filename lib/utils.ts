@@ -10,12 +10,12 @@ export function capitalize(s: string) {
 	return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-export function classColorMap(className: string) {
+export function classColorMapText(className: string) {
 	switch (className.toLowerCase()) {
 		case "knight":
 			return "text-blue-500"
 		case "warrior":
-			return "text-brown-500"
+			return "text-yellow-900"
 		case "archer":
 			return "text-green-500"
 		case "mechanic":
@@ -26,5 +26,24 @@ export function classColorMap(className: string) {
 			return "text-purple-500"
 		case "priest":
 			return "text-blue-200"
+	}
+}
+
+export function classColorMapBg(className: string) {
+	switch (className.toLowerCase()) {
+		case "knight":
+			return "bg-blue-500/10"
+		case "warrior":
+			return "bg-yellow-900/10"
+		case "archer":
+			return "bg-green-500/10"
+		case "mechanic":
+			return "bg-blue-900/10"
+		case "wizard":
+			return "bg-red-500/10"
+		case "assassin":
+			return "bg-purple-500/10"
+		case "priest":
+			return "bg-blue-200/10"
 	}
 }
