@@ -11,12 +11,13 @@ import {
 	SidebarHeader,
 	SidebarFooter,
 } from "@/components/ui/sidebar"
-import { Home, UserRound, Amphora, ShieldHalf } from "lucide-react"
+import { Home, UserRound, Amphora, ShieldHalf, Github } from "lucide-react"
 import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
 
-// Menu items.
+// Menu items
 const items = [
 	{ title: "Home", url: "/", icon: Home },
 	{ title: "Heroes", url: "/heroes", icon: UserRound },
@@ -72,8 +73,14 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 				</SidebarGroup>
 			</SidebarContent>
 
-			<SidebarFooter className="px-5 py-4 border-t">
+			<SidebarFooter className="px-5 py-4 border-t flex flex-row justify-between">
 				<ModeToggle />
+				<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
+					<Button variant="outline" size="icon" className="bg-background">
+						<Github className="h-[1.2rem] w-[1.2rem]" />
+						<span className="sr-only">GitHub</span>
+					</Button>
+				</Link>
 			</SidebarFooter>
 		</Sidebar>
 	)

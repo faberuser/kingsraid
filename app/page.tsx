@@ -58,11 +58,7 @@ export default function Home() {
 								<CardDescription className="text-sm">{feature.description}</CardDescription>
 							</CardHeader>
 							<CardContent className="pt-0">
-								<Button
-									asChild
-									variant="outline"
-									className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
-								>
+								<Button asChild variant="outline" className="w-full">
 									<Link href={feature.href} className="flex items-center justify-center gap-2">
 										Explore {feature.title}
 										<ArrowRight className="w-4 h-4" />
