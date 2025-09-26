@@ -57,8 +57,8 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 												href={item.url}
 												className={`flex items-center space-x-2 pl-5 py-6 rounded-md transition-colors ${
 													isActive
-														? "bg-gray-600 dark:bg-gray-500"
-														: "hover:bg-gray-100 dark:hover:bg-gray-800"
+														? "bg-gray-200 dark:bg-gray-800"
+														: "hover:bg-gray-100 dark:hover:bg-gray-700"
 												}`}
 											>
 												<item.icon />
