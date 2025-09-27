@@ -8,6 +8,9 @@ import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
 import Models from "@/components/heroes/models"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
 
 interface Costume {
 	name: string
@@ -23,6 +26,16 @@ interface SlugClientProps {
 export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
 		<div className="py-0 px-2 sm:py-10 sm:px-20 w-full">
+			{/* Back Button */}
+			<div className="mb-6">
+				<Link href="/heroes">
+					<Button variant="ghost" className="gap-2">
+						<ArrowLeft className="h-4 w-4" />
+						Back to Heroes
+					</Button>
+				</Link>
+			</div>
+
 			<Tabs defaultValue="profile" className="w-full mt-4">
 				<TabsList className="w-full">
 					<TabsTrigger value="profile">Profile</TabsTrigger>

@@ -62,7 +62,7 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 												}`}
 											>
 												<item.icon />
-												<span className="text-lg">{item.title}</span>
+												<div className="text-lg">{item.title}</div>
 											</Link>
 										</SidebarMenuButton>
 									</SidebarMenuItem>
@@ -78,7 +78,7 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 				<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
 					<Button variant="outline" size="icon" className="bg-background">
 						<Github className="h-[1.2rem] w-[1.2rem]" />
-						<span className="sr-only">GitHub</span>
+						<div className="sr-only">GitHub</div>
 					</Button>
 				</Link>
 			</SidebarFooter>

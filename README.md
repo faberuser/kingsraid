@@ -1,4 +1,4 @@
-# King's Raid Database
+# King's Raid Info
 
 A web application that provides a number of data from the mobile game King's Raid.
 

@@ -1,6 +1,7 @@
 import { Hero } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 
 interface SkillsProps {
@@ -31,14 +32,20 @@ export default function Skills({ heroData }: SkillsProps) {
 									<div className="text-xl font-semibold">{skill.name}</div>
 									<div className="flex gap-2 text-sm">
 										{skill.cost && (
-											<div className="px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900">
+											<Badge
+												variant="default"
+												className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
+											>
 												Mana: {skill.cost}
-											</div>
+											</Badge>
 										)}
 										{skill.cooldown && (
-											<div className="px-2 py-1 rounded bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900">
+											<Badge
+												variant="default"
+												className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
+											>
 												CD: {skill.cooldown}s
-											</div>
+											</Badge>
 										)}
 									</div>
 								</div>

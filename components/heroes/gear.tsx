@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { classColorMapText, classColorMapBg } from "@/lib/utils"
-
+import { Badge } from "@/components/ui/badge"
 interface GearProps {
 	heroData: Hero
 }
@@ -186,12 +186,18 @@ export default function Gear({ heroData }: GearProps) {
 										{heroData.uw.name}
 									</div>
 									<div className="flex gap-2 text-sm">
-										<div className="px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900">
+										<Badge
+											variant="default"
+											className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
+										>
 											Uses: {heroData.sw.uses}
-										</div>
-										<div className="px-2 py-1 rounded bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900">
+										</Badge>
+										<Badge
+											variant="default"
+											className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
+										>
 											CD: {heroData.sw.cooldown}s
-										</div>
+										</Badge>
 									</div>
 								</div>
 

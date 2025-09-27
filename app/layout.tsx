@@ -6,7 +6,7 @@ import { SidebarProvider } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/app-sidebar"
 
 const title = "King's Raid"
-const description = "Indexer for King's Raid"
+const description = "Info for King's Raid"
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",

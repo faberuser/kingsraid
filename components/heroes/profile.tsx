@@ -126,7 +126,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						<div className="text-xl font-semibold pb-2">Background Story</div>
 						<Separator className="mb-4" />
 						<div className="prose max-w-none">
-							<div className="leading-relaxed text-justify">{infos.story}</div>
+							<div className="text-justify">{infos.story}</div>
 						</div>
 					</CardContent>
 				</Card>
