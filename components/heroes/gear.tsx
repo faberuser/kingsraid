@@ -69,18 +69,21 @@ export default function Gear({ heroData }: GearProps) {
 															heroData.infos.class
 														)}`}
 													>
-														Stat {statKey}
+														Stat ({statKey})
 													</div>
-													{Object.entries(statValues).map(([level, value]) => (
-														<div
-															key={level}
-															className={`p-2 rounded text-center ${classColorMapBg(
-																heroData.infos.class
-															)}`}
-														>
-															★{level}: {value}
-														</div>
-													))}
+													<div className="flex flex-wrap gap-1">
+														{Object.entries(statValues).map(([level, value]) => (
+															<Badge
+																variant="secondary"
+																key={level}
+																className={`p-2 rounded text-center ${classColorMapBg(
+																	heroData.infos.class
+																)}`}
+															>
+																★{level}: {value}
+															</Badge>
+														))}
+													</div>
 												</div>
 											))}
 										</div>
@@ -156,16 +159,17 @@ export default function Gear({ heroData }: GearProps) {
 													</div>
 													<div className="flex gap-2 text-xs">
 														{Object.entries(ut.value).map(([statKey, statValues]) => (
-															<div key={statKey} className="flex gap-1">
+															<div key={statKey} className="flex flex-wrap gap-1">
 																{Object.entries(statValues).map(([level, value]) => (
-																	<div
+																	<Badge
+																		variant="secondary"
 																		key={level}
 																		className={`p-2 rounded text-center ${classColorMapBg(
 																			heroData.infos.class
 																		)}`}
 																	>
 																		★{level}: {value}
-																	</div>
+																	</Badge>
 																))}
 															</div>
 														))}

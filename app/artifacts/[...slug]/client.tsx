@@ -71,7 +71,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 								<div className="grid grid-cols-3 md:grid-cols-6 gap-2">
 									{values.split(", ").map((value, index) => (
 										<div key={index} className="text-center">
-											<Badge variant="outline" className="p-2 w-full justify-center">
+											<Badge variant="secondary" className="p-2 w-full justify-center">
 												★{index}: {value.trim()}
 											</Badge>
 										</div>
