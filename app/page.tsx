@@ -7,14 +7,14 @@ import { ModeToggle } from "@/components/theme-toggle"
 const features = [
 	{
 		title: "Heroes",
-		description: "Discover heroes, skills, gears, and costumes.",
+		description: "Discover heroes, skills, gears, and more.",
 		icon: UserRound,
 		href: "/heroes",
 		color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
 	},
 	{
 		title: "Artifacts",
-		description: "Browse through artifacts' effects/synergies.",
+		description: "Browse through artifacts' effects and synergies.",
 		icon: Amphora,
 		href: "/artifacts",
 		color: "bg-purple-500/10 text-purple-600 dark:text-purple-400",

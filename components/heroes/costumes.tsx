@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Hero } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { capitalize } from "@/lib/utils"
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
+import { ZoomIn } from "lucide-react"
+import ImageZoomModal from "@/components/image-modal"
 
 interface Costume {
 	name: string
@@ -19,19 +17,9 @@ interface CostumesProps {
 	costumes: Costume[]
 }
 
-const MAX_ZOOM_IN = 10
-const MAX_ZOOM_OUT = 1
-
 export default function Costumes({ heroData, costumes }: CostumesProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string | null>(null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
-	const [zoomLevel, setZoomLevel] = useState(1)
-	const [panPosition, setPanPosition] = useState({ x: 0, y: 0 })
-	const [isDragging, setIsDragging] = useState(false)
-	const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-	const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 })
-
-	const imageContainerRef = useRef<HTMLDivElement>(null)
 
 	// Auto-select first costume when costumes are available
 	useEffect(() => {
@@ -42,103 +30,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 
 	const handleImageClick = () => {
 		setIsModalOpen(true)
-		setZoomLevel(1)
-		setPanPosition({ x: 0, y: 0 })
 	}
-
-	const handleZoomIn = () => {
-		setZoomLevel((prev) => Math.min(prev + 0.25, MAX_ZOOM_IN))
-	}
-
-	const handleZoomOut = () => {
-		setZoomLevel((prev) => {
-			const newZoom = Math.max(prev - 0.25, MAX_ZOOM_OUT)
-			if (newZoom === 1) {
-				setPanPosition({ x: 0, y: 0 })
-			}
-			return newZoom
-		})
-	}
-
-	const handleResetZoom = () => {
-		setZoomLevel(1)
-		setPanPosition({ x: 0, y: 0 })
-	}
-
-	// Scroll wheel zoom
-	const handleWheel = useCallback((e: React.WheelEvent) => {
-		const zoomSpeed = 0.1
-		const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed
-
-		setZoomLevel((prev) => {
-			const newZoom = Math.max(MAX_ZOOM_OUT, Math.min(MAX_ZOOM_IN, prev + delta))
-			if (newZoom === 1) {
-				setPanPosition({ x: 0, y: 0 })
-			}
-			return newZoom
-		})
-	}, [])
-
-	const handleMouseDown = useCallback(
-		(e: React.MouseEvent) => {
-			if (zoomLevel > 1) {
-				setIsDragging(true)
-				setDragStart({ x: e.clientX, y: e.clientY })
-				setLastPanPosition(panPosition)
-			}
-		},
-		[zoomLevel, panPosition]
-	)
-
-	const handleMouseMove = useCallback(
-		(e: React.MouseEvent) => {
-			if (isDragging && zoomLevel > 1) {
-				const deltaX = e.clientX - dragStart.x
-				const deltaY = e.clientY - dragStart.y
-
-				setPanPosition({
-					x: lastPanPosition.x + deltaX,
-					y: lastPanPosition.y + deltaY,
-				})
-			}
-		},
-		[isDragging, dragStart, lastPanPosition, zoomLevel]
-	)
-
-	const handleMouseUp = useCallback(() => {
-		setIsDragging(false)
-	}, [])
-
-	// Touch events for mobile support
-	const handleTouchStart = useCallback(
-		(e: React.TouchEvent) => {
-			if (zoomLevel > 1 && e.touches.length === 1) {
-				setIsDragging(true)
-				setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
-				setLastPanPosition(panPosition)
-			}
-		},
-		[zoomLevel, panPosition]
-	)
-
-	const handleTouchMove = useCallback(
-		(e: React.TouchEvent) => {
-			if (isDragging && zoomLevel > 1 && e.touches.length === 1) {
-				const deltaX = e.touches[0].clientX - dragStart.x
-				const deltaY = e.touches[0].clientY - dragStart.y
-
-				setPanPosition({
-					x: lastPanPosition.x + deltaX,
-					y: lastPanPosition.y + deltaY,
-				})
-			}
-		},
-		[isDragging, dragStart, lastPanPosition, zoomLevel]
-	)
-
-	const handleTouchEnd = useCallback(() => {
-		setIsDragging(false)
-	}, [])
 
 	if (!heroData.costumes) {
 		return (
@@ -228,81 +120,15 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 			</div>
 
 			{/* Zoom Modal */}
-			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-				<DialogContent className="[&>button]:hidden max-w-4xl max-h-[90vh] p-0">
-					<DialogHeader className="p-4 pb-2">
-						<div className="flex items-center justify-between">
-							<DialogTitle>
-								{capitalize(heroData.name)} - {selectedCostumeData?.displayName}
-							</DialogTitle>
-							<div className="flex items-center gap-2">
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleZoomOut}
-									disabled={zoomLevel <= MAX_ZOOM_OUT}
-								>
-									<ZoomOut className="w-4 h-4" />
-								</Button>
-								<div className="text-sm font-medium min-w-[60px] text-center">
-									{Math.round(zoomLevel * 100)}%
-								</div>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleZoomIn}
-									disabled={zoomLevel >= MAX_ZOOM_IN}
-								>
-									<ZoomIn className="w-4 h-4" />
-								</Button>
-								<Button variant="outline" size="sm" onClick={handleResetZoom}>
-									<RotateCcw className="w-4 h-4" />
-								</Button>
-							</div>
-						</div>
-					</DialogHeader>
-
-					<div className="overflow-hidden flex-1 p-4 pt-2" ref={imageContainerRef}>
-						<div
-							className="flex justify-center items-center min-h-[400px] h-full"
-							onMouseDown={handleMouseDown}
-							onMouseMove={handleMouseMove}
-							onMouseUp={handleMouseUp}
-							onMouseLeave={handleMouseUp}
-							onTouchStart={handleTouchStart}
-							onTouchMove={handleTouchMove}
-							onTouchEnd={handleTouchEnd}
-							onWheel={handleWheel}
-							style={{
-								cursor: zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
-							}}
-						>
-							{selectedCostumeData && (
-								<div
-									className="transition-transform duration-200 ease-out select-none"
-									style={{
-										transform: `scale(${zoomLevel}) translate(${panPosition.x / zoomLevel}px, ${
-											panPosition.y / zoomLevel
-										}px)`,
-										transformOrigin: "center center",
-									}}
-								>
-									<Image
-										src={`/assets/${selectedCostumeData.path}`}
-										alt={`${heroData.name} - ${selectedCostume}`}
-										width="0"
-										height="0"
-										sizes="100vw"
-										className="w-auto h-full"
-										priority
-										draggable={false}
-									/>
-								</div>
-							)}
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+			{selectedCostumeData && (
+				<ImageZoomModal
+					isOpen={isModalOpen}
+					onOpenChange={setIsModalOpen}
+					imageSrc={`/assets/${selectedCostumeData.path}`}
+					imageAlt={`${heroData.name} - ${selectedCostume}`}
+					title={`${capitalize(heroData.name)} - ${selectedCostumeData.displayName}`}
+				/>
+			)}
 		</div>
 	)
 }
@@ -327,7 +153,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				alt={`${heroName} - ${costume.displayName}`}
 				width="0"
 				height="0"
-				sizes="20vw"
+				sizes="40vw md:20vw"
 				className="w-full flex-1 hover:scale-110 transition-transform duration-300"
 			/>
 			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2 flex items-center justify-center">

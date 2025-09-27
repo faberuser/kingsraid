@@ -1,7 +1,11 @@
+import { useState } from "react"
 import { Hero } from "@/model/Hero"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import ImageZoomModal from "@/components/image-modal"
+import { ZoomIn } from "lucide-react"
+import { capitalize } from "@/lib/utils"
 
 interface ProfileProps {
 	heroData: Hero
@@ -9,6 +13,11 @@ interface ProfileProps {
 
 export default function Profile({ heroData }: ProfileProps) {
 	const { infos } = heroData
+	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	const handleImageClick = () => {
+		setIsModalOpen(true)
+	}
 
 	return (
 		<div className="space-y-6">
@@ -77,7 +86,10 @@ export default function Profile({ heroData }: ProfileProps) {
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Splashart</div>
 						<Separator className="mb-4" />
-						<div className="w-full flex items-center justify-center">
+						<div
+							className="relative w-full flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
+							onClick={handleImageClick}
+						>
 							<Image
 								src={`/assets/${heroData.splashart}`}
 								alt={`${heroData.name} Splashart`}
@@ -86,7 +98,18 @@ export default function Profile({ heroData }: ProfileProps) {
 								sizes="100vw"
 								className="w-auto h-full rounded"
 							/>
+							<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+								<ZoomIn className="w-12 h-12 text-white" />
+							</div>
 						</div>
+
+						<ImageZoomModal
+							isOpen={isModalOpen}
+							onOpenChange={setIsModalOpen}
+							imageSrc={`/assets/${heroData.splashart}`}
+							imageAlt={`${heroData.name} Splashart`}
+							title={`${capitalize(heroData.name)} Splashart`}
+						/>
 					</CardContent>
 				</Card>
 			</div>

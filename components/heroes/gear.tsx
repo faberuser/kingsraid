@@ -61,7 +61,7 @@ export default function Gear({ heroData }: GearProps) {
 										<div className="font-medium text-sm text-muted-foreground mb-2">
 											Enhancement Values
 										</div>
-										<div className="flex gap-2 text-xs">
+										<div className="flex gap-4 text-xs">
 											{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
 												<div key={statKey} className="space-y-1">
 													<div className="font-medium">Stat ({statKey})</div>
@@ -151,7 +151,7 @@ export default function Gear({ heroData }: GearProps) {
 													<div className="font-medium text-sm text-muted-foreground mb-2">
 														Enhancement Values
 													</div>
-													<div className="flex gap-2 text-xs">
+													<div className="flex gap-4 text-xs">
 														{Object.entries(ut.value).map(([statKey, statValues]) => (
 															<div key={statKey} className="space-y-1">
 																<div className="font-medium">Stat ({statKey})</div>

@@ -27,18 +27,14 @@ const items = [
 	{ title: "Softcap", url: "/softcap", icon: Calculator },
 ]
 
-interface AppSidebarProps {
-	title: string
-}
-
-export default function AppSidebar({ title }: AppSidebarProps) {
+export default function AppSidebar() {
 	const pathname = usePathname()
 
 	return (
 		<Sidebar className="dark:border-gray-600">
 			<SidebarHeader className="px-5 py-4 border-b">
 				<Link href="/" className="text-2xl font-bold">
-					{title}
+					King's Raid
 				</Link>
 			</SidebarHeader>
 

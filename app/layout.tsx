@@ -5,9 +5,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/app-sidebar"
 
-const title = "King's Raid"
-const description = "Info for King's Raid"
-
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -19,11 +16,11 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title,
-	description,
+	title: "King's Raid",
+	description: "Info for King's Raid",
 	openGraph: {
-		title,
-		description,
+		title: "King's Raid",
+		description: "Info for King's Raid",
 	},
 }
 
@@ -39,7 +36,7 @@ export default function RootLayout({
 				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 						<SidebarProvider>
-							<AppSidebar title={title} />
+							<AppSidebar />
 							<main className="w-full h-screen">{children}</main>
 						</SidebarProvider>
 					</ThemeProvider>
