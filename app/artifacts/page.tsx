@@ -9,7 +9,6 @@ interface ArtifactsData {
 
 async function getArtifacts(): Promise<{ name: string; data: ArtifactData }[]> {
 	try {
-		// Use the same data source as the slug page
 		const artifactsFile = path.join(process.cwd(), "kingsraid-data", "table-data", "artifacts.json")
 
 		if (!fs.existsSync(artifactsFile)) {

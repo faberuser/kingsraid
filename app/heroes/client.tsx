@@ -6,11 +6,12 @@ import Fuse from "fuse.js"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import HeroCard from "@/components/heroes/hero-card"
 import { Hero } from "@/model/Hero"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
+// Add import for the reverse list
+import saReverse from "@/kingsraid-data/sa_reverse.json"
 
 interface HeroesClientProps {
 	heroes: Hero[]
@@ -107,7 +108,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 											className="inline"
 										/>
 									) : (
-										<div className="w-4 h-4 flex items-center justify-center text-xs font-bold border rounded">
+										<div className="w-4 h-4 flex items-center justify-center text-xs font-bold">
 											All
 										</div>
 									)}
@@ -120,7 +121,25 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 
 			<div className="flex flex-row gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
-					<HeroCard key={hero.name} name={hero.name} splashart={hero.splashart} />
+					<Link
+						key={hero.name}
+						className="border rounded w-48 h-64 flex flex-col relative cursor-pointer overflow-hidden"
+						href={`/heroes/${encodeURIComponent(hero.name.toLowerCase().replace(/\s+/g, "-"))}`}
+					>
+						<Image
+							src={"/assets/" + hero.splashart}
+							alt={hero.name}
+							width="0"
+							height="0"
+							sizes="20vw"
+							className={`w-full flex-1 object-cover ${
+								saReverse.includes(hero.name) ? "object-left" : "object-right"
+							} hover:scale-110 transition-transform duration-300`}
+						/>
+						<div className="text-xl font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2">
+							{hero.name}
+						</div>
+					</Link>
 				))}
 			</div>
 

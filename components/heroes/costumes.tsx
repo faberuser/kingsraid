@@ -317,7 +317,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				width="0"
 				height="0"
 				sizes="100vw"
-				className="w-full flex-1 object-cover hover:scale-110 transition-transform duration-300"
+				className="w-full flex-1 hover:scale-110 transition-transform duration-300"
 			/>
 			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2 flex items-center justify-center">
 				{costume.displayName}

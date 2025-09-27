@@ -65,7 +65,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 							width="0"
 							height="0"
 							sizes="10vw"
-							className="w-full h-auto rounded object-cover"
+							className="w-full h-auto rounded"
 						/>
 					</div>
 					<div className="flex flex-col justify-center flex-1">
@@ -90,7 +90,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 
 			{/* Values */}
 			<div className="mb-8">
-				<h2 className="text-2xl font-bold mb-6">Values by Enhancement Level</h2>
+				<div className="text-2xl font-bold mb-6">Values by Enhancement Level</div>
 				<div className="grid gap-4">
 					{Object.entries(data.value).map(([key, values]) => (
 						<Card key={key} className="gap-2">

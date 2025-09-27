@@ -24,9 +24,10 @@ export default function Gear({ heroData }: GearProps) {
 								<Image
 									src={`/assets/${heroData.uw.thumbnail}`}
 									alt={heroData.uw.name}
-									width={80}
-									height={80}
-									className="rounded"
+									width="0"
+									height="0"
+									sizes="10vw"
+									className="w-full h-auto rounded mt-2"
 								/>
 							</div>
 
@@ -102,9 +103,10 @@ export default function Gear({ heroData }: GearProps) {
 											<Image
 												src={`/assets/${ut.thumbnail}`}
 												alt={ut.name}
-												width={64}
-												height={64}
-												className="rounded"
+												width="0"
+												height="0"
+												sizes="10vw"
+												className="w-full h-auto rounded mt-2"
 											/>
 										</div>
 
@@ -174,9 +176,10 @@ export default function Gear({ heroData }: GearProps) {
 								<Image
 									src={`/assets/${heroData.sw.thumbnail}`}
 									alt="Soul Weapon"
-									width={80}
-									height={80}
-									className="rounded"
+									width="0"
+									height="0"
+									sizes="10vw"
+									className="w-full h-auto rounded mt-2"
 								/>
 							</div>
 
@@ -205,7 +208,7 @@ export default function Gear({ heroData }: GearProps) {
 
 								<div className="space-y-3">
 									<div>
-										<h4 className="font-medium">Requirement</h4>
+										<div className="font-medium">Requirement</div>
 										<div>{heroData.sw.requirement}</div>
 									</div>
 

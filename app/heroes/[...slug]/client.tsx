@@ -50,7 +50,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 							width="0"
 							height="0"
 							sizes="10vw"
-							className="w-full h-auto rounded object-cover"
+							className="w-full h-auto rounded"
 						/>
 					</div>
 				</div>

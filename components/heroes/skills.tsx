@@ -16,13 +16,14 @@ export default function Skills({ heroData }: SkillsProps) {
 					<Card key={skillKey}>
 						<CardContent className="flex flex-col md:flex-row gap-4">
 							{/* Skill Icon */}
-							<div className="flex-shrink-0 mt-2">
+							<div className="flex-shrink-0">
 								<Image
 									src={`/assets/${skill.thumbnail}`}
 									alt={skill.name}
-									width={64}
-									height={64}
-									className="rounded"
+									width="0"
+									height="0"
+									sizes="10vw"
+									className="w-full h-auto rounded mt-2"
 								/>
 							</div>
 

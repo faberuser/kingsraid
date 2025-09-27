@@ -39,7 +39,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
-			<div className="mb-8">
+			<div className="space-y-4 mb-4">
 				{/* Back Button */}
 				<div className="mb-2">
 					<Link href="/">
@@ -50,15 +50,15 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row gap-4 items-baseline mb-4">
+				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Bosses</div>
 					<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
 				</div>
 
-				<Separator className="mb-6" />
+				<Separator />
 
 				{/* Search Input */}
-				<div className="w-full max-w-sm mb-6">
+				<div className="w-full max-w-sm">
 					<Input
 						type="text"
 						placeholder="Search for bosses..."
@@ -74,6 +74,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 					<Link
 						key={boss.infos.class}
 						href={`/bosses/${encodeURIComponent(boss.infos.class.toLowerCase().replace(/\s+/g, "-"))}`}
+						className="hover:scale-105 transition-transform duration-300"
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4">
 							<CardHeader>
@@ -85,7 +86,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 											width="0"
 											height="0"
 											sizes="10vw"
-											className="w-full h-auto rounded object-cover"
+											className="w-full h-auto rounded"
 										/>
 									</div>
 									<div className="flex-1">
@@ -101,7 +102,11 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 										<Badge
 											variant="default"
 											className={
-												boss.infos["damage type"] === "Physical" ? "bg-red-300" : "bg-blue-300"
+												boss.infos["damage type"] === "Physical"
+													? "bg-red-300"
+													: boss.infos["damage type"] === "Magical"
+													? "bg-blue-300"
+													: "bg-yellow-400"
 											}
 										>
 											{boss.infos["damage type"]}

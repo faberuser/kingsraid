@@ -38,7 +38,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
-			<div className="mb-8">
+			<div className="space-y-4 mb-4">
 				{/* Back Button */}
 				<div className="mb-2">
 					<Link href="/">
@@ -49,15 +49,15 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row gap-4 items-baseline mb-4">
+				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Artifacts</div>
 					<div className="text-muted-foreground text-sm">Showing {filteredArtifacts.length} artifacts</div>
 				</div>
 
-				<Separator className="mb-6" />
+				<Separator />
 
 				{/* Search Input */}
-				<div className="w-full max-w-sm mb-6">
+				<div className="w-full max-w-sm">
 					<Input
 						type="text"
 						placeholder="Search for artifacts..."
@@ -73,6 +73,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 					<Link
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
+						className="hover:scale-105 transition-transform duration-300"
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-0">
 							<CardHeader>
@@ -85,7 +86,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 												width="0"
 												height="0"
 												sizes="10vw"
-												className="w-full h-auto rounded object-cover"
+												className="w-full h-auto rounded"
 											/>
 										</div>
 									)}

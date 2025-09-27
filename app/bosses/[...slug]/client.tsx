@@ -39,7 +39,7 @@ export default function BossClient({ bossData }: BossClientProps) {
 								width="0"
 								height="0"
 								sizes="10vw"
-								className="w-full h-auto rounded object-cover"
+								className="w-full h-auto rounded"
 							/>
 						</div>
 					</div>
@@ -50,7 +50,13 @@ export default function BossClient({ bossData }: BossClientProps) {
 							<Badge variant="secondary">{infos.race}</Badge>
 							<Badge
 								variant="default"
-								className={infos["damage type"] === "Physical" ? "bg-red-300" : "bg-blue-300"}
+								className={
+									infos["damage type"] === "Physical"
+										? "bg-red-300"
+										: infos["damage type"] === "Magical"
+										? "bg-blue-300"
+										: "bg-yellow-400"
+								}
 							>
 								{infos["damage type"]}
 							</Badge>
@@ -91,7 +97,11 @@ export default function BossClient({ bossData }: BossClientProps) {
 									<div className="flex flex-row gap-2 items-center">
 										<CardTitle
 											className={`text-lg ${
-												infos["damage type"] === "Physical" ? "text-red-300" : "text-blue-300"
+												infos["damage type"] === "Physical"
+													? "text-red-300"
+													: infos["damage type"] === "Magical"
+													? "text-blue-300"
+													: "text-yellow-400"
 											}`}
 										>
 											{skill.name}

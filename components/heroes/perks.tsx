@@ -31,9 +31,10 @@ export default function Perks({ heroData }: PerksProps) {
 														<Image
 															src={`/assets/${perk.thumbnail}`}
 															alt={perkKey}
-															width={48}
-															height={48}
-															className="rounded border self-start"
+															width="0"
+															height="0"
+															sizes="5vw"
+															className="w-auto h-full rounded border self-start"
 														/>
 													)}
 													<div className="flex-grow flex items-center">
@@ -45,13 +46,14 @@ export default function Perks({ heroData }: PerksProps) {
 												<div className="grid md:grid-cols-2 gap-4">
 													{"light" in perk && (
 														<div className="border rounded p-3 bg-yellow-50 dark:bg-yellow-900/10">
-															<div className="flex items-center gap-2 mb-2">
+															<div className="flex items-center gap-3 mb-2">
 																<Image
 																	src={`/assets/${perk.light.thumbnail}`}
 																	alt="Light"
-																	width={32}
-																	height={32}
-																	className="rounded"
+																	width="0"
+																	height="0"
+																	sizes="5vw"
+																	className="w-10 h-10 rounded"
 																/>
 																<div className="font-medium text-yellow-800">Light</div>
 															</div>
@@ -61,13 +63,14 @@ export default function Perks({ heroData }: PerksProps) {
 
 													{"dark" in perk && (
 														<div className="border rounded p-3 bg-purple-50 dark:bg-purple-900/10">
-															<div className="flex items-center gap-2 mb-2">
+															<div className="flex items-center gap-3 mb-2">
 																<Image
 																	src={`/assets/${perk.dark.thumbnail}`}
 																	alt="Dark"
-																	width={32}
-																	height={32}
-																	className="rounded"
+																	width="0"
+																	height="0"
+																	sizes="5vw"
+																	className="w-10 h-10 rounded"
 																/>
 																<div className="font-medium text-purple-800">Dark</div>
 															</div>

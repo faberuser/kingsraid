@@ -76,7 +76,7 @@ export default function Profile({ heroData }: ProfileProps) {
 				{/* Splash Art */}
 				<Card>
 					<CardContent>
-						<h3 className="text-xl font-semibold pb-2">Splashart</h3>
+						<div className="text-xl font-semibold pb-2">Splashart</div>
 						<Separator className="mb-4" />
 						<div className="w-full flex items-center justify-center">
 							<Image
