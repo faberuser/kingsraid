@@ -23,7 +23,7 @@ export default function Skills({ heroData }: SkillsProps) {
 									width="0"
 									height="0"
 									sizes="10vw"
-									className="w-full h-auto rounded mt-2 "
+									className="w-full h-auto rounded mt-2"
 								/>
 							</div>
 
@@ -31,7 +31,7 @@ export default function Skills({ heroData }: SkillsProps) {
 							<div className="flex-grow">
 								<div className="flex flex-row md:items-center gap-2 mb-2">
 									{/* Skill Icon */}
-									<div className="block md:hidden flex-shrink-0">
+									<div className="flex md:hidden flex-shrink-0 justify-center items-center">
 										<Image
 											src={`/assets/${skill.thumbnail}`}
 											alt={skill.name}

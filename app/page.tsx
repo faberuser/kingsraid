@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UserRound, Amphora, ShieldHalf, ArrowRight, Zap, Calculator } from "lucide-react"
+import { ModeToggle } from "@/components/theme-toggle"
 
 const features = [
 	{
@@ -44,9 +45,13 @@ const features = [
 export default function Home() {
 	return (
 		<div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900">
-			<div className="container mx-auto px-6 py-8">
+			<div className="container relative mx-auto px-6 py-8">
+				<div className="block md:hidden absolute top-4 right-4">
+					<ModeToggle />
+				</div>
+
 				{/* Hero Section */}
-				<div className="text-center mb-12">
+				<div className="text-center mb-12 mt-12 md:mt-0">
 					<div className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-[normal]">
 						King's Raid Info
 					</div>

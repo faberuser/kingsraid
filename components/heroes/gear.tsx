@@ -33,7 +33,7 @@ export default function Gear({ heroData }: GearProps) {
 
 							<div className="flex-grow">
 								<div className="flex flex-row md:items-center gap-2 mb-2">
-									<div className="flex-shrink-0 block md:hidden">
+									<div className="flex-shrink-0 flex md:hidden justify-center items-center">
 										<Image
 											src={`/assets/${heroData.uw.thumbnail}`}
 											alt={heroData.uw.name}
@@ -130,7 +130,7 @@ export default function Gear({ heroData }: GearProps) {
 
 										<div className="flex-grow">
 											<div className="flex flex-row md:items-center gap-2 mb-2">
-												<div className="flex-shrink-0 block md:hidden">
+												<div className="flex-shrink-0 flex md:hidden justify-center items-center">
 													<Image
 														src={`/assets/${ut.thumbnail}`}
 														alt={ut.name}
@@ -218,7 +218,7 @@ export default function Gear({ heroData }: GearProps) {
 							<div className="flex-grow">
 								<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
 									<div className="flex flex-row md:items-center gap-2 mb-2">
-										<div className="flex-shrink-0 block md:hidden">
+										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
 											<Image
 												src={`/assets/${heroData.sw.thumbnail}`}
 												alt="Soul Weapon"
