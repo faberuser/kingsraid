@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { UserRound, Amphora, ShieldHalf, ArrowRight } from "lucide-react"
+import { UserRound, Amphora, ShieldHalf, ArrowRight, Zap, Calculator } from "lucide-react"
 
 const features = [
 	{
@@ -25,6 +25,20 @@ const features = [
 		href: "/bosses",
 		color: "bg-red-500/10 text-red-600 dark:text-red-400",
 	},
+	{
+		title: "Technomagic Gear",
+		description: "Explore technomagic gear and their effects.",
+		icon: Zap,
+		href: "/technomagic-gear",
+		color: "bg-green-500/10 text-green-600 dark:text-green-400",
+	},
+	{
+		title: "Softcap",
+		description: "Calculate actual stats after softcap adjustments.",
+		icon: Calculator,
+		href: "/softcap",
+		color: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+	},
 ]
 
 export default function Home() {
@@ -42,11 +56,11 @@ export default function Home() {
 				</div>
 
 				{/* Features Grid */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+				<div className="flex flex-wrap justify-center gap-6">
 					{features.map((feature) => (
 						<Card
 							key={feature.title}
-							className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1"
+							className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 w-full md:w-80"
 						>
 							<CardHeader className="pb-4">
 								<div
