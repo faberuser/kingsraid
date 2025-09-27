@@ -74,7 +74,7 @@ export default function Gear({ heroData }: GearProps) {
 													{Object.entries(statValues).map(([level, value]) => (
 														<div
 															key={level}
-															className={`px-2 py-1 rounded text-center ${classColorMapBg(
+															className={`p-2 rounded text-center ${classColorMapBg(
 																heroData.infos.class
 															)}`}
 														>
@@ -160,7 +160,7 @@ export default function Gear({ heroData }: GearProps) {
 																{Object.entries(statValues).map(([level, value]) => (
 																	<div
 																		key={level}
-																		className={`px-2 py-1 rounded text-center ${classColorMapBg(
+																		className={`p-2 rounded text-center ${classColorMapBg(
 																			heroData.infos.class
 																		)}`}
 																	>
