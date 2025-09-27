@@ -30,9 +30,9 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
 		<div className="py-0 px-2 sm:py-10 sm:px-20 w-full">
 			{/* Back Button */}
-			<div className="mb-6">
+			<div className="mb-6 mt-5">
 				<Link href="/heroes">
-					<Button variant="ghost" className="gap-2">
+					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-2">
 						<ArrowLeft className="h-4 w-4" />
 						Back to Heroes
 					</Button>

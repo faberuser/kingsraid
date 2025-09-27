@@ -131,7 +131,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 							alt={hero.name}
 							width="0"
 							height="0"
-							sizes="20vw"
+							sizes="30vw"
 							className={`w-full flex-1 object-cover ${
 								saReverse.includes(hero.name) ? "object-left" : "object-right"
 							} hover:scale-110 transition-transform duration-300`}

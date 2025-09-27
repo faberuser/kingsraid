@@ -17,11 +17,11 @@ export default function BossClient({ bossData }: BossClientProps) {
 	const { infos, skills } = bossData
 
 	return (
-		<div className="container mx-auto p-2 sm:p-8">
+		<div className="container mx-auto p-4 sm:p-8">
 			{/* Back Button */}
 			<div className="mb-6">
 				<Link href="/bosses">
-					<Button variant="ghost" className="gap-2">
+					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-0">
 						<ArrowLeft className="h-4 w-4" />
 						Back to Bosses
 					</Button>
