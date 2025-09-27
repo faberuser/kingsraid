@@ -28,7 +28,7 @@ interface SlugClientProps {
 
 export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
-		<div className="py-0 px-2 sm:py-10 sm:px-20 w-full">
+		<div className="py-0 px-2 sm:py-5 sm:px-20 w-full">
 			{/* Back Button */}
 			<div className="mb-6 mt-5">
 				<Link href="/heroes">
