@@ -47,18 +47,20 @@ export default function Skills({ heroData }: SkillsProps) {
 
 								{/* Skill Books if available */}
 								{heroData.books && heroData.books[skillKey] && (
-									<div className="mt-4">
-										<div className="font-medium text-sm mb-2 text-muted-foreground">
+									<details className="mt-4 cursor-pointer">
+										<summary className="font-medium text-sm mb-2 text-muted-foreground">
 											Skill Books
-										</div>
+										</summary>
 										<div className="flex flex-col gap-2 text-xs">
 											{Object.entries(heroData.books[skillKey]).map(([level, effect]) => (
 												<div key={level} className="px-2 py-1 border-l-2">
-													<div className="font-medium">{level}:</div> {effect}
+													<div className="font-medium">
+														{level}: {effect}
+													</div>
 												</div>
 											))}
 										</div>
-									</div>
+									</details>
 								)}
 							</div>
 						</CardContent>
