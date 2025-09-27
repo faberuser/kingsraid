@@ -20,7 +20,7 @@ export default function Gear({ heroData }: GearProps) {
 						</div>
 
 						<div className="flex flex-col md:flex-row gap-6">
-							<div className="flex-shrink-0">
+							<div className="flex-shrink-0 hidden md:block">
 								<Image
 									src={`/assets/${heroData.uw.thumbnail}`}
 									alt={heroData.uw.name}
@@ -32,11 +32,26 @@ export default function Gear({ heroData }: GearProps) {
 							</div>
 
 							<div className="flex-grow">
-								<div
-									className={`text-xl font-semibold mb-2 ${classColorMapText(heroData.infos.class)}`}
-								>
-									{heroData.uw.name}
+								<div className="flex flex-row md:items-center gap-2 mb-2">
+									<div className="flex-shrink-0 block md:hidden">
+										<Image
+											src={`/assets/${heroData.uw.thumbnail}`}
+											alt={heroData.uw.name}
+											width="0"
+											height="0"
+											sizes="10vw"
+											className="w-10 h-10 rounded"
+										/>
+									</div>
+									<div
+										className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
+											heroData.infos.class
+										)}`}
+									>
+										{heroData.uw.name}
+									</div>
 								</div>
+
 								<Separator className="mb-3" />
 								<div className="mb-4">{heroData.uw.description}</div>
 
@@ -89,17 +104,17 @@ export default function Gear({ heroData }: GearProps) {
 
 			{/* Unique Treasures */}
 			{heroData.uts && (
-				<Card>
-					<CardContent>
-						<div className="flex items-center gap-2 mb-4">
-							<div className="text-2xl font-bold">Unique Treasures</div>
-						</div>
+				<>
+					<div className="flex items-center gap-2 mb-4">
+						<div className="text-2xl font-bold">Unique Treasures</div>
+					</div>
 
-						<div className="grid gap-4">
-							{Object.entries(heroData.uts).map(([utKey, ut]) => (
-								<div key={utKey} className="border rounded-lg p-4">
+					<div className="grid gap-4">
+						{Object.entries(heroData.uts).map(([utKey, ut]) => (
+							<Card key={utKey}>
+								<CardContent>
 									<div className="flex flex-col md:flex-row gap-4">
-										<div className="flex-shrink-0">
+										<div className="flex-shrink-0 hidden md:block">
 											<Image
 												src={`/assets/${ut.thumbnail}`}
 												alt={ut.name}
@@ -111,13 +126,26 @@ export default function Gear({ heroData }: GearProps) {
 										</div>
 
 										<div className="flex-grow">
-											<div
-												className={`text-lg font-semibold mb-2 ${classColorMapText(
-													heroData.infos.class
-												)}`}
-											>
-												{ut.name}
+											<div className="flex flex-row md:items-center gap-2 mb-2">
+												<div className="flex-shrink-0 block md:hidden">
+													<Image
+														src={`/assets/${ut.thumbnail}`}
+														alt={ut.name}
+														width="0"
+														height="0"
+														sizes="10vw"
+														className="w-10 h-10 rounded"
+													/>
+												</div>
+												<div
+													className={`text-lg font-semibold flex justify-center items-center ${classColorMapText(
+														heroData.infos.class
+													)}`}
+												>
+													{ut.name}
+												</div>
 											</div>
+
 											<div className="mb-3">{ut.description}</div>
 
 											{/* UT Values */}
@@ -156,11 +184,11 @@ export default function Gear({ heroData }: GearProps) {
 											</details>
 										</div>
 									</div>
-								</div>
-							))}
-						</div>
-					</CardContent>
-				</Card>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</>
 			)}
 
 			{/* Soul Weapon */}
@@ -172,7 +200,7 @@ export default function Gear({ heroData }: GearProps) {
 						</div>
 
 						<div className="flex flex-col md:flex-row gap-6">
-							<div className="flex-shrink-0">
+							<div className="flex-shrink-0 hidden md:block">
 								<Image
 									src={`/assets/${heroData.sw.thumbnail}`}
 									alt="Soul Weapon"
@@ -185,9 +213,26 @@ export default function Gear({ heroData }: GearProps) {
 
 							<div className="flex-grow">
 								<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
-									<div className={`text-xl font-semibold ${classColorMapText(heroData.infos.class)}`}>
-										{heroData.uw.name}
+									<div className="flex flex-row md:items-center gap-2 mb-2">
+										<div className="flex-shrink-0 block md:hidden">
+											<Image
+												src={`/assets/${heroData.sw.thumbnail}`}
+												alt="Soul Weapon"
+												width="0"
+												height="0"
+												sizes="10vw"
+												className="w-10 h-10 rounded"
+											/>
+										</div>
+										<div
+											className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
+												heroData.infos.class
+											)}`}
+										>
+											{heroData.uw.name}
+										</div>
 									</div>
+
 									<div className="flex gap-2 text-sm">
 										<Badge
 											variant="default"

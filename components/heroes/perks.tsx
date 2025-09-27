@@ -20,22 +20,33 @@ export default function Perks({ heroData }: PerksProps) {
 								Object.entries(perks).map(([perkKey, perk]) => (
 									<Card key={perkKey}>
 										<CardContent>
-											<div className="text-lg font-semibold mb-3">
-												{perkCategory === "t3" ? `Skill ${perkKey}` : capitalize(perkKey)}
-											</div>
+											{perkCategory === "t3" && (
+												<div className="text-lg font-semibold mb-3">Skill {perkKey}</div>
+											)}
 
 											{typeof perk === "object" && "effect" in perk ? (
 												/* T5 Perks */
-												<div className="flex flex-col md:flex-row gap-3">
+												<div className="flex flex-col gap-3">
 													{perk.thumbnail && (
-														<Image
-															src={`/assets/${perk.thumbnail}`}
-															alt={perkKey}
-															width="0"
-															height="0"
-															sizes="5vw"
-															className="w-auto h-full rounded border self-start"
-														/>
+														<div className="flex items-center gap-3">
+															<Image
+																src={`/assets/${perk.thumbnail}`}
+																alt={perkKey}
+																width="0"
+																height="0"
+																sizes="5vw"
+																className="w-10 h-10 rounded border self-start"
+															/>
+															<div
+																className={`font-medium ${
+																	perkKey === "light"
+																		? "text-yellow-800"
+																		: "text-purple-800"
+																}`}
+															>
+																{capitalize(perkKey)}
+															</div>
+														</div>
 													)}
 													<div className="flex-grow flex items-center">
 														<div>{perk.effect}</div>

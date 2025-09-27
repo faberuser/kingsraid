@@ -28,11 +28,11 @@ interface SlugClientProps {
 
 export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 	return (
-		<div className="py-0 px-2 sm:py-5 sm:px-20 w-full">
+		<div className="py-0 px-4 sm:py-5 sm:px-20 w-full pb-4">
 			{/* Back Button */}
 			<div className="mb-6 mt-5">
 				<Link href="/heroes">
-					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-2">
+					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-0">
 						<ArrowLeft className="h-4 w-4" />
 						Back to Heroes
 					</Button>
@@ -40,7 +40,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 			</div>
 
 			{/* Hero Basic Info */}
-			<div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-center sm:items-start pb-2">
+			<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start pb-2">
 				{/* Hero Image */}
 				<div className="flex items-center justify-center self-stretch">
 					<div className="w-32 h-32 md:w-40 md:h-40">

@@ -1,7 +1,6 @@
 import { Hero } from "@/model/Hero"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
-import { capitalize, classColorMapText } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
 interface ProfileProps {

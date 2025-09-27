@@ -1,12 +1,12 @@
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Hero } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { useState, useRef, useCallback } from "react"
 import { capitalize } from "@/lib/utils"
-import { ZoomIn, ZoomOut, RotateCcw, Move } from "lucide-react"
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
 
 interface Costume {
 	name: string
@@ -32,6 +32,13 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	const [lastPanPosition, setLastPanPosition] = useState({ x: 0, y: 0 })
 
 	const imageContainerRef = useRef<HTMLDivElement>(null)
+
+	// Auto-select first costume when costumes are available
+	useEffect(() => {
+		if (costumes.length > 0 && !selectedCostume) {
+			setSelectedCostume(costumes[0].name)
+		}
+	}, [costumes, selectedCostume])
 
 	const handleImageClick = () => {
 		setIsModalOpen(true)
@@ -60,8 +67,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 
 	// Scroll wheel zoom
 	const handleWheel = useCallback((e: React.WheelEvent) => {
-		// e.preventDefault()
-
 		const zoomSpeed = 0.1
 		const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed
 
@@ -80,7 +85,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				setIsDragging(true)
 				setDragStart({ x: e.clientX, y: e.clientY })
 				setLastPanPosition(panPosition)
-				e.preventDefault()
 			}
 		},
 		[zoomLevel, panPosition]
@@ -112,7 +116,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				setIsDragging(true)
 				setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
 				setLastPanPosition(panPosition)
-				e.preventDefault()
 			}
 		},
 		[zoomLevel, panPosition]
@@ -128,7 +131,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 					x: lastPanPosition.x + deltaX,
 					y: lastPanPosition.y + deltaY,
 				})
-				e.preventDefault()
 			}
 		},
 		[isDragging, dragStart, lastPanPosition, zoomLevel]
@@ -140,7 +142,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 
 	if (!heroData.costumes) {
 		return (
-			<div className="text-center text-gray-500 py-8">
+			<div className="text-center text-muted-foreground py-8">
 				No costume data available for {capitalize(heroData.name)}
 			</div>
 		)
@@ -150,71 +152,80 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 
 	return (
 		<div className="space-y-6">
-			{/* Header */}
-			<Card>
-				<CardContent>
-					<div className="text-2xl font-bold mb-2">{capitalize(heroData.name)} Costumes</div>
-					<Separator className="mb-4" />
-					<div className="text-sm text-muted-foreground">Showing {costumes.length} costume variations</div>
-				</CardContent>
-			</Card>
-
-			{/* Selected Costume Display */}
-			{selectedCostume && selectedCostumeData && (
+			{/* Main Layout - Side by side */}
+			<div className="flex flex-col md:flex-row gap-6">
+				{/* Available Costumes - Left Side */}
 				<Card>
 					<CardContent>
-						<div className="text-xl font-semibold mb-4">{selectedCostumeData.displayName}</div>
-						<div className="flex justify-center">
-							<div
-								className="relative max-w-md cursor-pointer hover:opacity-90 transition-opacity"
-								onClick={handleImageClick}
-							>
-								<Image
-									src={`/assets/${selectedCostumeData.path}`}
-									alt={`${heroData.name} - ${selectedCostume}`}
-									width="0"
-									height="0"
-									sizes="100vw"
-									className="w-auto h-full"
-									priority
-								/>
-								<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
-									<ZoomIn className="w-12 h-12 text-white" />
+						<div className="text-xl font-semibold mb-4">Costumes ({costumes.length} variations)</div>
+						<div className="flex items-center justify-center">
+							<div className="max-h-[450px] custom-scrollbar overflow-y-auto overflow-x-hidden space-y-3 p-2">
+								{costumes.map((costume) => (
+									<CostumeCard
+										key={costume.name}
+										costume={costume}
+										heroName={heroData.name}
+										isSelected={selectedCostume === costume.name}
+										onClick={() => setSelectedCostume(costume.name)}
+									/>
+								))}
+							</div>
+						</div>
+
+						{costumes.length === 0 && (
+							<div className="text-center text-muted-foreground py-8">
+								<div>No costume images found</div>
+								<div className="text-sm mt-2">
+									Costume images should be located in: /assets/{heroData.costumes}/
 								</div>
 							</div>
-						</div>
+						)}
 					</CardContent>
 				</Card>
-			)}
 
-			{/* Costume Container */}
-			<Card>
-				<CardContent>
-					<div className="text-xl font-semibold mb-4">Available Costumes</div>
-					<div className="flex items-center justify-center">
-						<div className="flex flex-row gap-4 flex-wrap w-full justify-center">
-							{costumes.map((costume) => (
-								<CostumeCard
-									key={costume.name}
-									costume={costume}
-									heroName={heroData.name}
-									isSelected={selectedCostume === costume.name}
-									onClick={() => setSelectedCostume(costume.name)}
-								/>
-							))}
-						</div>
-					</div>
-
-					{costumes.length === 0 && (
-						<div className="text-center text-gray-500 py-8">
-							<div>No costume images found</div>
-							<div className="text-sm mt-2">
-								Costume images should be located in: /assets/{heroData.costumes}/
-							</div>
-						</div>
+				{/* Selected Costume Display - Right Side */}
+				<div className="flex-1">
+					{selectedCostume && selectedCostumeData ? (
+						<Card>
+							<CardContent>
+								<div className="text-xl font-semibold mb-4">{selectedCostumeData.displayName}</div>
+								<div className="flex justify-center">
+									<div
+										className="relative max-w-md cursor-pointer hover:opacity-90 transition-opacity"
+										onClick={handleImageClick}
+									>
+										<Image
+											src={`/assets/${selectedCostumeData.path}`}
+											alt={`${heroData.name} - ${selectedCostume}`}
+											width="0"
+											height="0"
+											sizes="100vw"
+											className="w-auto h-full"
+											priority
+										/>
+										<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+											<ZoomIn className="w-12 h-12 text-white" />
+										</div>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					) : (
+						<Card>
+							<CardContent>
+								<div className="flex items-center justify-center h-64 text-gray-500">
+									<div className="text-center">
+										<div className="text-lg">Select a costume to view</div>
+										<div className="text-sm mt-2">
+											Choose from the available costumes on the left
+										</div>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
 					)}
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Zoom Modal */}
 			<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -307,7 +318,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 	return (
 		<div
 			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:scale-105 ${
-				isSelected ? "ring-2 ring-offset-2" : ""
+				isSelected ? "ring-2" : ""
 			}`}
 			onClick={onClick}
 		>
@@ -316,7 +327,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				alt={`${heroName} - ${costume.displayName}`}
 				width="0"
 				height="0"
-				sizes="100vw"
+				sizes="20vw"
 				className="w-full flex-1 hover:scale-110 transition-transform duration-300"
 			/>
 			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2 flex items-center justify-center">

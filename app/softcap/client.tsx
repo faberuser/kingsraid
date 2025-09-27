@@ -97,7 +97,7 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 				</div>
 
 				<div className="flex flex-row gap-4 items-baseline">
-					<div className="text-xl font-bold">Softcap Calculator</div>
+					<div className="text-xl font-bold">Softcap</div>
 				</div>
 				<Separator />
 			</div>
