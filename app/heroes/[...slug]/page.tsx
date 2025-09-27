@@ -14,7 +14,6 @@ interface Costume {
 async function getHeroData(heroName: string): Promise<Hero | null> {
 	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
 	const normalizedSlug = capitalize(heroName.toLowerCase().replace(/-/g, " "))
-	console.log("Looking for hero data:", normalizedSlug)
 	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
 
 	if (!fs.existsSync(filePath)) {

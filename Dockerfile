@@ -1,8 +1,8 @@
 FROM alpine/git AS git-stage
 WORKDIR /src
 COPY . .
-# Clone the submodule repository directly instead of using git submodule
-RUN git clone https://github.com/faberuser/kingsraid-data.git kingsraid-data
+# Remove existing kingsraid-data directory if it exists, then clone fresh
+RUN rm -rf kingsraid-data && git clone https://github.com/faberuser/kingsraid-data.git kingsraid-data
 
 FROM oven/bun:alpine AS base
 WORKDIR /usr/src/app
