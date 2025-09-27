@@ -65,7 +65,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 					{Object.entries(data.value).map(([key, values]) => (
 						<Card key={key} className="gap-2">
 							<CardHeader>
-								<CardTitle className="flex items-center justify-between">Value ({key})</CardTitle>
+								<CardTitle className="flex items-center justify-between">Stat ({key})</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="grid grid-cols-3 md:grid-cols-6 gap-2">

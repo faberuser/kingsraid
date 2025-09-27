@@ -29,7 +29,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(heroes, {
-			keys: ["name"],
+			keys: ["name", "aliases", "infos.class"],
 			threshold: 0.3, // Adjust this value (0.0 = exact match, 1.0 = very loose)
 			includeScore: true,
 		})
@@ -131,7 +131,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 							alt={hero.name}
 							width="0"
 							height="0"
-							sizes="30vw"
+							sizes="40vw"
 							className={`w-full flex-1 object-cover ${
 								saReverse.includes(hero.name) ? "object-left" : "object-right"
 							} hover:scale-110 transition-transform duration-300`}

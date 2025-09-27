@@ -61,16 +61,10 @@ export default function Gear({ heroData }: GearProps) {
 										<div className="font-medium text-sm text-muted-foreground mb-2">
 											Enhancement Values
 										</div>
-										<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-2 text-xs">
+										<div className="flex gap-2 text-xs">
 											{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
 												<div key={statKey} className="space-y-1">
-													<div
-														className={`font-medium ${classColorMapText(
-															heroData.infos.class
-														)}`}
-													>
-														Stat ({statKey})
-													</div>
+													<div className="font-medium">Stat ({statKey})</div>
 													<div className="flex flex-wrap gap-1">
 														{Object.entries(statValues).map(([level, value]) => (
 															<Badge
@@ -154,23 +148,28 @@ export default function Gear({ heroData }: GearProps) {
 											{/* UT Values */}
 											{ut.value && (
 												<div className="mb-3">
-													<div className="font-medium text-xs text-muted-foreground mb-2">
+													<div className="font-medium text-sm text-muted-foreground mb-2">
 														Enhancement Values
 													</div>
 													<div className="flex gap-2 text-xs">
 														{Object.entries(ut.value).map(([statKey, statValues]) => (
-															<div key={statKey} className="flex flex-wrap gap-1">
-																{Object.entries(statValues).map(([level, value]) => (
-																	<Badge
-																		variant="secondary"
-																		key={level}
-																		className={`p-2 rounded text-center ${classColorMapBg(
-																			heroData.infos.class
-																		)}`}
-																	>
-																		★{level}: {value}
-																	</Badge>
-																))}
+															<div key={statKey} className="space-y-1">
+																<div className="font-medium">Stat ({statKey})</div>
+																<div className="flex flex-wrap gap-1">
+																	{Object.entries(statValues).map(
+																		([level, value]) => (
+																			<Badge
+																				variant="secondary"
+																				key={level}
+																				className={`p-2 rounded text-center ${classColorMapBg(
+																					heroData.infos.class
+																				)}`}
+																			>
+																				★{level}: {value}
+																			</Badge>
+																		)
+																	)}
+																</div>
 															</div>
 														))}
 													</div>

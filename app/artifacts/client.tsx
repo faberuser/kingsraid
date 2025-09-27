@@ -21,7 +21,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(artifacts, {
-			keys: ["name", "data.class", "data.type", "data.description", "data.aliases"],
+			keys: ["name", "data.description", "data.aliases"],
 			threshold: 0.3,
 			includeScore: true,
 		})
