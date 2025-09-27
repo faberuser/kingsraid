@@ -1,10 +1,14 @@
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function HeroCard({ name, splashart }: { name: string; splashart: string }) {
 	const router = useRouter()
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleClick = () => {
+		if (isLoading) return // Prevent multiple clicks
+		setIsLoading(true)
 		router.push(`/heroes/${encodeURIComponent(name.toLowerCase())}`)
 	}
 
@@ -24,6 +28,11 @@ export default function HeroCard({ name, splashart }: { name: string; splashart:
 			<div className="text-xl font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2">
 				{name}
 			</div>
+			{isLoading && (
+				<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+					<div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+				</div>
+			)}
 		</div>
 	)
 }

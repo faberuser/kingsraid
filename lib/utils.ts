@@ -7,7 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 
 export function capitalize(s: string) {
 	if (s.length === 0) return s
-	return s.charAt(0).toUpperCase() + s.slice(1)
+	return s
+		.split(" ")
+		.map((word) => (word.length > 0 ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word))
+		.join(" ")
 }
 
 export function classColorMapText(className: string) {

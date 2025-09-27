@@ -108,7 +108,6 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	const decodedHeroName = decodeURIComponent(heroName)
-	console.log(`Loading hero data for: ${decodedHeroName}`)
 	const heroData = await getHeroData(capitalize(decodedHeroName))
 
 	if (!heroData) {
