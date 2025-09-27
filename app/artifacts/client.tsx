@@ -81,7 +81,10 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 									{artifact.data.thumbnail && (
 										<div className="w-16 h-16 flex items-center justify-center">
 											<Image
-												src={`/assets/${artifact.data.thumbnail}`}
+												src={`/assets/${artifact.data.thumbnail
+													.split("/")
+													.map(encodeURIComponent)
+													.join("/")}`}
 												alt={artifact.name}
 												width="0"
 												height="0"

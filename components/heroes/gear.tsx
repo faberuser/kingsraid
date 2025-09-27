@@ -63,7 +63,7 @@ export default function Gear({ heroData }: GearProps) {
 																heroData.infos.class
 															)}`}
 														>
-															{level}*: {value}
+															★{level}: {value}
 														</div>
 													))}
 												</div>
@@ -136,7 +136,7 @@ export default function Gear({ heroData }: GearProps) {
 																			heroData.infos.class
 																		)}`}
 																	>
-																		{level}*: {value}
+																		★{level}: {value}
 																	</div>
 																))}
 															</div>

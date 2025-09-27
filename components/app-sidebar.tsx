@@ -44,7 +44,7 @@ export default function AppSidebar({ title }: AppSidebarProps) {
 
 			<SidebarContent className="ctscroll">
 				<SidebarGroup>
-					<SidebarGroupContent className="mt-5">
+					<SidebarGroupContent className="mt-2">
 						<SidebarMenu>
 							{items.map((item) => {
 								const isActive =

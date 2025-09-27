@@ -60,7 +60,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 				<div className="flex items-center gap-6 mb-6">
 					<div className="w-24 h-24">
 						<Image
-							src={`/assets/${data.thumbnail}`}
+							src={`/assets/${data.thumbnail.split("/").map(encodeURIComponent).join("/")}`}
 							alt={name}
 							width="0"
 							height="0"

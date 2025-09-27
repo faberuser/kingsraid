@@ -51,7 +51,7 @@ export default function Home() {
 						King's Raid Info
 					</div>
 					<div className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Comprehensive resource for Kings Raid heroes, artifacts, boss.
+						Comprehensive resource for Kings Raid.
 					</div>
 				</div>
 
