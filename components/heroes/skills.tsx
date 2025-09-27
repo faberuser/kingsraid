@@ -16,7 +16,7 @@ export default function Skills({ heroData }: SkillsProps) {
 					<Card key={skillKey}>
 						<CardContent className="flex flex-col md:flex-row gap-4">
 							{/* Skill Icon */}
-							<div className="flex-shrink-0">
+							<div className="flex-shrink-0 mt-2">
 								<Image
 									src={`/assets/${skill.thumbnail}`}
 									alt={skill.name}

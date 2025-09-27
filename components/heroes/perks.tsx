@@ -18,8 +18,8 @@ export default function Perks({ heroData }: PerksProps) {
 						<div className="space-y-4">
 							{typeof perks === "object" &&
 								Object.entries(perks).map(([perkKey, perk]) => (
-									<Card>
-										<CardContent key={perkKey}>
+									<Card key={perkKey}>
+										<CardContent>
 											<div className="text-lg font-semibold mb-3">
 												{perkCategory === "t3" ? `Skill ${perkKey}` : capitalize(perkKey)}
 											</div>

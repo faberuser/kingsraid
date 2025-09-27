@@ -38,13 +38,13 @@ export default function BossClient({ bossData }: BossClientProps) {
 								alt={infos.class}
 								width="0"
 								height="0"
-								sizes="100vw"
+								sizes="10vw"
 								className="w-full h-auto rounded object-cover"
 							/>
 						</div>
 					</div>
 					<div className="flex-1">
-						<div className="text-4xl font-bold mb-2">{infos.class}</div>
+						<div className="text-3xl font-bold mb-2">{infos.class}</div>
 						<div className="text-xl text-muted-foreground mb-4">{infos.title}</div>
 						<div className="flex flex-wrap gap-2 mb-4">
 							<Badge variant="secondary">{infos.race}</Badge>
@@ -59,7 +59,7 @@ export default function BossClient({ bossData }: BossClientProps) {
 				</div>
 
 				<div className="grid md:grid-cols-2 gap-6">
-					<Card>
+					<Card className="gap-2">
 						<CardHeader>
 							<CardTitle>Characteristics</CardTitle>
 						</CardHeader>
@@ -68,7 +68,7 @@ export default function BossClient({ bossData }: BossClientProps) {
 						</CardContent>
 					</Card>
 
-					<Card>
+					<Card className="gap-2">
 						<CardHeader>
 							<CardTitle>Recommended Heroes</CardTitle>
 						</CardHeader>
@@ -79,22 +79,40 @@ export default function BossClient({ bossData }: BossClientProps) {
 				</div>
 			</div>
 
-			<Separator className="mb-8" />
-
 			{/* Skills Section */}
 			<div className="mb-8">
 				<div className="text-2xl font-bold mb-6">Skills</div>
 
 				<div className="space-y-4">
 					{Object.entries(skills).map(([skillId, skill]) => (
-						<Card key={skillId}>
+						<Card key={skillId} className="gap-2">
 							<CardHeader>
 								<div className="flex items-start justify-between">
-									<div>
-										<CardTitle className="text-lg">{skill.name}</CardTitle>
-										<div className="flex gap-4 mt-2">
-											{skill.cost && <Badge variant="outline">Cost: {skill.cost}</Badge>}
-											{skill.cooldown && <Badge variant="outline">CD: {skill.cooldown}s</Badge>}
+									<div className="flex flex-row gap-2 items-center">
+										<CardTitle
+											className={`text-lg ${
+												infos["damage type"] === "Physical" ? "text-red-300" : "text-blue-300"
+											}`}
+										>
+											{skill.name}
+										</CardTitle>
+										<div className="flex gap-2">
+											{skill.cost && (
+												<Badge
+													variant="default"
+													className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
+												>
+													Cost: {skill.cost}
+												</Badge>
+											)}
+											{skill.cooldown && (
+												<Badge
+													variant="default"
+													className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
+												>
+													Cooldown: {skill.cooldown}s
+												</Badge>
+											)}
 										</div>
 									</div>
 									<Badge variant="secondary">#{skillId}</Badge>

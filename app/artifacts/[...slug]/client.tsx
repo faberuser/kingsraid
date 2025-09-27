@@ -3,7 +3,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -45,7 +44,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 	const { name, data } = artifactData
 
 	return (
-		<div className="container mx-auto py-8">
+		<div className="container mx-auto p-2 sm:p-8">
 			{/* Back Button */}
 			<div className="mb-6">
 				<Link href="/artifacts">
@@ -58,38 +57,33 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 
 			{/* Artifact Header */}
 			<div className="mb-8">
-				<div className="flex items-start gap-6 mb-6">
-					<div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted">
-						<Image src={`/assets/${data.thumbnail}`} alt={name} fill className="object-cover" />
+				<div className="flex items-center gap-6 mb-6">
+					<div className="w-24 h-24">
+						<Image
+							src={`/assets/${data.thumbnail}`}
+							alt={name}
+							width="0"
+							height="0"
+							sizes="10vw"
+							className="w-full h-auto rounded object-cover"
+						/>
 					</div>
-					<div className="flex-1">
-						<h1 className="text-4xl font-bold mb-4">{name}</h1>
-						{data.aliases && data.aliases.length > 0 && (
-							<div className="flex flex-wrap gap-2 mb-4">
-								<span className="text-sm text-muted-foreground">Aliases:</span>
-								{data.aliases.map((alias) => (
-									<Badge key={alias} variant="secondary">
-										{alias}
-									</Badge>
-								))}
-							</div>
-						)}
+					<div className="flex flex-col justify-center flex-1">
+						<div className="text-3xl font-bold mb-4">{name}</div>
 					</div>
 				</div>
 			</div>
 
-			<Separator className="mb-8" />
-
 			{/* Effect Description */}
 			<div className="mb-8">
-				<Card>
+				<Card className="gap-2">
 					<CardHeader>
-						<CardTitle className="flex items-center justify-between">Effect Description</CardTitle>
+						<CardTitle>Effect Description</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<p className="text-lg leading-relaxed">
+						<div className="text-lg">
 							{parseFormattedText(formatDescription(data.description, data.value))}
-						</p>
+						</div>
 					</CardContent>
 				</Card>
 			</div>
@@ -99,12 +93,12 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 				<h2 className="text-2xl font-bold mb-6">Values by Enhancement Level</h2>
 				<div className="grid gap-4">
 					{Object.entries(data.value).map(([key, values]) => (
-						<Card key={key}>
+						<Card key={key} className="gap-2">
 							<CardHeader>
 								<CardTitle className="flex items-center justify-between">Value {key}</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<div className="grid grid-cols-6 gap-2">
+								<div className="grid grid-cols-3 md:grid-cols-6 gap-2">
 									{values.split(", ").map((value, index) => (
 										<div key={index} className="text-center">
 											<div className="text-xs text-muted-foreground mb-1">★{index}</div>

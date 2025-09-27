@@ -6,9 +6,11 @@ import Fuse from "fuse.js"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-
 import HeroCard from "@/components/heroes/hero-card"
 import { Hero } from "@/model/Hero"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 
 interface HeroesClientProps {
 	heroes: Hero[]
@@ -53,6 +55,16 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 	return (
 		<div className="p-0 pt-5 sm:p-10">
 			<div className="flex flex-col text-start space-y-4 px-4 sm:px-10">
+				{/* Back Button */}
+				<div className="mb-2">
+					<Link href="/">
+						<Button variant="ghost" className="gap-2 has-[>svg]:px-0 p-0">
+							<ArrowLeft className="h-4 w-4" />
+							Back to Home
+						</Button>
+					</Link>
+				</div>
+
 				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Heroes</div>
 					<div className="text-muted-foreground text-sm">Showing {filteredHeroes.length} heroes</div>
@@ -77,7 +89,7 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 						<RadioGroup
 							value={selectedClass}
 							onValueChange={setSelectedClass}
-							className="flex flex-row space-x-4"
+							className="flex flex-row space-x-1"
 						>
 							{heroClasses.map((heroClass) => (
 								<label

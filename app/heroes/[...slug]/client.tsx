@@ -49,7 +49,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 							alt={heroData.name}
 							width="0"
 							height="0"
-							sizes="100vw"
+							sizes="10vw"
 							className="w-full h-auto rounded object-cover"
 						/>
 					</div>
@@ -66,30 +66,30 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 
 					<Separator className="mb-4" />
 
-					<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-						<div className="px-3 py-1 rounded border-l-4 border-blue-500">
-							<div className="font-semibold">Class</div>
-							<div>{heroData.infos.class}</div>
+					<div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-3 text-sm">
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Class</div>
+							<div className="font-medium">{heroData.infos.class}</div>
 						</div>
-						<div className="px-3 py-1 rounded border-l-4 border-green-500">
-							<div className="font-semibold">Position</div>
-							<div>{heroData.infos.position}</div>
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Position</div>
+							<div className="font-medium">{heroData.infos.position}</div>
 						</div>
-						<div className="px-3 py-1 rounded border-l-4 border-red-500">
-							<div className="font-semibold">Damage Type</div>
-							<div>{heroData.infos["damage type"]}</div>
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Damage Type</div>
+							<div className="font-medium">{heroData.infos["damage type"]}</div>
 						</div>
-						<div className="px-3 py-1 rounded border-l-4 border-yellow-500">
-							<div className="font-semibold">Attack Range</div>
-							<div>{heroData.infos["attack range"]}</div>
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Attack Range</div>
+							<div className="font-medium">{heroData.infos["attack range"]}</div>
 						</div>
-						<div className="px-3 py-1 rounded border-l-4 border-pink-500">
-							<div className="font-semibold">Gender</div>
-							<div>{heroData.infos.gender}</div>
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Gender</div>
+							<div className="font-medium">{heroData.infos.gender}</div>
 						</div>
-						<div className="px-3 py-1 rounded border-l-4 border-indigo-500">
-							<div className="font-semibold">Race</div>
-							<div>{heroData.infos.race}</div>
+						<div className="flex flex-col space-y-1 text-center md:text-left">
+							<div className="text-xs text-gray-500 uppercase tracking-wide">Race</div>
+							<div className="font-medium">{heroData.infos.race}</div>
 						</div>
 					</div>
 				</div>
