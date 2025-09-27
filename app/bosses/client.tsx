@@ -85,7 +85,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 											alt={boss.infos.class}
 											width="0"
 											height="0"
-											sizes="10vw"
+											sizes="30vw md:10vw"
 											className="w-full h-auto rounded"
 										/>
 									</div>

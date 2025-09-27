@@ -88,7 +88,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 												alt={artifact.name}
 												width="0"
 												height="0"
-												sizes="10vw"
+												sizes="30vw md:10vw"
 												className="w-full h-auto rounded"
 											/>
 										</div>
