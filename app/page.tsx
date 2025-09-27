@@ -65,7 +65,7 @@ export default function Home() {
 					{features.map((feature) => (
 						<Card
 							key={feature.title}
-							className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 w-full md:w-80"
+							className="group hover:shadow-lg transition-all duration-200 hover:-translate-y-1 w-full md:w-80 flex flex-col justify-between"
 						>
 							<CardHeader className="pb-4">
 								<div
