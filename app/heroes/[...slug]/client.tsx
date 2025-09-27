@@ -11,6 +11,9 @@ import Models from "@/components/heroes/models"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { capitalize, classColorMapText } from "@/lib/utils"
+import Image from "next/image"
+import { Separator } from "@/components/ui/separator"
 
 interface Costume {
 	name: string
@@ -34,6 +37,62 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 						Back to Heroes
 					</Button>
 				</Link>
+			</div>
+
+			{/* Hero Basic Info */}
+			<div className="flex flex-col sm:flex-row gap-6 sm:gap-10 items-center sm:items-start pb-2">
+				{/* Hero Image */}
+				<div className="flex items-center justify-center self-stretch">
+					<div className="w-32 h-32 md:w-40 md:h-40">
+						<Image
+							src={`/assets/${heroData.infos.thumbnail}`}
+							alt={heroData.name}
+							width="0"
+							height="0"
+							sizes="100vw"
+							className="w-full h-auto rounded object-cover"
+						/>
+					</div>
+				</div>
+
+				{/* Hero Basic Info */}
+				<div className="flex-grow">
+					<div className="mb-2 text-center sm:text-start">
+						<div className="text-3xl font-bold">{capitalize(heroData.name)}</div>
+						<div className={`text-lg font-semibold ${classColorMapText(heroData.infos.class)}`}>
+							{heroData.infos.title}
+						</div>
+					</div>
+
+					<Separator className="mb-4" />
+
+					<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+						<div className="px-3 py-1 rounded border-l-4 border-blue-500">
+							<div className="font-semibold">Class</div>
+							<div>{heroData.infos.class}</div>
+						</div>
+						<div className="px-3 py-1 rounded border-l-4 border-green-500">
+							<div className="font-semibold">Position</div>
+							<div>{heroData.infos.position}</div>
+						</div>
+						<div className="px-3 py-1 rounded border-l-4 border-red-500">
+							<div className="font-semibold">Damage Type</div>
+							<div>{heroData.infos["damage type"]}</div>
+						</div>
+						<div className="px-3 py-1 rounded border-l-4 border-yellow-500">
+							<div className="font-semibold">Attack Range</div>
+							<div>{heroData.infos["attack range"]}</div>
+						</div>
+						<div className="px-3 py-1 rounded border-l-4 border-pink-500">
+							<div className="font-semibold">Gender</div>
+							<div>{heroData.infos.gender}</div>
+						</div>
+						<div className="px-3 py-1 rounded border-l-4 border-indigo-500">
+							<div className="font-semibold">Race</div>
+							<div>{heroData.infos.race}</div>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<Tabs defaultValue="profile" className="w-full mt-4">

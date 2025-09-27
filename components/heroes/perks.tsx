@@ -12,14 +12,14 @@ export default function Perks({ heroData }: PerksProps) {
 		<div className="space-y-6">
 			{heroData.perks ? (
 				Object.entries(heroData.perks).map(([perkCategory, perks]) => (
-					<Card key={perkCategory}>
-						<CardContent>
-							<div className="text-2xl font-bold capitalize mb-4">{perkCategory} Perks</div>
+					<div key={perkCategory}>
+						<div className="text-2xl font-bold capitalize mb-4">{perkCategory} Perks</div>
 
-							<div className="space-y-4">
-								{typeof perks === "object" &&
-									Object.entries(perks).map(([perkKey, perk]) => (
-										<div key={perkKey} className="border rounded p-4">
+						<div className="space-y-4">
+							{typeof perks === "object" &&
+								Object.entries(perks).map(([perkKey, perk]) => (
+									<Card>
+										<CardContent key={perkKey}>
 											<div className="text-lg font-semibold mb-3">
 												{perkCategory === "t3" ? `Skill ${perkKey}` : capitalize(perkKey)}
 											</div>
@@ -76,11 +76,11 @@ export default function Perks({ heroData }: PerksProps) {
 													)}
 												</div>
 											)}
-										</div>
-									))}
-							</div>
-						</CardContent>
-					</Card>
+										</CardContent>
+									</Card>
+								))}
+						</div>
+					</div>
 				))
 			) : (
 				<div className="text-center text-gray-500 py-8">No perk data available</div>

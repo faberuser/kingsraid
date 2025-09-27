@@ -196,7 +196,7 @@ export default function Gear({ heroData }: GearProps) {
 											variant="default"
 											className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
 										>
-											CD: {heroData.sw.cooldown}s
+											Cooldown: {heroData.sw.cooldown}s
 										</Badge>
 									</div>
 								</div>

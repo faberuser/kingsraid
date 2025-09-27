@@ -8,9 +8,10 @@ async function getBossData(bossName: string): Promise<BossData | null> {
 	try {
 		const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
 		const files = fs.readdirSync(bossesDir)
+		const normalizedSlug = bossName.toLowerCase().replace(/-/g, " ")
 
 		// Try to find boss by exact name match (case insensitive)
-		let targetFile = files.find((file) => file.toLowerCase().replace(".json", "") === bossName.toLowerCase())
+		let targetFile = files.find((file) => file.toLowerCase().replace(".json", "") === normalizedSlug)
 
 		// If not found by filename, search by class name or aliases in the JSON files
 		if (!targetFile) {
@@ -21,14 +22,23 @@ async function getBossData(bossName: string): Promise<BossData | null> {
 					const bossData = JSON.parse(fileContent)
 
 					// Check class name match
-					if (bossData.infos?.class?.toLowerCase() === bossName.toLowerCase()) {
+					if (
+						bossData.infos?.class?.toLowerCase() === bossName.toLowerCase() ||
+						bossData.infos?.class?.toLowerCase() === normalizedSlug
+					) {
 						targetFile = file
 						break
 					}
 
 					// Check aliases match
 					if (bossData.aliases && Array.isArray(bossData.aliases)) {
-						if (bossData.aliases.some((alias: string) => alias.toLowerCase() === bossName.toLowerCase())) {
+						if (
+							bossData.aliases.some(
+								(alias: string) =>
+									alias.toLowerCase() === bossName.toLowerCase() ||
+									alias.toLowerCase() === normalizedSlug
+							)
+						) {
 							targetFile = file
 							break
 						}

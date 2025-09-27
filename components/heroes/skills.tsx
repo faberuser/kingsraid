@@ -44,7 +44,7 @@ export default function Skills({ heroData }: SkillsProps) {
 												variant="default"
 												className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
 											>
-												CD: {skill.cooldown}s
+												Cooldown: {skill.cooldown}s
 											</Badge>
 										)}
 									</div>

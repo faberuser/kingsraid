@@ -56,7 +56,10 @@ export default async function BossesPage() {
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{bosses.map((boss) => (
-					<Link key={boss.infos.class} href={`/bosses/${encodeURIComponent(boss.infos.class.toLowerCase())}`}>
+					<Link
+						key={boss.infos.class}
+						href={`/bosses/${encodeURIComponent(boss.infos.class.toLowerCase().replace(/\s+/g, "-"))}`}
+					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
 							<CardHeader className="pb-4">
 								<div className="flex items-center gap-4">
@@ -89,10 +92,6 @@ export default async function BossesPage() {
 									</div>
 									<div className="text-sm text-muted-foreground line-clamp-3">
 										{boss.infos.characteristics}
-									</div>
-									<div className="text-sm">
-										<div className="font-medium">Recommended: </div>
-										<div className="text-muted-foreground">{boss.infos["recommended heroes"]}</div>
 									</div>
 								</div>
 							</CardContent>

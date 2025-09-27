@@ -13,7 +13,8 @@ interface Costume {
 
 async function getHeroData(heroName: string): Promise<Hero | null> {
 	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
-	const filePath = path.join(heroesDir, `${heroName}.json`)
+	const normalizedSlug = heroName.toLowerCase().replace(/-/g, " ")
+	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
 
 	if (!fs.existsSync(filePath)) {
 		return null
@@ -21,9 +22,9 @@ async function getHeroData(heroName: string): Promise<Hero | null> {
 
 	try {
 		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
-		return { name: heroName, ...heroData }
+		return { name: normalizedSlug, ...heroData }
 	} catch (error) {
-		console.error(`Error loading hero data for ${heroName}:`, error)
+		console.error(`Error loading hero data for ${normalizedSlug}:`, error)
 		return null
 	}
 }

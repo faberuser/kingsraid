@@ -13,64 +13,6 @@ export default function Profile({ heroData }: ProfileProps) {
 
 	return (
 		<div className="space-y-6">
-			{/* Hero Basic Info */}
-			<Card>
-				<CardContent className="flex flex-col md:flex-row items-center md:items-start gap-6">
-					{/* Hero Image */}
-					<div className="flex items-center justify-center self-stretch">
-						<div className="w-32 h-32 md:w-40 md:h-40">
-							<Image
-								src={`/assets/${infos.thumbnail}`}
-								alt={heroData.name}
-								width="0"
-								height="0"
-								sizes="100vw"
-								className="w-full h-auto rounded object-cover"
-							/>
-						</div>
-					</div>
-
-					{/* Hero Basic Info */}
-					<div className="flex-grow">
-						<div className="mb-2 text-center sm:text-start">
-							<div className="text-3xl font-bold">{capitalize(heroData.name)}</div>
-							<div className={`text-lg font-semibold ${classColorMapText(infos.class)}`}>
-								{infos.title}
-							</div>
-						</div>
-
-						<Separator className="mb-4" />
-
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-							<div className="px-3 py-1 rounded border-l-4 border-blue-500">
-								<div className="font-semibold">Class</div>
-								<div>{infos.class}</div>
-							</div>
-							<div className="px-3 py-1 rounded border-l-4 border-green-500">
-								<div className="font-semibold">Position</div>
-								<div>{infos.position}</div>
-							</div>
-							<div className="px-3 py-1 rounded border-l-4 border-red-500">
-								<div className="font-semibold">Damage Type</div>
-								<div>{infos["damage type"]}</div>
-							</div>
-							<div className="px-3 py-1 rounded border-l-4 border-yellow-500">
-								<div className="font-semibold">Attack Range</div>
-								<div>{infos["attack range"]}</div>
-							</div>
-							<div className="px-3 py-1 rounded border-l-4 border-pink-500">
-								<div className="font-semibold">Gender</div>
-								<div>{infos.gender}</div>
-							</div>
-							<div className="px-3 py-1 rounded border-l-4 border-indigo-500">
-								<div className="font-semibold">Race</div>
-								<div>{infos.race}</div>
-							</div>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-
 			{/* Personal Details */}
 			<div className="grid md:grid-cols-2 gap-6">
 				<Card>
