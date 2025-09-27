@@ -32,6 +32,19 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 		setIsModalOpen(true)
 	}
 
+	const handleModalNavigate = (direction: "prev" | "next") => {
+		const currentIndex = costumes.findIndex((c) => c.name === selectedCostume)
+		let newIndex: number
+
+		if (direction === "prev") {
+			newIndex = currentIndex > 0 ? currentIndex - 1 : costumes.length - 1
+		} else {
+			newIndex = currentIndex < costumes.length - 1 ? currentIndex + 1 : 0
+		}
+
+		setSelectedCostume(costumes[newIndex].name)
+	}
+
 	if (!heroData.costumes) {
 		return (
 			<div className="text-center text-muted-foreground py-8">
@@ -41,6 +54,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	}
 
 	const selectedCostumeData = costumes.find((c) => c.name === selectedCostume)
+	const currentCostumeIndex = costumes.findIndex((c) => c.name === selectedCostume)
 
 	return (
 		<div className="space-y-6">
@@ -127,6 +141,12 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 					imageSrc={`/assets/${selectedCostumeData.path}`}
 					imageAlt={`${heroData.name} - ${selectedCostume}`}
 					title={`${capitalize(heroData.name)} - ${selectedCostumeData.displayName}`}
+					showNavigation={costumes.length > 1}
+					currentIndex={currentCostumeIndex}
+					totalCount={costumes.length}
+					onNavigate={handleModalNavigate}
+					canNavigatePrev={true}
+					canNavigateNext={true}
 				/>
 			)}
 		</div>
@@ -154,7 +174,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				width="0"
 				height="0"
 				sizes="40vw md:20vw"
-				className="w-full flex-1 hover:scale-110 transition-transform duration-300"
+				className="w-full flex-1 hover:scale-110 transition-transform duration-300 object-contain"
 			/>
 			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2 flex items-center justify-center">
 				{costume.displayName}

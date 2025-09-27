@@ -1,9 +1,8 @@
-import { useState, useRef, useCallback } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState, useRef, useEffect, useCallback } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
-
+import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
 interface ImageZoomModalProps {
 	isOpen: boolean
 	onOpenChange: (open: boolean) => void
@@ -12,6 +11,13 @@ interface ImageZoomModalProps {
 	title?: string
 	maxZoomIn?: number
 	maxZoomOut?: number
+	// Navigation props
+	showNavigation?: boolean
+	currentIndex?: number
+	totalCount?: number
+	onNavigate?: (direction: "prev" | "next") => void
+	canNavigatePrev?: boolean
+	canNavigateNext?: boolean
 }
 
 const DEFAULT_MAX_ZOOM_IN = 10
@@ -25,6 +31,12 @@ export default function ImageZoomModal({
 	title,
 	maxZoomIn = DEFAULT_MAX_ZOOM_IN,
 	maxZoomOut = DEFAULT_MAX_ZOOM_OUT,
+	showNavigation = false,
+	currentIndex,
+	totalCount,
+	onNavigate,
+	canNavigatePrev = true,
+	canNavigateNext = true,
 }: ImageZoomModalProps) {
 	const [zoomLevel, setZoomLevel] = useState(1)
 	const [panPosition, setPanPosition] = useState({ x: 0, y: 0 })
@@ -34,7 +46,7 @@ export default function ImageZoomModal({
 
 	const imageContainerRef = useRef<HTMLDivElement>(null)
 
-	// Reset zoom and pan when modal opens
+	// Reset zoom and pan when modal opens or image changes
 	const handleOpenChange = (open: boolean) => {
 		if (open) {
 			setZoomLevel(1)
@@ -42,6 +54,39 @@ export default function ImageZoomModal({
 		}
 		onOpenChange(open)
 	}
+
+	// Reset zoom and pan when navigating
+	const resetView = () => {
+		setZoomLevel(1)
+		setPanPosition({ x: 0, y: 0 })
+	}
+
+	const handleNavigate = (direction: "prev" | "next") => {
+		resetView()
+		onNavigate?.(direction)
+	}
+
+	// Keyboard navigation
+	const handleKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			if (!isOpen || !showNavigation || !onNavigate) return
+
+			if ((e.key === "ArrowLeft" || e.key === "," || e.key === "[" || e.key === "-") && canNavigatePrev) {
+				handleNavigate("prev")
+			} else if ((e.key === "ArrowRight" || e.key === "." || e.key === "]" || e.key === "=") && canNavigateNext) {
+				handleNavigate("next")
+			}
+		},
+		[isOpen, showNavigation, onNavigate, canNavigatePrev, canNavigateNext]
+	)
+
+	// Add keyboard event listener
+	useEffect(() => {
+		if (isOpen) {
+			document.addEventListener("keydown", handleKeyDown)
+			return () => document.removeEventListener("keydown", handleKeyDown)
+		}
+	}, [isOpen, handleKeyDown])
 
 	const handleZoomIn = () => {
 		setZoomLevel((prev) => Math.min(prev + 0.25, maxZoomIn))
@@ -142,40 +187,81 @@ export default function ImageZoomModal({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={handleOpenChange}>
-			<DialogContent className="[&>button]:hidden max-w-[90vw] max-h-[90vh] p-0">
-				<DialogHeader className="p-4 pb-2">
+			<DialogContent className="[&>button]:hidden p-0 max-w-screen md:max-w-fit sm:max-w-fit w-screen md:w-fit h-fit sm:h-fit focus:outline-none">
+				<DialogHeader className="p-4 pb-0">
 					<div className="flex items-center justify-between">
-						{title && <DialogTitle>{title}</DialogTitle>}
-						<div className="flex items-center gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleZoomOut}
-								disabled={zoomLevel <= maxZoomOut}
-							>
-								<ZoomOut className="w-4 h-4" />
-							</Button>
-							<div className="text-sm font-medium min-w-[60px] text-center">
-								{Math.round(zoomLevel * 100)}%
+						{title && <DialogTitle className="hidden md:block">{title}</DialogTitle>}
+						<div className="flex items-center gap-2 w-full md:w-fit justify-end">
+							{/* Navigation controls */}
+							{showNavigation && onNavigate && (
+								<>
+									<div className="flex items-center">
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handleNavigate("prev")}
+											disabled={!canNavigatePrev}
+										>
+											<ChevronLeft className="w-4 h-4" />
+										</Button>
+										{currentIndex !== undefined && totalCount !== undefined && (
+											<div className="text-sm font-medium min-w-[60px] text-center">
+												{currentIndex + 1} / {totalCount}
+											</div>
+										)}
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => handleNavigate("next")}
+											disabled={!canNavigateNext}
+										>
+											<ChevronRight className="w-4 h-4" />
+										</Button>
+									</div>
+									<div className="hidden md:block w-px h-6 bg-border mx-1" />
+								</>
+							)}
+
+							{/* Zoom controls */}
+							<div className="hidden md:flex gap-2">
+								<div className="flex items-center">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleZoomOut}
+										disabled={zoomLevel <= maxZoomOut}
+									>
+										<ZoomOut className="w-4 h-4" />
+									</Button>
+									<div className="text-sm font-medium min-w-[60px] text-center">
+										{Math.round(zoomLevel * 100)}%
+									</div>
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={handleZoomIn}
+										disabled={zoomLevel >= maxZoomIn}
+									>
+										<ZoomIn className="w-4 h-4" />
+									</Button>
+								</div>
+								<Button variant="outline" size="sm" onClick={handleResetZoom}>
+									<RotateCcw className="w-4 h-4" />
+								</Button>
+								<div className="w-px h-6 bg-border mx-1" />
 							</div>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleZoomIn}
-								disabled={zoomLevel >= maxZoomIn}
-							>
-								<ZoomIn className="w-4 h-4" />
-							</Button>
-							<Button variant="outline" size="sm" onClick={handleResetZoom}>
-								<RotateCcw className="w-4 h-4" />
-							</Button>
+
+							<DialogClose asChild>
+								<Button variant="outline" size="sm">
+									<X className="w-4 h-4" />
+								</Button>
+							</DialogClose>
 						</div>
 					</div>
 				</DialogHeader>
-
-				<div className="overflow-hidden flex-1 p-4 pt-2" ref={imageContainerRef}>
+				<div className="overflow-hidden p-4 pt-2 h-full w-full" ref={imageContainerRef}>
 					<div
-						className="flex justify-center items-center min-h-[400px] h-full"
+						className="flex justify-center items-center h-full w-full"
 						onMouseDown={handleMouseDown}
 						onMouseMove={handleMouseMove}
 						onMouseUp={handleMouseUp}
@@ -197,14 +283,12 @@ export default function ImageZoomModal({
 								transformOrigin: "center center",
 							}}
 						>
-							<Image
+							<img
 								src={imageSrc}
 								alt={imageAlt}
-								width="0"
-								height="0"
-								sizes="100vw"
-								className="w-auto h-full"
-								priority
+								style={{
+									imageRendering: "auto",
+								}}
 								draggable={false}
 							/>
 						</div>
