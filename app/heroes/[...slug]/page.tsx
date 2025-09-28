@@ -18,15 +18,18 @@ interface ModelFile {
 	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
 }
 
+interface HairTextureInfo {
+	hair?: string
+	ornament?: string
+}
+
 interface TextureInfo {
 	diffuse?: string
-	normal?: string
-	specular?: string
 	eye?: string
 }
 
 interface ModelWithTextures extends ModelFile {
-	textures: TextureInfo
+	textures: TextureInfo | HairTextureInfo
 }
 
 async function getCostumeData(costumePath: string): Promise<Costume[]> {
@@ -89,7 +92,7 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 
 		return costumes
 	} catch (error) {
-		console.error("Error reading costume directory:", error)
+		console.error(error)
 		return []
 	}
 }
@@ -125,7 +128,10 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 		})
 
 		// Helper function to scan for textures in a folder
-		const scanFolderForTextures = async (folderPath: string, folderName: string): Promise<TextureInfo> => {
+		const scanFolderForTextures = async (
+			folderPath: string,
+			folderName: string
+		): Promise<TextureInfo | HairTextureInfo> => {
 			const textures: TextureInfo = {}
 
 			try {
@@ -139,6 +145,26 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 
 				// Extract model base name for better matching
 				const modelBaseName = folderName.replace(/^Hero_\w+_/, "").replace(/_\w+$/, "")
+
+				if (folderName.includes("_Hair")) {
+					const hairTextures: HairTextureInfo = {}
+
+					// Look for hair textures
+					const hairFile = textureFiles.find(
+						(file) => file.includes("_Hair") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (hairFile) {
+						hairTextures.hair = `${folderName}/${hairFile}`
+					}
+					// Look for ornament textures
+					const ornamentFile = textureFiles.find(
+						(file) => file.includes("AC_D(RGB)") || file.includes("AC_D.")
+					)
+					if (ornamentFile) {
+						hairTextures.ornament = `${folderName}/${ornamentFile}`
+					}
+					return hairTextures
+				}
 
 				// Look for diffuse textures - prefer exact matches first
 				let diffuseFile = textureFiles.find(
@@ -154,22 +180,6 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 					textures.diffuse = `${folderName}/${diffuseFile}`
 				}
 
-				// Look for normal textures
-				const normalFile = textureFiles.find(
-					(file) => file.includes(`${modelBaseName}_Normal`) || file.includes("_Normal")
-				)
-				if (normalFile) {
-					textures.normal = `${folderName}/${normalFile}`
-				}
-
-				// Look for specular textures
-				const specularFile = textureFiles.find(
-					(file) => file.includes(`${modelBaseName}_AS.`) || file.includes("_AS.")
-				)
-				if (specularFile) {
-					textures.specular = `${folderName}/${specularFile}`
-				}
-
 				// Look for eye textures (for body models)
 				if (folderName.includes("_Body")) {
 					const eyeFile = textureFiles.find(
@@ -181,14 +191,9 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 					}
 				}
 
-				console.log(`Textures found for ${folderName}:`, textures)
-
-				// Log all texture files for debugging
-				console.log(`All texture files in ${folderName}:`, textureFiles)
-
 				return textures
 			} catch (error) {
-				console.warn(`Error scanning textures for ${folderName}:`, error)
+				console.warn(error)
 				return {}
 			}
 		}
@@ -233,7 +238,7 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 						})
 					}
 				} catch (error) {
-					console.warn(`Error reading folder ${folderName}:`, error)
+					console.warn(error)
 				}
 			}
 
@@ -243,10 +248,9 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 			}
 		}
 
-		console.log(`Found ${Object.keys(heroModels).length} costumes for ${heroName}:`, Object.keys(heroModels))
 		return heroModels
 	} catch (error) {
-		console.error("Error reading models directory:", error)
+		console.error(error)
 		return {}
 	}
 }
