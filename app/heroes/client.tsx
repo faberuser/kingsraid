@@ -122,22 +122,22 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 			<div className="flex flex-row gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
 					<Link
-						key={hero.name}
+						key={hero.infos.name}
 						className="border rounded w-48 h-64 flex flex-col relative cursor-pointer overflow-hidden"
-						href={`/heroes/${encodeURIComponent(hero.name.toLowerCase().replace(/\s+/g, "-"))}`}
+						href={`/heroes/${encodeURIComponent(hero.infos.name.toLowerCase().replace(/\s+/g, "-"))}`}
 					>
 						<Image
 							src={"/assets/" + hero.splashart}
-							alt={hero.name}
+							alt={hero.infos.name}
 							width="0"
 							height="0"
 							sizes="40vw md:20vw"
 							className={`w-full flex-1 object-cover ${
-								saReverse.includes(hero.name) ? "object-left" : "object-right"
+								saReverse.includes(hero.infos.name) ? "object-left" : "object-right"
 							} hover:scale-110 transition-transform duration-300`}
 						/>
 						<div className="text-xl font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2">
-							{hero.name}
+							{hero.infos.name}
 						</div>
 					</Link>
 				))}

@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import ClientSidebar from "@/components/client-sidebar"
+import ClientSidebar from "@/components/sidebar/client-sidebar"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
@@ -27,10 +27,7 @@ async function getSearchData() {
 					const filePath = path.join(heroesDir, file)
 					const fileContent = fs.readFileSync(filePath, "utf-8")
 					const heroData: HeroData = JSON.parse(fileContent)
-					searchData.heroes.push({
-						...heroData,
-						name: heroData.name || path.basename(file, ".json"),
-					})
+					searchData.heroes.push(heroData)
 				} catch (error) {
 					console.error(error)
 				}

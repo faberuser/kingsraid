@@ -1,6 +1,6 @@
 export interface HeroData {
-	name: string
 	infos: {
+		"name": string
 		"title": string
 		"class": string
 		"position": string

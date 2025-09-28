@@ -1,28 +1,8 @@
 import type { Metadata } from "next"
-import fs from "fs"
-import path from "path"
 import { BossData } from "@/model/Boss"
-import { capitalize } from "@/lib/utils"
+import { SlugPageProps, getDirData } from "@/components/server/get-data"
 
-async function getBossData(bossName: string): Promise<BossData | null> {
-	const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
-	const normalizedSlug = capitalize(bossName.toLowerCase().replace(/-/g, " "))
-	const filePath = path.join(bossesDir, `${normalizedSlug}.json`)
-
-	if (!fs.existsSync(filePath)) {
-		return null
-	}
-
-	try {
-		const bossData = JSON.parse(fs.readFileSync(filePath, "utf-8"))
-		return bossData
-	} catch (error) {
-		console.error(error)
-		return null
-	}
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
 	const { slug } = await params
 
 	if (!slug || slug.length === 0) {
@@ -37,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 	}
 
 	const bossName = decodeURIComponent(slug[0])
-	const bossData = await getBossData(bossName)
+	const bossData = (await getDirData(slug[0], "bosses")) as BossData | null
 
 	if (!bossData) {
 		return {

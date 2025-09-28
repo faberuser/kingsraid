@@ -1,32 +1,15 @@
 import fs from "fs"
 import path from "path"
-import { HeroData } from "@/model/Hero"
 import { notFound } from "next/navigation"
-import SlugClient from "./client"
+import SlugClient from "@/app/heroes/[...slug]/client"
 import { capitalize } from "@/lib/utils"
+import { SlugPageProps, getDirData } from "@/components/server/get-data"
+import { HeroData } from "@/model/Hero"
 
 interface Costume {
 	name: string
 	path: string
 	displayName: string
-}
-
-async function getHeroData(heroName: string): Promise<HeroData | null> {
-	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
-	const normalizedSlug = capitalize(heroName.toLowerCase().replace(/-/g, " "))
-	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
-
-	if (!fs.existsSync(filePath)) {
-		return null
-	}
-
-	try {
-		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
-		return { name: normalizedSlug, ...heroData }
-	} catch (error) {
-		console.error(error)
-		return null
-	}
 }
 
 async function getCostumeData(costumePath: string): Promise<Costume[]> {
@@ -94,12 +77,6 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	}
 }
 
-interface SlugPageProps {
-	params: Promise<{
-		slug: string[]
-	}>
-}
-
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params
 	const heroName = slug?.[0]
@@ -108,8 +85,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const decodedHeroName = decodeURIComponent(heroName)
-	const heroData = await getHeroData(decodedHeroName)
+	const heroData = (await getDirData(heroName, "heroes")) as HeroData | null
 
 	if (!heroData) {
 		notFound()

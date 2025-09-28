@@ -1,28 +1,8 @@
 import type { Metadata } from "next"
-import fs from "fs"
-import path from "path"
 import { HeroData } from "@/model/Hero"
-import { capitalize } from "@/lib/utils"
+import { SlugPageProps, getDirData } from "@/components/server/get-data"
 
-async function getHeroData(heroName: string): Promise<HeroData | null> {
-	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
-	const normalizedSlug = capitalize(heroName.toLowerCase().replace(/-/g, " "))
-	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
-
-	if (!fs.existsSync(filePath)) {
-		return null
-	}
-
-	try {
-		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
-		return { name: normalizedSlug, ...heroData }
-	} catch (error) {
-		console.error(error)
-		return null
-	}
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
 	const { slug } = await params
 
 	if (!slug || slug.length === 0) {
@@ -36,8 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 		}
 	}
 
-	const heroName = decodeURIComponent(slug[0])
-	const heroData = await getHeroData(heroName)
+	const heroData = (await getDirData(slug[0], "heroes")) as HeroData | null
 
 	if (!heroData) {
 		return {
@@ -50,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 		}
 	}
 
-	const displayName = heroData.name
+	const displayName = heroData.infos.name
 
 	return {
 		title: `${displayName} - Heroes - King's Raid`,

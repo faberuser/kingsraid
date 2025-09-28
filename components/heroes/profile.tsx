@@ -92,7 +92,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						>
 							<Image
 								src={`/assets/${heroData.splashart}`}
-								alt={`${heroData.name} Splashart`}
+								alt={`${heroData.infos.name} Splashart`}
 								width="0"
 								height="0"
 								sizes="100vw"
@@ -107,8 +107,8 @@ export default function Profile({ heroData }: ProfileProps) {
 							isOpen={isModalOpen}
 							onOpenChange={setIsModalOpen}
 							imageSrc={`/assets/${heroData.splashart}`}
-							imageAlt={`${heroData.name} Splashart`}
-							title={`${capitalize(heroData.name)} Splashart`}
+							imageAlt={`${heroData.infos.name} Splashart`}
+							title={`${capitalize(heroData.infos.name)} Splashart`}
 						/>
 					</CardContent>
 				</Card>

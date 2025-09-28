@@ -15,7 +15,7 @@ async function getArtifacts(): Promise<ArtifactData[]> {
 		const artifactsData: ArtifactData[] = JSON.parse(fileContent)
 
 		// Sort artifacts alphabetically by name
-		return artifactsData.sort((a: ArtifactData, b: ArtifactData) => a.name.localeCompare(b.name))
+		return artifactsData.sort((a, b) => a.name.localeCompare(b.name))
 	} catch (error) {
 		console.error(error)
 		return []

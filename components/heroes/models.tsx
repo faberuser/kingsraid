@@ -5,5 +5,5 @@ interface ModelsProps {
 }
 
 export default function Models({ heroData }: ModelsProps) {
-	return <div>3D Models viewer coming soon</div>
+	return <div>coming soon</div>
 }

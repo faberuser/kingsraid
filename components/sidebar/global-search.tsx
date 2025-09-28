@@ -116,10 +116,10 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 			searchData.heroes.forEach((hero, index) => {
 				items.push({
 					id: `hero-${index}`,
-					title: hero.name,
+					title: hero.infos.name,
 					description: hero.infos.title,
 					type: "hero",
-					url: `/heroes/${encodeURIComponent(hero.name)}`,
+					url: `/heroes/${encodeURIComponent(hero.infos.name)}`,
 					icon: UserRound,
 					aliases: hero.aliases || null,
 				})

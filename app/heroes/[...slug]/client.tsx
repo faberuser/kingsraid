@@ -46,7 +46,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 					<div className="w-32 h-32 md:w-40 md:h-40">
 						<Image
 							src={`/assets/${heroData.infos.thumbnail}`}
-							alt={heroData.name}
+							alt={heroData.infos.name}
 							width="0"
 							height="0"
 							sizes="30vw md:10vw"
@@ -58,7 +58,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 				{/* Hero Basic Info */}
 				<div className="flex-grow">
 					<div className="mb-2 text-center sm:text-start">
-						<div className="text-3xl font-bold">{capitalize(heroData.name)}</div>
+						<div className="text-3xl font-bold">{capitalize(heroData.infos.name)}</div>
 						<div className={`text-lg font-semibold ${classColorMapText(heroData.infos.class)}`}>
 							{heroData.infos.title}
 						</div>
