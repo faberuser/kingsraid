@@ -16,7 +16,6 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const bossName = decodeURIComponent(slug[0])
 	const bossData = (await getFileData(slug[0], "bosses")) as BossData | null
 
 	if (!bossData) {
@@ -30,8 +29,7 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	// Use only available properties from BossInfo
-	const displayName = bossData.infos?.name || bossName
+	const displayName = bossData.infos?.name
 
 	return {
 		title: `${displayName} - Bosses - King's Raid`,
