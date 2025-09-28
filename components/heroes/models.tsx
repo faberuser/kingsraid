@@ -131,20 +131,16 @@ function Model({
 
 										if (matName.includes("eye") && eyeTexture) {
 											// Eye material - anime style (Blender equivalent)
-											return new THREE.MeshStandardMaterial({
+											return new THREE.MeshToonMaterial({
 												map: eyeTexture,
 												normalMap: normalTexture,
-												metalness: 0.0,
-												roughness: 1.0,
 												name: originalMat.name,
 											})
 										} else if (mainTexture) {
 											// Skin material - anime style (Blender equivalent)
-											return new THREE.MeshStandardMaterial({
+											return new THREE.MeshToonMaterial({
 												map: mainTexture,
 												normalMap: normalTexture,
-												metalness: 0.0,
-												roughness: 1.0,
 												name: originalMat.name,
 											})
 										}
@@ -156,11 +152,9 @@ function Model({
 									const useEyeTexture = matName.includes("eye") && eyeTexture
 
 									materials = [
-										new THREE.MeshStandardMaterial({
+										new THREE.MeshToonMaterial({
 											map: useEyeTexture ? eyeTexture : mainTexture,
 											normalMap: normalTexture,
-											metalness: 0.0,
-											roughness: 1.0,
 										}),
 									]
 								}
@@ -168,11 +162,9 @@ function Model({
 								child.material = materials
 							} else if (mainTexture) {
 								// Regular single material - anime style (Blender equivalent)
-								child.material = new THREE.MeshStandardMaterial({
+								child.material = new THREE.MeshToonMaterial({
 									map: mainTexture,
 									normalMap: normalTexture,
-									metalness: 0.0,
-									roughness: 1.0,
 								})
 							}
 
@@ -185,13 +177,11 @@ function Model({
 					// Apply default material if no textures found
 					fbx.traverse((child) => {
 						if (child instanceof THREE.Mesh) {
-							child.material = new THREE.MeshStandardMaterial({
+							child.material = new THREE.MeshBasicMaterial({
 								color: 0xcccccc,
-								metalness: 0.1,
-								roughness: 0.8,
 							})
-							child.castShadow = true
-							child.receiveShadow = true
+							child.castShadow = false
+							child.receiveShadow = false
 						}
 					})
 				}
@@ -379,8 +369,8 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 						minDistance={0.5}
 						target={[0, 1, 0]}
 					/>
-					<ambientLight intensity={1} />
-					<directionalLight position={[0, 10, 5]} intensity={1} castShadow={false} />
+					<ambientLight intensity={1.25} />
+					{/* <directionalLight position={[0, 10, 5]} intensity={0.2} castShadow={false} /> */}
 					<Suspense fallback={null}>
 						<Model modelFiles={modelFiles} heroName={heroName} visibleModels={visibleModels} />
 					</Suspense>
