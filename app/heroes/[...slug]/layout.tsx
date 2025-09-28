@@ -2,51 +2,22 @@ import type { Metadata } from "next"
 import fs from "fs"
 import path from "path"
 import { HeroData } from "@/model/Hero"
+import { capitalize } from "@/lib/utils"
 
 async function getHeroData(heroName: string): Promise<HeroData | null> {
-	try {
-		const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
+	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
+	const normalizedSlug = capitalize(heroName.toLowerCase().replace(/-/g, " "))
+	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
 
-		// Convert slug back to hero name format
-		const normalizedSlug = heroName.toLowerCase().replace(/-/g, " ")
-
-		if (!fs.existsSync(heroesDir)) {
-			return null
-		}
-
-		const files = fs.readdirSync(heroesDir)
-		const jsonFiles = files.filter((file) => file.endsWith(".json"))
-
-		for (const file of jsonFiles) {
-			const heroFileName = path.basename(file, ".json")
-
-			// Check if file name matches (case insensitive)
-			if (
-				heroFileName.toLowerCase() === normalizedSlug ||
-				heroFileName.toLowerCase().replace(/[-_]/g, " ") === normalizedSlug
-			) {
-				const filePath = path.join(heroesDir, file)
-				const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
-				return { name: heroFileName, ...heroData }
-			}
-		}
-
-		// Try partial matching
-		for (const file of jsonFiles) {
-			const heroFileName = path.basename(file, ".json")
-			if (
-				heroFileName.toLowerCase().includes(normalizedSlug) ||
-				normalizedSlug.includes(heroFileName.toLowerCase())
-			) {
-				const filePath = path.join(heroesDir, file)
-				const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
-				return { name: heroFileName, ...heroData }
-			}
-		}
-
+	if (!fs.existsSync(filePath)) {
 		return null
+	}
+
+	try {
+		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
+		return { name: normalizedSlug, ...heroData }
 	} catch (error) {
-		console.error("Error reading hero data:", error)
+		console.error(error)
 		return null
 	}
 }

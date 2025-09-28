@@ -10,7 +10,7 @@ async function getArtifactData(artifactName: string): Promise<ArtifactData | nul
 		const artifactsData: ArtifactData[] = JSON.parse(fileContent)
 
 		// Convert slug back to artifact name format
-		const normalizedSlug = artifactName.replace(/-/g, " ")
+		const normalizedSlug = artifactName.toLowerCase().replace(/-/g, " ")
 
 		// Try to find artifact by exact name match (case insensitive)
 		let foundArtifact = artifactsData.find((artifact) => artifact.name.toLowerCase() === normalizedSlug)
