@@ -1,8 +1,9 @@
 FROM alpine/git AS git-stage
 WORKDIR /src
 COPY . .
-# Remove existing kingsraid-data directory if it exists, then clone fresh
+# Remove existing kingsraid-data & kingsraid-models directory if it exists, then clone fresh
 RUN rm -rf kingsraid-data && git clone https://github.com/faberuser/kingsraid-data.git kingsraid-data
+RUN rm -rf kingsraid-models && git clone https://github.com/faberuser/kingsraid-models.git kingsraid-models
 
 FROM oven/bun:alpine AS base
 WORKDIR /usr/src/app
@@ -35,6 +36,7 @@ COPY --from=prerelease /usr/src/app/.next ./.next
 COPY --from=prerelease /usr/src/app/package.json .
 COPY --from=prerelease /usr/src/app/public ./public
 COPY --from=prerelease /usr/src/app/kingsraid-data ./kingsraid-data
+COPY --from=prerelease /usr/src/app/kingsraid-models ./kingsraid-models
 
 # expose the port
 EXPOSE 3000
