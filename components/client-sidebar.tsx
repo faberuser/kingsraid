@@ -16,6 +16,7 @@ import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
+import GlobalSearch from "@/components/global-search"
 
 // Menu items
 const items = [
@@ -27,20 +28,36 @@ const items = [
 	{ title: "Softcap", url: "/softcap", icon: Calculator },
 ]
 
-export default function AppSidebar() {
+interface ClientSidebarProps {
+	searchData: {
+		heroes: Array<{ name: string; infos?: { class?: string; title?: string } }>
+		artifacts: Array<{ name: string; data?: { description?: string } }>
+		bosses: Array<{ infos?: { class?: string; title?: string; race?: string } }>
+	}
+}
+
+export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const pathname = usePathname()
 
 	return (
-		<Sidebar className="dark:border-gray-600">
+		<Sidebar>
 			<SidebarHeader className="px-5 py-4 border-b">
 				<Link href="/" className="text-2xl font-bold">
 					King's Raid
 				</Link>
 			</SidebarHeader>
 
-			<SidebarContent className="ctscroll">
+			<SidebarContent className="gap-0">
+				{/* Search Section */}
 				<SidebarGroup>
-					<SidebarGroupContent className="mt-2">
+					<SidebarGroupContent className="px-2 mt-2">
+						<GlobalSearch searchData={searchData} />
+					</SidebarGroupContent>
+				</SidebarGroup>
+
+				{/* Navigation Menu */}
+				<SidebarGroup>
+					<SidebarGroupContent>
 						<SidebarMenu>
 							{items.map((item) => {
 								const isActive =
