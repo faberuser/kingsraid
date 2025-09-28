@@ -77,6 +77,77 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	}
 }
 
+interface ModelFile {
+	name: string
+	path: string
+	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+}
+
+export async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelFile[] }> {
+	try {
+		const modelsDir = path.join(process.cwd(), "kingsraid-models", "models")
+
+		if (!fs.existsSync(modelsDir)) {
+			return {}
+		}
+
+		const allDirs = fs.readdirSync(modelsDir)
+
+		// Filter files for this hero
+		const heroDirs = allDirs.filter((dir) => dir.startsWith(`Hero_${heroName}_`))
+		if (heroDirs.length === 0) {
+			return {}
+		}
+		// Flatten files from all relevant directories
+		const heroFiles: string[] = []
+		heroDirs.forEach((dir) => {
+			const dirPath = path.join(modelsDir, dir)
+			if (fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory()) {
+				const files = fs.readdirSync(dirPath).filter((file) => file.endsWith(".fbx"))
+				heroFiles.push(...files.map((file) => path.join(dir, file))) // Store relative path
+			}
+		})
+
+		if (heroFiles.length === 0) {
+			return {}
+		}
+
+		// Group by costume
+		const modelsByCostume: { [costume: string]: ModelFile[] } = {}
+
+		heroFiles.forEach((file) => {
+			// Extract costume name from filename
+			// Example: Hero_Aisha_Cos16SL_Body.fbx -> Cos16SL
+			const match = file.match(/Hero_\w+_([^_]+)_(.+)\.fbx$/)
+			if (match) {
+				const costume = match[1]
+				const component = match[2].toLowerCase()
+
+				// Determine component type
+				let type: ModelFile["type"] = "body"
+				if (component.includes("hair")) type = "hair"
+				else if (component.includes("weapon02")) type = "weapon02"
+				else if (component.includes("weapon01") || component.includes("weapon")) type = "weapon"
+
+				if (!modelsByCostume[costume]) {
+					modelsByCostume[costume] = []
+				}
+
+				modelsByCostume[costume].push({
+					name: file,
+					path: file,
+					type: type,
+				})
+			}
+		})
+
+		return modelsByCostume
+	} catch (error) {
+		console.error("Error fetching hero models:", error)
+		return {}
+	}
+}
+
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params
 	const heroName = slug?.[0]
@@ -94,5 +165,8 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get costume data server-side
 	const costumes = await getCostumeData(heroData.costumes)
 
-	return <SlugClient heroData={heroData} costumes={costumes} />
+	// Get model data server-side
+	const heroModels = await getHeroModels(heroData.infos.name)
+
+	return <SlugClient heroData={heroData} costumes={costumes} heroModels={heroModels} />
 }
