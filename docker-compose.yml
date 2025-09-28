@@ -1,6 +1,6 @@
 services:
     app:
-        container_name: kingsraid
+        container_name: ${CONTAINER_NAME:-kingsraid}
         build:
             context: .
             dockerfile: Dockerfile

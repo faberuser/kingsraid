@@ -67,5 +67,6 @@ The application will be available at `http://localhost:3000` (or the port specif
 Create a `.env.local` file for local development:
 
 ```env
-DOCKER_PORT=3000  # Port for Docker deployment
+CONTAINER_NAME=kingsraid # optional
+DOCKER_PORT=3000  # optional
 ```
