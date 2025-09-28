@@ -12,6 +12,23 @@ interface Costume {
 	displayName: string
 }
 
+interface ModelFile {
+	name: string
+	path: string
+	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+}
+
+interface TextureInfo {
+	diffuse?: string
+	normal?: string
+	specular?: string
+	eye?: string
+}
+
+interface ModelWithTextures extends ModelFile {
+	textures: TextureInfo
+}
+
 async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	if (!costumePath) return []
 
@@ -77,73 +94,159 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	}
 }
 
-interface ModelFile {
-	name: string
-	path: string
-	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
-}
+async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelWithTextures[] }> {
+	const modelsDir = path.join(process.cwd(), "public", "models")
+	const heroModels: { [costume: string]: ModelWithTextures[] } = {}
 
-export async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelFile[] }> {
 	try {
-		const modelsDir = path.join(process.cwd(), "kingsraid-models", "models")
+		const modelFolders = await fs.promises.readdir(modelsDir, { withFileTypes: true })
 
-		if (!fs.existsSync(modelsDir)) {
-			return {}
-		}
+		// Filter folders that belong to this hero
+		const heroFolders = modelFolders.filter(
+			(folder) => folder.isDirectory() && folder.name.toLowerCase().startsWith(`hero_${heroName.toLowerCase()}_`)
+		)
 
-		const allDirs = fs.readdirSync(modelsDir)
+		// Group by costume name
+		const costumeGroups: { [costume: string]: string[] } = {}
 
-		// Filter files for this hero
-		const heroDirs = allDirs.filter((dir) => dir.startsWith(`Hero_${heroName}_`))
-		if (heroDirs.length === 0) {
-			return {}
-		}
-		// Flatten files from all relevant directories
-		const heroFiles: string[] = []
-		heroDirs.forEach((dir) => {
-			const dirPath = path.join(modelsDir, dir)
-			if (fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory()) {
-				const files = fs.readdirSync(dirPath).filter((file) => file.endsWith(".fbx"))
-				heroFiles.push(...files.map((file) => path.join(dir, file))) // Store relative path
+		heroFolders.forEach((folder) => {
+			// Extract costume name from folder name
+			// Hero_Aisha_Cos17Christmas_Body -> Cos17Christmas
+			const match = folder.name.match(/Hero_\w+_(Cos\w+)_(\w+)/)
+			if (match) {
+				const costumeName = match[1] // e.g., "Cos17Christmas"
+				const componentType = match[2] // e.g., "Body", "Hair", "Weapon01"
+
+				if (!costumeGroups[costumeName]) {
+					costumeGroups[costumeName] = []
+				}
+				costumeGroups[costumeName].push(folder.name)
 			}
 		})
 
-		if (heroFiles.length === 0) {
-			return {}
-		}
+		// Helper function to scan for textures in a folder
+		const scanFolderForTextures = async (folderPath: string, folderName: string): Promise<TextureInfo> => {
+			const textures: TextureInfo = {}
 
-		// Group by costume
-		const modelsByCostume: { [costume: string]: ModelFile[] } = {}
+			try {
+				const files = await fs.promises.readdir(folderPath)
 
-		heroFiles.forEach((file) => {
-			// Extract costume name from filename
-			// Example: Hero_Aisha_Cos16SL_Body.fbx -> Cos16SL
-			const match = file.match(/Hero_\w+_([^_]+)_(.+)\.fbx$/)
-			if (match) {
-				const costume = match[1]
-				const component = match[2].toLowerCase()
+				// Common texture extensions
+				const textureExtensions = [".png"]
+				const textureFiles = files.filter((file) =>
+					textureExtensions.some((ext) => file.toLowerCase().endsWith(ext))
+				)
 
-				// Determine component type
-				let type: ModelFile["type"] = "body"
-				if (component.includes("hair")) type = "hair"
-				else if (component.includes("weapon02")) type = "weapon02"
-				else if (component.includes("weapon01") || component.includes("weapon")) type = "weapon"
+				// Extract model base name for better matching
+				const modelBaseName = folderName.replace(/^Hero_\w+_/, "").replace(/_\w+$/, "")
 
-				if (!modelsByCostume[costume]) {
-					modelsByCostume[costume] = []
+				// Look for diffuse textures - prefer exact matches first
+				let diffuseFile = textureFiles.find(
+					(file) => file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)
+				)
+
+				// Fallback to more general patterns
+				if (!diffuseFile) {
+					diffuseFile = textureFiles.find((file) => file.includes("_D(RGB)") || file.includes("_D."))
 				}
 
-				modelsByCostume[costume].push({
-					name: file,
-					path: file,
-					type: type,
-				})
-			}
-		})
+				if (diffuseFile) {
+					textures.diffuse = `${folderName}/${diffuseFile}`
+				}
 
-		return modelsByCostume
+				// Look for normal textures
+				const normalFile = textureFiles.find(
+					(file) => file.includes(`${modelBaseName}_Normal`) || file.includes("_Normal")
+				)
+				if (normalFile) {
+					textures.normal = `${folderName}/${normalFile}`
+				}
+
+				// Look for specular textures
+				const specularFile = textureFiles.find(
+					(file) => file.includes(`${modelBaseName}_AS.`) || file.includes("_AS.")
+				)
+				if (specularFile) {
+					textures.specular = `${folderName}/${specularFile}`
+				}
+
+				// Look for eye textures (for body models)
+				if (folderName.includes("_Body")) {
+					const eyeFile = textureFiles.find(
+						(file) =>
+							file.toLowerCase().includes("eye") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (eyeFile) {
+						textures.eye = `${folderName}/${eyeFile}`
+					}
+				}
+
+				console.log(`Textures found for ${folderName}:`, textures)
+
+				// Log all texture files for debugging
+				console.log(`All texture files in ${folderName}:`, textureFiles)
+
+				return textures
+			} catch (error) {
+				console.warn(`Error scanning textures for ${folderName}:`, error)
+				return {}
+			}
+		}
+
+		// Process each costume group
+		for (const [costumeName, folders] of Object.entries(costumeGroups)) {
+			const models: ModelWithTextures[] = []
+
+			for (const folderName of folders) {
+				const folderPath = path.join(modelsDir, folderName)
+
+				try {
+					const files = await fs.promises.readdir(folderPath)
+					const fbxFile = files.find((file) => file.endsWith(".fbx"))
+
+					if (fbxFile) {
+						// Determine component type
+						let type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+
+						if (folderName.includes("_Body")) {
+							type = "body"
+						} else if (folderName.includes("_Hair")) {
+							type = "hair"
+						} else if (folderName.includes("_Weapon01")) {
+							type = "weapon01"
+						} else if (folderName.includes("_Weapon02")) {
+							type = "weapon02"
+						} else if (folderName.includes("_Weapon")) {
+							type = "weapon"
+						} else {
+							continue // Skip unknown types
+						}
+
+						// Scan for textures in this folder
+						const textures = await scanFolderForTextures(folderPath, folderName)
+
+						models.push({
+							name: `${costumeName}_${type}`,
+							path: `${folderName}/${fbxFile}`,
+							type: type,
+							textures: textures,
+						})
+					}
+				} catch (error) {
+					console.warn(`Error reading folder ${folderName}:`, error)
+				}
+			}
+
+			// Only add costume if it has at least a body model
+			if (models.some((m) => m.type === "body")) {
+				heroModels[costumeName] = models
+			}
+		}
+
+		console.log(`Found ${Object.keys(heroModels).length} costumes for ${heroName}:`, Object.keys(heroModels))
+		return heroModels
 	} catch (error) {
-		console.error("Error fetching hero models:", error)
+		console.error("Error reading models directory:", error)
 		return {}
 	}
 }

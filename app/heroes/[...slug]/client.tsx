@@ -25,6 +25,12 @@ interface ModelFile {
 	name: string
 	path: string
 	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+	textures: {
+		diffuse?: string
+		normal?: string
+		specular?: string
+		eye?: string
+	}
 }
 
 interface SlugClientProps {

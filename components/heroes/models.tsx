@@ -17,11 +17,16 @@ interface ModelsProps {
 	heroData: HeroData
 	heroModels: { [costume: string]: ModelFile[] }
 }
-
 interface ModelFile {
 	name: string
 	path: string
 	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+	textures: {
+		diffuse?: string
+		normal?: string
+		specular?: string
+		eye?: string
+	}
 }
 
 type HeroModel = THREE.Group & {
@@ -58,58 +63,64 @@ function Model({
 					fbxLoader.load(`/models/${modelFile.path}`, resolve, undefined, reject)
 				})
 
-				// Try to load corresponding texture
-				const texturePath = `/models/${modelFile.path.replace(".fbx", "_D(RGB).png")}`
-				try {
-					const texture = await new Promise<THREE.Texture>((resolve, reject) => {
-						textureLoader.load(texturePath, resolve, undefined, reject)
-					})
+				// Load textures using the manifest data
+				let mainTexture = null
+				let eyeTexture = null
+				let normalTexture = null
+				let specularTexture = null
 
-					texture.flipY = true
-
-					// For body models, also try to load eye texture
-					let eyeTexture = null
-					if (modelFile.type === "body") {
-						try {
-							// Extract hero name from path (e.g., Hero_Aisha_Cos16SL_Body.fbx -> Aisha)
-							const heroNameMatch = modelFile.path.match(/Hero_([^_]+)_/)
-							if (heroNameMatch) {
-								const heroName = heroNameMatch[1]
-								const pathParts = modelFile.path.replace(/\\/g, "/").split("/")
-								const modelFolder = pathParts[0] // Get the first part (folder name)
-								// Try multiple eye texture naming patterns
-								const eyeTexturePaths = [
-									`/models/${modelFolder}/Hero_${heroName}_Facial_Eye_01_D(RGB).png`, // New pattern
-									`/models/${modelFolder}/Hero_${heroName}_Eye_01_D(RGB).png`, // Alternative with D(RGB)
-									`/models/${modelFolder}/Hero_${heroName}_Eye_01_D.png`, // Original pattern
-								]
-
-								// Try loading eye texture with different naming patterns
-								for (const eyeTexturePath of eyeTexturePaths) {
-									try {
-										console.log(`Trying eye texture: ${eyeTexturePath}`)
-										eyeTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-											textureLoader.load(eyeTexturePath, resolve, undefined, reject)
-										})
-
-										eyeTexture.flipY = true
-										console.log(`Successfully loaded eye texture: ${eyeTexturePath}`)
-										break // Stop trying once we find one that works
-									} catch (individualEyeError) {
-										console.warn(`Eye texture not found at: ${eyeTexturePath}`)
-										continue // Try the next pattern
-									}
-								}
-							}
-						} catch (eyeError) {
-							console.warn(`Eye texture not found for ${modelFile.name}`)
-						}
+				// Load diffuse texture
+				if (modelFile.textures.diffuse) {
+					try {
+						mainTexture = await new Promise<THREE.Texture>((resolve, reject) => {
+							textureLoader.load(`/models/${modelFile.textures.diffuse}`, resolve, undefined, reject)
+						})
+						mainTexture.flipY = true
+						console.log(`Successfully loaded diffuse texture: ${modelFile.textures.diffuse}`)
+					} catch (error) {
+						console.warn(`Failed to load diffuse texture: ${modelFile.textures.diffuse}`)
 					}
+				}
 
-					// Apply textures to model
+				// Load eye texture
+				if (modelFile.textures.eye) {
+					try {
+						eyeTexture = await new Promise<THREE.Texture>((resolve, reject) => {
+							textureLoader.load(`/models/${modelFile.textures.eye}`, resolve, undefined, reject)
+						})
+						eyeTexture.flipY = true
+						console.log(`Successfully loaded eye texture: ${modelFile.textures.eye}`)
+					} catch (error) {
+						console.warn(`Failed to load eye texture: ${modelFile.textures.eye}`)
+					}
+				}
+
+				// Load normal texture (optional)
+				if (modelFile.textures.normal) {
+					try {
+						normalTexture = await new Promise<THREE.Texture>((resolve, reject) => {
+							textureLoader.load(`/models/${modelFile.textures.normal}`, resolve, undefined, reject)
+						})
+						normalTexture.flipY = true
+						console.log(`Successfully loaded normal texture: ${modelFile.textures.normal}`)
+					} catch (error) {
+						console.warn(`Failed to load normal texture: ${modelFile.textures.normal}`)
+					}
+				}
+
+				// Apply textures to model
+				if (mainTexture || eyeTexture) {
 					fbx.traverse((child) => {
 						if (child instanceof THREE.Mesh) {
-							console.log(`Found mesh: ${child.name}`)
+							console.log(`Mesh: ${child.name}`)
+							if (Array.isArray(child.material)) {
+								child.material.forEach((mat, index) => {
+									console.log(`Material ${index}: ${mat.name}`)
+								})
+							} else {
+								console.log(`Material: ${child.material.name}`)
+							}
+
 							if (child.name.toLowerCase().includes("facial_a") && eyeTexture) {
 								let materials = []
 
@@ -118,45 +129,50 @@ function Model({
 									materials = child.material.map((originalMat) => {
 										const matName = originalMat.name?.toLowerCase() || ""
 
-										if (matName.includes("eye")) {
+										if (matName.includes("eye") && eyeTexture) {
 											// Eye material - anime style (Blender equivalent)
 											return new THREE.MeshStandardMaterial({
 												map: eyeTexture,
-												metalness: 0.0, // Same as Blender
-												roughness: 1.0, // Same as Blender
+												normalMap: normalTexture,
+												metalness: 0.0,
+												roughness: 1.0,
 												name: originalMat.name,
 											})
-										} else {
+										} else if (mainTexture) {
 											// Skin material - anime style (Blender equivalent)
 											return new THREE.MeshStandardMaterial({
-												map: texture,
-												metalness: 0.0, // Same as Blender
-												roughness: 1.0, // Same as Blender
+												map: mainTexture,
+												normalMap: normalTexture,
+												metalness: 0.0,
+												roughness: 1.0,
 												name: originalMat.name,
 											})
 										}
+										return originalMat
 									})
 								} else {
 									// Single material, check if it's eye or skin
 									const matName = child.material.name?.toLowerCase() || ""
-									const useEyeTexture = matName.includes("eye")
+									const useEyeTexture = matName.includes("eye") && eyeTexture
 
 									materials = [
 										new THREE.MeshStandardMaterial({
-											map: useEyeTexture ? eyeTexture : texture,
-											metalness: 0.0, // Same as Blender
-											roughness: 1.0, // Same as Blender
+											map: useEyeTexture ? eyeTexture : mainTexture,
+											normalMap: normalTexture,
+											metalness: 0.0,
+											roughness: 1.0,
 										}),
 									]
 								}
 
 								child.material = materials
-							} else {
+							} else if (mainTexture) {
 								// Regular single material - anime style (Blender equivalent)
 								child.material = new THREE.MeshStandardMaterial({
-									map: texture,
-									metalness: 0.0, // Same as Blender
-									roughness: 1.0, // Same as Blender
+									map: mainTexture,
+									normalMap: normalTexture,
+									metalness: 0.0,
+									roughness: 1.0,
 								})
 							}
 
@@ -164,9 +180,9 @@ function Model({
 							child.receiveShadow = false
 						}
 					})
-				} catch (textureError) {
-					console.warn(`Texture not found for ${modelFile.name}, using default material`)
-					// Apply default material if texture fails
+				} else {
+					console.warn(`No textures found for ${modelFile.name}, using default material`)
+					// Apply default material if no textures found
 					fbx.traverse((child) => {
 						if (child instanceof THREE.Mesh) {
 							child.material = new THREE.MeshStandardMaterial({
@@ -256,10 +272,10 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 	const controlsRef = useRef<any>(null)
 
 	useEffect(() => {
-		// Start with only body model visible
-		const bodyModel = modelFiles.find((m) => m.type === "body")
-		if (bodyModel) {
-			setVisibleModels(new Set([bodyModel.name]))
+		// Auto-load all available components for the selected costume
+		if (modelFiles.length > 0) {
+			const modelNames = modelFiles.map((m) => m.name)
+			setVisibleModels(new Set(modelNames))
 		}
 	}, [modelFiles])
 
@@ -297,12 +313,37 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 		setVisibleModels(new Set())
 	}
 
+	// Group models by type for better display
+	const modelsByType = modelFiles.reduce((acc, model) => {
+		if (!acc[model.type]) acc[model.type] = []
+		acc[model.type].push(model)
+		return acc
+	}, {} as Record<string, ModelFile[]>)
+
 	return (
 		<div className="space-y-4">
+			{/* Costume Info */}
+			<div className="bg-muted p-3 rounded-lg">
+				<div className="flex items-center justify-between mb-2">
+					<h4 className="font-medium">Costume Components</h4>
+					<div className="text-sm text-muted-foreground">{modelFiles.length} components available</div>
+				</div>
+				<div className="flex gap-2 flex-wrap">
+					{Object.entries(modelsByType).map(([type, models]) => (
+						<span
+							key={type}
+							className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
+						>
+							{type} ({models.length})
+						</span>
+					))}
+				</div>
+			</div>
+
 			{/* Model Controls */}
 			<div className="flex flex-wrap gap-2">
 				<Button size="sm" onClick={showAllModels}>
-					Show All
+					Show Complete Costume
 				</Button>
 				<Button size="sm" variant="outline" onClick={hideAllModels}>
 					Hide All
@@ -310,7 +351,7 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 			</div>
 
 			{/* Individual Model Toggles */}
-			<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
 				{modelFiles.map((model) => (
 					<Button
 						key={model.name}
@@ -320,7 +361,7 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 						className="flex items-center gap-2"
 					>
 						{visibleModels.has(model.name) ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-						<span className="capitalize">{model.name}</span>
+						<span className="capitalize">{model.type}</span>
 					</Button>
 				))}
 			</div>
@@ -338,24 +379,12 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 						minDistance={0.5}
 						target={[0, 1, 0]}
 					/>
-					{/* Anime-style lighting */}
 					<ambientLight intensity={1} />
-					<directionalLight
-						position={[0, 10, 5]}
-						intensity={1}
-						castShadow={false} // Disable shadows for anime look
-					/>
-					{/* Remove other lights or reduce their intensity */}
-					{/* <pointLight position={[5, 5, 5]} intensity={0.2} /> */}
+					<directionalLight position={[0, 10, 5]} intensity={1} castShadow={false} />
 					<Suspense fallback={null}>
 						<Model modelFiles={modelFiles} heroName={heroName} visibleModels={visibleModels} />
-						{/* <Environment preset="sunset" /> */}
 					</Suspense>
 					<gridHelper args={[10, 10]} />
-					{/* <mesh receiveShadow position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-						<planeGeometry args={[20, 20]} />
-						<shadowMaterial opacity={0.3} />
-					</mesh> */}
 				</Canvas>
 
 				{/* Camera Controls */}
@@ -389,10 +418,12 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [loading, setLoading] = useState(true)
 
 	useEffect(() => {
-		// Set default costume
-		const costumes = Object.keys(heroModels)
+		// Set default costume (prioritize non-default costumes)
+		const costumes = Object.keys(heroModels).sort()
 		if (costumes.length > 0) {
-			setSelectedCostume(costumes[0])
+			// Prefer costumes with "Cos" in the name, fallback to first available
+			const preferredCostume = costumes.find((c) => c.includes("Cos")) || costumes[0]
+			setSelectedCostume(preferredCostume)
 		}
 		setLoading(false)
 	}, [heroModels])
@@ -410,8 +441,16 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 		)
 	}
 
-	const costumeOptions = Object.keys(heroModels)
+	const costumeOptions = Object.keys(heroModels).sort()
 	const currentModels = selectedCostume ? heroModels[selectedCostume] || [] : []
+
+	// Helper function to format costume name
+	const formatCostumeName = (costumeName: string) => {
+		return costumeName
+			.replace(/^Cos\d+/, "") // Remove Cos prefix
+			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
+			.trim()
+	}
 
 	if (costumeOptions.length === 0) {
 		return (
@@ -435,13 +474,18 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					<CardTitle className="flex items-center justify-between">
 						3D Models
 						<Select value={selectedCostume} onValueChange={setSelectedCostume}>
-							<SelectTrigger className="w-48">
+							<SelectTrigger className="w-64">
 								<SelectValue placeholder="Select costume" />
 							</SelectTrigger>
 							<SelectContent>
 								{costumeOptions.map((costume) => (
 									<SelectItem key={costume} value={costume}>
-										{costume.replace(/^Hero_\w+_/, "").replace(/_/g, " ")}
+										<div className="flex items-center gap-2">
+											<span>{formatCostumeName(costume)}</span>
+											<span className="text-xs text-muted-foreground">
+												({heroModels[costume].length} parts)
+											</span>
+										</div>
 									</SelectItem>
 								))}
 							</SelectContent>
@@ -459,17 +503,28 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 				</CardContent>
 			</Card>
 
-			{currentModels.length > 0 && (
+			{/* Costume Overview */}
+			{costumeOptions.length > 1 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Model Components</CardTitle>
+						<CardTitle>Available Costumes</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-							{currentModels.map((model) => (
-								<div key={model.name} className="flex items-center gap-2 p-2 bg-muted rounded">
-									<div className="text-sm font-medium capitalize">{model.type}</div>
-									<div className="text-xs text-muted-foreground truncate">{model.name}</div>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							{costumeOptions.map((costume) => (
+								<div
+									key={costume}
+									className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+										costume === selectedCostume
+											? "border-primary bg-primary/5"
+											: "border-muted hover:border-primary/50"
+									}`}
+									onClick={() => setSelectedCostume(costume)}
+								>
+									<div className="font-medium">{formatCostumeName(costume)}</div>
+									<div className="text-sm text-muted-foreground mt-1">
+										{heroModels[costume].map((m) => m.type).join(", ")}
+									</div>
 								</div>
 							))}
 						</div>
