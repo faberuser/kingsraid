@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, getDirData } from "@/components/server/get-data"
+import { SlugPageProps, getFileData } from "@/components/server/get-data"
 
 export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
 	const { slug } = await params
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	}
 
 	const bossName = decodeURIComponent(slug[0])
-	const bossData = (await getDirData(slug[0], "bosses")) as BossData | null
+	const bossData = (await getFileData(slug[0], "bosses")) as BossData | null
 
 	if (!bossData) {
 		return {

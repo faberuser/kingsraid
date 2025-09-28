@@ -29,8 +29,8 @@ export default function HeroesClient({ heroes, heroClasses }: HeroesClientProps)
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(heroes, {
-			keys: ["name", "infos.title", "aliases"],
-			threshold: 0.3, // Adjust this value (0.0 = exact match, 1.0 = very loose)
+			keys: ["infos.name", "infos.title", "aliases"],
+			threshold: 0.3,
 			includeScore: true,
 		})
 	}, [heroes])

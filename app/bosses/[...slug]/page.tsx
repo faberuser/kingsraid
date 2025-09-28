@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import BossClient from "@/app/bosses/[...slug]/client"
 import { BossData } from "@/model/Boss"
 import { capitalize } from "@/lib/utils"
-import { SlugPageProps, getDirData } from "@/components/server/get-data"
+import { SlugPageProps, getFileData } from "@/components/server/get-data"
 
 async function getBossData(bossName: string): Promise<BossData | null> {
 	const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
@@ -32,7 +32,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const bossData = (await getDirData(bossName, "bosses")) as BossData | null
+	const bossData = (await getFileData(bossName, "bosses")) as BossData | null
 
 	if (!bossData) {
 		notFound()

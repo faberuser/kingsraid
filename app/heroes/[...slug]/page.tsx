@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import SlugClient from "@/app/heroes/[...slug]/client"
 import { capitalize } from "@/lib/utils"
-import { SlugPageProps, getDirData } from "@/components/server/get-data"
+import { SlugPageProps, getFileData } from "@/components/server/get-data"
 import { HeroData } from "@/model/Hero"
 
 interface Costume {
@@ -85,7 +85,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const heroData = (await getDirData(heroName, "heroes")) as HeroData | null
+	const heroData = (await getFileData(heroName, "heroes")) as HeroData | null
 
 	if (!heroData) {
 		notFound()
