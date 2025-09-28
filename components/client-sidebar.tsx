@@ -17,6 +17,9 @@ import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import GlobalSearch from "@/components/global-search"
+import { ArtifactData } from "@/model/Artifact"
+import { HeroData } from "@/model/Hero"
+import { BossData } from "@/model/Boss"
 
 // Menu items
 const items = [
@@ -30,9 +33,9 @@ const items = [
 
 interface ClientSidebarProps {
 	searchData: {
-		heroes: Array<{ name: string; infos?: { class?: string; title?: string } }>
-		artifacts: Array<{ name: string; data?: { description?: string } }>
-		bosses: Array<{ infos?: { class?: string; title?: string; race?: string } }>
+		heroes: HeroData[]
+		artifacts: ArtifactData[]
+		bosses: BossData[]
 	}
 }
 

@@ -72,8 +72,8 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{filteredBosses.map((boss) => (
 					<Link
-						key={boss.infos.class}
-						href={`/bosses/${encodeURIComponent(boss.infos.class.toLowerCase().replace(/\s+/g, "-"))}`}
+						key={boss.infos.name}
+						href={`/bosses/${encodeURIComponent(boss.infos.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4">
@@ -82,7 +82,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 									<div className="w-16 h-16 flex items-center justify-center">
 										<Image
 											src={`/assets/${boss.infos.thumbnail}`}
-											alt={boss.infos.class}
+											alt={boss.infos.name}
 											width="0"
 											height="0"
 											sizes="30vw md:10vw"
@@ -90,7 +90,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 										/>
 									</div>
 									<div className="flex-1">
-										<CardTitle className="text-lg">{boss.infos.class}</CardTitle>
+										<CardTitle className="text-lg">{boss.infos.name}</CardTitle>
 										<CardDescription className="text-sm">{boss.infos.title}</CardDescription>
 									</div>
 								</div>

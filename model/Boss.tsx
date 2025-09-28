@@ -1,5 +1,5 @@
 export interface BossInfo {
-	"class": string
+	"name": string
 	"title": string
 	"race": string
 	"damage type": string

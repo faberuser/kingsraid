@@ -1,4 +1,4 @@
-export interface Hero {
+export interface HeroData {
 	name: string
 	infos: {
 		"title": string

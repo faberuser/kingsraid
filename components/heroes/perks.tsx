@@ -1,10 +1,10 @@
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { capitalize } from "@/lib/utils"
 
 interface PerksProps {
-	heroData: Hero
+	heroData: HeroData
 }
 
 export default function Perks({ heroData }: PerksProps) {

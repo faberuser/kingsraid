@@ -3,11 +3,7 @@ import path from "path"
 import ArtifactsClient from "@/app/artifacts/client"
 import { ArtifactData } from "@/model/Artifact"
 
-interface ArtifactsData {
-	[artifactName: string]: ArtifactData
-}
-
-async function getArtifacts(): Promise<{ name: string; data: ArtifactData }[]> {
+async function getArtifacts(): Promise<ArtifactData[]> {
 	try {
 		const artifactsFile = path.join(process.cwd(), "kingsraid-data", "table-data", "artifacts.json")
 
@@ -16,18 +12,12 @@ async function getArtifacts(): Promise<{ name: string; data: ArtifactData }[]> {
 		}
 
 		const fileContent = fs.readFileSync(artifactsFile, "utf-8")
-		const artifactsData: ArtifactsData = JSON.parse(fileContent)
-
-		// Convert to array format with name included
-		const artifacts = Object.entries(artifactsData).map(([name, data]) => ({
-			name,
-			data,
-		}))
+		const artifactsData: ArtifactData[] = JSON.parse(fileContent)
 
 		// Sort artifacts alphabetically by name
-		return artifacts.sort((a, b) => a.name.localeCompare(b.name))
+		return artifactsData.sort((a: ArtifactData, b: ArtifactData) => a.name.localeCompare(b.name))
 	} catch (error) {
-		console.error("Error reading artifacts data:", error)
+		console.error(error)
 		return []
 	}
 }

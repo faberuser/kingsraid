@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
 interface ArtifactsClientProps {
-	artifacts: { name: string; data: ArtifactData }[]
+	artifacts: ArtifactData[]
 }
 
 export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
@@ -21,7 +21,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(artifacts, {
-			keys: ["name", "data.description", "data.aliases"],
+			keys: ["name", "description", "aliases"],
 			threshold: 0.3,
 			includeScore: true,
 		})
@@ -69,19 +69,19 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{filteredArtifacts.map((artifact) => (
+				{filteredArtifacts.map((artifact, index) => (
 					<Link
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
 					>
-						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-0">
+						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2">
 							<CardHeader>
 								<div className="flex items-center gap-4">
-									{artifact.data.thumbnail && (
+									{artifact.thumbnail && (
 										<div className="w-16 h-16 flex items-center justify-center">
 											<Image
-												src={`/assets/${artifact.data.thumbnail
+												src={`/assets/${artifact.thumbnail
 													.split("/")
 													.map(encodeURIComponent)
 													.join("/")}`}
@@ -100,11 +100,10 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
-									<div className="flex flex-wrap gap-2"></div>
-									{artifact.data.description && (
-										<div className="text-sm text-muted-foreground line-clamp-3">
-											{artifact.data.description}
-										</div>
+									{artifact.description && (
+										<p className="text-sm text-muted-foreground line-clamp-3">
+											{artifact.description}
+										</p>
 									)}
 								</div>
 							</CardContent>

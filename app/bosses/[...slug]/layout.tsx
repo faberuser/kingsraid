@@ -2,36 +2,22 @@ import type { Metadata } from "next"
 import fs from "fs"
 import path from "path"
 import { BossData } from "@/model/Boss"
+import { capitalize } from "@/lib/utils"
 
 async function getBossData(bossName: string): Promise<BossData | null> {
-	try {
-		const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
-		const files = fs.readdirSync(bossesDir)
-		const jsonFiles = files.filter((file) => file.endsWith(".json"))
+	const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
+	const normalizedSlug = capitalize(bossName.toLowerCase().replace(/-/g, " "))
+	const filePath = path.join(bossesDir, `${normalizedSlug}.json`)
 
-		// Convert slug back to boss name format
-		const normalizedSlug = bossName.toLowerCase().replace(/-/g, " ")
-
-		for (const file of jsonFiles) {
-			const filePath = path.join(bossesDir, file)
-			const fileContent = fs.readFileSync(filePath, "utf-8")
-			const bossData: BossData = JSON.parse(fileContent)
-
-			// Check if boss class matches (case insensitive)
-			if (bossData.infos?.class?.toLowerCase() === normalizedSlug) {
-				return bossData
-			}
-
-			// Check if file name matches (case insensitive)
-			const fileName = path.basename(file, ".json")
-			if (fileName.toLowerCase().replace(/-/g, " ") === normalizedSlug) {
-				return bossData
-			}
-		}
-
+	if (!fs.existsSync(filePath)) {
 		return null
+	}
+
+	try {
+		const bossData = JSON.parse(fs.readFileSync(filePath, "utf-8"))
+		return bossData
 	} catch (error) {
-		console.error("Error reading boss data:", error)
+		console.error(error)
 		return null
 	}
 }
@@ -65,7 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 	}
 
 	// Use only available properties from BossInfo
-	const displayName = bossData.infos?.class || bossName
+	const displayName = bossData.infos?.name || bossName
 
 	return {
 		title: `${displayName} - Bosses - King's Raid`,

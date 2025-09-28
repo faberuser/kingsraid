@@ -6,7 +6,7 @@ import Fuse from "fuse.js"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
@@ -14,7 +14,7 @@ import { ArrowLeft } from "lucide-react"
 import saReverse from "@/kingsraid-data/sa_reverse.json"
 
 interface HeroesClientProps {
-	heroes: Hero[]
+	heroes: HeroData[]
 	heroClasses: Array<{
 		value: string
 		name: string

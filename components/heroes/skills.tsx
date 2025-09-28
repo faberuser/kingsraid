@@ -1,11 +1,11 @@
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 
 interface SkillsProps {
-	heroData: Hero
+	heroData: HeroData
 }
 
 export default function Skills({ heroData }: SkillsProps) {

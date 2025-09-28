@@ -3,64 +3,22 @@ import path from "path"
 import { notFound } from "next/navigation"
 import BossClient from "@/app/bosses/[...slug]/client"
 import { BossData } from "@/model/Boss"
+import { capitalize } from "@/lib/utils"
 
 async function getBossData(bossName: string): Promise<BossData | null> {
+	const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
+	const normalizedSlug = capitalize(bossName.toLowerCase().replace(/-/g, " "))
+	const filePath = path.join(bossesDir, `${normalizedSlug}.json`)
+
+	if (!fs.existsSync(filePath)) {
+		return null
+	}
+
 	try {
-		const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
-		const files = fs.readdirSync(bossesDir)
-		const normalizedSlug = bossName.toLowerCase().replace(/-/g, " ")
-
-		// Try to find boss by exact name match (case insensitive)
-		let targetFile = files.find((file) => file.toLowerCase().replace(".json", "") === normalizedSlug)
-
-		// If not found by filename, search by class name or aliases in the JSON files
-		if (!targetFile) {
-			for (const file of files.filter((f) => f.endsWith(".json"))) {
-				try {
-					const filePath = path.join(bossesDir, file)
-					const fileContent = fs.readFileSync(filePath, "utf-8")
-					const bossData = JSON.parse(fileContent)
-
-					// Check class name match
-					if (
-						bossData.infos?.class?.toLowerCase() === bossName.toLowerCase() ||
-						bossData.infos?.class?.toLowerCase() === normalizedSlug
-					) {
-						targetFile = file
-						break
-					}
-
-					// Check aliases match
-					if (bossData.aliases && Array.isArray(bossData.aliases)) {
-						if (
-							bossData.aliases.some(
-								(alias: string) =>
-									alias.toLowerCase() === bossName.toLowerCase() ||
-									alias.toLowerCase() === normalizedSlug
-							)
-						) {
-							targetFile = file
-							break
-						}
-					}
-				} catch (error) {
-					console.error(`Error reading file ${file}:`, error)
-					continue
-				}
-			}
-		}
-
-		if (!targetFile) {
-			return null
-		}
-
-		const filePath = path.join(bossesDir, targetFile)
-		const fileContent = fs.readFileSync(filePath, "utf-8")
-		const bossData = JSON.parse(fileContent)
-
+		const bossData = JSON.parse(fs.readFileSync(filePath, "utf-8"))
 		return bossData
 	} catch (error) {
-		console.error("Error reading boss data:", error)
+		console.error(error)
 		return null
 	}
 }

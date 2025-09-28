@@ -1,26 +1,15 @@
 import fs from "fs"
 import path from "path"
-import { ArtifactData } from "@/model/Artifact"
-import { BossData } from "@/model/Boss"
 import ClientSidebar from "@/components/client-sidebar"
-
-interface ArtifactsData {
-	[artifactName: string]: ArtifactData
-}
-
-interface HeroData {
-	name: string
-	infos?: {
-		class?: string
-		title?: string
-	}
-}
+import { ArtifactData } from "@/model/Artifact"
+import { HeroData } from "@/model/Hero"
+import { BossData } from "@/model/Boss"
 
 async function getSearchData() {
 	const searchData: {
-		heroes: Array<{ name: string; infos?: { class?: string; title?: string } }>
-		artifacts: Array<{ name: string; data?: { description?: string } }>
-		bosses: Array<{ infos?: { class?: string; title?: string; race?: string } }>
+		heroes: HeroData[]
+		artifacts: ArtifactData[]
+		bosses: BossData[]
 	} = {
 		heroes: [],
 		artifacts: [],
@@ -38,13 +27,12 @@ async function getSearchData() {
 					const filePath = path.join(heroesDir, file)
 					const fileContent = fs.readFileSync(filePath, "utf-8")
 					const heroData: HeroData = JSON.parse(fileContent)
-
 					searchData.heroes.push({
+						...heroData,
 						name: heroData.name || path.basename(file, ".json"),
-						infos: heroData.infos,
 					})
 				} catch (error) {
-					console.error(`Error reading hero file ${file}:`, error)
+					console.error(error)
 				}
 			}
 		}
@@ -53,14 +41,8 @@ async function getSearchData() {
 		const artifactsFile = path.join(process.cwd(), "kingsraid-data", "table-data", "artifacts.json")
 		if (fs.existsSync(artifactsFile)) {
 			const fileContent = fs.readFileSync(artifactsFile, "utf-8")
-			const artifactsData: ArtifactsData = JSON.parse(fileContent)
-
-			searchData.artifacts = Object.entries(artifactsData).map(([name, data]) => ({
-				name,
-				data: {
-					description: data.description,
-				},
-			}))
+			const artifactsData: ArtifactData[] = JSON.parse(fileContent)
+			searchData.artifacts = artifactsData
 		}
 
 		// Load Bosses
@@ -73,21 +55,14 @@ async function getSearchData() {
 					const filePath = path.join(bossesDir, file)
 					const fileContent = fs.readFileSync(filePath, "utf-8")
 					const bossData: BossData = JSON.parse(fileContent)
-
-					searchData.bosses.push({
-						infos: {
-							class: bossData.infos?.class,
-							title: bossData.infos?.title || bossData.infos?.class,
-							race: bossData.infos?.race,
-						},
-					})
+					searchData.bosses.push(bossData)
 				} catch (error) {
-					console.error(`Error reading boss file ${file}:`, error)
+					console.error(error)
 				}
 			}
 		}
 	} catch (error) {
-		console.error("Error loading search data:", error)
+		console.error(error)
 	}
 
 	return searchData

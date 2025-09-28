@@ -13,6 +13,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Search, Home, UserRound, Amphora, ShieldHalf, Zap, Calculator } from "lucide-react"
 import { DialogTitle } from "@/components/ui/dialog"
+import { ArtifactData } from "@/model/Artifact"
+import { HeroData } from "@/model/Hero"
+import { BossData } from "@/model/Boss"
 
 // Types for search data
 interface SearchItem {
@@ -78,9 +81,9 @@ const pageItems: SearchItem[] = [
 
 interface GlobalSearchProps {
 	searchData?: {
-		heroes?: Array<{ name: string; infos?: { class?: string; title?: string } }>
-		artifacts?: Array<{ name: string; data?: { description?: string } }>
-		bosses?: Array<{ infos?: { class?: string; title?: string; race?: string } }>
+		heroes?: HeroData[]
+		artifacts?: ArtifactData[]
+		bosses?: BossData[]
 	}
 }
 
@@ -113,7 +116,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 				items.push({
 					id: `hero-${index}`,
 					title: hero.name,
-					description: `${hero.infos?.class || "Unknown"} - ${hero.infos?.title || "Hero"}`,
+					description: hero.infos.title,
 					type: "hero",
 					url: `/heroes/${encodeURIComponent(hero.name)}`,
 					icon: UserRound,
@@ -126,7 +129,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 				items.push({
 					id: `artifact-${index}`,
 					title: artifact.name,
-					description: artifact.data?.description || "Artifact",
+					description: artifact.description,
 					type: "artifact",
 					url: `/artifacts/${encodeURIComponent(artifact.name)}`,
 					icon: Amphora,
@@ -136,15 +139,12 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 
 		if (searchData?.bosses) {
 			searchData.bosses.forEach((boss, index) => {
-				const bossName = boss.infos?.class || boss.infos?.title || `Boss ${index + 1}`
 				items.push({
 					id: `boss-${index}`,
-					title: bossName,
-					description: `${boss.infos?.title || boss.infos?.class || "Unknown"} - ${
-						boss.infos?.race || "Boss"
-					}`,
+					title: boss.infos.name,
+					description: boss.infos.title,
 					type: "boss",
-					url: `/bosses/${encodeURIComponent(bossName)}`,
+					url: `/bosses/${encodeURIComponent(boss.infos.name)}`,
 					icon: ShieldHalf,
 				})
 			})

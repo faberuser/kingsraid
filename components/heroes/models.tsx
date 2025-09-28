@@ -1,7 +1,7 @@
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 
 interface ModelsProps {
-	heroData: Hero
+	heroData: HeroData
 }
 
 export default function Models({ heroData }: ModelsProps) {

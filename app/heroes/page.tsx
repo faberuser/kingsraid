@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import HeroesClient from "@/app/heroes/client"
 
 const heroClasses = [
@@ -14,9 +14,8 @@ const heroClasses = [
 	{ value: "priest", name: "Priest", icon: "/assets/classes/priest.png" },
 ]
 
-async function getHeroes(): Promise<Hero[]> {
+async function getHeroes(): Promise<HeroData[]> {
 	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
-
 	if (!fs.existsSync(heroesDir)) {
 		return []
 	}

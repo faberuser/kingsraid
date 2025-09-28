@@ -1,7 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import Profile from "@/components/heroes/profile"
 import Skills from "@/components/heroes/skills"
 import Perks from "@/components/heroes/perks"
@@ -22,7 +22,7 @@ interface Costume {
 }
 
 interface SlugClientProps {
-	heroData: Hero
+	heroData: HeroData
 	costumes: Costume[]
 }
 

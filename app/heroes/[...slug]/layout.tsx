@@ -1,9 +1,9 @@
 import type { Metadata } from "next"
 import fs from "fs"
 import path from "path"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 
-async function getHeroData(heroName: string): Promise<Hero | null> {
+async function getHeroData(heroName: string): Promise<HeroData | null> {
 	try {
 		const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
 

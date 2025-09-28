@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -8,7 +8,7 @@ import { ZoomIn } from "lucide-react"
 import { capitalize } from "@/lib/utils"
 
 interface ProfileProps {
-	heroData: Hero
+	heroData: HeroData
 }
 
 export default function Profile({ heroData }: ProfileProps) {

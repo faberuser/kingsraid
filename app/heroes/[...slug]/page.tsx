@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { Hero } from "@/model/Hero"
+import { HeroData } from "@/model/Hero"
 import { notFound } from "next/navigation"
 import SlugClient from "./client"
 import { capitalize } from "@/lib/utils"
@@ -11,7 +11,7 @@ interface Costume {
 	displayName: string
 }
 
-async function getHeroData(heroName: string): Promise<Hero | null> {
+async function getHeroData(heroName: string): Promise<HeroData | null> {
 	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
 	const normalizedSlug = capitalize(heroName.toLowerCase().replace(/-/g, " "))
 	const filePath = path.join(heroesDir, `${normalizedSlug}.json`)
@@ -24,7 +24,7 @@ async function getHeroData(heroName: string): Promise<Hero | null> {
 		const heroData = JSON.parse(fs.readFileSync(filePath, "utf8"))
 		return { name: normalizedSlug, ...heroData }
 	} catch (error) {
-		console.error(`Error loading hero data for ${normalizedSlug}:`, error)
+		console.error(error)
 		return null
 	}
 }
