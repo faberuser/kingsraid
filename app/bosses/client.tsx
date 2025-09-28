@@ -22,7 +22,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(bosses, {
-			keys: ["infos.class", "infos.title", "infos.race", "aliases"],
+			keys: ["infos.name", "infos.title", "aliases"],
 			threshold: 0.3,
 			includeScore: true,
 		})

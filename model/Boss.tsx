@@ -20,5 +20,5 @@ export interface BossData {
 	skills: {
 		[skillId: string]: Skill
 	}
-	aliases?: string[]
+	aliases?: string[] | null
 }

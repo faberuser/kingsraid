@@ -95,6 +95,6 @@ export interface HeroData {
 	}
 	splashart: string
 	costumes: string
-	visual: any
-	aliases: any
+	visual?: string | null
+	aliases?: string[] | null
 }

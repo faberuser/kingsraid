@@ -25,6 +25,7 @@ interface SearchItem {
 	type: "page" | "hero" | "artifact" | "boss"
 	url: string
 	icon?: React.ComponentType<{ className?: string }>
+	aliases?: string[] | null
 }
 
 // Page items
@@ -120,6 +121,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					type: "hero",
 					url: `/heroes/${encodeURIComponent(hero.name)}`,
 					icon: UserRound,
+					aliases: hero.aliases || null,
 				})
 			})
 		}
@@ -133,6 +135,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					type: "artifact",
 					url: `/artifacts/${encodeURIComponent(artifact.name)}`,
 					icon: Amphora,
+					aliases: artifact.aliases || null,
 				})
 			})
 		}
@@ -146,6 +149,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					type: "boss",
 					url: `/bosses/${encodeURIComponent(boss.infos.name)}`,
 					icon: ShieldHalf,
+					aliases: boss.aliases || null,
 				})
 			})
 		}
@@ -234,7 +238,9 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 								return (
 									<CommandItem
 										key={item.id}
-										value={`${item.title} ${item.description}`}
+										value={`${item.title} ${item.description} ${
+											item.aliases ? item.aliases.join(" ") : ""
+										}`}
 										onSelect={() => handleSelect(item.url)}
 										className="flex items-center gap-2 px-2 py-1.5"
 									>
