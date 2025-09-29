@@ -3,7 +3,7 @@ WORKDIR /src
 COPY . .
 # Remove existing kingsraid-data & kingsraid-models directory if it exists, then clone fresh
 RUN rm -rf kingsraid-data && git clone https://github.com/faberuser/kingsraid-data.git kingsraid-data
-RUN rm -rf kingsraid-models && git clone https://github.com/faberuser/kingsraid-models.git kingsraid-models
+RUN rm -rf kingsraid-models && git clone https://gitea.k-clowd.top/faberuser/kingsraid-models.git kingsraid-models
 
 FROM oven/bun:alpine AS base
 
