@@ -7,8 +7,8 @@ RUN rm -rf kingsraid-models && git clone https://github.com/faberuser/kingsraid-
 
 FROM oven/bun:alpine AS base
 
-ARG NEXT_PUBLIC_SITE_URL
-ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+# ARG NEXT_PUBLIC_SITE_URL
+# ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 
 WORKDIR /usr/src/app
 

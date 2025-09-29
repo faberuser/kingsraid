@@ -4,8 +4,8 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-            args:
-                - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+            # args:
+            #     - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
         ports:
             - ${DOCKER_PORT:-3000}:3000
         restart: unless-stopped
