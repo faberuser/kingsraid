@@ -111,6 +111,18 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 		console.warn(e)
 	}
 
+	// Load hair_fallback.json
+	let hairFallback: Record<string, string> = {}
+	try {
+		const hairFallbackPath = path.join(process.cwd(), "public", "kingsraid-models", "hair_fallback.json")
+		if (fs.existsSync(hairFallbackPath)) {
+			const raw = fs.readFileSync(hairFallbackPath, "utf-8")
+			hairFallback = JSON.parse(raw)
+		}
+	} catch (e) {
+		console.warn(e)
+	}
+
 	// Use mapped name if available
 	const mappedHeroName = nameDiff[heroName] || heroName
 
@@ -129,7 +141,7 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 		heroFolders.forEach((folder) => {
 			// Extract costume name from folder name
 			// Hero_Aisha_Cos17Christmas_Body -> Cos17Christmas
-			const match = folder.name.match(/Hero_\w+_(Cos\w+)_(\w+)/)
+			const match = folder.name.match(/Hero_\w+_(\w+)_(\w+)/)
 			if (match) {
 				const costumeName = match[1] // e.g., "Cos17Christmas"
 				const componentType = match[2] // e.g., "Body", "Hair", "Weapon01"
@@ -259,6 +271,53 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 			// Only add costume if it has at least a body model
 			if (models.some((m) => m.type === "body")) {
 				heroModels[costumeName] = models
+			}
+		}
+
+		// Fallback for missing parts
+		const partTypes: Array<ModelWithTextures["type"]> = ["hair", "weapon", "weapon01", "weapon02"]
+		for (const [costumeName, models] of Object.entries(heroModels)) {
+			for (const partType of partTypes) {
+				if (!models.some((m) => m.type === partType)) {
+					let found: ModelWithTextures | undefined
+
+					// 1. Check hair_fallback.json for this costume and part
+					if (partType === "hair" && hairFallback[`Hero_${mappedHeroName}_${costumeName}`]) {
+						const fallbackFolder = hairFallback[`Hero_${mappedHeroName}_${costumeName}`]
+						const fallbackPath = path.join(modelsDir, fallbackFolder)
+						try {
+							const files = await fs.promises.readdir(fallbackPath)
+							const fbxFile = files.find((file) => file.endsWith(".fbx"))
+							if (fbxFile) {
+								const textures = await scanFolderForTextures(fallbackPath, fallbackFolder)
+								found = {
+									name: `${costumeName}_hair`,
+									path: `${fallbackFolder}/${fbxFile}`,
+									type: "hair",
+									textures: textures,
+								}
+							}
+						} catch (e) {
+							console.warn(e)
+						}
+					}
+
+					// 2. If not found, fallback to any other costume's part
+					if (!found) {
+						for (const [otherCostume, otherModels] of Object.entries(heroModels)) {
+							if (otherCostume === costumeName) continue
+							found = otherModels.find((m) => m.type === partType)
+							if (found) break
+						}
+					}
+
+					if (found) {
+						models.push({
+							...found,
+							name: `${costumeName}_${partType}`,
+						})
+					}
+				}
 			}
 		}
 
