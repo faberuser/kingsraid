@@ -21,7 +21,10 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "King's Raid",
 		description: "Info for King's Raid",
+		url: process.env.NEXT_PUBLIC_SITE_URL || "https://kingsraid.k-clowd.top",
+		siteName: "King's Raid",
 	},
+	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://kingsraid.k-clowd.top"),
 }
 
 export default function RootLayout({

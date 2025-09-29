@@ -6,6 +6,10 @@ RUN rm -rf kingsraid-data && git clone https://github.com/faberuser/kingsraid-da
 RUN rm -rf kingsraid-models && git clone https://github.com/faberuser/kingsraid-models.git kingsraid-models
 
 FROM oven/bun:alpine AS base
+
+ARG NEXT_PUBLIC_SITE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
 WORKDIR /usr/src/app
 
 # install dependencies into temp directory
