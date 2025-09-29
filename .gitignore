@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-public/assets
-public/models
+public/kingsraid-data
+public/kingsraid-models

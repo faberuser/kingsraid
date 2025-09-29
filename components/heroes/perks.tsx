@@ -30,7 +30,7 @@ export default function Perks({ heroData }: PerksProps) {
 													{perk.thumbnail && (
 														<div className="flex items-center gap-3">
 															<Image
-																src={`/assets/${perk.thumbnail}`}
+																src={`/kingsraid-data/assets/${perk.thumbnail}`}
 																alt={perkKey}
 																width="0"
 																height="0"
@@ -59,7 +59,7 @@ export default function Perks({ heroData }: PerksProps) {
 														<div className="border rounded p-3 bg-yellow-50 dark:bg-yellow-900/10">
 															<div className="flex items-center gap-3 mb-2">
 																<Image
-																	src={`/assets/${perk.light.thumbnail}`}
+																	src={`/kingsraid-data/assets/${perk.light.thumbnail}`}
 																	alt="Light"
 																	width="0"
 																	height="0"
@@ -76,7 +76,7 @@ export default function Perks({ heroData }: PerksProps) {
 														<div className="border rounded p-3 bg-purple-50 dark:bg-purple-900/10">
 															<div className="flex items-center gap-3 mb-2">
 																<Image
-																	src={`/assets/${perk.dark.thumbnail}`}
+																	src={`/kingsraid-data/assets/${perk.dark.thumbnail}`}
 																	alt="Dark"
 																	width="0"
 																	height="0"

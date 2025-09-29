@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import saReverse from "@/kingsraid-data/sa_reverse.json"
+import saReverse from "@/public/kingsraid-data/sa_reverse.json"
 
 export default function HeroCard({ name, splashart }: { name: string; splashart: string }) {
 	const [isLoading, setIsLoading] = useState(false)
@@ -19,7 +19,7 @@ export default function HeroCard({ name, splashart }: { name: string; splashart:
 			onClick={handleClick}
 		>
 			<Image
-				src={"/assets/" + splashart}
+				src={"/kingsraid-data/assets/" + splashart}
 				alt={name}
 				width="0"
 				height="0"

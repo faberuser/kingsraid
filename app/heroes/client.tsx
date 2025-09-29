@@ -10,7 +10,6 @@ import { HeroData } from "@/model/Hero"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
-import saReverse from "@/kingsraid-data/sa_reverse.json"
 import HeroCard from "@/components/heroes/card"
 
 interface HeroesClientProps {

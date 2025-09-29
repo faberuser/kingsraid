@@ -81,7 +81,7 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 									{artifact.thumbnail && (
 										<div className="w-16 h-16 flex items-center justify-center">
 											<Image
-												src={`/assets/${artifact.thumbnail
+												src={`/kingsraid-data/assets/${artifact.thumbnail
 													.split("/")
 													.map(encodeURIComponent)
 													.join("/")}`}

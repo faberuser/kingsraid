@@ -81,7 +81,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 								<div className="flex items-center gap-4">
 									<div className="w-16 h-16 flex items-center justify-center">
 										<Image
-											src={`/assets/${boss.infos.thumbnail}`}
+											src={`/kingsraid-data/assets/${boss.infos.thumbnail}`}
 											alt={boss.infos.name}
 											width="0"
 											height="0"

@@ -35,8 +35,8 @@ COPY --from=install-prod /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/.next ./.next
 COPY --from=prerelease /usr/src/app/package.json .
 COPY --from=prerelease /usr/src/app/public ./public
-COPY --from=prerelease /usr/src/app/kingsraid-data ./kingsraid-data
-COPY --from=prerelease /usr/src/app/kingsraid-models ./kingsraid-models
+COPY --from=prerelease /usr/src/app/kingsraid-data ./public/kingsraid-data
+COPY --from=prerelease /usr/src/app/kingsraid-models ./public/kingsraid-models
 
 # expose the port
 EXPOSE 3000

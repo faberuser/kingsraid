@@ -3,11 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "bun run copy-assets && next dev --turbopack",
-		"build": "bun run copy-assets && next build",
+		"dev": "next dev --turbopack",
+		"build": "next build",
 		"start": "next start",
-		"lint": "next lint",
-		"copy-assets": "node copy-assets.js"
+		"lint": "next lint"
 	},
 	"dependencies": {
 		"@radix-ui/react-dialog": "^1.1.15",

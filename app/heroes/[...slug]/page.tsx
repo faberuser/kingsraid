@@ -36,7 +36,7 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	if (!costumePath) return []
 
 	try {
-		const fullPath = path.join(process.cwd(), "public", "assets", costumePath)
+		const fullPath = path.join(process.cwd(), "public", "kingsraid-data", "assets", costumePath)
 
 		if (!fs.existsSync(fullPath)) {
 			return []
@@ -98,17 +98,17 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 }
 
 async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelWithTextures[] }> {
-	const modelsDir = path.join(process.cwd(), "public", "models", "heroes")
+	const modelsDir = path.join(process.cwd(), "public", "kingsraid-models", "heroes")
 	const heroModels: { [costume: string]: ModelWithTextures[] } = {}
 
 	// Load name_diff.json
 	let nameDiff: Record<string, string> = {}
 	try {
-		const nameDiffPath = path.join(process.cwd(), "kingsraid-models", "name_diff.json")
+		const nameDiffPath = path.join(process.cwd(), "public", "kingsraid-models", "name_diff.json")
 		const raw = fs.readFileSync(nameDiffPath, "utf-8")
 		nameDiff = JSON.parse(raw)
 	} catch (e) {
-		console.warn("Could not load name_diff.json:", e)
+		console.warn(e)
 	}
 
 	// Use mapped name if available

@@ -4,13 +4,13 @@ import { getDirData } from "@/components/server/get-data"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
-	{ value: "knight", name: "Knight", icon: "/assets/classes/knight.png" },
-	{ value: "warrior", name: "Warrior", icon: "/assets/classes/warrior.png" },
-	{ value: "archer", name: "Archer", icon: "/assets/classes/archer.png" },
-	{ value: "mechanic", name: "Mechanic", icon: "/assets/classes/mechanic.png" },
-	{ value: "wizard", name: "Wizard", icon: "/assets/classes/wizard.png" },
-	{ value: "assassin", name: "Assassin", icon: "/assets/classes/assassin.png" },
-	{ value: "priest", name: "Priest", icon: "/assets/classes/priest.png" },
+	{ value: "knight", name: "Knight", icon: "/kingsraid-data/assets/classes/knight.png" },
+	{ value: "warrior", name: "Warrior", icon: "/kingsraid-data/assets/classes/warrior.png" },
+	{ value: "archer", name: "Archer", icon: "/kingsraid-data/assets/classes/archer.png" },
+	{ value: "mechanic", name: "Mechanic", icon: "/kingsraid-data/assets/classes/mechanic.png" },
+	{ value: "wizard", name: "Wizard", icon: "/kingsraid-data/assets/classes/wizard.png" },
+	{ value: "assassin", name: "Assassin", icon: "/kingsraid-data/assets/classes/assassin.png" },
+	{ value: "priest", name: "Priest", icon: "/kingsraid-data/assets/classes/priest.png" },
 ]
 
 export default async function HeroesPage() {

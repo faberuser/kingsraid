@@ -30,7 +30,10 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 				<div className="flex items-center gap-6 mb-6">
 					<div className="w-24 h-24">
 						<Image
-							src={`/assets/${artifactData.thumbnail.split("/").map(encodeURIComponent).join("/")}`}
+							src={`/kingsraid-data/assets/${artifactData.thumbnail
+								.split("/")
+								.map(encodeURIComponent)
+								.join("/")}`}
 							alt={artifactData.name}
 							width="0"
 							height="0"

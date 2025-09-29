@@ -81,9 +81,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 						{costumes.length === 0 && (
 							<div className="text-center text-muted-foreground py-8">
 								<div>No costume images found</div>
-								<div className="text-sm mt-2">
-									Costume images should be located in: /assets/{heroData.costumes}/
-								</div>
 							</div>
 						)}
 					</CardContent>
@@ -101,7 +98,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 										onClick={handleImageClick}
 									>
 										<Image
-											src={`/assets/${selectedCostumeData.path}`}
+											src={`/kingsraid-data/assets/${selectedCostumeData.path}`}
 											alt={`${heroData.infos.name} - ${selectedCostume}`}
 											width="0"
 											height="0"
@@ -138,7 +135,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				<ImageZoomModal
 					isOpen={isModalOpen}
 					onOpenChange={setIsModalOpen}
-					imageSrc={`/assets/${selectedCostumeData.path}`}
+					imageSrc={`/kingsraid-data/assets/${selectedCostumeData.path}`}
 					imageAlt={`${heroData.infos.name} - ${selectedCostume}`}
 					title={`${capitalize(heroData.infos.name)} - ${selectedCostumeData.displayName}`}
 					showNavigation={costumes.length > 1}
@@ -169,7 +166,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 			onClick={onClick}
 		>
 			<Image
-				src={`/assets/${costume.path}`}
+				src={`/kingsraid-data/assets/${costume.path}`}
 				alt={`${heroName} - ${costume.displayName}`}
 				width="0"
 				height="0"

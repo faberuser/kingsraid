@@ -61,7 +61,7 @@ export default function SlugClient({ heroData, costumes, heroModels }: SlugClien
 				<div className="flex items-center justify-center self-stretch">
 					<div className="w-32 h-32 md:w-40 md:h-40">
 						<Image
-							src={`/assets/${heroData.infos.thumbnail}`}
+							src={`/kingsraid-data/assets/${heroData.infos.thumbnail}`}
 							alt={heroData.infos.name}
 							width="0"
 							height="0"

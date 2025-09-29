@@ -91,7 +91,7 @@ export default function Profile({ heroData }: ProfileProps) {
 							onClick={handleImageClick}
 						>
 							<Image
-								src={`/assets/${heroData.splashart}`}
+								src={`/kingsraid-data/assets/${heroData.splashart}`}
 								alt={`${heroData.infos.name} Splashart`}
 								width="0"
 								height="0"
@@ -106,7 +106,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						<ImageZoomModal
 							isOpen={isModalOpen}
 							onOpenChange={setIsModalOpen}
-							imageSrc={`/assets/${heroData.splashart}`}
+							imageSrc={`/kingsraid-data/assets/${heroData.splashart}`}
 							imageAlt={`${heroData.infos.name} Splashart`}
 							title={`${capitalize(heroData.infos.name)} Splashart`}
 						/>

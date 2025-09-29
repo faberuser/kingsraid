@@ -45,7 +45,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
-			const modelDir = `/models/heroes`
+			const modelDir = `/kingsraid-models/heroes`
 
 			setLoading((prev) => new Set(prev).add(modelFile.name))
 
@@ -501,7 +501,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 				{costumeOptions.length > 1 && (
 					<Card>
 						<CardHeader>
-							<CardTitle>Costumes ({costumeOptions.length} variants)</CardTitle>
+							<CardTitle>Models ({costumeOptions.length} variants)</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="grid grid-cols-1 gap-2">

@@ -33,7 +33,7 @@ export default function BossClient({ bossData }: BossClientProps) {
 					<div className="flex items-center justify-center self-stretch">
 						<div className="w-30 h-30">
 							<Image
-								src={`/assets/${infos.thumbnail}`}
+								src={`/kingsraid-data/assets/${infos.thumbnail}`}
 								alt={infos.name}
 								width="0"
 								height="0"
