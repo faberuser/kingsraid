@@ -98,15 +98,29 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 }
 
 async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelWithTextures[] }> {
-	const modelsDir = path.join(process.cwd(), "public", "models")
+	const modelsDir = path.join(process.cwd(), "public", "models", "heroes")
 	const heroModels: { [costume: string]: ModelWithTextures[] } = {}
+
+	// Load name_diff.json
+	let nameDiff: Record<string, string> = {}
+	try {
+		const nameDiffPath = path.join(process.cwd(), "kingsraid-models", "name_diff.json")
+		const raw = fs.readFileSync(nameDiffPath, "utf-8")
+		nameDiff = JSON.parse(raw)
+	} catch (e) {
+		console.warn("Could not load name_diff.json:", e)
+	}
+
+	// Use mapped name if available
+	const mappedHeroName = nameDiff[heroName] || heroName
 
 	try {
 		const modelFolders = await fs.promises.readdir(modelsDir, { withFileTypes: true })
 
 		// Filter folders that belong to this hero
 		const heroFolders = modelFolders.filter(
-			(folder) => folder.isDirectory() && folder.name.toLowerCase().startsWith(`hero_${heroName.toLowerCase()}_`)
+			(folder) =>
+				folder.isDirectory() && folder.name.toLowerCase().startsWith(`hero_${mappedHeroName.toLowerCase()}_`)
 		)
 
 		// Group by costume name

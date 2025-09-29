@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useRef, Suspense } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
-import { OrbitControls, Environment, PerspectiveCamera } from "@react-three/drei"
+import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
 import { TextureLoader } from "three"
 import * as THREE from "three"
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RotateCcw, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react"
 
@@ -37,15 +36,7 @@ type HeroModel = THREE.Group & {
 	animations?: THREE.AnimationClip[]
 }
 
-function Model({
-	modelFiles,
-	heroName,
-	visibleModels,
-}: {
-	modelFiles: ModelFile[]
-	heroName: string
-	visibleModels: Set<string>
-}) {
+function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visibleModels: Set<string> }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
 	const [mixers, setMixers] = useState<THREE.AnimationMixer[]>([])
@@ -54,6 +45,7 @@ function Model({
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
+			const modelDir = `/models/heroes`
 
 			setLoading((prev) => new Set(prev).add(modelFile.name))
 
@@ -63,7 +55,7 @@ function Model({
 
 				// Load FBX model
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
-					fbxLoader.load(`/models/${modelFile.path}`, resolve, undefined, reject)
+					fbxLoader.load(`${modelDir}/${modelFile.path}`, resolve, undefined, reject)
 				})
 
 				// Load textures using the manifest data
@@ -80,7 +72,7 @@ function Model({
 					try {
 						mainTexture = await new Promise<THREE.Texture>((resolve, reject) => {
 							textureLoader.load(
-								`/models/${(modelFile.textures as { diffuse: string }).diffuse}`,
+								`${modelDir}/${(modelFile.textures as { diffuse: string }).diffuse}`,
 								resolve,
 								undefined,
 								reject
@@ -103,7 +95,7 @@ function Model({
 					try {
 						eyeTexture = await new Promise<THREE.Texture>((resolve, reject) => {
 							textureLoader.load(
-								`/models/${(modelFile.textures as { eye: string }).eye}`,
+								`${modelDir}/${(modelFile.textures as { eye: string }).eye}`,
 								resolve,
 								undefined,
 								reject
@@ -124,7 +116,7 @@ function Model({
 					try {
 						mainTexture = await new Promise<THREE.Texture>((resolve, reject) => {
 							textureLoader.load(
-								`/models/${(modelFile.textures as { hair: string }).hair}`,
+								`${modelDir}/${(modelFile.textures as { hair: string }).hair}`,
 								resolve,
 								undefined,
 								reject
@@ -145,7 +137,7 @@ function Model({
 					try {
 						ornamentTexture = await new Promise<THREE.Texture>((resolve, reject) => {
 							textureLoader.load(
-								`/models/${(modelFile.textures as { ornament: string }).ornament}`,
+								`${modelDir}/${(modelFile.textures as { ornament: string }).ornament}`,
 								resolve,
 								undefined,
 								reject
@@ -173,30 +165,30 @@ function Model({
 							// }
 
 							if (child.name.toLowerCase().includes("hair") && mainTexture) {
-								// Hair material
-								// if (Array.isArray(child.material)) {
-								// 	child.material = child.material.map((mat) => {
-								// 		const matName = mat.name?.toLowerCase() || ""
-								// 		// If this is the ornament material (e.g., contains "ac"), use ornament texture if available
-								// 		if (matName.includes("ac") && ornamentTexture) {
-								// 			return new THREE.MeshToonMaterial({
-								// 				map: ornamentTexture,
-								// 				name: mat.name,
-								// 			})
-								// 		}
-								// 		// Otherwise, use the main hair texture
-								// 		return new THREE.MeshToonMaterial({
-								// 			map: mainTexture,
-								// 			name: mat.name,
-								// 		})
-								// 	})
-								// } else {
-								// Single material, just use main hair texture
-								child.material = new THREE.MeshToonMaterial({
-									map: mainTexture,
-									name: child.material.name,
-								})
-								// }
+								// Hair material - anime style (Blender equivalent)
+								if (Array.isArray(child.material)) {
+									child.material = child.material.map((mat) => {
+										const matName = mat.name?.toLowerCase() || ""
+										// If this is the ornament material (e.g., contains "ac"), use ornament texture if available
+										if (matName.includes("ac") && ornamentTexture) {
+											return new THREE.MeshToonMaterial({
+												map: ornamentTexture,
+												name: mat.name,
+											})
+										}
+										// Otherwise, use the main hair texture
+										return new THREE.MeshToonMaterial({
+											map: mainTexture,
+											name: mat.name,
+										})
+									})
+								} else {
+									// Single material, just use main hair texture
+									child.material = new THREE.MeshToonMaterial({
+										map: mainTexture,
+										name: child.material.name,
+									})
+								}
 							} else if (child.name.toLowerCase().includes("facial_a") && eyeTexture) {
 								let materials = []
 
@@ -206,13 +198,13 @@ function Model({
 										const matName = originalMat.name?.toLowerCase() || ""
 
 										if (matName.includes("eye") && eyeTexture) {
-											// Eye material
+											// Eye material - anime style (Blender equivalent)
 											return new THREE.MeshStandardMaterial({
 												map: eyeTexture,
 												name: originalMat.name,
 											})
 										} else if (mainTexture) {
-											// Skin material
+											// Skin material - anime style (Blender equivalent)
 											return new THREE.MeshToonMaterial({
 												map: mainTexture,
 												name: originalMat.name,
@@ -234,7 +226,7 @@ function Model({
 
 								child.material = materials
 							} else if (mainTexture) {
-								// Regular single material
+								// Regular single material - anime style (Blender equivalent)
 								child.material = new THREE.MeshToonMaterial({
 									map: mainTexture,
 								})
@@ -249,7 +241,7 @@ function Model({
 					// Apply default material if no textures found
 					fbx.traverse((child) => {
 						if (child instanceof THREE.Mesh) {
-							child.material = new THREE.MeshBasicMaterial({
+							child.material = new THREE.MeshToonMaterial({
 								color: 0xcccccc,
 							})
 							child.castShadow = false
@@ -329,7 +321,10 @@ function Model({
 }
 
 function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroName: string }) {
-	const [cameraPosition, setCameraPosition] = useState<[number, number, number]>([0, 1, 3])
+	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
+	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
+
+	const [cameraPosition, setCameraPosition] = useState<[number, number, number]>(INITIAL_CAMERA_POSITION)
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
 	const controlsRef = useRef<any>(null)
 
@@ -342,8 +337,10 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 	}, [modelFiles])
 
 	const resetCamera = () => {
+		setCameraPosition(INITIAL_CAMERA_POSITION)
 		if (controlsRef.current) {
-			controlsRef.current.reset()
+			controlsRef.current.target.set(...INITIAL_CAMERA_TARGET)
+			controlsRef.current.update()
 		}
 	}
 
@@ -375,33 +372,8 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 		setVisibleModels(new Set())
 	}
 
-	// Group models by type for better display
-	const modelsByType = modelFiles.reduce((acc, model) => {
-		if (!acc[model.type]) acc[model.type] = []
-		acc[model.type].push(model)
-		return acc
-	}, {} as Record<string, ModelFile[]>)
-
 	return (
 		<div className="space-y-4">
-			{/* Costume Info */}
-			<div className="bg-muted p-3 rounded-lg">
-				<div className="flex items-center justify-between mb-2">
-					<h4 className="font-medium">Costume Components</h4>
-					<div className="text-sm text-muted-foreground">{modelFiles.length} components available</div>
-				</div>
-				<div className="flex gap-2 flex-wrap">
-					{Object.entries(modelsByType).map(([type, models]) => (
-						<span
-							key={type}
-							className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary"
-						>
-							{type} ({models.length})
-						</span>
-					))}
-				</div>
-			</div>
-
 			{/* Model Controls */}
 			<div className="flex flex-wrap gap-2">
 				<Button size="sm" onClick={showAllModels}>
@@ -442,9 +414,8 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 						target={[0, 1, 0]}
 					/>
 					<ambientLight intensity={1.25} />
-					{/* <directionalLight position={[0, 10, 5]} intensity={0.2} castShadow={false} /> */}
 					<Suspense fallback={null}>
-						<Model modelFiles={modelFiles} heroName={heroName} visibleModels={visibleModels} />
+						<Model modelFiles={modelFiles} visibleModels={visibleModels} />
 					</Suspense>
 					<gridHelper args={[10, 10]} />
 				</Canvas>
@@ -493,9 +464,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	if (loading) {
 		return (
 			<Card>
-				<CardHeader>
-					<CardTitle>3D Models</CardTitle>
-				</CardHeader>
 				<CardContent>
 					<Skeleton className="w-full h-96 rounded-lg" />
 				</CardContent>
@@ -517,9 +485,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	if (costumeOptions.length === 0) {
 		return (
 			<Card>
-				<CardHeader>
-					<CardTitle>3D Models</CardTitle>
-				</CardHeader>
 				<CardContent>
 					<div className="text-center text-muted-foreground py-8">
 						No 3D models available for {heroData.infos.name}
@@ -530,69 +495,51 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	}
 
 	return (
-		<div className="space-y-6">
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center justify-between">
-						3D Models
-						<Select value={selectedCostume} onValueChange={setSelectedCostume}>
-							<SelectTrigger className="w-64">
-								<SelectValue placeholder="Select costume" />
-							</SelectTrigger>
-							<SelectContent>
+		<div className="flex gap-6">
+			{/* Left sidebar for costume selection */}
+			<div className="w-72 flex-shrink-0 space-y-4">
+				{costumeOptions.length > 1 && (
+					<Card>
+						<CardHeader>
+							<CardTitle>Costumes ({costumeOptions.length} variants)</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 gap-2">
 								{costumeOptions.map((costume) => (
-									<SelectItem key={costume} value={costume}>
-										<div className="flex items-center gap-2">
-											<span>{formatCostumeName(costume)}</span>
-											<span className="text-xs text-muted-foreground">
-												({heroModels[costume].length} parts)
-											</span>
+									<div
+										key={costume}
+										className={`p-2 rounded-lg border cursor-pointer transition-colors ${
+											costume === selectedCostume
+												? "border-primary bg-primary/5"
+												: "border-muted hover:border-primary/50"
+										}`}
+										onClick={() => setSelectedCostume(costume)}
+									>
+										<div className="font-medium">{formatCostumeName(costume)}</div>
+										<div className="text-xs text-muted-foreground mt-1">
+											{heroModels[costume].map((m) => m.type).join(", ")}
 										</div>
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</CardTitle>
-				</CardHeader>
-				<CardContent>
-					{currentModels.length > 0 ? (
-						<ModelViewer modelFiles={currentModels} heroName={heroData.infos.name} />
-					) : (
-						<div className="text-center text-muted-foreground py-8">
-							No models available for this costume
-						</div>
-					)}
-				</CardContent>
-			</Card>
-
-			{/* Costume Overview */}
-			{costumeOptions.length > 1 && (
-				<Card>
-					<CardHeader>
-						<CardTitle>Available Costumes</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							{costumeOptions.map((costume) => (
-								<div
-									key={costume}
-									className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-										costume === selectedCostume
-											? "border-primary bg-primary/5"
-											: "border-muted hover:border-primary/50"
-									}`}
-									onClick={() => setSelectedCostume(costume)}
-								>
-									<div className="font-medium">{formatCostumeName(costume)}</div>
-									<div className="text-sm text-muted-foreground mt-1">
-										{heroModels[costume].map((m) => m.type).join(", ")}
 									</div>
-								</div>
-							))}
-						</div>
+								))}
+							</div>
+						</CardContent>
+					</Card>
+				)}
+			</div>
+			{/* Main content */}
+			<div className="flex-1 space-y-6">
+				<Card>
+					<CardContent>
+						{currentModels.length > 0 ? (
+							<ModelViewer modelFiles={currentModels} heroName={heroData.infos.name} />
+						) : (
+							<div className="text-center text-muted-foreground py-8">
+								No models available for this costume
+							</div>
+						)}
 					</CardContent>
 				</Card>
-			)}
+			</div>
 		</div>
 	)
 }

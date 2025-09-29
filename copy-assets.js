@@ -64,8 +64,8 @@ if (fs.existsSync(assetsrcDir)) {
 
 // Copy models
 console.log("Checking models...")
-const modelsSrcDir = path.join(__dirname, ".", "kingsraid-models", "models")
-const modelsDestDir = path.join(__dirname, ".", "public", "models")
+const modelsSrcDir = path.join(__dirname, ".", "kingsraid-models", "heroes")
+const modelsDestDir = path.join(__dirname, ".", "public", "models", "heroes")
 
 if (fs.existsSync(modelsSrcDir)) {
 	const startTime = Date.now()
