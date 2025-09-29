@@ -45,7 +45,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
-			const modelDir = `/kingsraid-models/heroes`
+			const modelDir = `/kingsraid-models/models/heroes`
 
 			setLoading((prev) => new Set(prev).add(modelFile.name))
 

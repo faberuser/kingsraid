@@ -98,7 +98,7 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 }
 
 async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelWithTextures[] }> {
-	const modelsDir = path.join(process.cwd(), "public", "kingsraid-models", "heroes")
+	const modelsDir = path.join(process.cwd(), "public", "kingsraid-models", "models", "heroes")
 	const heroModels: { [costume: string]: ModelWithTextures[] } = {}
 
 	// Load name_diff.json
