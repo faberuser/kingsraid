@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { HeroData } from "@/model/Hero"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { capitalize } from "@/lib/utils"
 import { ZoomIn } from "lucide-react"
@@ -62,10 +62,12 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 			<div className="flex flex-col md:flex-row gap-6">
 				{/* Available Costumes - Left Side */}
 				<Card>
-					<CardContent>
-						<div className="text-xl font-semibold mb-4">Costumes ({costumes.length} variations)</div>
+					<CardHeader>
+						<CardTitle>Costumes ({costumes.length} variations)</CardTitle>
+					</CardHeader>
+					<CardContent className="h-200 custom-scrollbar overflow-y-auto overflow-x-hidden">
 						<div className="flex items-center justify-center">
-							<div className="max-h-[450px] custom-scrollbar overflow-y-auto overflow-x-hidden space-y-3 p-2">
+							<div className="space-y-3 p-2">
 								{costumes.map((costume) => (
 									<CostumeCard
 										key={costume.name}
@@ -90,22 +92,21 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				<div className="flex-1">
 					{selectedCostume && selectedCostumeData ? (
 						<Card>
+							<CardHeader>
+								<CardTitle>{selectedCostumeData.displayName}</CardTitle>
+							</CardHeader>
 							<CardContent>
-								<div className="text-xl font-semibold mb-4">{selectedCostumeData.displayName}</div>
 								<div className="flex justify-center">
 									<div
-										className="relative max-w-md cursor-pointer hover:opacity-90 transition-opacity"
+										className="h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity"
+										style={{
+											backgroundImage: `url(/kingsraid-data/assets/${selectedCostumeData.path})`,
+											backgroundSize: "contain",
+											backgroundRepeat: "no-repeat",
+											backgroundPosition: "center",
+										}}
 										onClick={handleImageClick}
 									>
-										<Image
-											src={`/kingsraid-data/assets/${selectedCostumeData.path}`}
-											alt={`${heroData.infos.name} - ${selectedCostume}`}
-											width="0"
-											height="0"
-											sizes="100vw"
-											className="w-auto h-full"
-											priority
-										/>
 										<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
 											<ZoomIn className="w-12 h-12 text-white" />
 										</div>

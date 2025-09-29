@@ -320,7 +320,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	)
 }
 
-function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroName: string }) {
+function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
@@ -364,35 +364,17 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 		})
 	}
 
-	const showAllModels = () => {
-		setVisibleModels(new Set(modelFiles.map((m) => m.name)))
-	}
-
-	const hideAllModels = () => {
-		setVisibleModels(new Set())
-	}
-
 	return (
-		<div className="space-y-4">
-			{/* Model Controls */}
-			<div className="flex flex-wrap gap-2">
-				<Button size="sm" onClick={showAllModels}>
-					Show Complete Costume
-				</Button>
-				<Button size="sm" variant="outline" onClick={hideAllModels}>
-					Hide All
-				</Button>
-			</div>
-
+		<div className="space-y-4 flex flex-row gap-6">
 			{/* Individual Model Toggles */}
-			<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+			<div className="flex flex-col gap-2">
 				{modelFiles.map((model) => (
 					<Button
 						key={model.name}
 						size="sm"
 						variant={visibleModels.has(model.name) ? "default" : "outline"}
 						onClick={() => toggleModelVisibility(model.name)}
-						className="flex items-center gap-2"
+						className="flex items-center gap-2 w-30"
 					>
 						{visibleModels.has(model.name) ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
 						<span className="capitalize">{model.type}</span>
@@ -401,7 +383,7 @@ function ModelViewer({ modelFiles, heroName }: { modelFiles: ModelFile[]; heroNa
 			</div>
 
 			{/* 3D Viewer */}
-			<div className="relative w-full h-200 bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
+			<div className="relative h-200 w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
 				<Canvas shadows>
 					<PerspectiveCamera makeDefault position={cameraPosition} />
 					<OrbitControls
@@ -497,13 +479,13 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	return (
 		<div className="flex gap-6">
 			{/* Left sidebar for costume selection */}
-			<div className="w-72 flex-shrink-0 space-y-4">
+			<div className="w-70 flex-shrink-0 space-y-4">
 				{costumeOptions.length > 1 && (
 					<Card>
 						<CardHeader>
 							<CardTitle>Models ({costumeOptions.length} variants)</CardTitle>
 						</CardHeader>
-						<CardContent>
+						<CardContent className="h-200 overflow-y-auto custom-scrollbar">
 							<div className="grid grid-cols-1 gap-2">
 								{costumeOptions.map((costume) => (
 									<div
@@ -526,12 +508,16 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					</Card>
 				)}
 			</div>
+
 			{/* Main content */}
 			<div className="flex-1 space-y-6">
 				<Card>
+					<CardHeader>
+						<CardTitle>{selectedCostume && selectedCostume}</CardTitle>
+					</CardHeader>
 					<CardContent>
 						{currentModels.length > 0 ? (
-							<ModelViewer modelFiles={currentModels} heroName={heroData.infos.name} />
+							<ModelViewer modelFiles={currentModels} />
 						) : (
 							<div className="text-center text-muted-foreground py-8">
 								No models available for this costume
