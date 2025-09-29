@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	}
 
 	const displayName = heroData.infos.name
+	const thumbnail = heroData.infos.thumbnail
 
 	return {
 		title: `${displayName} - Heroes - King's Raid`,
@@ -37,6 +38,16 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		openGraph: {
 			title: `${displayName} - Heroes - King's Raid`,
 			description: `View hero ${displayName} details.`,
+			images: thumbnail
+				? [
+						{
+							url: thumbnail,
+							width: 512,
+							height: 512,
+							alt: `${displayName}`,
+						},
+				  ]
+				: undefined,
 		},
 	}
 }

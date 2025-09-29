@@ -29,7 +29,8 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const displayName = bossData.infos?.name
+	const displayName = bossData.infos.name
+	const thumbnail = bossData.infos.thumbnail
 
 	return {
 		title: `${displayName} - Bosses - King's Raid`,
@@ -37,6 +38,16 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		openGraph: {
 			title: `${displayName} - Bosses - King's Raid`,
 			description: `View boss ${displayName} details.`,
+			images: thumbnail
+				? [
+						{
+							url: thumbnail,
+							width: 512,
+							height: 512,
+							alt: `${displayName}`,
+						},
+				  ]
+				: undefined,
 		},
 	}
 }
