@@ -91,11 +91,11 @@ export default function Profile({ heroData }: ProfileProps) {
 							onClick={handleImageClick}
 						>
 							<Image
-								src={`/assets/${heroData.splashart}`}
+								src={`/kingsraid-data/assets/${heroData.splashart}`}
 								alt={`${heroData.infos.name} Splashart`}
 								width="0"
 								height="0"
-								sizes="100vw"
+								sizes="80vw md:40vw"
 								className="w-auto h-full rounded"
 							/>
 							<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
@@ -106,7 +106,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						<ImageZoomModal
 							isOpen={isModalOpen}
 							onOpenChange={setIsModalOpen}
-							imageSrc={`/assets/${heroData.splashart}`}
+							imageSrc={`/kingsraid-data/assets/${heroData.splashart}`}
 							imageAlt={`${heroData.infos.name} Splashart`}
 							title={`${capitalize(heroData.infos.name)} Splashart`}
 						/>

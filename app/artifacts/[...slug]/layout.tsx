@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	}
 
 	const displayName = artifactData.name
+	// const assetPath = "/assets/" + artifactData.thumbnail
+	// const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {
 		title: `${displayName} - Artifacts - King's Raid`,

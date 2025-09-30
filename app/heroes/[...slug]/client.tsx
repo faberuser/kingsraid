@@ -21,12 +21,29 @@ interface Costume {
 	displayName: string
 }
 
+interface ModelFile {
+	name: string
+	path: string
+	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+	textures:
+		| {
+				diffuse?: string
+				eye?: string
+				wing?: string
+		  }
+		| {
+				hair?: string
+				ornament?: string
+		  }
+}
+
 interface SlugClientProps {
 	heroData: HeroData
 	costumes: Costume[]
+	heroModels: { [costume: string]: ModelFile[] }
 }
 
-export default function SlugClient({ heroData, costumes }: SlugClientProps) {
+export default function SlugClient({ heroData, costumes, heroModels }: SlugClientProps) {
 	return (
 		<div className="py-0 px-4 sm:py-5 sm:px-20 w-full pb-4">
 			{/* Back Button */}
@@ -45,7 +62,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 				<div className="flex items-center justify-center self-stretch">
 					<div className="w-32 h-32 md:w-40 md:h-40">
 						<Image
-							src={`/assets/${heroData.infos.thumbnail}`}
+							src={`/kingsraid-data/assets/${heroData.infos.thumbnail}`}
 							alt={heroData.infos.name}
 							width="0"
 							height="0"
@@ -126,7 +143,7 @@ export default function SlugClient({ heroData, costumes }: SlugClientProps) {
 				</TabsContent>
 
 				<TabsContent value="models" className="mt-4">
-					<Models heroData={heroData} />
+					<Models heroData={heroData} heroModels={heroModels} />
 				</TabsContent>
 			</Tabs>
 		</div>

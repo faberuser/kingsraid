@@ -13,7 +13,7 @@ export interface SlugPageProps {
 
 export async function getFileData(objName: string, dirName: string): Promise<HeroData | BossData | null> {
 	try {
-		const dir = path.join(process.cwd(), "kingsraid-data", "table-data", dirName)
+		const dir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", dirName)
 		const normalizedSlug = capitalize(decodeURIComponent(objName).toLowerCase().replace(/-/g, " "))
 		const filePath = path.join(dir, `${normalizedSlug}.json`)
 
@@ -29,7 +29,7 @@ export async function getFileData(objName: string, dirName: string): Promise<Her
 }
 
 export async function getDirData(dirName: string): Promise<HeroData[] | BossData[]> {
-	const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", dirName)
+	const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", dirName)
 	if (!fs.existsSync(heroesDir)) {
 		return []
 	}
@@ -51,7 +51,7 @@ export async function getDirData(dirName: string): Promise<HeroData[] | BossData
 
 export async function getJsonData(jsonFile: string): Promise<ArtifactData[]> {
 	try {
-		const objsFile = path.join(process.cwd(), "kingsraid-data", "table-data", jsonFile)
+		const objsFile = path.join(process.cwd(), "public", "kingsraid-data", "table-data", jsonFile)
 
 		if (!fs.existsSync(objsFile)) {
 			return []
@@ -70,7 +70,7 @@ export async function getJsonData(jsonFile: string): Promise<ArtifactData[]> {
 
 export async function findData(objName: string, jsonFile: string): Promise<ArtifactData | null> {
 	try {
-		const objsFile = path.join(process.cwd(), "kingsraid-data", "table-data", jsonFile)
+		const objsFile = path.join(process.cwd(), "public", "kingsraid-data", "table-data", jsonFile)
 		const fileContent = fs.readFileSync(objsFile, "utf-8")
 		const data: ArtifactData[] = JSON.parse(fileContent)
 

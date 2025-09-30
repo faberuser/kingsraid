@@ -18,7 +18,7 @@ export default function Skills({ heroData }: SkillsProps) {
 							{/* Skill Icon */}
 							<div className="hidden md:block flex-shrink-0">
 								<Image
-									src={`/assets/${skill.thumbnail}`}
+									src={`/kingsraid-data/assets/${skill.thumbnail}`}
 									alt={skill.name}
 									width="0"
 									height="0"
@@ -33,7 +33,7 @@ export default function Skills({ heroData }: SkillsProps) {
 									{/* Skill Icon */}
 									<div className="flex md:hidden flex-shrink-0 justify-center items-center">
 										<Image
-											src={`/assets/${skill.thumbnail}`}
+											src={`/kingsraid-data/assets/${skill.thumbnail}`}
 											alt={skill.name}
 											width="0"
 											height="0"

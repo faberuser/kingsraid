@@ -18,7 +18,7 @@ async function getSearchData() {
 
 	try {
 		// Load Heroes
-		const heroesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "heroes")
+		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
 		if (fs.existsSync(heroesDir)) {
 			const heroFiles = fs.readdirSync(heroesDir).filter((file) => file.endsWith(".json"))
 
@@ -35,7 +35,7 @@ async function getSearchData() {
 		}
 
 		// Load Artifacts
-		const artifactsFile = path.join(process.cwd(), "kingsraid-data", "table-data", "artifacts.json")
+		const artifactsFile = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "artifacts.json")
 		if (fs.existsSync(artifactsFile)) {
 			const fileContent = fs.readFileSync(artifactsFile, "utf-8")
 			const artifactsData: ArtifactData[] = JSON.parse(fileContent)
@@ -43,7 +43,7 @@ async function getSearchData() {
 		}
 
 		// Load Bosses
-		const bossesDir = path.join(process.cwd(), "kingsraid-data", "table-data", "bosses")
+		const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "bosses")
 		if (fs.existsSync(bossesDir)) {
 			const bossFiles = fs.readdirSync(bossesDir).filter((file) => file.endsWith(".json"))
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { HeroData } from "@/model/Hero"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { capitalize } from "@/lib/utils"
 import { ZoomIn } from "lucide-react"
@@ -57,15 +57,17 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	const currentCostumeIndex = costumes.findIndex((c) => c.name === selectedCostume)
 
 	return (
-		<div className="space-y-6">
+		<>
 			{/* Main Layout - Side by side */}
 			<div className="flex flex-col md:flex-row gap-6">
 				{/* Available Costumes - Left Side */}
 				<Card>
-					<CardContent>
-						<div className="text-xl font-semibold mb-4">Costumes ({costumes.length} variations)</div>
+					<CardHeader>
+						<CardTitle>Costumes ({costumes.length} variations)</CardTitle>
+					</CardHeader>
+					<CardContent className="h-200 custom-scrollbar overflow-y-auto overflow-x-hidden">
 						<div className="flex items-center justify-center">
-							<div className="max-h-[450px] custom-scrollbar overflow-y-auto overflow-x-hidden space-y-3 p-2">
+							<div className="space-y-3 p-2">
 								{costumes.map((costume) => (
 									<CostumeCard
 										key={costume.name}
@@ -81,9 +83,6 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 						{costumes.length === 0 && (
 							<div className="text-center text-muted-foreground py-8">
 								<div>No costume images found</div>
-								<div className="text-sm mt-2">
-									Costume images should be located in: /assets/{heroData.costumes}/
-								</div>
 							</div>
 						)}
 					</CardContent>
@@ -93,21 +92,22 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				<div className="flex-1">
 					{selectedCostume && selectedCostumeData ? (
 						<Card>
+							<CardHeader>
+								<CardTitle>{selectedCostumeData.displayName}</CardTitle>
+							</CardHeader>
 							<CardContent>
-								<div className="text-xl font-semibold mb-4">{selectedCostumeData.displayName}</div>
 								<div className="flex justify-center">
 									<div
-										className="relative max-w-md cursor-pointer hover:opacity-90 transition-opacity"
+										className="h-100 md:h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
 										onClick={handleImageClick}
 									>
 										<Image
-											src={`/assets/${selectedCostumeData.path}`}
-											alt={`${heroData.infos.name} - ${selectedCostume}`}
+											src={`/kingsraid-data/assets/${selectedCostumeData.path}`}
+											alt={`${heroData.infos.name} - ${selectedCostumeData.displayName}`}
 											width="0"
 											height="0"
-											sizes="100vw"
-											className="w-auto h-full"
-											priority
+											sizes="80vw md:60vw"
+											className="object-contain h-full w-full"
 										/>
 										<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
 											<ZoomIn className="w-12 h-12 text-white" />
@@ -138,7 +138,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				<ImageZoomModal
 					isOpen={isModalOpen}
 					onOpenChange={setIsModalOpen}
-					imageSrc={`/assets/${selectedCostumeData.path}`}
+					imageSrc={`/kingsraid-data/assets/${selectedCostumeData.path}`}
 					imageAlt={`${heroData.infos.name} - ${selectedCostume}`}
 					title={`${capitalize(heroData.infos.name)} - ${selectedCostumeData.displayName}`}
 					showNavigation={costumes.length > 1}
@@ -149,7 +149,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 					canNavigateNext={true}
 				/>
 			)}
-		</div>
+		</>
 	)
 }
 
@@ -163,13 +163,13 @@ interface CostumeCardProps {
 function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProps) {
 	return (
 		<div
-			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:scale-105 ${
+			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:ring-1 ${
 				isSelected ? "ring-2" : ""
 			}`}
 			onClick={onClick}
 		>
 			<Image
-				src={`/assets/${costume.path}`}
+				src={`/kingsraid-data/assets/${costume.path}`}
 				alt={`${heroName} - ${costume.displayName}`}
 				width="0"
 				height="0"

@@ -29,7 +29,9 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const displayName = bossData.infos?.name
+	const displayName = bossData.infos.name
+	// const assetPath = "/assets/" + bossData.infos.thumbnail
+	// const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {
 		title: `${displayName} - Bosses - King's Raid`,

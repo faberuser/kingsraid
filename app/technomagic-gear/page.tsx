@@ -12,7 +12,7 @@ interface TechnomagicGearData {
 }
 
 async function getTechnomagicGearData(): Promise<TechnomagicGearData> {
-	const filePath = path.join(process.cwd(), "kingsraid-data/table-data/technomagic_gear.json")
+	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "technomagic_gear.json")
 	const jsonData = fs.readFileSync(filePath, "utf8")
 	return JSON.parse(jsonData)
 }

@@ -12,11 +12,32 @@ interface Costume {
 	displayName: string
 }
 
+interface ModelFile {
+	name: string
+	path: string
+	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+}
+
+interface HairTextureInfo {
+	hair?: string
+	ornament?: string
+}
+
+interface TextureInfo {
+	diffuse?: string
+	eye?: string
+	wing?: string
+}
+
+interface ModelWithTextures extends ModelFile {
+	textures: TextureInfo | HairTextureInfo
+}
+
 async function getCostumeData(costumePath: string): Promise<Costume[]> {
 	if (!costumePath) return []
 
 	try {
-		const fullPath = path.join(process.cwd(), "public", "assets", costumePath)
+		const fullPath = path.join(process.cwd(), "public", "kingsraid-data", "assets", costumePath)
 
 		if (!fs.existsSync(fullPath)) {
 			return []
@@ -72,8 +93,319 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 
 		return costumes
 	} catch (error) {
-		console.error("Error reading costume directory:", error)
+		console.error(error)
 		return []
+	}
+}
+
+async function getHeroModels(heroName: string): Promise<{ [costume: string]: ModelWithTextures[] }> {
+	const modelsDir = path.join(process.cwd(), "public", "kingsraid-models", "models", "heroes")
+	const heroModels: { [costume: string]: ModelWithTextures[] } = {}
+
+	// Load name_diff.json
+	let nameDiff: Record<string, string> = {}
+	try {
+		const nameDiffPath = path.join(process.cwd(), "public", "kingsraid-models", "name_diff.json")
+		const raw = fs.readFileSync(nameDiffPath, "utf-8")
+		nameDiff = JSON.parse(raw)
+	} catch (e) {
+		console.warn(e)
+	}
+
+	// Load hair_fallback.json
+	let hairFallback: Record<string, string> = {}
+	try {
+		const hairFallbackPath = path.join(process.cwd(), "public", "kingsraid-models", "hair_fallback.json")
+		if (fs.existsSync(hairFallbackPath)) {
+			const raw = fs.readFileSync(hairFallbackPath, "utf-8")
+			hairFallback = JSON.parse(raw)
+		}
+	} catch (e) {
+		console.warn(e)
+	}
+
+	// Load weapon_fallback.json
+	let weaponFallback: Record<string, string> = {}
+	try {
+		const weaponFallbackPath = path.join(process.cwd(), "public", "kingsraid-models", "weapon_fallback.json")
+		if (fs.existsSync(weaponFallbackPath)) {
+			const raw = fs.readFileSync(weaponFallbackPath, "utf-8")
+			weaponFallback = JSON.parse(raw)
+		}
+	} catch (e) {
+		console.warn(e)
+	}
+
+	// Use mapped name if available
+	const mappedHeroName = nameDiff[heroName] || heroName
+
+	try {
+		const modelFolders = await fs.promises.readdir(modelsDir, { withFileTypes: true })
+
+		// Filter folders that belong to this hero
+		const heroFolders = modelFolders.filter(
+			(folder) =>
+				folder.isDirectory() && folder.name.toLowerCase().startsWith(`hero_${mappedHeroName.toLowerCase()}_`)
+		)
+
+		// Group by costume name
+		const costumeGroups: { [costume: string]: string[] } = {}
+
+		heroFolders.forEach((folder) => {
+			// Extract costume name from folder name
+			// Hero_Aisha_Cos17Christmas_Body -> Cos17Christmas
+			const match = folder.name.match(/Hero_\w+_(\w+)_(\w+)/)
+			if (match) {
+				const costumeName = match[1] // e.g., "Cos17Christmas"
+				const componentType = match[2] // e.g., "Body", "Hair", "Weapon01"
+
+				if (!costumeGroups[costumeName]) {
+					costumeGroups[costumeName] = []
+				}
+				costumeGroups[costumeName].push(folder.name)
+			}
+		})
+
+		// Helper function to scan for textures in a folder
+		const scanFolderForTextures = async (
+			folderPath: string,
+			folderName: string
+		): Promise<TextureInfo | HairTextureInfo> => {
+			const textures: TextureInfo = {}
+
+			try {
+				const files = await fs.promises.readdir(folderPath)
+
+				// Common texture extensions
+				const textureExtensions = [".png"]
+				const textureFiles = files.filter((file) =>
+					textureExtensions.some((ext) => file.toLowerCase().endsWith(ext))
+				)
+
+				// Extract model base name for better matching
+				const modelBaseName = folderName.replace(/^Hero_\w+_/, "").replace(/_\w+$/, "")
+
+				if (folderName.includes("_Hair")) {
+					const hairTextures: HairTextureInfo = {}
+
+					// Look for hair textures
+					const hairFile = textureFiles.find(
+						(file) => file.includes("_Hair") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (hairFile) {
+						hairTextures.hair = `${folderName}/${hairFile}`
+					}
+					// Look for ornament textures
+					const ornamentFile = textureFiles.find(
+						(file) => file.includes("AC_D(RGB)") || file.includes("AC_D.")
+					)
+					if (ornamentFile) {
+						hairTextures.ornament = `${folderName}/${ornamentFile}`
+					}
+					return hairTextures
+				}
+
+				// Look for diffuse textures - prefer exact matches first
+				let diffuseFile = textureFiles.find(
+					(file) =>
+						(file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)) &&
+						// Exclude eye and wing textures
+						!file.toLowerCase().includes("eye") &&
+						!file.toLowerCase().includes("wing")
+				)
+
+				// Fallback to more general patterns
+				if (!diffuseFile) {
+					diffuseFile = textureFiles.find(
+						(file) =>
+							(file.includes("_D(RGB)") || file.includes("_D.")) &&
+							// Exclude eye and wing textures
+							!file.toLowerCase().includes("eye") &&
+							!file.toLowerCase().includes("wing")
+					)
+				}
+
+				if (diffuseFile) {
+					textures.diffuse = `${folderName}/${diffuseFile}`
+				}
+
+				if (folderName.includes("_Body")) {
+					// Look for eye textures (for body models)
+					const eyeFile = textureFiles.find(
+						(file) =>
+							file.toLowerCase().includes("eye") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (eyeFile) {
+						textures.eye = `${folderName}/${eyeFile}`
+					}
+
+					// Looke for wing textures (for body models)
+					const wingFile = textureFiles.find(
+						(file) =>
+							file.toLowerCase().includes("wing") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (wingFile) {
+						textures.wing = `${folderName}/${wingFile}`
+					}
+				}
+
+				return textures
+			} catch (error) {
+				console.warn(error)
+				return {}
+			}
+		}
+
+		// Process each costume group
+		for (const [costumeName, folders] of Object.entries(costumeGroups)) {
+			const models: ModelWithTextures[] = []
+
+			for (const folderName of folders) {
+				const folderPath = path.join(modelsDir, folderName)
+
+				try {
+					const files = await fs.promises.readdir(folderPath)
+					const fbxFile = files.find((file) => file.endsWith(".fbx"))
+
+					if (fbxFile) {
+						// Determine component type
+						let type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
+
+						if (folderName.includes("_Body")) {
+							type = "body"
+						} else if (folderName.includes("_Hair")) {
+							type = "hair"
+						} else if (folderName.includes("_Weapon01")) {
+							type = "weapon01"
+						} else if (folderName.includes("_Weapon02")) {
+							type = "weapon02"
+						} else if (folderName.includes("_Weapon")) {
+							type = "weapon"
+						} else {
+							continue // Skip unknown types
+						}
+
+						// Scan for textures in this folder
+						const textures = await scanFolderForTextures(folderPath, folderName)
+
+						models.push({
+							name: `${costumeName}_${type}`,
+							path: `${folderName}/${fbxFile}`,
+							type: type,
+							textures: textures,
+						})
+					}
+				} catch (error) {
+					console.warn(error)
+				}
+			}
+
+			// Only add costume if it has at least a body model
+			if (models.some((m) => m.type === "body")) {
+				heroModels[costumeName] = models
+			}
+		}
+
+		// Only fallback for hair and one weapon type if missing
+		for (const [costumeName, models] of Object.entries(heroModels)) {
+			// Hair fallback (unchanged)
+			if (!models.some((m) => m.type === "hair")) {
+				let found: ModelWithTextures | undefined
+
+				// Check hair_fallback.json for this costume
+				if (hairFallback[`Hero_${mappedHeroName}_${costumeName}`]) {
+					const fallbackFolder = hairFallback[`Hero_${mappedHeroName}_${costumeName}`]
+					const fallbackPath = path.join(modelsDir, fallbackFolder)
+					try {
+						const files = await fs.promises.readdir(fallbackPath)
+						const fbxFile = files.find((file) => file.endsWith(".fbx"))
+						if (fbxFile) {
+							const textures = await scanFolderForTextures(fallbackPath, fallbackFolder)
+							found = {
+								name: `${costumeName}_hair`,
+								path: `${fallbackFolder}/${fbxFile}`,
+								type: "hair",
+								textures: textures,
+							}
+						}
+					} catch (e) {
+						console.warn(e)
+					}
+				}
+
+				// If not found, fallback to any other costume's hair
+				if (!found) {
+					for (const [otherCostume, otherModels] of Object.entries(heroModels)) {
+						if (otherCostume === costumeName) continue
+						found = otherModels.find((m) => m.type === "hair")
+						if (found) break
+					}
+				}
+
+				if (found) {
+					models.push({
+						...found,
+						name: `${costumeName}_hair`,
+					})
+				}
+			}
+
+			// Weapon fallback: only if none of weapon, weapon01, weapon02 exist
+			const hasWeapon = models.some((m) => m.type === "weapon" || m.type === "weapon01" || m.type === "weapon02")
+			if (!hasWeapon) {
+				let found: ModelWithTextures | undefined
+
+				// Check weapon_fallback.json for this costume
+				if (weaponFallback[`Hero_${mappedHeroName}_${costumeName}`]) {
+					const fallbackFolder = weaponFallback[`Hero_${mappedHeroName}_${costumeName}`]
+					const fallbackPath = path.join(modelsDir, fallbackFolder)
+					try {
+						const files = await fs.promises.readdir(fallbackPath)
+						const fbxFile = files.find((file) => file.endsWith(".fbx"))
+						if (fbxFile) {
+							// Determine weapon type from folder name
+							let type: "weapon" | "weapon01" | "weapon02" = "weapon"
+							if (fallbackFolder.includes("_Weapon01")) type = "weapon01"
+							else if (fallbackFolder.includes("_Weapon02")) type = "weapon02"
+							else if (fallbackFolder.includes("_Weapon")) type = "weapon"
+
+							const textures = await scanFolderForTextures(fallbackPath, fallbackFolder)
+							found = {
+								name: `${costumeName}_${type}`,
+								path: `${fallbackFolder}/${fbxFile}`,
+								type: type,
+								textures: textures,
+							}
+						}
+					} catch (e) {
+						console.warn(e)
+					}
+				}
+
+				// If not found, fallback to any other costume's weapon
+				if (!found) {
+					for (const [otherCostume, otherModels] of Object.entries(heroModels)) {
+						if (otherCostume === costumeName) continue
+						found = otherModels.find(
+							(m) => m.type === "weapon" || m.type === "weapon01" || m.type === "weapon02"
+						)
+						if (found) break
+					}
+				}
+
+				if (found) {
+					models.push({
+						...found,
+						name: `${costumeName}_${found.type}`,
+					})
+				}
+			}
+		}
+
+		return heroModels
+	} catch (error) {
+		console.error(error)
+		return {}
 	}
 }
 
@@ -94,5 +426,8 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get costume data server-side
 	const costumes = await getCostumeData(heroData.costumes)
 
-	return <SlugClient heroData={heroData} costumes={costumes} />
+	// Get model data server-side
+	const heroModels = await getHeroModels(heroData.infos.name)
+
+	return <SlugClient heroData={heroData} costumes={costumes} heroModels={heroModels} />
 }
