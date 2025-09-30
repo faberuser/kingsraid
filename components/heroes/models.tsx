@@ -406,7 +406,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	return (
 		<div className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6">
 			{/* Individual Model Toggles */}
-			<div className="flex flex-row md:flex-col gap-2">
+			<div className="flex flex-row flex-wrap md:flex-col gap-2">
 				{modelFiles.map((model) => (
 					<Button
 						key={model.name}

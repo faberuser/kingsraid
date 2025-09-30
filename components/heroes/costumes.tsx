@@ -98,15 +98,17 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 							<CardContent>
 								<div className="flex justify-center">
 									<div
-										className="h-100 md:h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity"
-										style={{
-											backgroundImage: `url(/kingsraid-data/assets/${selectedCostumeData.path})`,
-											backgroundSize: "contain",
-											backgroundRepeat: "no-repeat",
-											backgroundPosition: "center",
-										}}
+										className="h-100 md:h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
 										onClick={handleImageClick}
 									>
+										<Image
+											src={`/kingsraid-data/assets/${selectedCostumeData.path}`}
+											alt={`${heroData.infos.name} - ${selectedCostumeData.displayName}`}
+											width="0"
+											height="0"
+											sizes="80vw md:60vw"
+											className="object-contain h-full w-full"
+										/>
 										<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
 											<ZoomIn className="w-12 h-12 text-white" />
 										</div>
