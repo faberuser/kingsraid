@@ -57,7 +57,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	const currentCostumeIndex = costumes.findIndex((c) => c.name === selectedCostume)
 
 	return (
-		<div className="space-y-6">
+		<>
 			{/* Main Layout - Side by side */}
 			<div className="flex flex-col md:flex-row gap-6">
 				{/* Available Costumes - Left Side */}
@@ -98,7 +98,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 							<CardContent>
 								<div className="flex justify-center">
 									<div
-										className="h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity"
+										className="h-100 md:h-200 w-full relative cursor-pointer hover:opacity-90 transition-opacity"
 										style={{
 											backgroundImage: `url(/kingsraid-data/assets/${selectedCostumeData.path})`,
 											backgroundSize: "contain",
@@ -147,7 +147,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 					canNavigateNext={true}
 				/>
 			)}
-		</div>
+		</>
 	)
 }
 

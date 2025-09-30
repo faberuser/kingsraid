@@ -404,9 +404,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	}
 
 	return (
-		<div className="space-y-4 flex flex-row gap-6">
+		<div className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6">
 			{/* Individual Model Toggles */}
-			<div className="flex flex-col gap-2">
+			<div className="flex flex-row md:flex-col gap-2">
 				{modelFiles.map((model) => (
 					<Button
 						key={model.name}
@@ -516,15 +516,15 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	}
 
 	return (
-		<div className="flex gap-6">
+		<div className="flex flex-col md:flex-row gap-6">
 			{/* Left sidebar for costume selection */}
-			<div className="w-70 flex-shrink-0 space-y-4">
+			<div className="w-full md:w-70 flex-shrink-0 space-y-4">
 				{costumeOptions.length > 1 && (
 					<Card>
 						<CardHeader>
 							<CardTitle>Models ({costumeOptions.length} variants)</CardTitle>
 						</CardHeader>
-						<CardContent className="h-200 overflow-y-auto custom-scrollbar">
+						<CardContent className="h-fit md:h-200 overflow-y-auto custom-scrollbar">
 							<div className="grid grid-cols-1 gap-2">
 								{costumeOptions.map((costume) => (
 									<div
