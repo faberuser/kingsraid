@@ -24,6 +24,7 @@ interface ModelFile {
 		| {
 				diffuse?: string
 				eye?: string
+				wing?: string
 		  }
 		| {
 				hair?: string
@@ -61,6 +62,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 				// Load textures using the manifest data
 				let mainTexture = null
 				let eyeTexture = null
+				let wingTexture = null
 				let ornamentTexture = null
 
 				// Load diffuse texture
@@ -104,6 +106,27 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 						eyeTexture.flipY = true
 					} catch (error) {
 						console.warn(`Failed to load eye texture: ${(modelFile.textures as { eye: string }).eye}`)
+					}
+				}
+
+				// Load wing texture
+				if (
+					"wing" in modelFile.textures &&
+					typeof (modelFile.textures as { wing?: string }).wing === "string" &&
+					(modelFile.textures as { wing?: string }).wing
+				) {
+					try {
+						wingTexture = await new Promise<THREE.Texture>((resolve, reject) => {
+							textureLoader.load(
+								`${modelDir}/${(modelFile.textures as { wing: string }).wing}`,
+								resolve,
+								undefined,
+								reject
+							)
+						})
+						wingTexture.flipY = true
+					} catch (error) {
+						console.warn(`Failed to load wing texture: ${(modelFile.textures as { wing: string }).wing}`)
 					}
 				}
 
@@ -189,6 +212,22 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 										name: child.material.name,
 									})
 								}
+							} else if (child.name.toLowerCase().includes("wing") && wingTexture) {
+								// Wing material
+								if (Array.isArray(child.material)) {
+									child.material = child.material.map(
+										(mat) =>
+											new THREE.MeshStandardMaterial({
+												map: wingTexture,
+												name: mat.name,
+											})
+									)
+								} else {
+									child.material = new THREE.MeshStandardMaterial({
+										map: wingTexture,
+										name: child.material.name,
+									})
+								}
 							} else if (child.name.toLowerCase().includes("facial_a") && eyeTexture) {
 								let materials = []
 
@@ -198,13 +237,13 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 										const matName = originalMat.name?.toLowerCase() || ""
 
 										if (matName.includes("eye") && eyeTexture) {
-											// Eye material - anime style (Blender equivalent)
+											// Eye material
 											return new THREE.MeshStandardMaterial({
 												map: eyeTexture,
 												name: originalMat.name,
 											})
 										} else if (mainTexture) {
-											// Skin material - anime style (Blender equivalent)
+											// Skin material
 											return new THREE.MeshToonMaterial({
 												map: mainTexture,
 												name: originalMat.name,

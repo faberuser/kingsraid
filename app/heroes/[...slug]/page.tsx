@@ -26,6 +26,7 @@ interface HairTextureInfo {
 interface TextureInfo {
 	diffuse?: string
 	eye?: string
+	wing?: string
 }
 
 interface ModelWithTextures extends ModelFile {
@@ -208,14 +209,19 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 				let diffuseFile = textureFiles.find(
 					(file) =>
 						(file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)) &&
-						!file.toLowerCase().includes("eye")
+						// Exclude eye and wing textures
+						!file.toLowerCase().includes("eye") &&
+						!file.toLowerCase().includes("wing")
 				)
 
 				// Fallback to more general patterns
 				if (!diffuseFile) {
 					diffuseFile = textureFiles.find(
 						(file) =>
-							(file.includes("_D(RGB)") || file.includes("_D.")) && !file.toLowerCase().includes("eye")
+							(file.includes("_D(RGB)") || file.includes("_D.")) &&
+							// Exclude eye and wing textures
+							!file.toLowerCase().includes("eye") &&
+							!file.toLowerCase().includes("wing")
 					)
 				}
 
@@ -223,14 +229,23 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 					textures.diffuse = `${folderName}/${diffuseFile}`
 				}
 
-				// Look for eye textures (for body models)
 				if (folderName.includes("_Body")) {
+					// Look for eye textures (for body models)
 					const eyeFile = textureFiles.find(
 						(file) =>
 							file.toLowerCase().includes("eye") && (file.includes("_D(RGB)") || file.includes("_D."))
 					)
 					if (eyeFile) {
 						textures.eye = `${folderName}/${eyeFile}`
+					}
+
+					// Looke for wing textures (for body models)
+					const wingFile = textureFiles.find(
+						(file) =>
+							file.toLowerCase().includes("wing") && (file.includes("_D(RGB)") || file.includes("_D."))
+					)
+					if (wingFile) {
+						textures.wing = `${folderName}/${wingFile}`
 					}
 				}
 

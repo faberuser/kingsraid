@@ -29,6 +29,7 @@ interface ModelFile {
 		| {
 				diffuse?: string
 				eye?: string
+				wing?: string
 		  }
 		| {
 				hair?: string
