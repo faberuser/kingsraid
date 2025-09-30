@@ -163,7 +163,7 @@ interface CostumeCardProps {
 function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProps) {
 	return (
 		<div
-			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden transition-all duration-200 transform hover:scale-105 ${
+			className={`border rounded w-50 h-50 flex flex-col relative cursor-pointer overflow-hidden ${
 				isSelected ? "ring-2" : ""
 			}`}
 			onClick={onClick}
