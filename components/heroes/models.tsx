@@ -552,7 +552,10 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			<div className="flex-1 space-y-6">
 				<Card>
 					<CardHeader>
-						<CardTitle>{selectedCostume && selectedCostume}</CardTitle>
+						<CardTitle className="w-full flex justify-between">
+							{selectedCostume && selectedCostume}
+							<i className="text-red-500 text-xs">Work in progress. Model might be scuffed</i>
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						{currentModels.length > 0 ? (
