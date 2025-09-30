@@ -206,12 +206,17 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 
 				// Look for diffuse textures - prefer exact matches first
 				let diffuseFile = textureFiles.find(
-					(file) => file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)
+					(file) =>
+						(file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)) &&
+						!file.toLowerCase().includes("eye")
 				)
 
 				// Fallback to more general patterns
 				if (!diffuseFile) {
-					diffuseFile = textureFiles.find((file) => file.includes("_D(RGB)") || file.includes("_D."))
+					diffuseFile = textureFiles.find(
+						(file) =>
+							(file.includes("_D(RGB)") || file.includes("_D.")) && !file.toLowerCase().includes("eye")
+					)
 				}
 
 				if (diffuseFile) {
