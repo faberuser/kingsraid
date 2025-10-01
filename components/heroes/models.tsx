@@ -407,7 +407,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 		<div className="space-y-4 flex flex-col md:flex-row gap-4 md:gap-6">
 			{/* Individual Model Toggles */}
 			<div className="flex flex-row flex-wrap md:flex-col gap-2">
-				{modelFiles.map((model) => (
+				{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values()).map((model) => (
 					<Button
 						key={model.name}
 						size="sm"
@@ -554,7 +554,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					<CardHeader>
 						<CardTitle className="w-full flex justify-between">
 							{selectedCostume && selectedCostume}
-							<i className="text-red-500 text-xs">Work in progress. Model might be scuffed</i>
+							<i className="text-red-500 text-xs">work in progress, model might be scuffed</i>
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
