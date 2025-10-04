@@ -14,33 +14,12 @@ import Link from "next/link"
 import { capitalize, classColorMapText } from "@/lib/utils"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-
-interface Costume {
-	name: string
-	path: string
-	displayName: string
-}
-
-interface ModelFile {
-	name: string
-	path: string
-	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
-	textures:
-		| {
-				diffuse?: string
-				eye?: string
-				wing?: string
-		  }
-		| {
-				hair?: string
-				ornament?: string
-		  }
-}
+import { Costume, ModelWithTextures } from "@/model/Hero_Model"
 
 interface SlugClientProps {
 	heroData: HeroData
 	costumes: Costume[]
-	heroModels: { [costume: string]: ModelFile[] }
+	heroModels: { [costume: string]: ModelWithTextures[] }
 }
 
 export default function SlugClient({ heroData, costumes, heroModels }: SlugClientProps) {

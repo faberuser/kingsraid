@@ -11,25 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RotateCcw, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react"
+import { ModelWithTextures } from "@/model/Hero_Model"
 
 interface ModelsProps {
 	heroData: HeroData
-	heroModels: { [costume: string]: ModelFile[] }
-}
-interface ModelFile {
-	name: string
-	path: string
-	type: "body" | "hair" | "weapon" | "weapon01" | "weapon02"
-	textures:
-		| {
-				diffuse?: string
-				eye?: string
-				wing?: string
-		  }
-		| {
-				hair?: string
-				ornament?: string
-		  }
+	heroModels: { [costume: string]: ModelWithTextures[] }
 }
 
 type HeroModel = THREE.Group & {
@@ -37,14 +23,14 @@ type HeroModel = THREE.Group & {
 	animations?: THREE.AnimationClip[]
 }
 
-function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visibleModels: Set<string> }) {
+function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[]; visibleModels: Set<string> }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
 	const [mixers, setMixers] = useState<THREE.AnimationMixer[]>([])
 	const [loading, setLoading] = useState<Set<string>>(new Set())
 
 	useEffect(() => {
-		const loadModel = async (modelFile: ModelFile) => {
+		const loadModel = async (modelFile: ModelWithTextures) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `/kingsraid-models/models/heroes`
 
@@ -178,15 +164,6 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 				if (mainTexture || eyeTexture) {
 					fbx.traverse((child) => {
 						if (child instanceof THREE.Mesh) {
-							// console.log(`Mesh: ${child.name}`)
-							// if (Array.isArray(child.material)) {
-							// 	child.material.forEach((mat, index) => {
-							// 		console.log(`Material ${index}: ${mat.name}`)
-							// 	})
-							// } else {
-							// 	console.log(`Material: ${child.material.name}`)
-							// }
-
 							if (child.name.toLowerCase().includes("hair") && mainTexture) {
 								// Hair material - anime style (Blender equivalent)
 								if (Array.isArray(child.material)) {
@@ -265,7 +242,6 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 
 								child.material = materials
 							} else if (mainTexture) {
-								// Regular single material - anime style (Blender equivalent)
 								child.material = new THREE.MeshToonMaterial({
 									map: mainTexture,
 								})
@@ -300,25 +276,49 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 					;(fbx as HeroModel).animations = fbx.animations
 				}
 
+				const rotation = -Math.PI / 2 // Rotate -90 degrees to make it stand upright
+
 				// Position models based on type
-				switch (modelFile.type) {
-					case "body":
-						fbx.position.set(0, 0, 0)
-						fbx.rotation.x = -Math.PI / 2 // Rotate -90 degrees to make it stand upright
-						break
-					case "hair":
-						fbx.position.set(0, 0, 0)
-						fbx.rotation.x = -Math.PI / 2 // Apply same rotation to hair
-						break
-					case "weapon":
-					case "weapon01":
-						fbx.position.set(0.5, 0, 0)
-						fbx.rotation.x = -Math.PI / 2 // Apply same rotation to weapons
-						break
-					case "weapon02":
-						fbx.position.set(-0.5, 0, 0)
-						fbx.rotation.x = -Math.PI / 2 // Apply same rotation to weapons
-						break
+				const weaponTypes = [
+					"handle",
+					"weapon",
+					"weapon01",
+					"weapon01",
+					"weapon_blue",
+					"weapon_red",
+					"weapon_open",
+					"weapon_close",
+					"weapon_a",
+					"weapon_b",
+					"weapona",
+					"weaponb",
+					"weapon_r",
+					"weapon_l",
+					"weaponr",
+					"weaponl",
+					"weaponbottle",
+					"weaponpen",
+					"weaponscissors",
+					"weaponskein",
+					"shield",
+					"sword",
+					"lance",
+					"gunblade",
+					"axe",
+					"arrow",
+					"quiver",
+				]
+
+				if (modelFile.type === "body" || modelFile.type === "arms" || modelFile.type === "hair") {
+					fbx.position.set(0, 0, 0)
+					fbx.rotation.x = rotation
+				} else if (weaponTypes.includes(modelFile.type)) {
+					fbx.position.set(0.5, 0, 0)
+					fbx.rotation.x = rotation
+				} else {
+					// Default positioning for unknown types
+					fbx.position.set(0, 0, 0)
+					fbx.rotation.x = rotation
 				}
 
 				setLoadedModels((prev) => new Map(prev).set(modelFile.name, fbx as HeroModel))
@@ -359,7 +359,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	)
 }
 
-function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
+function ModelViewer({ modelFiles }: { modelFiles: ModelWithTextures[] }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 

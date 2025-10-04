@@ -1,3 +1,5 @@
+// Taken from https://github.com/duckness/NotCleo/blob/master/krmath/krmath.py
+
 "use client"
 
 import { useState } from "react"
@@ -32,7 +34,6 @@ interface SoftcapClientProps {
 	softcapData: SoftcapData
 }
 
-// Helper functions for calculations
 function attenuate(x: number, k: number, a: number, b: number): number {
 	return Math.floor((k * 1000000) / (a * x * x + b * x + 1000000))
 }
@@ -41,7 +42,6 @@ function attenuateInv(x: number, k: number, a: number, b: number): number {
 	return k - Math.floor((k * 1000000) / (a * x * x + b * x + 1000000))
 }
 
-// Main calculation function matching the Python algorithm
 function calculateActualStat(statType: SoftcapData[string], istat: number): string {
 	let actual = 0
 
@@ -63,25 +63,25 @@ function calculateActualStat(statType: SoftcapData[string], istat: number): stri
 	return Math.round(actual) + "%"
 }
 
-// Stat mappings based on your Python code
+// Stat mappings
 const statMappings = [
 	{ name: "ACC", key: "acc" },
 	{ name: "Crit", key: "crit" },
 	{ name: "Attack Spd", key: "aspd" },
-	{ name: "Lifesteal", key: "dodge" }, // Note: uses dodge data in Python
+	{ name: "Lifesteal", key: "dodge" }, // uses dodge data
 	{ name: "Penetration", key: "pen" },
 	{ name: "Block DEF", key: "blockdef" },
 	{ name: "CC Resist", key: "ccresist" },
 	{ name: "Dodge", key: "dodge" },
-	{ name: "Block", key: "dodge" }, // Note: uses dodge data in Python
-	{ name: "Tough", key: "pen" }, // Note: uses pen data in Python
+	{ name: "Block", key: "dodge" }, // uses dodge data
+	{ name: "Tough", key: "pen" }, // uses pen data
 	{ name: "Crit Resist", key: "critresist" },
 	{ name: "CC ACC", key: "ccacc" },
 	{ name: "Mp/Atk", key: "mpatk" },
 ]
 
 export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
-	const [inputValue, setInputValue] = useState<number>(1000)
+	const [inputValue, setInputValue] = useState<number>(0)
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
@@ -105,7 +105,7 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 			{/* Input Section */}
 			<Card className="mb-6">
 				<CardHeader>
-					<CardTitle>Enter Stat Value</CardTitle>
+					<CardTitle>Raw Stat Value</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex gap-4 items-center">
@@ -117,7 +117,6 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 							placeholder="Enter stat value"
 							className="max-w-xs"
 						/>
-						<span className="text-sm text-muted-foreground">Enter a value to see softcap calculations</span>
 					</div>
 				</CardContent>
 			</Card>
@@ -132,8 +131,8 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 						<TableHeader>
 							<TableRow>
 								<TableHead className="text-left">Stat</TableHead>
-								<TableHead className="text-right">Softcap</TableHead>
-								<TableHead className="text-right">Value</TableHead>
+								<TableHead className="text-left">Softcap</TableHead>
+								<TableHead className="text-left">Value</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -146,8 +145,8 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 								return (
 									<TableRow key={stat.name}>
 										<TableCell className="font-medium">{stat.name}</TableCell>
-										<TableCell className="text-right">{statData.X2}</TableCell>
-										<TableCell className="text-right">{actualValue}</TableCell>
+										<TableCell className="text-left">{statData.X2}</TableCell>
+										<TableCell className="text-left">{actualValue}</TableCell>
 									</TableRow>
 								)
 							})}
