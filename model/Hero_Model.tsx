@@ -39,6 +39,8 @@ export interface ModelFile {
 		| "axe"
 		| "arrow"
 		| "quiver"
+		| "sheath"
+	defaultPosition?: boolean
 }
 
 export interface HairTextureInfo {
@@ -52,6 +54,7 @@ export interface TextureInfo {
 	wing?: string
 	arm?: string
 	effect?: string
+	mask?: string
 	additionalTextures?: { [materialName: string]: string }
 }
 

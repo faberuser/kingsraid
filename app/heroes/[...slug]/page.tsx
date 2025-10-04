@@ -110,6 +110,18 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 		console.warn(e)
 	}
 
+	// Load weapon_defaultpos.json for default position
+	let defaultPosHeroes: string[] = []
+	try {
+		const defaultPosPath = path.join(process.cwd(), "public", "kingsraid-models", "weapon_defaultpos.json")
+		if (fs.existsSync(defaultPosPath)) {
+			const raw = fs.readFileSync(defaultPosPath, "utf-8")
+			defaultPosHeroes = JSON.parse(raw)
+		}
+	} catch (e) {
+		console.warn(e)
+	}
+
 	// Use mapped name if available
 	const mappedHeroName = nameDiff[heroName] || heroName
 
@@ -214,63 +226,66 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 				const textures: TextureInfo & { additionalTextures?: { [materialName: string]: string } } = {}
 
 				// Find all diffuse textures (files containing _D(RGB) or _D. or (Color))
-				const allDiffuseTextures = textureFiles.filter(
+				let remainingTextures = textureFiles.filter(
 					(file) => file.includes("_D(RGB)") || file.includes("_D.") || file.includes("(Color)")
 				)
 
 				// Categorize textures
-				for (const textureFile of allDiffuseTextures) {
+				for (const textureFile of [...remainingTextures]) {
 					const lowerFile = textureFile.toLowerCase()
 
 					// Eye texture
 					if (lowerFile.includes("eye")) {
 						textures.eye = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
 					// Wing texture
 					else if (lowerFile.includes("wing")) {
 						textures.wing = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
-					// Arms texture
+					// Arms texture (check before arm to avoid conflict)
 					else if (lowerFile.includes("arms")) {
 						textures.arm = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
 					// Arm texture
 					else if (lowerFile.includes("arm")) {
 						textures.arm = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
 					// Effect texture
 					else if (lowerFile.includes("effect")) {
 						textures.effect = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
-					// Main diffuse texture (prefer exact match)
-					else if (!textures.diffuse) {
-						if (
-							textureFile.includes(`${modelBaseName}_D(RGB)`) ||
-							textureFile.includes(`${modelBaseName}_D.`)
-						) {
-							textures.diffuse = `${folderName}/${textureFile}`
-						}
+					// Mask texture
+					else if (lowerFile.includes("mask")) {
+						textures.mask = `${folderName}/${textureFile}`
+						remainingTextures = remainingTextures.filter((f) => f !== textureFile)
 					}
 				}
 
-				// If no main diffuse found yet, use the first non-categorized one
-				if (!textures.diffuse && allDiffuseTextures.length > 0) {
-					const uncategorized = allDiffuseTextures.find(
-						(file) =>
-							!file.toLowerCase().includes("eye") &&
-							!file.toLowerCase().includes("wing") &&
-							!file.toLowerCase().includes("arms") &&
-							!file.toLowerCase().includes("arm") &&
-							!file.toLowerCase().includes("effect")
+				// Main diffuse texture from remaining textures (prefer exact match)
+				if (!textures.diffuse && remainingTextures.length > 0) {
+					const exactMatch = remainingTextures.find(
+						(file) => file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)
 					)
-					if (uncategorized) {
-						textures.diffuse = `${folderName}/${uncategorized}`
+					if (exactMatch) {
+						textures.diffuse = `${folderName}/${exactMatch}`
+						remainingTextures = remainingTextures.filter((f) => f !== exactMatch)
 					}
+				}
+
+				// If no main diffuse found yet, use the first remaining one
+				if (!textures.diffuse && remainingTextures.length > 0) {
+					textures.diffuse = `${folderName}/${remainingTextures[0]}`
+					remainingTextures = remainingTextures.filter((f, i) => i !== 0)
 				}
 
 				// Store additional textures with their material names
 				const additionalTextures: { [key: string]: string } = {}
-				for (const textureFile of allDiffuseTextures) {
+				for (const textureFile of remainingTextures) {
 					const lowerFile = textureFile.toLowerCase()
 					// Skip already categorized textures
 					if (
@@ -278,7 +293,8 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 						lowerFile.includes("wing") ||
 						lowerFile.includes("arms") ||
 						lowerFile.includes("arm") ||
-						lowerFile.includes("effect")
+						lowerFile.includes("effect") ||
+						lowerFile.includes("mask")
 					) {
 						continue
 					}
@@ -318,7 +334,6 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 					) {
 						continue
 					}
-
 					additionalTextures[materialName] = `${folderName}/${textureFile}`
 				}
 
@@ -332,7 +347,7 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 
 				return textures
 			} catch (error) {
-				console.warn(`Error scanning textures in ${folderPath}:`, error)
+				console.warn(error)
 				return {}
 			}
 		}
@@ -419,6 +434,8 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 							type = "arrow"
 						} else if (folderName.includes("_Quiver")) {
 							type = "quiver"
+						} else if (folderName.includes("_Sheath")) {
+							type = "sheath"
 						} else {
 							continue // Skip unknown types
 						}
@@ -426,10 +443,14 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 						// Scan for textures in this folder
 						const textures = await scanFolderForTextures(folderPath, folderName)
 
+						// Check if hero in weapon_defaultpos.json for default position
+						const defaultPos = defaultPosHeroes.includes(mappedHeroName)
+
 						models.push({
 							name: `${costumeName}_${type}`,
 							path: `${folderName}/${fbxFile}`,
 							type: type,
+							defaultPosition: defaultPos,
 							textures: textures,
 						})
 					}
@@ -550,6 +571,7 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 								else if (fallbackFolder.includes("_Axe")) type = "axe"
 								else if (fallbackFolder.includes("_Arrow")) type = "arrow"
 								else if (fallbackFolder.includes("_Quiver")) type = "quiver"
+								else if (fallbackFolder.includes("_Sheath")) type = "sheath"
 								else if (fallbackFolder.includes("_Weapon")) type = "weapon"
 
 								const textures = await scanFolderForTextures(fallbackPath, fallbackFolder)

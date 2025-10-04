@@ -1,6 +1,3 @@
 [submodule "public/kingsraid-data"]
 	path = public/kingsraid-data
 	url = https://github.com/faberuser/kingsraid-data
-[submodule "public/kingsraid-models"]
-	path = public/kingsraid-models
-	url = https://gitea.k-clowd.top/faberuser/kingsraid-models.git

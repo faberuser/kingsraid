@@ -29,6 +29,9 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 	const [mixers, setMixers] = useState<THREE.AnimationMixer[]>([])
 	const [loading, setLoading] = useState<Set<string>>(new Set())
 
+	// Shared texture cache across all models
+	const sharedTexturesRef = useRef<Map<string, THREE.Texture>>(new Map())
+
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelWithTextures) => {
 			if (loadedModels.has(modelFile.name)) return
@@ -52,6 +55,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 				let ornamentTexture = null
 				let armTexture = null
 				let effectTexture = null
+				let maskTexture = null
 				const additionalTexturesMap = new Map<string, THREE.Texture>()
 
 				// Load diffuse texture
@@ -135,6 +139,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 							)
 						})
 						mainTexture.flipY = true
+						sharedTexturesRef.current.set("hair", mainTexture)
 					} catch (error) {
 						console.warn(`Failed to load hair texture: ${(modelFile.textures as { hair: string }).hair}`)
 					}
@@ -208,6 +213,28 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 					}
 				}
 
+				// Load mask texture
+				if (
+					"mask" in modelFile.textures &&
+					typeof (modelFile.textures as { mask?: string }).mask === "string" &&
+					(modelFile.textures as { mask?: string }).mask
+				) {
+					try {
+						maskTexture = await new Promise<THREE.Texture>((resolve, reject) => {
+							textureLoader.load(
+								`${modelDir}/${(modelFile.textures as { mask: string }).mask}`,
+								resolve,
+								undefined,
+								reject
+							)
+						})
+						maskTexture.flipY = true
+						additionalTexturesMap.set("mask", maskTexture)
+					} catch (error) {
+						console.warn(`Failed to load mask texture: ${(modelFile.textures as { mask: string }).mask}`)
+					}
+				}
+
 				// Load additional textures
 				if ("additionalTextures" in modelFile.textures) {
 					const additionalTextures = (modelFile.textures as TextureInfo).additionalTextures
@@ -248,6 +275,9 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 					}
 					if (matName.includes("effect") && effectTexture) {
 						return effectTexture
+					}
+					if (matName.includes("mask") && maskTexture) {
+						return maskTexture
 					}
 
 					// Check additional textures with better matching logic
@@ -313,6 +343,24 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 							// Handle multi-material meshes
 							if (Array.isArray(child.material)) {
 								child.material = child.material.map((mat) => {
+									// Create black material for eyebrows in facial_a meshes
+									if (
+										meshName.includes("facial_a") &&
+										mat.name &&
+										mat.name.toLowerCase().includes("hair")
+									) {
+										// Check shared textures first, then local, then fallbacks
+										const hairTexture = sharedTexturesRef.current.get("hair")
+										if (hairTexture) {
+											return new THREE.MeshToonMaterial({
+												map: hairTexture,
+												name: mat.name,
+											})
+										}
+										// Fallback to black if no hair texture found
+										return new THREE.MeshToonMaterial({ color: 0x000000, name: mat.name })
+									}
+									// Apply textures to all other materials
 									const texture = getTextureForMaterial(mat.name || "")
 									return createMaterial(mat, texture)
 								})
@@ -410,6 +458,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 					"axe",
 					"arrow",
 					"quiver",
+					"sheath",
 				]
 
 				if (
@@ -421,7 +470,9 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 					fbx.position.set(0, 0, 0)
 					fbx.rotation.x = rotation
 				} else if (weaponTypes.includes(modelFile.type)) {
-					fbx.position.set(0.5, 0, 0)
+					if (!modelFile.defaultPosition) {
+						fbx.position.set(1, 0, 0)
+					}
 					fbx.rotation.x = rotation
 				} else {
 					// Default positioning for unknown types
