@@ -125,8 +125,6 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 				folder.name.toLowerCase().startsWith(`hero_${mappedHeroName.toLowerCase()}_substory`)
 		)
 
-		console.log(heroFolders.map((f) => f.name)) // Debug: list matched folders
-
 		// Group by costume name
 		const costumeGroups: { [costume: string]: string[] } = {}
 
@@ -178,8 +176,6 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 			folderName: string,
 			type?: ModelFile["type"]
 		): Promise<TextureInfo | HairTextureInfo> => {
-			const textures: TextureInfo = {}
-
 			try {
 				const files = await fs.promises.readdir(folderPath)
 
@@ -195,14 +191,14 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 				if (folderName.includes("_Hair") || type === "hair") {
 					const hairTextures: HairTextureInfo = {}
 
-					// Look for hair textures (exclude AC_ prefix which is for ornaments)
+					// Look for hair textures
 					const hairFile = textureFiles.find(
 						(file) => file.includes("_Hair") && (file.includes("_D(RGB)") || file.includes("_D."))
-						// && !file.includes("AC_D")
 					)
 					if (hairFile) {
 						hairTextures.hair = `${folderName}/${hairFile}`
 					}
+
 					// Look for ornament textures
 					const ornamentFile = textureFiles.find(
 						(file) => file.includes("AC_D(RGB)") || file.includes("AC_D.")
@@ -210,56 +206,133 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 					if (ornamentFile) {
 						hairTextures.ornament = `${folderName}/${ornamentFile}`
 					}
+
 					return hairTextures
 				}
 
-				// Look for diffuse textures - prefer exact matches first
-				let diffuseFile = textureFiles.find(
-					(file) =>
-						(file.includes(`${modelBaseName}_D(RGB)`) || file.includes(`${modelBaseName}_D.`)) &&
-						// Exclude eye and wing textures
-						!file.toLowerCase().includes("eye") &&
-						!file.toLowerCase().includes("wing")
+				// For non-hair models, collect ALL diffuse textures
+				const textures: TextureInfo & { additionalTextures?: { [materialName: string]: string } } = {}
+
+				// Find all diffuse textures (files containing _D(RGB) or _D. or (Color))
+				const allDiffuseTextures = textureFiles.filter(
+					(file) => file.includes("_D(RGB)") || file.includes("_D.") || file.includes("(Color)")
 				)
 
-				// Fallback to more general patterns
-				if (!diffuseFile) {
-					diffuseFile = textureFiles.find(
+				// Categorize textures
+				for (const textureFile of allDiffuseTextures) {
+					const lowerFile = textureFile.toLowerCase()
+
+					// Eye texture
+					if (lowerFile.includes("eye")) {
+						textures.eye = `${folderName}/${textureFile}`
+					}
+					// Wing texture
+					else if (lowerFile.includes("wing")) {
+						textures.wing = `${folderName}/${textureFile}`
+					}
+					// Arms texture
+					else if (lowerFile.includes("arms")) {
+						textures.arm = `${folderName}/${textureFile}`
+					}
+					// Arm texture
+					else if (lowerFile.includes("arm")) {
+						textures.arm = `${folderName}/${textureFile}`
+					}
+					// Effect texture
+					else if (lowerFile.includes("effect")) {
+						textures.effect = `${folderName}/${textureFile}`
+					}
+					// Main diffuse texture (prefer exact match)
+					else if (!textures.diffuse) {
+						if (
+							textureFile.includes(`${modelBaseName}_D(RGB)`) ||
+							textureFile.includes(`${modelBaseName}_D.`)
+						) {
+							textures.diffuse = `${folderName}/${textureFile}`
+						}
+					}
+				}
+
+				// If no main diffuse found yet, use the first non-categorized one
+				if (!textures.diffuse && allDiffuseTextures.length > 0) {
+					const uncategorized = allDiffuseTextures.find(
 						(file) =>
-							(file.includes("_D(RGB)") || file.includes("_D.")) &&
-							// Exclude eye and wing textures
 							!file.toLowerCase().includes("eye") &&
-							!file.toLowerCase().includes("wing")
+							!file.toLowerCase().includes("wing") &&
+							!file.toLowerCase().includes("arms") &&
+							!file.toLowerCase().includes("arm") &&
+							!file.toLowerCase().includes("effect")
 					)
+					if (uncategorized) {
+						textures.diffuse = `${folderName}/${uncategorized}`
+					}
 				}
 
-				if (diffuseFile) {
-					textures.diffuse = `${folderName}/${diffuseFile}`
+				// Store additional textures with their material names
+				const additionalTextures: { [key: string]: string } = {}
+				for (const textureFile of allDiffuseTextures) {
+					const lowerFile = textureFile.toLowerCase()
+					// Skip already categorized textures
+					if (
+						lowerFile.includes("eye") ||
+						lowerFile.includes("wing") ||
+						lowerFile.includes("arms") ||
+						lowerFile.includes("arm") ||
+						lowerFile.includes("effect")
+					) {
+						continue
+					}
+
+					// Extract material name from texture filename
+					// Examples:
+					// Hero_Chase_Vari05_Body01_D(RGB).png -> body01
+					// Hero_Chase_Vari05_Body02_D(RGB).png -> body02
+					// Hero_Clause_Vari05_02_D(RGB).png -> 02
+					// Hero_Clause_Vari05_etc_D(RGB).png -> etc
+					// Hero_Fluss_Cos18Halloween_Body_Effect(Color).png -> effect
+
+					// Try multiple patterns to extract material name
+					let materialName = ""
+
+					// Pattern 1: _MaterialName_D (most common)
+					let matMatch = textureFile.match(/_([^_]+)_D(?:\(RGB\)|\.)/i)
+					if (matMatch) {
+						materialName = matMatch[1].toLowerCase()
+					}
+
+					// Pattern 2: _MaterialName(Color) for effect textures
+					if (!materialName) {
+						matMatch = textureFile.match(/_([^_]+)\(Color\)/i)
+						if (matMatch) {
+							materialName = matMatch[1].toLowerCase()
+						}
+					}
+
+					// If material name is too generic (like just the hero name), skip it
+					if (
+						!materialName ||
+						materialName.includes("vari") ||
+						materialName.includes("cos") ||
+						materialName === "d" ||
+						additionalTextures[materialName]
+					) {
+						continue
+					}
+
+					additionalTextures[materialName] = `${folderName}/${textureFile}`
 				}
 
-				if (folderName.includes("_Body") || folderName.includes("_Mesh")) {
-					// Look for eye textures (for body models)
-					const eyeFile = textureFiles.find(
-						(file) =>
-							file.toLowerCase().includes("eye") && (file.includes("_D(RGB)") || file.includes("_D."))
-					)
-					if (eyeFile) {
-						textures.eye = `${folderName}/${eyeFile}`
-					}
+				if (Object.keys(additionalTextures).length > 0) {
+					textures.additionalTextures = additionalTextures
+				}
 
-					// Look for wing textures (for body models)
-					const wingFile = textureFiles.find(
-						(file) =>
-							file.toLowerCase().includes("wing") && (file.includes("_D(RGB)") || file.includes("_D."))
-					)
-					if (wingFile) {
-						textures.wing = `${folderName}/${wingFile}`
-					}
+				if (Object.keys(additionalTextures).length > 0) {
+					textures.additionalTextures = additionalTextures
 				}
 
 				return textures
 			} catch (error) {
-				console.warn(error)
+				console.warn(`Error scanning textures in ${folderPath}:`, error)
 				return {}
 			}
 		}
@@ -288,6 +361,8 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 							type = "body"
 						} else if (folderName.includes("_Arms")) {
 							type = "arms"
+						} else if (folderName.includes("_Arm")) {
+							type = "arm"
 						} else if (folderName.includes("_Hair")) {
 							type = "hair"
 						} else if (folderName.includes("_Weapon_Blue")) {

@@ -10,6 +10,7 @@ export interface ModelFile {
 	type:
 		| "body"
 		| "arms"
+		| "arm"
 		| "hair"
 		| "handle"
 		| "weapon"
@@ -50,6 +51,8 @@ export interface TextureInfo {
 	eye?: string
 	wing?: string
 	arm?: string
+	effect?: string
+	additionalTextures?: { [materialName: string]: string }
 }
 
 export interface ModelWithTextures extends ModelFile {
