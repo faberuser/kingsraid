@@ -67,7 +67,7 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 
 		return costumes
 	} catch (error) {
-		console.error(error)
+		console.error("Error reading costume data:", error)
 		return []
 	}
 }
@@ -593,7 +593,7 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 
 		return heroModels
 	} catch (error) {
-		console.error(error)
+		console.error("Error reading hero models:", error)
 		return {}
 	}
 }
