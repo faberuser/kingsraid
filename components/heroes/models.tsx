@@ -312,7 +312,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 					</Button>
 				</div>
 
-				{/* Loading indicator */}
+				{/* Models count */}
 				{modelFiles.some((m) => visibleModels.has(m.name)) && (
 					<div className="absolute bottom-4 left-4">
 						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
