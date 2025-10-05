@@ -52,9 +52,10 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 
 							materials.forEach((material, index) => {
 								// Type guard to check if material has map property
-								let materialName = "unknown"
+								let name = "unknown"
 								let originalMap = null
-								let materialColor = new THREE.Color(0xcccccc)
+								let color = new THREE.Color(0xcccccc)
+								let opacity = 1.0
 
 								if (
 									material instanceof THREE.MeshStandardMaterial ||
@@ -63,23 +64,40 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 									material instanceof THREE.MeshBasicMaterial ||
 									material instanceof THREE.MeshToonMaterial
 								) {
-									materialName = material.name || "unnamed"
+									name = material.name || "unnamed"
 									originalMap = material.map
-									materialColor = material.color || new THREE.Color(0xcccccc)
+									color = material.color || new THREE.Color(0xcccccc)
+									opacity = material.opacity
 								}
 
 								// Create a new MeshToonMaterial
-								const toonMaterial = new THREE.MeshToonMaterial({
-									name: materialName,
-									map: originalMap,
-									...(originalMap ? {} : { color: materialColor }),
-								})
+								if (opacity === 0) {
+									// Use MeshBasicMaterial with transparency for invisible materials
+									const transparentMaterial = new THREE.MeshBasicMaterial({
+										name: name,
+										transparent: true,
+										opacity: 0,
+										visible: false,
+									})
 
-								// Replace the material
-								if (Array.isArray(mesh.material)) {
-									mesh.material[index] = toonMaterial
+									if (Array.isArray(mesh.material)) {
+										mesh.material[index] = transparentMaterial
+									} else {
+										mesh.material = transparentMaterial
+									}
 								} else {
-									mesh.material = toonMaterial
+									const toonMaterial = new THREE.MeshToonMaterial({
+										name: name,
+										map: originalMap,
+										...(originalMap ? {} : { color: color }),
+										...(opacity < 1 ? { transparent: true, opacity: opacity } : {}),
+									})
+
+									if (Array.isArray(mesh.material)) {
+										mesh.material[index] = toonMaterial
+									} else {
+										mesh.material = toonMaterial
+									}
 								}
 							})
 
@@ -136,6 +154,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 					"arrow",
 					"quiver",
 					"sheath",
+					"bag",
 				]
 
 				if (
@@ -143,6 +162,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 					modelFile.type === "arms" ||
 					modelFile.type === "arm" ||
 					modelFile.type === "hair"
+					// modelFile.type === "mask"
 				) {
 					fbx.position.set(0, 0, 0)
 					fbx.rotation.x = rotation
@@ -390,10 +410,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			<div className="flex-1 space-y-6">
 				<Card>
 					<CardHeader>
-						<CardTitle className="w-full flex justify-between">
-							{selectedCostume && selectedCostume}
-							<i className="text-red-500 text-xs">work in progress, model might be scuffed</i>
-						</CardTitle>
+						<CardTitle>{selectedCostume && selectedCostume}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						{currentModels.length > 0 ? (

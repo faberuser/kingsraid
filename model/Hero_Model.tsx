@@ -44,5 +44,7 @@ export interface ModelFile {
 		| "arrow"
 		| "quiver"
 		| "sheath"
+		| "bag"
+		| "mask"
 	defaultPosition?: boolean
 }

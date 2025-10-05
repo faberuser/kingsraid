@@ -48,6 +48,8 @@ const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	{ pattern: "_Arrow", type: "arrow" },
 	{ pattern: "_Quiver", type: "quiver" },
 	{ pattern: "_Sheath", type: "sheath" },
+	{ pattern: "_Bag", type: "bag" },
+	{ pattern: "_Mask", type: "mask" },
 ]
 
 function getModelType(folderName: string): ModelFile["type"] | null {
