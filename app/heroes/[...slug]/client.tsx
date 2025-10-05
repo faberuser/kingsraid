@@ -14,12 +14,12 @@ import Link from "next/link"
 import { capitalize, classColorMapText } from "@/lib/utils"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-import { Costume, ModelWithTextures } from "@/model/Hero_Model"
+import { Costume, ModelFile } from "@/model/Hero_Model"
 
 interface SlugClientProps {
 	heroData: HeroData
 	costumes: Costume[]
-	heroModels: { [costume: string]: ModelWithTextures[] }
+	heroModels: { [costume: string]: ModelFile[] }
 }
 
 export default function SlugClient({ heroData, costumes, heroModels }: SlugClientProps) {

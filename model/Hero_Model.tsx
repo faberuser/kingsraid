@@ -12,6 +12,10 @@ export interface ModelFile {
 		| "arms"
 		| "arm"
 		| "hair"
+		| "hood"
+		| "hood_hair"
+		| "hoodopen"
+		| "hoodopen_hair"
 		| "handle"
 		| "weapon"
 		| "weapon01"
@@ -41,23 +45,4 @@ export interface ModelFile {
 		| "quiver"
 		| "sheath"
 	defaultPosition?: boolean
-}
-
-export interface HairTextureInfo {
-	hair?: string
-	ornament?: string
-}
-
-export interface TextureInfo {
-	diffuse?: string
-	eye?: string
-	wing?: string
-	arm?: string
-	effect?: string
-	mask?: string
-	additionalTextures?: { [materialName: string]: string }
-}
-
-export interface ModelWithTextures extends ModelFile {
-	textures: TextureInfo | HairTextureInfo
 }

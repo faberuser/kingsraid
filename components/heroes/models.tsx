@@ -4,18 +4,17 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
-import { TextureLoader } from "three"
 import * as THREE from "three"
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { RotateCcw, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react"
-import { ModelWithTextures, TextureInfo } from "@/model/Hero_Model"
+import { ModelFile } from "@/model/Hero_Model"
 
 interface ModelsProps {
 	heroData: HeroData
-	heroModels: { [costume: string]: ModelWithTextures[] }
+	heroModels: { [costume: string]: ModelFile[] }
 }
 
 type HeroModel = THREE.Group & {
@@ -23,17 +22,14 @@ type HeroModel = THREE.Group & {
 	animations?: THREE.AnimationClip[]
 }
 
-function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[]; visibleModels: Set<string> }) {
+function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visibleModels: Set<string> }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
 	const [mixers, setMixers] = useState<THREE.AnimationMixer[]>([])
 	const [loading, setLoading] = useState<Set<string>>(new Set())
 
-	// Shared texture cache across all models
-	const sharedTexturesRef = useRef<Map<string, THREE.Texture>>(new Map())
-
 	useEffect(() => {
-		const loadModel = async (modelFile: ModelWithTextures) => {
+		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `/kingsraid-models/models/heroes`
 
@@ -41,380 +37,61 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 
 			try {
 				const fbxLoader = new FBXLoader()
-				const textureLoader = new TextureLoader()
 
 				// Load FBX model
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
 					fbxLoader.load(`${modelDir}/${modelFile.path}`, resolve, undefined, reject)
 				})
 
-				// Load textures using the manifest data
-				let mainTexture = null
-				let eyeTexture = null
-				let wingTexture = null
-				let ornamentTexture = null
-				let armTexture = null
-				let effectTexture = null
-				let maskTexture = null
-				const additionalTexturesMap = new Map<string, THREE.Texture>()
+				// Fix materials
+				fbx.traverse((child) => {
+					if ((child as THREE.Mesh).isMesh) {
+						const mesh = child as THREE.Mesh
+						if (mesh.material) {
+							const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
 
-				// Load diffuse texture
-				if (
-					"diffuse" in modelFile.textures &&
-					typeof modelFile.textures.diffuse === "string" &&
-					modelFile.textures.diffuse
-				) {
-					try {
-						mainTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { diffuse: string }).diffuse}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						mainTexture.flipY = true
-					} catch (error) {
-						console.warn(
-							`Failed to load diffuse texture: ${(modelFile.textures as { diffuse: string }).diffuse}`
-						)
-					}
-				}
+							materials.forEach((material, index) => {
+								// Type guard to check if material has map property
+								let materialName = "unknown"
+								let originalMap = null
+								let materialColor = new THREE.Color(0xcccccc)
 
-				// Load eye texture
-				if (
-					"eye" in modelFile.textures &&
-					typeof (modelFile.textures as { eye?: string }).eye === "string" &&
-					(modelFile.textures as { eye?: string }).eye
-				) {
-					try {
-						eyeTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { eye: string }).eye}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						eyeTexture.flipY = true
-					} catch (error) {
-						console.warn(`Failed to load eye texture: ${(modelFile.textures as { eye: string }).eye}`)
-					}
-				}
+								if (
+									material instanceof THREE.MeshStandardMaterial ||
+									material instanceof THREE.MeshPhongMaterial ||
+									material instanceof THREE.MeshLambertMaterial ||
+									material instanceof THREE.MeshBasicMaterial ||
+									material instanceof THREE.MeshToonMaterial
+								) {
+									materialName = material.name || "unnamed"
+									originalMap = material.map
+									materialColor = material.color || new THREE.Color(0xcccccc)
+								}
 
-				// Load wing texture
-				if (
-					"wing" in modelFile.textures &&
-					typeof (modelFile.textures as { wing?: string }).wing === "string" &&
-					(modelFile.textures as { wing?: string }).wing
-				) {
-					try {
-						wingTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { wing: string }).wing}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						wingTexture.flipY = true
-					} catch (error) {
-						console.warn(`Failed to load wing texture: ${(modelFile.textures as { wing: string }).wing}`)
-					}
-				}
-
-				// Load hair texture
-				if (
-					"hair" in modelFile.textures &&
-					typeof (modelFile.textures as { hair?: string }).hair === "string" &&
-					(modelFile.textures as { hair?: string }).hair
-				) {
-					try {
-						mainTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { hair: string }).hair}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						mainTexture.flipY = true
-						sharedTexturesRef.current.set("hair", mainTexture)
-					} catch (error) {
-						console.warn(`Failed to load hair texture: ${(modelFile.textures as { hair: string }).hair}`)
-					}
-				}
-
-				// Load ornament texture
-				if (
-					"ornament" in modelFile.textures &&
-					typeof (modelFile.textures as { ornament?: string }).ornament === "string" &&
-					(modelFile.textures as { ornament?: string }).ornament
-				) {
-					try {
-						ornamentTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { ornament: string }).ornament}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						ornamentTexture.flipY = true
-					} catch (error) {
-						console.warn(
-							`Failed to load ornament texture: ${(modelFile.textures as { ornament: string }).ornament}`
-						)
-					}
-				}
-
-				// Load arm texture
-				if (
-					"arm" in modelFile.textures &&
-					typeof (modelFile.textures as { arm?: string }).arm === "string" &&
-					(modelFile.textures as { arm?: string }).arm
-				) {
-					try {
-						armTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { arm: string }).arm}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						armTexture.flipY = true
-					} catch (error) {
-						console.warn(`Failed to load arm texture: ${(modelFile.textures as { arm: string }).arm}`)
-					}
-				}
-
-				// Load effect texture
-				if (
-					"effect" in modelFile.textures &&
-					typeof (modelFile.textures as { effect?: string }).effect === "string" &&
-					(modelFile.textures as { effect?: string }).effect
-				) {
-					try {
-						effectTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { effect: string }).effect}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						effectTexture.flipY = true
-						additionalTexturesMap.set("effect", effectTexture)
-					} catch (error) {
-						console.warn(
-							`Failed to load effect texture: ${(modelFile.textures as { effect: string }).effect}`
-						)
-					}
-				}
-
-				// Load mask texture
-				if (
-					"mask" in modelFile.textures &&
-					typeof (modelFile.textures as { mask?: string }).mask === "string" &&
-					(modelFile.textures as { mask?: string }).mask
-				) {
-					try {
-						maskTexture = await new Promise<THREE.Texture>((resolve, reject) => {
-							textureLoader.load(
-								`${modelDir}/${(modelFile.textures as { mask: string }).mask}`,
-								resolve,
-								undefined,
-								reject
-							)
-						})
-						maskTexture.flipY = true
-						additionalTexturesMap.set("mask", maskTexture)
-					} catch (error) {
-						console.warn(`Failed to load mask texture: ${(modelFile.textures as { mask: string }).mask}`)
-					}
-				}
-
-				// Load additional textures
-				if ("additionalTextures" in modelFile.textures) {
-					const additionalTextures = (modelFile.textures as TextureInfo).additionalTextures
-					if (additionalTextures) {
-						for (const [matName, texturePath] of Object.entries(additionalTextures)) {
-							try {
-								const texture = await new Promise<THREE.Texture>((resolve, reject) => {
-									textureLoader.load(`${modelDir}/${texturePath}`, resolve, undefined, reject)
+								// Create a new MeshToonMaterial
+								const toonMaterial = new THREE.MeshToonMaterial({
+									name: materialName,
+									map: originalMap,
+									...(originalMap ? {} : { color: materialColor }),
 								})
-								texture.flipY = true
-								additionalTexturesMap.set(matName.toLowerCase(), texture)
-							} catch (error) {
-								console.warn(`Failed to load additional texture ${matName}: ${texturePath}`)
-							}
-						}
-					}
-				}
 
-				// Helper function to select appropriate texture for a material
-				const getTextureForMaterial = (materialName: string): THREE.Texture | null => {
-					const matName = materialName.toLowerCase()
-
-					// Check for specific named textures first (highest priority)
-					if (matName.includes("eye") && eyeTexture) {
-						return eyeTexture
-					}
-					if (matName.includes("wing") && wingTexture) {
-						return wingTexture
-					}
-					if (matName.includes("arm") && armTexture) {
-						return armTexture
-					}
-					if (matName.includes("ac") && ornamentTexture) {
-						return ornamentTexture
-					}
-					if (modelFile.type === "hair" && matName.includes("effect") && ornamentTexture) {
-						return ornamentTexture
-					}
-					if (matName.includes("effect") && effectTexture) {
-						return effectTexture
-					}
-					if (matName.includes("mask") && maskTexture) {
-						return maskTexture
-					}
-
-					// Check additional textures with better matching logic
-					if (additionalTexturesMap.size > 0) {
-						// Sort keys by length (longest first) to match more specific names first
-						const sortedKeys = Array.from(additionalTexturesMap.keys()).sort((a, b) => b.length - a.length)
-
-						// First pass: Try exact suffix matches ONLY (most specific)
-						// This ensures "etc" at the end matches before "body" in the middle
-						for (const key of sortedKeys) {
-							// ONLY check if material name ends with _key (no middle matches)
-							if (matName.endsWith(`_${key}`)) {
-								const texture = additionalTexturesMap.get(key)
-								if (texture) {
-									return texture
-								}
-							}
-						}
-
-						// Second pass: Try boundary matches (includes middle positions)
-						// Only match if the key is a complete word segment
-						for (const key of sortedKeys) {
-							const regex = new RegExp(`_${key}(?:_|$)`, "i")
-							if (regex.test(matName)) {
-								const texture = additionalTexturesMap.get(key)
-								if (texture) {
-									return texture
-								}
-							}
-						}
-
-						// Third pass: Try partial matches (least specific)
-						for (const key of sortedKeys) {
-							if (matName.includes(key)) {
-								const texture = additionalTexturesMap.get(key)
-								if (texture) {
-									return texture
-								}
-							}
-						}
-					}
-
-					// Default to main texture
-					return mainTexture
-				}
-
-				// Helper function to create material
-				const createMaterial = (originalMat: THREE.Material, texture: THREE.Texture | null): THREE.Material => {
-					if (!texture) return originalMat
-
-					return new THREE.MeshToonMaterial({
-						map: texture,
-						name: originalMat.name,
-					})
-				}
-
-				// Apply textures to model
-				if (mainTexture || eyeTexture || additionalTexturesMap.size > 0) {
-					fbx.traverse((child) => {
-						if (child instanceof THREE.Mesh) {
-							const meshName = child.name.toLowerCase()
-
-							// Handle multi-material meshes
-							if (Array.isArray(child.material)) {
-								child.material = child.material.map((mat) => {
-									// Create black material for eyebrows in facial_a meshes
-									if (
-										meshName.includes("facial_a") &&
-										mat.name &&
-										mat.name.toLowerCase().includes("hair")
-									) {
-										// Check shared textures first, then local, then fallbacks
-										const hairTexture = sharedTexturesRef.current.get("hair")
-										if (hairTexture) {
-											return new THREE.MeshToonMaterial({
-												map: hairTexture,
-												name: mat.name,
-											})
-										}
-										// Fallback to black if no hair texture found
-										return new THREE.MeshToonMaterial({ color: 0x000000, name: mat.name })
-									}
-									// Apply textures to all other materials
-									const texture = getTextureForMaterial(mat.name || "")
-									return createMaterial(mat, texture)
-								})
-							} else {
-								// Single material
-								const texture = getTextureForMaterial(child.material.name || "")
-								if (texture) {
-									child.material = createMaterial(child.material, texture)
-								}
-							}
-
-							child.castShadow = false
-							child.receiveShadow = false
-						}
-					})
-				} else {
-					// If texture type is hair, try to load ornmaent texture to hair instead
-					if (modelFile.type === "hair" && ornamentTexture) {
-						fbx.traverse((child) => {
-							if (child instanceof THREE.Mesh) {
-								// Handle multi-material meshes
-								if (Array.isArray(child.material)) {
-									child.material = child.material.map((mat) => {
-										// Only apply ornament texture to materials with "hair" in the name
-										if (mat.name.toLowerCase().includes("hair")) {
-											return createMaterial(mat, ornamentTexture)
-										}
-										return mat
-									})
+								// Replace the material
+								if (Array.isArray(mesh.material)) {
+									mesh.material[index] = toonMaterial
 								} else {
-									// Single material
-									if (child.material.name.toLowerCase().includes("hair")) {
-										child.material = createMaterial(child.material, ornamentTexture)
-									}
+									mesh.material = toonMaterial
 								}
+							})
 
-								child.castShadow = false
-								child.receiveShadow = false
+							// Update material if it's an array
+							if (Array.isArray(mesh.material)) {
+								mesh.material = [...mesh.material]
 							}
-						})
-					} else {
-						console.warn(`No textures found for ${modelFile.name}, using default material`)
-						// Apply default material if no textures found
-						fbx.traverse((child) => {
-							if (child instanceof THREE.Mesh) {
-								child.material = new THREE.MeshToonMaterial({
-									color: 0xcccccc,
-								})
-								child.castShadow = false
-								child.receiveShadow = false
-							}
-						})
+						}
+						mesh.castShadow = false
+						mesh.receiveShadow = false
 					}
-				}
+				})
 
 				// Set up animations
 				const newMixers = [...mixers]
@@ -518,7 +195,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelWithTextures[];
 	)
 }
 
-function ModelViewer({ modelFiles }: { modelFiles: ModelWithTextures[] }) {
+function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
@@ -593,7 +270,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelWithTextures[] }) {
 						minDistance={0.5}
 						target={[0, 1, 0]}
 					/>
-					<ambientLight intensity={1.25} />
+					<ambientLight intensity={1.5} />
+					<directionalLight position={[5, 5, 5]} intensity={1} castShadow />
+					<directionalLight position={[-5, 5, -5]} intensity={1} />
 					<Suspense fallback={null}>
 						<Model modelFiles={modelFiles} visibleModels={visibleModels} />
 					</Suspense>
