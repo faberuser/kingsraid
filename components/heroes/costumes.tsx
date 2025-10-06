@@ -59,7 +59,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	return (
 		<>
 			{/* Main Layout - Side by side */}
-			<div className="flex flex-col md:flex-row gap-6">
+			<div className="flex flex-col lg:flex-row gap-6">
 				{/* Available Costumes - Left Side */}
 				<Card>
 					<CardHeader>

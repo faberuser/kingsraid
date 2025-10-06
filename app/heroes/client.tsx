@@ -194,7 +194,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 				</div>
 			</div>
 
-			<div className="flex flex-row gap-4 flex-wrap w-full justify-center mt-4">
+			<div className="flex flex-row gap-2 sm:gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
 					<HeroCard key={hero.infos.name} name={hero.infos.name} splashart={hero.splashart} />
 				))}
