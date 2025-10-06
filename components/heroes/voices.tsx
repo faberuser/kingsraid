@@ -141,7 +141,6 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 		<Card>
 			<CardHeader>
 				<CardTitle>Voice Lines</CardTitle>
-				<CardDescription>Listen to {heroData.infos.name}'s voice lines</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Tabs
