@@ -26,9 +26,9 @@ interface SlugClientProps {
 
 export default function SlugClient({ heroData, costumes, heroModels, voiceFiles }: SlugClientProps) {
 	return (
-		<div className="py-0 px-4 sm:py-5 sm:px-20 w-full pb-4">
+		<div className="container mx-auto p-4 sm:p-8">
 			{/* Back Button */}
-			<div className="mb-6 mt-5">
+			<div className="mb-6">
 				<Link href="/heroes">
 					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-0">
 						<ArrowLeft className="h-4 w-4" />
