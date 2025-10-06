@@ -8,6 +8,7 @@ import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
 import Models from "@/components/heroes/models"
+import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -20,9 +21,10 @@ interface SlugClientProps {
 	heroData: HeroData
 	costumes: Costume[]
 	heroModels: { [costume: string]: ModelFile[] }
+	voiceFiles: VoiceFiles
 }
 
-export default function SlugClient({ heroData, costumes, heroModels }: SlugClientProps) {
+export default function SlugClient({ heroData, costumes, heroModels, voiceFiles }: SlugClientProps) {
 	return (
 		<div className="py-0 px-4 sm:py-5 sm:px-20 w-full pb-4">
 			{/* Back Button */}
@@ -99,6 +101,7 @@ export default function SlugClient({ heroData, costumes, heroModels }: SlugClien
 					<TabsTrigger value="gear">Gear</TabsTrigger>
 					<TabsTrigger value="costumes">Costumes</TabsTrigger>
 					<TabsTrigger value="models">Models</TabsTrigger>
+					<TabsTrigger value="voices">Voices</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="profile" className="mt-4">
@@ -123,6 +126,10 @@ export default function SlugClient({ heroData, costumes, heroModels }: SlugClien
 
 				<TabsContent value="models" className="mt-4">
 					<Models heroData={heroData} heroModels={heroModels} />
+				</TabsContent>
+
+				<TabsContent value="voices" className="mt-4">
+					<Voices heroData={heroData} voiceFiles={voiceFiles} />
 				</TabsContent>
 			</Tabs>
 		</div>
