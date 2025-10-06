@@ -22,7 +22,7 @@ export default function Profile({ heroData }: ProfileProps) {
 	return (
 		<div className="space-y-6">
 			{/* Personal Details */}
-			<div className="grid md:grid-cols-2 gap-6">
+			<div className="grid lg:grid-cols-2 gap-6">
 				<Card>
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Personal Details</div>
@@ -69,7 +69,7 @@ export default function Profile({ heroData }: ProfileProps) {
 				</Card>
 			</div>
 
-			<div className="grid md:grid-cols-2 gap-6">
+			<div className="grid lg:grid-cols-2 gap-6">
 				{/* Story Section */}
 				<Card>
 					<CardContent>

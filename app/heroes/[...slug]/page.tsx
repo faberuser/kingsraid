@@ -6,6 +6,7 @@ import { capitalize } from "@/lib/utils"
 import { SlugPageProps, getFileData } from "@/components/server/get-data"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
+import Voices, { VoiceFiles, VoiceFile } from "@/components/heroes/voices"
 
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
@@ -393,6 +394,52 @@ async function getHeroModels(heroName: string): Promise<{ [costume: string]: Mod
 	}
 }
 
+async function getVoiceFiles(heroName: string): Promise<VoiceFiles> {
+	const voicesDir = path.join(process.cwd(), "public", "kingsraid-audio", "voices", "heroes")
+	const voiceFiles: VoiceFiles = {
+		en: [],
+		jp: [],
+		kr: [],
+	}
+
+	const languages = ["en", "jp", "kr"] as const
+
+	for (const lang of languages) {
+		const langDir = path.join(voicesDir, lang)
+
+		try {
+			if (!fs.existsSync(langDir)) {
+				continue
+			}
+
+			const files = await fs.promises.readdir(langDir)
+
+			// Filter files that belong to this hero
+			const heroFiles = files.filter((file) => {
+				const lowerFile = file.toLowerCase()
+				const lowerHeroName = heroName.toLowerCase()
+				return lowerFile.startsWith(`${lowerHeroName}-`) && lowerFile.match(/\.(wav|mp3|ogg)$/i)
+			})
+
+			voiceFiles[lang] = heroFiles.map((filename) => {
+				const nameWithoutExt = filename.replace(/\.(wav|mp3|ogg)$/i, "")
+				return {
+					name: nameWithoutExt,
+					path: `/kingsraid-audio/voices/heroes/${lang}/${encodeURIComponent(filename)}`,
+					displayName: nameWithoutExt,
+				}
+			})
+
+			// Sort by filename
+			voiceFiles[lang].sort((a, b) => a.name.localeCompare(b.name))
+		} catch (error) {
+			console.error(error)
+		}
+	}
+
+	return voiceFiles
+}
+
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params
 	const heroName = slug?.[0]
@@ -413,5 +460,8 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get model data server-side
 	const heroModels = await getHeroModels(heroData.infos.name)
 
-	return <SlugClient heroData={heroData} costumes={costumes} heroModels={heroModels} />
+	// Get voice files server-side
+	const voiceFiles = await getVoiceFiles(heroData.infos.name)
+
+	return <SlugClient heroData={heroData} costumes={costumes} heroModels={heroModels} voiceFiles={voiceFiles} />
 }

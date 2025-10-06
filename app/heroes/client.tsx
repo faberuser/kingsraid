@@ -90,8 +90,8 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 	}, [heroes, searchQuery, selectedClass, fuse, sortType, releaseOrder, reverseSort])
 
 	return (
-		<div className="p-0 pt-5 sm:p-10">
-			<div className="flex flex-col text-start space-y-4 px-4 sm:px-10">
+		<div className="container mx-auto p-4 sm:p-8">
+			<div className="space-y-4 mb-4">
 				{/* Back Button */}
 				<div className="mb-2">
 					<Link href="/">
@@ -194,7 +194,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 				</div>
 			</div>
 
-			<div className="flex flex-row gap-4 flex-wrap w-full justify-center mt-4">
+			<div className="flex flex-row gap-2 sm:gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
 					<HeroCard key={hero.infos.name} name={hero.infos.name} splashart={hero.splashart} />
 				))}

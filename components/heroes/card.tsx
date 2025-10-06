@@ -14,7 +14,7 @@ export default function HeroCard({ name, splashart }: { name: string; splashart:
 	return (
 		<Link
 			key={name}
-			className="border rounded w-48 h-64 flex flex-col relative cursor-pointer overflow-hidden"
+			className="border rounded w-40 h-56 sm:w-48 sm:h-64 flex flex-col relative cursor-pointer overflow-hidden"
 			href={`/heroes/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`}
 			onClick={handleClick}
 		>
