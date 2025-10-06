@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesClient from "@/app/heroes/client"
-import { getDirData } from "@/components/server/get-data"
+import { getDirData, getReleaseOrder } from "@/components/server/get-data"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
@@ -15,6 +15,7 @@ const heroClasses = [
 
 export default async function HeroesPage() {
 	const heroes = (await getDirData("heroes")) as HeroData[]
+	const releaseOrder = await getReleaseOrder()
 
-	return <HeroesClient heroes={heroes} heroClasses={heroClasses} />
+	return <HeroesClient heroes={heroes} heroClasses={heroClasses} releaseOrder={releaseOrder} />
 }

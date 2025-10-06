@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Fuse from "fuse.js"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Search, ChevronDown, ChevronUp } from "lucide-react"
 
 interface BossesClientProps {
 	bosses: BossData[]
@@ -18,6 +18,20 @@ interface BossesClientProps {
 
 export default function BossesClient({ bosses }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
+	const [reverseSort, setReverseSort] = useState(false)
+
+	// Load sort state from localStorage on mount
+	useEffect(() => {
+		const savedReverseSort = localStorage.getItem("bossesReverseSort")
+		if (savedReverseSort === "true" || savedReverseSort === "false") {
+			setReverseSort(savedReverseSort === "true")
+		}
+	}, [])
+
+	// Save sort state to localStorage when changed
+	useEffect(() => {
+		localStorage.setItem("bossesReverseSort", reverseSort.toString())
+	}, [reverseSort])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -28,14 +42,21 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 		})
 	}, [bosses])
 
-	// Filter bosses by search query
+	// Filter and sort bosses
 	const filteredBosses = useMemo(() => {
+		let result = bosses
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
-			return searchResults.map((item) => item.item)
+			result = searchResults.map((item) => item.item)
 		}
-		return bosses
-	}, [bosses, searchQuery, fuse])
+		// Sort alphabetically
+		result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
+		// Reverse if needed
+		if (reverseSort) {
+			result = result.reverse()
+		}
+		return result
+	}, [bosses, searchQuery, fuse, reverseSort])
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
@@ -50,21 +71,32 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row gap-4 items-baseline">
-					<div className="text-xl font-bold">Bosses</div>
-					<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
+				<div className="flex flex-row justify-between">
+					<div className="flex flex-row gap-4 items-baseline">
+						<div className="text-xl font-bold">Bosses</div>
+						<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
+					</div>
+					<div className="flex flex-row">
+						<Button variant="outline" onClick={() => setReverseSort(!reverseSort)}>
+							{reverseSort ? <ChevronDown /> : <ChevronUp />}
+							{reverseSort ? "Z → A" : "A → Z"}
+						</Button>
+					</div>
 				</div>
 
 				<Separator />
 
 				{/* Search Input */}
-				<div className="w-full max-w-sm">
+				<div className="w-full max-w-sm relative">
+					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+						<Search className="h-4 w-4" />
+					</span>
 					<Input
 						type="text"
 						placeholder="Search for bosses..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full"
+						className="w-full pl-10"
 					/>
 				</div>
 			</div>

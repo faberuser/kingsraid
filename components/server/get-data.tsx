@@ -11,6 +11,20 @@ export interface SlugPageProps {
 	}>
 }
 
+export async function getReleaseOrder(): Promise<Record<string, string>> {
+	try {
+		const releaseOrderPath = path.join(process.cwd(), "public", "kingsraid-data", "release_order.json")
+		if (!fs.existsSync(releaseOrderPath)) {
+			return {}
+		}
+		const fileContent = fs.readFileSync(releaseOrderPath, "utf-8")
+		return JSON.parse(fileContent)
+	} catch (error) {
+		console.error(error)
+		return {}
+	}
+}
+
 export async function getFileData(objName: string, dirName: string): Promise<HeroData | BossData | null> {
 	try {
 		const dir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", dirName)

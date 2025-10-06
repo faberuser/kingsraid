@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Fuse from "fuse.js"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { ArtifactData } from "@/model/Artifact"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Search, ChevronDown, ChevronUp } from "lucide-react"
 
 interface ArtifactsClientProps {
 	artifacts: ArtifactData[]
@@ -17,6 +17,20 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
+	const [reverseSort, setReverseSort] = useState(false)
+
+	// Load reverseSort from localStorage on mount
+	useEffect(() => {
+		const savedReverseSort = localStorage.getItem("artifactsReverseSort")
+		if (savedReverseSort === "true" || savedReverseSort === "false") {
+			setReverseSort(savedReverseSort === "true")
+		}
+	}, [])
+
+	// Save reverseSort to localStorage when changed
+	useEffect(() => {
+		localStorage.setItem("artifactsReverseSort", reverseSort.toString())
+	}, [reverseSort])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -27,14 +41,21 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 		})
 	}, [artifacts])
 
-	// Filter artifacts by search query
+	// Filter and sort artifacts
 	const filteredArtifacts = useMemo(() => {
+		let result = artifacts
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
-			return searchResults.map((item) => item.item)
+			result = searchResults.map((item) => item.item)
 		}
-		return artifacts
-	}, [artifacts, searchQuery, fuse])
+		// Sort alphabetically
+		result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+		// Reverse if needed
+		if (reverseSort) {
+			result = result.reverse()
+		}
+		return result
+	}, [artifacts, searchQuery, fuse, reverseSort])
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
@@ -49,27 +70,40 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row gap-4 items-baseline">
-					<div className="text-xl font-bold">Artifacts</div>
-					<div className="text-muted-foreground text-sm">Showing {filteredArtifacts.length} artifacts</div>
+				<div className="flex flex-row justify-between">
+					<div className="flex flex-row gap-4 items-baseline">
+						<div className="text-xl font-bold">Artifacts</div>
+						<div className="text-muted-foreground text-sm">
+							Showing {filteredArtifacts.length} artifacts
+						</div>
+					</div>
+					<div className="flex flex-row">
+						<Button variant="outline" onClick={() => setReverseSort(!reverseSort)}>
+							{reverseSort ? <ChevronDown /> : <ChevronUp />}
+							{reverseSort ? "Z → A" : "A → Z"}
+						</Button>
+					</div>
 				</div>
 
 				<Separator />
 
 				{/* Search Input */}
-				<div className="w-full max-w-sm">
+				<div className="w-full max-w-sm relative">
+					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+						<Search className="h-4 w-4" />
+					</span>
 					<Input
 						type="text"
 						placeholder="Search for artifacts..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full"
+						className="w-full pl-10"
 					/>
 				</div>
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{filteredArtifacts.map((artifact, index) => (
+				{filteredArtifacts.map((artifact) => (
 					<Link
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
