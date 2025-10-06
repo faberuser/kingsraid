@@ -70,8 +70,8 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row justify-between">
-					<div className="flex flex-row gap-4 items-baseline">
+				<div className="flex flex-row justify-between items-center">
+					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Artifacts</div>
 						<div className="text-muted-foreground text-sm">
 							Showing {filteredArtifacts.length} artifacts

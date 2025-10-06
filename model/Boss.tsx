@@ -1,6 +1,7 @@
 export interface BossInfo {
 	"name": string
 	"title": string
+	"type": string[]
 	"race": string
 	"damage type": string
 	"recommended heroes": string

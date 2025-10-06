@@ -11,9 +11,9 @@ export interface SlugPageProps {
 	}>
 }
 
-export async function getReleaseOrder(): Promise<Record<string, string>> {
+export async function getJsonData(jsonFile: string): Promise<Record<string, string>> {
 	try {
-		const releaseOrderPath = path.join(process.cwd(), "public", "kingsraid-data", "release_order.json")
+		const releaseOrderPath = path.join(process.cwd(), "public", "kingsraid-data", jsonFile)
 		if (!fs.existsSync(releaseOrderPath)) {
 			return {}
 		}
@@ -63,7 +63,7 @@ export async function getDirData(dirName: string): Promise<HeroData[] | BossData
 	)
 }
 
-export async function getJsonData(jsonFile: string): Promise<ArtifactData[]> {
+export async function getJsonDataList(jsonFile: string): Promise<ArtifactData[]> {
 	try {
 		const objsFile = path.join(process.cwd(), "public", "kingsraid-data", "table-data", jsonFile)
 

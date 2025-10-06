@@ -11,14 +11,17 @@ import Image from "next/image"
 import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Search, ChevronDown, ChevronUp } from "lucide-react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 interface BossesClientProps {
 	bosses: BossData[]
+	bossTypeMap: Record<string, string>
 }
 
-export default function BossesClient({ bosses }: BossesClientProps) {
+export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [reverseSort, setReverseSort] = useState(false)
+	const [selectedType, setSelectedType] = useState("all")
 
 	// Load sort state from localStorage on mount
 	useEffect(() => {
@@ -42,12 +45,25 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 		})
 	}, [bosses])
 
+	// Get all boss types from data
+	const bossTypes = useMemo(() => {
+		const types = new Set<string>()
+		bosses.forEach((boss) => {
+			boss.infos.type?.forEach((t) => types.add(t))
+		})
+		return Array.from(types)
+	}, [bosses])
+
 	// Filter and sort bosses
 	const filteredBosses = useMemo(() => {
 		let result = bosses
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
 			result = searchResults.map((item) => item.item)
+		}
+		// Filter by type
+		if (selectedType !== "all") {
+			result = result.filter((boss) => boss.infos.type?.includes(selectedType))
 		}
 		// Sort alphabetically
 		result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
@@ -56,7 +72,7 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 			result = result.reverse()
 		}
 		return result
-	}, [bosses, searchQuery, fuse, reverseSort])
+	}, [bosses, searchQuery, fuse, reverseSort, selectedType])
 
 	return (
 		<div className="container mx-auto p-4 sm:p-8">
@@ -71,8 +87,8 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 					</Link>
 				</div>
 
-				<div className="flex flex-row justify-between">
-					<div className="flex flex-row gap-4 items-baseline">
+				<div className="flex flex-row justify-between items-center">
+					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Bosses</div>
 						<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
 					</div>
@@ -86,18 +102,48 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 
 				<Separator />
 
-				{/* Search Input */}
-				<div className="w-full max-w-sm relative">
-					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-						<Search className="h-4 w-4" />
-					</span>
-					<Input
-						type="text"
-						placeholder="Search for bosses..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10"
-					/>
+				<div className="flex flex-col items-start xl:flex-row xl:items-center gap-4">
+					{/* Search Input */}
+					<div className="w-full max-w-sm relative">
+						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+							<Search className="h-4 w-4" />
+						</span>
+						<Input
+							type="text"
+							placeholder="Search for bosses..."
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="w-full pl-10"
+						/>
+					</div>
+
+					{/* Boss Type Filter */}
+					<div>
+						<RadioGroup
+							value={selectedType}
+							onValueChange={setSelectedType}
+							className="flex flex-row flex-wrap justify-center space-x-1 md:space-x-2"
+						>
+							<label
+								key="all"
+								htmlFor="all"
+								className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
+							>
+								<RadioGroupItem value="all" id="all" />
+								<span>All</span>
+							</label>
+							{bossTypes.map((type) => (
+								<label
+									key={type}
+									htmlFor={type}
+									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
+								>
+									<RadioGroupItem value={type} id={type} />
+									<span>{bossTypeMap[type] ?? type}</span>
+								</label>
+							))}
+						</RadioGroup>
+					</div>
 				</div>
 			</div>
 
@@ -130,6 +176,11 @@ export default function BossesClient({ bosses }: BossesClientProps) {
 							<CardContent>
 								<div className="space-y-3">
 									<div className="flex flex-wrap gap-2">
+										{boss.infos.type.map((type) => (
+											<Badge key={type} variant="secondary">
+												{type}
+											</Badge>
+										))}
 										<Badge variant="secondary">{boss.infos.race}</Badge>
 										<Badge
 											variant="default"

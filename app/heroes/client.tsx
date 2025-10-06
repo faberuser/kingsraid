@@ -102,12 +102,12 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 					</Link>
 				</div>
 
-				<div className="flex flex-row justify-between">
-					<div className="flex flex-row gap-4 items-baseline">
+				<div className="flex flex-row justify-between items-center">
+					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Heroes</div>
 						<div className="text-muted-foreground text-sm">Showing {filteredHeroes.length} heroes</div>
 					</div>
-					<div className="flex flex-row gap-4">
+					<div className="flex flex-row gap-1">
 						{/* Alphabetical Sort */}
 						<Button
 							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
@@ -165,13 +165,13 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 						<RadioGroup
 							value={selectedClass}
 							onValueChange={setSelectedClass}
-							className="flex flex-row space-x-1"
+							className="flex flex-row space-x-1 md:space-x-2"
 						>
 							{heroClasses.map((heroClass) => (
 								<label
 									key={heroClass.value}
 									htmlFor={heroClass.value}
-									className="flex items-center space-x-2 cursor-pointer"
+									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
 								>
 									<RadioGroupItem value={heroClass.value} id={heroClass.value} />
 									{heroClass.value !== "all" ? (
