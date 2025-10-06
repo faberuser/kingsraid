@@ -46,6 +46,11 @@ export default function BossClient({ bossData }: BossClientProps) {
 						<div className="text-3xl font-bold mb-2">{infos.name}</div>
 						<div className="text-xl text-muted-foreground mb-4">{infos.title}</div>
 						<div className="flex flex-wrap gap-2 mb-4">
+							{bossData.infos.type.map((type) => (
+								<Badge key={type} variant="default">
+									{type}
+								</Badge>
+							))}
 							<Badge variant="secondary">{infos.race}</Badge>
 							<Badge
 								variant="default"
