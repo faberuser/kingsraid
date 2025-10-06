@@ -91,7 +91,7 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 		}
 
 		return (
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
 				{voices.map((voice) => (
 					<Card key={voice.path} className="overflow-hidden">
 						<CardContent>
@@ -148,21 +148,21 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 					defaultValue={availableLanguages[0][0]}
 					onValueChange={(value) => setCurrentLanguage(value as "en" | "jp" | "kr")}
 				>
-					<TabsList className="grid w-full grid-cols-3 mb-4">
+					<TabsList className="w-full mb-4">
 						{voiceFiles.en.length > 0 && <TabsTrigger value="en">English</TabsTrigger>}
 						{voiceFiles.jp.length > 0 && <TabsTrigger value="jp">Japanese</TabsTrigger>}
 						{voiceFiles.kr.length > 0 && <TabsTrigger value="kr">Korean</TabsTrigger>}
 					</TabsList>
 
-					<TabsContent value="en" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-2">
+					<TabsContent value="en" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
 						{renderVoiceList(voiceFiles.en)}
 					</TabsContent>
 
-					<TabsContent value="jp" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-2">
+					<TabsContent value="jp" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
 						{renderVoiceList(voiceFiles.jp)}
 					</TabsContent>
 
-					<TabsContent value="kr" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-2">
+					<TabsContent value="kr" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
 						{renderVoiceList(voiceFiles.kr)}
 					</TabsContent>
 				</Tabs>
