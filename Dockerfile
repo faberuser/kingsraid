@@ -1,9 +1,11 @@
 FROM alpine/git AS git-stage
-WORKDIR /src
+WORKDIR /usr/src/app
 COPY . .
-# Remove existing kingsraid-data & kingsraid-models directory if it exists, then clone fresh
+
+# Remove existing submodule dirs if exists, then clone fresh
 RUN rm -rf public/kingsraid-data && git clone https://github.com/faberuser/kingsraid-data.git public/kingsraid-data
 RUN rm -rf public/kingsraid-models && git clone https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models
+RUN rm -rf public/kingsraid-audio && git clone https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio
 
 FROM oven/bun:alpine AS base
 
@@ -28,7 +30,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY --from=git-stage /src .
+COPY --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build

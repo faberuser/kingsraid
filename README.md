@@ -4,7 +4,7 @@ A web application that provides a number of data from the mobile game King's Rai
 
 ## Data and 3D Model Files
 
-**Note:** Data, illustrations are stored in [kingsraid-data](https://github.com/faberuser/kingsraid-data) and 3D model files in a separate private/personal Git server [kingsraid-models](https://gitea.k-clowd.top/faberuser/kingsraid-models) due to their large size.
+Data, illustrations are stored in [kingsraid-data](https://github.com/faberuser/kingsraid-data), 3D model and audio files are in a self hosted Git servers [kingsraid-models](https://gitea.k-clowd.top/faberuser/kingsraid-models) and [kingsraid-audio](https://gitea.k-clowd.top/faberuser/kingsraid-audio) due to their large size.
 
 By cloning this repo with `--recurse-submodules` or do `git submodule update` will clone both data and models repos into your machine.
 
