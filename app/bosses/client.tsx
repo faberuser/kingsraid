@@ -51,8 +51,10 @@ export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps)
 		bosses.forEach((boss) => {
 			boss.infos.type?.forEach((t) => types.add(t))
 		})
-		return Array.from(types)
-	}, [bosses])
+		// Sort by the order in bossTypeMap
+		const typeOrder = Object.keys(bossTypeMap)
+		return Array.from(types).sort((a, b) => typeOrder.indexOf(a) - typeOrder.indexOf(b))
+	}, [bosses, bossTypeMap])
 
 	// Filter and sort bosses
 	const filteredBosses = useMemo(() => {
@@ -177,7 +179,7 @@ export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps)
 								<div className="space-y-3">
 									<div className="flex flex-wrap gap-2">
 										{boss.infos.type.map((type) => (
-											<Badge key={type} variant="secondary">
+											<Badge key={type} variant="default">
 												{type}
 											</Badge>
 										))}
