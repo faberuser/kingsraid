@@ -2,10 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { ArtifactData } from "@/model/Artifact"
 
 interface ArtifactClientProps {
@@ -14,17 +11,7 @@ interface ArtifactClientProps {
 
 export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 	return (
-		<div className="container mx-auto p-4 sm:p-8">
-			{/* Back Button */}
-			<div className="mb-6">
-				<Link href="/artifacts">
-					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-0">
-						<ArrowLeft className="h-4 w-4" />
-						Back to Artifacts
-					</Button>
-				</Link>
-			</div>
-
+		<div>
 			{/* Artifact Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-6 mb-6">

@@ -2,8 +2,9 @@ import "@/app/globals.css"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import SidebarWrapper from "@/components/sidebar/sidebar-wrapper"
+import SidebarInsetClient from "@/components/sidebar/sidebar-inset-client"
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -40,9 +41,7 @@ export default function RootLayout({
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 						<SidebarProvider>
 							<SidebarWrapper />
-							<SidebarInset>
-								<main className="w-full h-screen">{children}</main>
-							</SidebarInset>
+							<SidebarInsetClient>{children}</SidebarInsetClient>
 						</SidebarProvider>
 					</ThemeProvider>
 				</body>

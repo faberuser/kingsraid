@@ -16,6 +16,7 @@ import { DialogTitle } from "@/components/ui/dialog"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
+import { Kbd, KbdGroup } from "@/components/ui/kbd"
 
 // Types for search data
 interface SearchItem {
@@ -220,9 +221,9 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 			>
 				<Search className="mr-1 h-4 w-4" />
 				Search...
-				<kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-					<span className="text-xs">⌘</span>K
-				</kbd>
+				<KbdGroup className="ml-auto">
+					<Kbd>Ctrl + K</Kbd>
+				</KbdGroup>
 			</Button>
 
 			<CommandDialog open={open} onOpenChange={handleOpenChange}>

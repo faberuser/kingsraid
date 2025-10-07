@@ -9,9 +9,6 @@ import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
 import Models from "@/components/heroes/models"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 import { capitalize, classColorMapText } from "@/lib/utils"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
@@ -26,17 +23,7 @@ interface SlugClientProps {
 
 export default function SlugClient({ heroData, costumes, heroModels, voiceFiles }: SlugClientProps) {
 	return (
-		<div className="container mx-auto p-4 sm:p-8">
-			{/* Back Button */}
-			<div className="mb-6">
-				<Link href="/heroes">
-					<Button variant="ghost" className="gap-2 p-0 has-[>svg]:px-0">
-						<ArrowLeft className="h-4 w-4" />
-						Back to Heroes
-					</Button>
-				</Link>
-			</div>
-
+		<div>
 			{/* Hero Basic Info */}
 			<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start pb-2">
 				{/* Hero Image */}

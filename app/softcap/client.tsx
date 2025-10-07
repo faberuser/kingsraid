@@ -3,12 +3,9 @@
 "use client"
 
 import { useState } from "react"
-import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface SoftcapData {
@@ -84,21 +81,12 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 	const [inputValue, setInputValue] = useState<number>(0)
 
 	return (
-		<div className="container mx-auto p-4 sm:p-8">
+		<div>
 			<div className="space-y-4 mb-4">
-				{/* Back Button */}
-				<div className="mb-2">
-					<Link href="/">
-						<Button variant="ghost" className="gap-2 has-[>svg]:px-0 p-0">
-							<ArrowLeft className="h-4 w-4" />
-							Back to Home
-						</Button>
-					</Link>
-				</div>
-
-				<div className="flex flex-row gap-4 items-baseline">
+				<div className="items-baseline">
 					<div className="text-xl font-bold">Softcap</div>
 				</div>
+
 				<Separator />
 			</div>
 

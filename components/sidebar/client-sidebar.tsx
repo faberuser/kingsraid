@@ -22,13 +22,13 @@ import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
 
 // Menu items
-const items = [
+export const items = [
 	{ title: "Home", url: "/", icon: Home },
 	{ title: "Heroes", url: "/heroes", icon: UserRound },
 	{ title: "Artifacts", url: "/artifacts", icon: Amphora },
 	{ title: "Bosses", url: "/bosses", icon: ShieldHalf },
-	{ title: "Technomagic Gear", url: "/technomagic-gear", icon: Zap },
 	{ title: "Softcap", url: "/softcap", icon: Calculator },
+	{ title: "Technomagic Gear", url: "/technomagic-gear", icon: Zap },
 ]
 
 interface ClientSidebarProps {

@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import Image from "next/image"
 import { ArtifactData } from "@/model/Artifact"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Search, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, ChevronDown, ChevronUp } from "lucide-react"
 
 interface ArtifactsClientProps {
 	artifacts: ArtifactData[]
@@ -58,18 +58,8 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	}, [artifacts, searchQuery, fuse, reverseSort])
 
 	return (
-		<div className="container mx-auto p-4 sm:p-8">
+		<div>
 			<div className="space-y-4 mb-4">
-				{/* Back Button */}
-				<div className="mb-2">
-					<Link href="/">
-						<Button variant="ghost" className="gap-2 has-[>svg]:px-0 p-0">
-							<ArrowLeft className="h-4 w-4" />
-							Back to Home
-						</Button>
-					</Link>
-				</div>
-
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Artifacts</div>

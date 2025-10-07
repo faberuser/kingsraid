@@ -1,12 +1,6 @@
-"use client"
-
-import { useState } from "react"
-import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft } from "lucide-react"
 
 interface TechnomagicGear {
 	name: string
@@ -32,22 +26,13 @@ const classColors = {
 
 export default function TechnomagicGearClient({ gears }: TechnomagicGearClientProps) {
 	return (
-		<div className="container mx-auto p-4 sm:p-8">
+		<div>
 			<div className="space-y-4 mb-4">
-				{/* Back Button */}
-				<div className="mb-2">
-					<Link href="/">
-						<Button variant="ghost" className="gap-2 has-[>svg]:px-0 p-0">
-							<ArrowLeft className="h-4 w-4" />
-							Back to Home
-						</Button>
-					</Link>
-				</div>
-
 				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Technomagic Gear</div>
 					<div className="text-muted-foreground text-sm">Showing {gears.length} gears</div>
 				</div>
+
 				<Separator />
 			</div>
 
