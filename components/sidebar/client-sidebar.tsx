@@ -44,14 +44,14 @@ interface ClientSidebarProps {
 
 export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const pathname = usePathname()
-	const { theme } = useTheme()
+	const { resolvedTheme } = useTheme()
 	const [mounted, setMounted] = useState(false)
 
 	useEffect(() => {
 		setMounted(true)
 	}, [])
 
-	const logoSrc = theme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
+	const logoSrc = mounted && resolvedTheme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
 
 	return (
 		<Sidebar>

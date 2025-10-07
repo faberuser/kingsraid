@@ -2,10 +2,8 @@ FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
 
-# Remove existing submodule dirs if exists, then clone fresh
-RUN rm -rf public/kingsraid-data && git clone https://github.com/faberuser/kingsraid-data.git public/kingsraid-data
-RUN rm -rf public/kingsraid-models && git clone https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models
-RUN rm -rf public/kingsraid-audio && git clone https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio
+# populate git submodules
+RUN git submodule update --init --recursive
 
 FROM oven/bun:alpine AS base
 
