@@ -1,5 +1,6 @@
 services:
     app:
+        image: ghcr.io/faberuser/kingsraid:latest
         container_name: ${CONTAINER_NAME:-kingsraid}
         build:
             context: .

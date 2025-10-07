@@ -13,6 +13,9 @@ interface TechnomagicGearData {
 
 async function getTechnomagicGearData(): Promise<TechnomagicGearData> {
 	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "technomagic_gear.json")
+	if (!fs.existsSync(filePath)) {
+		return {}
+	}
 	const jsonData = fs.readFileSync(filePath, "utf8")
 	return JSON.parse(jsonData)
 }

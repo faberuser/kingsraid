@@ -1,3 +1,5 @@
+# syntax=docker.io/docker/dockerfile:1.19-labs
+
 FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
@@ -49,7 +51,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY --from=git-stage /usr/src/app .
+COPY --exclude=/user/src/app/public --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build
@@ -59,7 +61,7 @@ FROM base AS release
 COPY --from=install-prod /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/.next ./.next
 COPY --from=prerelease /usr/src/app/package.json .
-COPY --from=prerelease /usr/src/app/public ./public
+COPY --from=git-stage /usr/src/app/public ./public
 
 # expose the port
 EXPOSE 3000
