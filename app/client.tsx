@@ -96,7 +96,7 @@ export default function HomeClient({ featuredHeroes }: HomeClientProps) {
 				)}
 
 				{/* Resources Grid */}
-				<div className="mb-8">
+				<div>
 					<div className="text-center mb-8">
 						<div className="text-3xl font-bold mb-2">Resources</div>
 						<div className="text-muted-foreground">King's Raid Communities</div>

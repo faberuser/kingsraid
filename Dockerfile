@@ -2,23 +2,42 @@ FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
 
-# Populate git submodules or clone manually if .git is missing
+# set up build args so Docker can detect changes and cache intelligently
+ARG KRDATA_REPO=https://github.com/faberuser/kingsraid-data.git
+ARG KRMODELS_REPO=https://gitea.k-clowd.top/faberuser/kingsraid-models.git
+ARG KRAUDIO_REPO=https://gitea.k-clowd.top/faberuser/kingsraid-audio.git
+
+# create directories for caching
+RUN mkdir -p /cache/kingsraid-data /cache/kingsraid-models /cache/kingsraid-audio
+
+# populate submodules or clone shallow copies if .git is missing
 RUN \
   if [ ! -d ".git" ]; then \
-    echo ".git folder not found — cloning submodules manually..."; \
-    rm -rf public/kingsraid-data && \
-    git clone https://github.com/faberuser/kingsraid-data.git public/kingsraid-data && \
-    rm -rf public/kingsraid-models && \
-    git clone https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models && \
-    rm -rf public/kingsraid-audio && \
-    git clone https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio; \
+    echo ".git folder not found, cloning submodules shallowly (with caching)..."; \
+    for repo in kingsraid-data kingsraid-models kingsraid-audio; do \
+      echo "Checking cache for $repo..."; \
+      if [ -d "/cache/$repo" ]; then \
+        echo "Using cached $repo..."; \
+        cp -r /cache/$repo "public/$repo"; \
+      else \
+        echo "Cloning $repo..."; \
+        case $repo in \
+          kingsraid-data) git clone --depth=1 $KRDATA_REPO "public/$repo" ;; \
+          kingsraid-models) git clone --depth=1 $KRMODELS_REPO "public/$repo" ;; \
+          kingsraid-audio) git clone --depth=1 $KRAUDIO_REPO "public/$repo" ;; \
+        esac && \
+        rm -rf "public/$repo/.git" && \
+        cp -r "public/$repo" "/cache/$repo"; \
+      fi; \
+    done; \
   else \
-    echo ".git folder found — checking submodules..."; \
+    echo ".git folder found, checking submodules..."; \
     if [ -z \"$(ls -A public/kingsraid-data 2>/dev/null)\" ] || \
        [ -z \"$(ls -A public/kingsraid-models 2>/dev/null)\" ] || \
        [ -z \"$(ls -A public/kingsraid-audio 2>/dev/null)\" ]; then \
       echo "Populating submodules..."; \
-      git submodule update --init --recursive; \
+      git submodule update --init --recursive --depth=1; \
+      find public/ -type d -name .git -prune -exec rm -rf {} +; \
     else \
       echo "Submodules already populated, skipping update."; \
     fi; \

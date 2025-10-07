@@ -11,11 +11,11 @@ export default function SidebarInsetClient({ children }: { children: React.React
 	const pathname = usePathname()
 
 	return (
-		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 sm:p-8"}`}>
+		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8"}`}>
 			{/* Back Button */}
 			<div
 				className={`mb-2 flex flex-row items-center ${
-					pathname === "/" ? "p-4 mt-0.5 justify-end" : "justify-between"
+					pathname === "/" ? "p-4 mt-0.5 justify-end md:hidden" : "justify-between"
 				}`}
 			>
 				{pathname !== "/" && (
