@@ -15,7 +15,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 			{/* Back Button */}
 			<div
 				className={`mb-2 flex flex-row items-center ${
-					pathname === "/" ? "p-4 mt-0.5 justify-end md:hidden" : "justify-between"
+					pathname === "/" ? "p-4 pt-2.5 justify-end md:hidden" : "justify-between"
 				}`}
 			>
 				{pathname !== "/" && (

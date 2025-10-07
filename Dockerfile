@@ -5,7 +5,7 @@ COPY . .
 # populate git submodules or clone manually if .git is missing
 RUN \
   if [ ! -d ".git" ]; then \
-    echo ".git folder not found, cloning submodules shallowly..."; \
+    echo ".git not found, cloning submodules shallowly..."; \
     rm -rf public/kingsraid-data && \
     git clone --depth=1 https://github.com/faberuser/kingsraid-data.git public/kingsraid-data && \
     rm -rf public/kingsraid-data/.git && \
@@ -16,7 +16,7 @@ RUN \
     git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio && \
     rm -rf public/kingsraid-audio/.git; \
   else \
-    echo ".git folder found, checking submodules..."; \
+    echo ".git found, checking submodules..."; \
     if [ -z \"$(ls -A public/kingsraid-data 2>/dev/null)\" ] || \
        [ -z \"$(ls -A public/kingsraid-models 2>/dev/null)\" ] || \
        [ -z \"$(ls -A public/kingsraid-audio 2>/dev/null)\" ]; then \
