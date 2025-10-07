@@ -1,10 +1,17 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import saReverse from "@/public/kingsraid-data/sa_reverse.json"
 import { Spinner } from "@/components/ui/spinner"
 
-export default function HeroCard({ name, splashart }: { name: string; splashart: string }) {
+export default function HeroCard({
+	name,
+	splashart,
+	reverseSA = false,
+}: {
+	name: string
+	splashart: string
+	reverseSA: boolean
+}) {
 	const [isLoading, setIsLoading] = useState(false)
 
 	const handleClick = () => {
@@ -26,7 +33,7 @@ export default function HeroCard({ name, splashart }: { name: string; splashart:
 				height="0"
 				sizes="40vw md:20vw"
 				className={`w-full flex-1 object-cover ${
-					saReverse.includes(name) ? "object-left" : "object-right"
+					reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-transform duration-300`}
 			/>
 			<div className="text-xl font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2">

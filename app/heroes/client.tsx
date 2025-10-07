@@ -19,9 +19,10 @@ interface HeroesClientProps {
 		icon: string
 	}>
 	releaseOrder: Record<string, string>
+	saReverse: string[]
 }
 
-export default function HeroesClient({ heroes, heroClasses, releaseOrder }: HeroesClientProps) {
+export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReverse }: HeroesClientProps) {
 	const [selectedClass, setSelectedClass] = useState("all")
 	const [searchQuery, setSearchQuery] = useState("")
 	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
@@ -185,7 +186,12 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder }: Hero
 
 			<div className="flex flex-row gap-2 sm:gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
-					<HeroCard key={hero.infos.name} name={hero.infos.name} splashart={hero.splashart} />
+					<HeroCard
+						key={hero.infos.name}
+						name={hero.infos.name}
+						splashart={hero.splashart}
+						reverseSA={saReverse.includes(hero.infos.name)}
+					/>
 				))}
 			</div>
 
