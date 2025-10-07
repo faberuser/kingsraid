@@ -2,8 +2,15 @@ FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
 
-# populate git submodules
-RUN git submodule update --init --recursive
+# populate git submodules if they are not already populated
+RUN \
+  ( \
+    [ -z "$(ls -A public/kingsraid-data 2>/dev/null)" ] || \
+    [ -z "$(ls -A public/kingsraid-models 2>/dev/null)" ] || \
+    [ -z "$(ls -A public/kingsraid-audio 2>/dev/null)" ] \
+  ) && \
+  git submodule update --init --recursive || \
+  echo "Submodules already populated, skipping update"
 
 FROM oven/bun:alpine AS base
 
