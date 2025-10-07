@@ -8,25 +8,23 @@ RUN \
     echo ".git not found, cloning submodules shallowly..."; \
     rm -rf public/kingsraid-data && \
     git clone --depth=1 https://github.com/faberuser/kingsraid-data.git public/kingsraid-data && \
-    rm -rf public/kingsraid-data/.git && \
     rm -rf public/kingsraid-models && \
     git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models && \
-    rm -rf public/kingsraid-models/.git && \
     rm -rf public/kingsraid-audio && \
-    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio && \
-    rm -rf public/kingsraid-audio/.git; \
+    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio; \
   else \
     echo ".git found, checking submodules..."; \
-    if [ -z \"$(ls -A public/kingsraid-data 2>/dev/null)\" ] || \
-       [ -z \"$(ls -A public/kingsraid-models 2>/dev/null)\" ] || \
-       [ -z \"$(ls -A public/kingsraid-audio 2>/dev/null)\" ]; then \
+    if [ -z "$(ls -A public/kingsraid-data 2>/dev/null)" ] || \
+       [ -z "$(ls -A public/kingsraid-models 2>/dev/null)" ] || \
+       [ -z "$(ls -A public/kingsraid-audio 2>/dev/null)" ]; then \
       echo "Populating submodules..."; \
       git submodule update --init --recursive --depth=1; \
-      find public/ -type d -name .git -prune -exec rm -rf {} +; \
     else \
       echo "Submodules already populated, skipping update."; \
     fi; \
-  fi
+  fi && \
+  # Always remove .git folders from submodules
+  find public/ -type d -name .git -prune -exec rm -rf {} +
 
 FROM oven/bun:alpine AS base
 

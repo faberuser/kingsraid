@@ -13,6 +13,11 @@ jobs:
           submodules: true
           fetch-depth: 1
 
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android
+          docker system prune -af
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
