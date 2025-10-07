@@ -6,7 +6,7 @@ import { capitalize } from "@/lib/utils"
 import { SlugPageProps, getFileData } from "@/components/server/get-data"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
-import Voices, { VoiceFiles, VoiceFile } from "@/components/heroes/voices"
+import { VoiceFiles } from "@/components/heroes/voices"
 
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [

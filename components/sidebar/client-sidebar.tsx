@@ -20,6 +20,9 @@ import GlobalSearch from "@/components/sidebar/global-search"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
+import Image from "next/image"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
 // Menu items
 export const items = [
@@ -41,12 +44,29 @@ interface ClientSidebarProps {
 
 export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const pathname = usePathname()
+	const { theme } = useTheme()
+	const [mounted, setMounted] = useState(false)
+
+	useEffect(() => {
+		setMounted(true)
+	}, [])
+
+	const logoSrc = theme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
 
 	return (
 		<Sidebar>
-			<SidebarHeader className="px-5 py-4 border-b">
-				<Link href="/" className="text-2xl font-bold">
-					King's Raid
+			<SidebarHeader className="px-5 py-4 border-b mt-1">
+				<Link href="/" className="flex items-center space-x-2">
+					{mounted && (
+						<Image
+							src={logoSrc}
+							alt="King's Raid Logo"
+							width={160}
+							height={40}
+							className="h-auto w-40"
+							priority
+						/>
+					)}
 				</Link>
 			</SidebarHeader>
 

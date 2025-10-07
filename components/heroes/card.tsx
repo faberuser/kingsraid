@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import saReverse from "@/public/kingsraid-data/sa_reverse.json"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function HeroCard({ name, splashart }: { name: string; splashart: string }) {
 	const [isLoading, setIsLoading] = useState(false)
@@ -33,7 +34,7 @@ export default function HeroCard({ name, splashart }: { name: string; splashart:
 			</div>
 			{isLoading && (
 				<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-					<div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+					<Spinner className="size-8" />
 				</div>
 			)}
 		</Link>
