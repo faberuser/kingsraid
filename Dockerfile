@@ -2,15 +2,27 @@ FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
 
-# populate git submodules if they are not already populated
+# Populate git submodules or clone manually if .git is missing
 RUN \
-  ( \
-    [ -z "$(ls -A public/kingsraid-data 2>/dev/null)" ] || \
-    [ -z "$(ls -A public/kingsraid-models 2>/dev/null)" ] || \
-    [ -z "$(ls -A public/kingsraid-audio 2>/dev/null)" ] \
-  ) && \
-  git submodule update --init --recursive || \
-  echo "Submodules already populated, skipping update"
+  if [ ! -d ".git" ]; then \
+    echo ".git folder not found — cloning submodules manually..."; \
+    rm -rf public/kingsraid-data && \
+    git clone https://github.com/faberuser/kingsraid-data.git public/kingsraid-data && \
+    rm -rf public/kingsraid-models && \
+    git clone https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models && \
+    rm -rf public/kingsraid-audio && \
+    git clone https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio; \
+  else \
+    echo ".git folder found — checking submodules..."; \
+    if [ -z \"$(ls -A public/kingsraid-data 2>/dev/null)\" ] || \
+       [ -z \"$(ls -A public/kingsraid-models 2>/dev/null)\" ] || \
+       [ -z \"$(ls -A public/kingsraid-audio 2>/dev/null)\" ]; then \
+      echo "Populating submodules..."; \
+      git submodule update --init --recursive; \
+    else \
+      echo "Submodules already populated, skipping update."; \
+    fi; \
+  fi
 
 FROM oven/bun:alpine AS base
 
