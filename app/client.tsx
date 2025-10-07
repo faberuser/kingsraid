@@ -28,10 +28,10 @@ interface HomeClientProps {
 
 export default function HomeClient({ featuredHeroes }: HomeClientProps) {
 	return (
-		<div className="min-h-screen block sm:flex flex-col justify-center bg-gradient-to-b from-white to-gray-100 dark:from-black dark:to-gray-900 relative pb-1 sm:pb-0">
-			<div className="container mx-auto sm:py-8">
+		<div className="min-h-screen block sm:flex flex-col justify-center">
+			<div className="container mx-auto">
 				{/* Hero Section */}
-				<div className="text-center mb-12 mt-12">
+				<div className="text-center mb-12">
 					<div className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-[normal]">
 						King's Raid Info
 					</div>
