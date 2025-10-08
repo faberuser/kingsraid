@@ -10,9 +10,17 @@ export interface FeaturedHero {
 	image: string
 }
 
+export interface NewsItem {
+	title: string
+	url: string
+	date: string
+	author: string
+	contents: string
+	feedlabel: string
+}
+
 async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 	try {
-		// Updated path to match your actual structure
 		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
 
 		if (!fs.existsSync(heroesDir)) {
@@ -81,8 +89,68 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 	}
 }
 
+async function getSteamNews(): Promise<NewsItem[]> {
+	try {
+		const response = await fetch("https://store.steampowered.com/feeds/news/app/3689540/", {
+			next: { revalidate: 3600 }, // Revalidate every hour
+		})
+
+		const text = await response.text()
+
+		// Parse RSS XML
+		const items: NewsItem[] = []
+		const itemRegex = /<item>([\s\S]*?)<\/item>/g
+		let match
+
+		while ((match = itemRegex.exec(text)) !== null) {
+			const itemContent = match[1]
+
+			// Extract CDATA content more precisely
+			const extractCDATA = (tag: string, content: string): string => {
+				const cdataMatch = content.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, "s"))
+				if (cdataMatch) return cdataMatch[1].trim()
+
+				const regularMatch = content.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "s"))
+				return regularMatch ? regularMatch[1].trim() : ""
+			}
+
+			// Decode HTML entities on server side
+			const decodeHtmlEntities = (str: string): string => {
+				return str
+					.replace(/&lt;/g, "<")
+					.replace(/&gt;/g, ">")
+					.replace(/&quot;/g, '"')
+					.replace(/&#39;/g, "'")
+					.replace(/&amp;/g, "&")
+			}
+
+			const title = extractCDATA("title", itemContent)
+			const url = extractCDATA("link", itemContent)
+			const date = extractCDATA("pubDate", itemContent)
+			const author = extractCDATA("author", itemContent)
+			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))
+			const feedlabel = extractCDATA("feedlabel", itemContent)
+
+			items.push({
+				title,
+				url,
+				date,
+				author,
+				contents, // Now properly decoded HTML
+				feedlabel,
+			})
+		}
+
+		return items.slice(0, 6) // Limit to 6 most recent
+	} catch (error) {
+		console.error("Error fetching Steam news:", error)
+		return []
+	}
+}
+
 export default async function Home() {
 	const featuredHeroes = await getFeaturedHeroes()
+	const steamNews = await getSteamNews()
 
-	return <HomeClient featuredHeroes={featuredHeroes} />
+	return <HomeClient featuredHeroes={featuredHeroes} steamNews={steamNews} />
 }
