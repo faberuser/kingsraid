@@ -30,7 +30,7 @@ interface HomeClientProps {
 
 export default function HomeClient({ featuredHeroes, steamNews }: HomeClientProps) {
 	return (
-		<div className="min-h-screen">
+		<div className="min-h-screen pb-12">
 			<div className="container mx-auto">
 				{/* Hero Section */}
 				<div className="text-center mb-12 mt-0 md:mt-24">

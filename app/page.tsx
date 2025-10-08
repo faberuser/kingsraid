@@ -14,9 +14,7 @@ export interface NewsItem {
 	title: string
 	url: string
 	date: string
-	author: string
 	contents: string
-	feedlabel: string
 }
 
 async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
@@ -127,21 +125,17 @@ async function getSteamNews(): Promise<NewsItem[]> {
 			const title = extractCDATA("title", itemContent)
 			const url = extractCDATA("link", itemContent)
 			const date = extractCDATA("pubDate", itemContent)
-			const author = extractCDATA("author", itemContent)
 			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))
-			const feedlabel = extractCDATA("feedlabel", itemContent)
 
 			items.push({
 				title,
 				url,
 				date,
-				author,
-				contents, // Now properly decoded HTML
-				feedlabel,
+				contents,
 			})
 		}
 
-		return items.slice(0, 6) // Limit to 6 most recent
+		return items
 	} catch (error) {
 		console.error("Error fetching Steam news:", error)
 		return []

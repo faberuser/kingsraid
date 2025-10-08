@@ -10,6 +10,29 @@ interface SteamRSSProps {
 	news: NewsItem[]
 }
 
+// Helper function to process HTML content
+function processContent(html: string): string {
+	// Find the first <img> tag
+	const imgMatch = html.match(/<img[^>]*>/i)
+
+	if (!imgMatch) {
+		return `<div class="line-clamp-5">${html}</div>`
+	}
+
+	const imgTag = imgMatch[0]
+	// Remove the image from the HTML
+	const contentWithoutImg = html.replace(imgTag, "")
+
+	return `
+	<div class="h-full flex flex-col items-center justify-center mb-2 [&_img]:rounded">
+		${imgTag}
+	</div>
+	<div class="line-clamp-5">
+		${contentWithoutImg}
+	</div>
+	`
+}
+
 export default function SteamRSS({ news }: SteamRSSProps) {
 	const [mounted, setMounted] = useState(false)
 
@@ -43,18 +66,15 @@ export default function SteamRSS({ news }: SteamRSSProps) {
 				{news.map((item, index) => (
 					<CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
 						<Link href={item.url} target="_blank" rel="noopener noreferrer">
-							<Card className="h-full hover:shadow-lg transition-shadow">
+							<Card className="h-full gap-2">
 								<CardHeader>
 									<CardTitle className="line-clamp-2">{item.title}</CardTitle>
-									<CardDescription>
-										{new Date(item.date).toLocaleDateString()} • King's Raid
-									</CardDescription>
+									<CardDescription>{new Date(item.date).toLocaleDateString()}</CardDescription>
 								</CardHeader>
-								<CardContent suppressHydrationWarning>
+								<CardContent className="h-full">
 									<div
-										className="text-sm text-muted-foreground line-clamp-3 [&_img]:rounded-md [&_img]:mb-5 [&_p]:inline"
-										dangerouslySetInnerHTML={{ __html: item.contents }}
-										suppressHydrationWarning
+										className="text-sm text-muted-foreground h-full flex flex-col justify-between"
+										dangerouslySetInnerHTML={{ __html: processContent(item.contents) }}
 									/>
 								</CardContent>
 							</Card>
