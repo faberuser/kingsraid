@@ -86,7 +86,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 										mesh.material = transparentMaterial
 									}
 								} else {
-									const toonMaterial = new THREE.MeshToonMaterial({
+									const basicMaterial = new THREE.MeshBasicMaterial({
 										name: name,
 										map: originalMap,
 										...(originalMap ? {} : { color: color }),
@@ -94,9 +94,9 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 									})
 
 									if (Array.isArray(mesh.material)) {
-										mesh.material[index] = toonMaterial
+										mesh.material[index] = basicMaterial
 									} else {
-										mesh.material = toonMaterial
+										mesh.material = basicMaterial
 									}
 								}
 							})
@@ -279,7 +279,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 
 			{/* 3D Viewer */}
 			<div className="relative h-200 w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
-				<Canvas shadows>
+				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
 					<PerspectiveCamera makeDefault position={cameraPosition} />
 					<OrbitControls
 						ref={controlsRef}
@@ -290,7 +290,6 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 						minDistance={0.5}
 						target={[0, 1, 0]}
 					/>
-					<ambientLight intensity={2.5} />
 					<Suspense fallback={null}>
 						<Model modelFiles={modelFiles} visibleModels={visibleModels} />
 					</Suspense>
