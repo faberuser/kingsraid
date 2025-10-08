@@ -24,6 +24,7 @@ interface HeroesClientProps {
 
 export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReverse }: HeroesClientProps) {
 	const [selectedClass, setSelectedClass] = useState("all")
+	const [selectedDamageType, setSelectedDamageType] = useState("all")
 	const [searchQuery, setSearchQuery] = useState("")
 	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
 	const [reverseSort, setReverseSort] = useState(true)
@@ -70,6 +71,13 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 			result = result.filter((hero) => hero.infos?.class?.toLowerCase() === selectedClass.toLowerCase())
 		}
 
+		// Apply damage type filter
+		if (selectedDamageType !== "all") {
+			result = result.filter(
+				(hero) => hero.infos?.["damage type"]?.toLowerCase() === selectedDamageType.toLowerCase()
+			)
+		}
+
 		// Sort by selected sort type
 		if (sortType === "release") {
 			result = [...result].sort((a, b) => {
@@ -87,7 +95,13 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		}
 
 		return result
-	}, [heroes, searchQuery, selectedClass, fuse, sortType, releaseOrder, reverseSort])
+	}, [heroes, searchQuery, selectedClass, selectedDamageType, fuse, sortType, releaseOrder, reverseSort])
+
+	const damageTypes = [
+		{ value: "all", name: "All" },
+		{ value: "magical", name: "Magical" },
+		{ value: "physical", name: "Physical" },
+	]
 
 	return (
 		<div>
@@ -135,7 +149,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 				<Separator />
 
-				<div className="flex flex-col items-start xl:flex-row xl:items-center gap-4">
+				<div className="flex flex-col items-center xl:flex-row gap-4">
 					{/* Search Input */}
 					<div className="w-full max-w-sm relative">
 						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -177,6 +191,26 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 											All
 										</div>
 									)}
+								</label>
+							))}
+						</RadioGroup>
+					</div>
+
+					{/* Damage Type Filter */}
+					<div>
+						<RadioGroup
+							value={selectedDamageType}
+							onValueChange={setSelectedDamageType}
+							className="flex flex-row space-x-1 md:space-x-2"
+						>
+							{damageTypes.map((damageType) => (
+								<label
+									key={damageType.value}
+									htmlFor={`dmg-${damageType.value}`}
+									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
+								>
+									<RadioGroupItem value={damageType.value} id={`dmg-${damageType.value}`} />
+									<span className="text-sm">{damageType.name}</span>
 								</label>
 							))}
 						</RadioGroup>
