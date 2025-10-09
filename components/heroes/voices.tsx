@@ -140,7 +140,14 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Voice Lines</CardTitle>
+				<CardTitle>
+					Voice Lines{" "}
+					{voiceFiles[currentLanguage].length > 0 && (
+						<span>
+							({voiceFiles[currentLanguage].length} {currentLanguage.toUpperCase()})
+						</span>
+					)}
+				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<Tabs
