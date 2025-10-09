@@ -18,10 +18,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: "King's Raid",
-	description: "Info for King's Raid",
+	description: "Comprehensive resource for Kings Raid",
 	openGraph: {
 		title: "King's Raid",
-		description: "Info for King's Raid",
+		description: "Comprehensive resource for Kings Raid",
 		url: process.env.NEXT_PUBLIC_SITE_URL || "https://kingsraid.k-clowd.top",
 		siteName: "King's Raid",
 	},
