@@ -75,4 +75,5 @@ Create a `.env.local` file for local development:
 ```env
 CONTAINER_NAME=kingsraid # optional
 DOCKER_PORT=3000  # optional
+NEXT_PUBLIC_SITE_URL=https://kingsraid.k-clowd.top # optional
 ```
