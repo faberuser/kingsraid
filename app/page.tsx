@@ -2,19 +2,13 @@ import HomeClient from "@/app/client"
 import fs from "fs"
 import path from "path"
 import { HeroData } from "@/model/Hero"
+import { getSteamNews } from "@/app/news/page"
 
 export interface FeaturedHero {
 	name: string
 	title: string
 	class: string
 	image: string
-}
-
-export interface NewsItem {
-	title: string
-	url: string
-	date: string
-	contents: string
 }
 
 async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
@@ -26,11 +20,15 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 		}
 
 		// Get all JSON files in the heroes directory
-		const files = fs.readdirSync(heroesDir).filter((file) => file.endsWith(".json"))
+		// Shuffle for variety
+		const files = fs
+			.readdirSync(heroesDir)
+			.filter((file) => file.endsWith(".json"))
+			.sort(() => Math.random() - 0.5)
 		const featuredHeroes: FeaturedHero[] = []
 
 		// Limit to 12 heroes
-		for (const file of files) {
+		for (const file of files.slice(0, 12)) {
 			const heroJsonPath = path.join(heroesDir, file)
 
 			try {
@@ -79,72 +77,16 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 			}
 		}
 
-		// Shuffle for variety
-		return featuredHeroes.sort(() => Math.random() - 0.5)
+		return featuredHeroes
 	} catch (error) {
 		console.error(error)
 		return []
 	}
 }
 
-async function getSteamNews(): Promise<NewsItem[]> {
-	try {
-		const response = await fetch("https://store.steampowered.com/feeds/news/app/3689540/", {
-			next: { revalidate: 3600 }, // Revalidate every hour
-		})
-
-		const text = await response.text()
-
-		// Parse RSS XML
-		const items: NewsItem[] = []
-		const itemRegex = /<item>([\s\S]*?)<\/item>/g
-		let match
-
-		while ((match = itemRegex.exec(text)) !== null) {
-			const itemContent = match[1]
-
-			// Extract CDATA content more precisely
-			const extractCDATA = (tag: string, content: string): string => {
-				const cdataMatch = content.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, "s"))
-				if (cdataMatch) return cdataMatch[1].trim()
-
-				const regularMatch = content.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "s"))
-				return regularMatch ? regularMatch[1].trim() : ""
-			}
-
-			// Decode HTML entities on server side
-			const decodeHtmlEntities = (str: string): string => {
-				return str
-					.replace(/&lt;/g, "<")
-					.replace(/&gt;/g, ">")
-					.replace(/&quot;/g, '"')
-					.replace(/&#39;/g, "'")
-					.replace(/&amp;/g, "&")
-			}
-
-			const title = extractCDATA("title", itemContent)
-			const url = extractCDATA("link", itemContent)
-			const date = extractCDATA("pubDate", itemContent)
-			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))
-
-			items.push({
-				title,
-				url,
-				date,
-				contents,
-			})
-		}
-
-		return items
-	} catch (error) {
-		console.error("Error fetching Steam news:", error)
-		return []
-	}
-}
-
 export default async function Home() {
 	const featuredHeroes = await getFeaturedHeroes()
-	const steamNews = await getSteamNews()
+	const steamNews = await getSteamNews(6) // Limit to 6 news items
 
 	return <HomeClient featuredHeroes={featuredHeroes} steamNews={steamNews} />
 }
