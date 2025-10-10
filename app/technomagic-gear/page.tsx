@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import TechnomagicGearClient from "./client"
+import TechnomagicGearClient from "@/app/technomagic-gear/client"
 
 interface TechnomagicGearData {
 	[gearName: string]: {

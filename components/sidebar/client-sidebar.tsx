@@ -11,7 +11,7 @@ import {
 	SidebarHeader,
 	SidebarFooter,
 } from "@/components/ui/sidebar"
-import { Home, UserRound, Amphora, ShieldHalf, Github, Zap, Calculator } from "lucide-react"
+import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Github, Zap, Calculator } from "lucide-react"
 import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
@@ -27,6 +27,7 @@ import { useEffect, useState } from "react"
 // Menu items
 export const items = [
 	{ title: "Home", url: "/", icon: Home },
+	{ title: "News", url: "/news", icon: Newspaper },
 	{ title: "Heroes", url: "/heroes", icon: UserRound },
 	{ title: "Artifacts", url: "/artifacts", icon: Amphora },
 	{ title: "Bosses", url: "/bosses", icon: ShieldHalf },

@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import SoftcapClient from "./client"
+import SoftcapClient from "@/app/softcap/client"
 
 interface SoftcapData {
 	[statName: string]: {

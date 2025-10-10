@@ -82,7 +82,7 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4">
+			<div className="space-y-4 mb-4 mt-1">
 				<div className="items-baseline">
 					<div className="text-xl font-bold">Softcap</div>
 				</div>
