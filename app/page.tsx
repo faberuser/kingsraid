@@ -2,7 +2,7 @@ import HomeClient from "@/app/client"
 import fs from "fs"
 import path from "path"
 import { HeroData } from "@/model/Hero"
-import { getSteamNews } from "@/app/news/page"
+import { getSteamNews } from "@/lib/steam-rss"
 
 export interface FeaturedHero {
 	name: string

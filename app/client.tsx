@@ -5,7 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "next/image"
 import { FeaturedHero } from "@/app/page"
-import { NewsItem } from "@/app/news/page"
+import { NewsItem } from "@/lib/steam-rss"
 import Autoplay from "embla-carousel-autoplay"
 import { useEffect, useState } from "react"
 import { getImage, getContent, NewsDetailDialog } from "@/app/news/client"
