@@ -27,7 +27,7 @@ const classColors = {
 export default function TechnomagicGearClient({ gears }: TechnomagicGearClientProps) {
 	return (
 		<div>
-			<div className="space-y-4 mb-4">
+			<div className="space-y-4 mb-4 mt-1">
 				<div className="flex flex-row gap-4 items-baseline">
 					<div className="text-xl font-bold">Technomagic Gear</div>
 					<div className="text-muted-foreground text-sm">Showing {gears.length} gears</div>

@@ -36,14 +36,14 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 	}
 
 	return (
-		<div>
+		<div className="space-y-4 mb-4 mt-1">
 			{/* Header */}
-			<div className="space-y-4 mb-4">
-				<div className="items-baseline">
-					<div className="text-xl font-bold">News Hub</div>
-				</div>
-				<Separator />
+			<div className="flex flex-row gap-2 items-baseline">
+				<div className="text-xl font-bold">News Hub</div>
+				<div className="text-muted-foreground text-sm">Showing {steamNews.length} news</div>
 			</div>
+
+			<Separator />
 
 			{/* News Grid */}
 			<div className="grid grid-cols-1 gap-4">
