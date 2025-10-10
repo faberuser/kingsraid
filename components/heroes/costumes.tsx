@@ -63,7 +63,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 				{/* Available Costumes - Left Side */}
 				<Card>
 					<CardHeader>
-						<CardTitle>Costumes ({costumes.length} variations)</CardTitle>
+						<CardTitle>Costumes ({costumes.length} variants)</CardTitle>
 					</CardHeader>
 					<CardContent className="h-200 custom-scrollbar overflow-y-auto overflow-x-hidden">
 						<div className="flex items-center justify-center">

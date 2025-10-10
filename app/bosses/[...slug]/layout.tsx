@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, getFileData } from "@/components/server/get-data"
+import { SlugPageProps, findData } from "@/lib/get-data"
 
 export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
 	const { slug } = await params
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const bossData = (await getFileData(slug[0], "bosses")) as BossData | null
+	const bossData = (await findData(slug[0], "bosses")) as BossData | null
 
 	if (!bossData) {
 		return {

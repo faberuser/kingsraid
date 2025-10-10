@@ -14,14 +14,14 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 
-interface SlugClientProps {
+interface HeroClientProps {
 	heroData: HeroData
 	costumes: Costume[]
 	heroModels: { [costume: string]: ModelFile[] }
 	voiceFiles: VoiceFiles
 }
 
-export default function SlugClient({ heroData, costumes, heroModels, voiceFiles }: SlugClientProps) {
+export default function HeroClient({ heroData, costumes, heroModels, voiceFiles }: HeroClientProps) {
 	return (
 		<div>
 			{/* Hero Basic Info */}

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation"
 import ArtifactClient from "@/app/artifacts/[...slug]/client"
 import { ArtifactData } from "@/model/Artifact"
-import { SlugPageProps, findData } from "@/components/server/get-data"
+import { findData, SlugPageProps } from "@/lib/get-data"
 
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params

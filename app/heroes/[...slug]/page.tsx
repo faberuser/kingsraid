@@ -1,9 +1,9 @@
 import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
-import SlugClient from "@/app/heroes/[...slug]/client"
+import HeroClient from "@/app/heroes/[...slug]/client"
 import { capitalize } from "@/lib/utils"
-import { SlugPageProps, getFileData } from "@/components/server/get-data"
+import { SlugPageProps, findData } from "@/lib/get-data"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
@@ -73,11 +73,11 @@ async function getCostumeData(costumePath: string): Promise<Costume[]> {
 		}
 
 		const files = fs.readdirSync(fullPath)
-		const imageFiles = files.filter((file) => file.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/))
+		const imageFiles = files.filter((file) => file.toLowerCase().match(/\.(png|gif)$/))
 
 		const costumes: Costume[] = imageFiles.map((filename) => {
 			// Remove file extension for display name
-			const nameWithoutExt = filename.replace(/\.(png|jpg|jpeg|gif|webp)$/i, "")
+			const nameWithoutExt = filename.replace(/\.(png|gif)$/i, "")
 
 			// Create a more readable display name
 			let displayName = nameWithoutExt
@@ -448,7 +448,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const heroData = (await getFileData(heroName, "heroes")) as HeroData | null
+	const heroData = (await findData(heroName, "heroes")) as HeroData | null
 
 	if (!heroData) {
 		notFound()
@@ -463,5 +463,5 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get voice files server-side
 	const voiceFiles = await getVoiceFiles(heroData.infos.name)
 
-	return <SlugClient heroData={heroData} costumes={costumes} heroModels={heroModels} voiceFiles={voiceFiles} />
+	return <HeroClient heroData={heroData} costumes={costumes} heroModels={heroModels} voiceFiles={voiceFiles} />
 }
