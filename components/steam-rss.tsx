@@ -68,7 +68,15 @@ export default function SteamRSS({ news }: SteamRSSProps) {
 						<Link href={item.url} target="_blank" rel="noopener noreferrer">
 							<Card className="h-full gap-2">
 								<CardHeader>
-									<CardTitle className="line-clamp-2">{item.title}</CardTitle>
+									<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
+										{item.title}
+										{new Date().getTime() - new Date(item.date).getTime() <
+											7 * 24 * 60 * 60 * 1000 && (
+											<span className="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded">
+												New
+											</span>
+										)}
+									</CardTitle>
 									<CardDescription>{new Date(item.date).toLocaleDateString()}</CardDescription>
 								</CardHeader>
 								<CardContent className="h-full">
