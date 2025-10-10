@@ -1,6 +1,6 @@
 "use client"
 
-import { NewsItem } from "@/app/news/page"
+import { NewsItem } from "@/lib/steam-rss"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
