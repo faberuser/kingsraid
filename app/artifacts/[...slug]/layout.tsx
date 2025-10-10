@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { ArtifactData } from "@/model/Artifact"
-import { SlugPageProps, findData } from "@/components/server/get-data"
+import { SlugPageProps, findData } from "@/lib/get-data"
 
 export async function generateMetadata({ params }: SlugPageProps): Promise<Metadata> {
 	const { slug } = await params

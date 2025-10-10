@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation"
 import BossClient from "@/app/bosses/[...slug]/client"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, getFileData } from "@/components/server/get-data"
-
+import { SlugPageProps, findData } from "@/lib/get-data"
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params
 	const bossName = slug?.[0]
@@ -11,7 +10,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const bossData = (await getFileData(bossName, "bosses")) as BossData | null
+	const bossData = (await findData(bossName, "bosses")) as BossData | null
 
 	if (!bossData) {
 		notFound()

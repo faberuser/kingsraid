@@ -1,9 +1,9 @@
 import BossesClient from "@/app/bosses/client"
 import { BossData } from "@/model/Boss"
-import { getDirData, getJsonData } from "@/components/server/get-data"
+import { getData, getJsonData } from "@/lib/get-data"
 
 export default async function BossesPage() {
-	const bosses = (await getDirData("bosses")) as BossData[]
+	const bosses = (await getData("bosses")) as BossData[]
 	const bossTypeMap = await getJsonData("boss_type.json")
 
 	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} />
