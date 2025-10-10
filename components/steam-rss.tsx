@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { NewsItem } from "@/app/page"
+import { Badge } from "@/components/ui/badge"
 
 interface SteamRSSProps {
 	news: NewsItem[]
@@ -71,11 +72,7 @@ export default function SteamRSS({ news }: SteamRSSProps) {
 									<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
 										{item.title}
 										{new Date().getTime() - new Date(item.date).getTime() <
-											7 * 24 * 60 * 60 * 1000 && (
-											<span className="bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded">
-												New
-											</span>
-										)}
+											7 * 24 * 60 * 60 * 1000 && <Badge className="text-xs">New</Badge>}
 									</CardTitle>
 									<CardDescription>{new Date(item.date).toLocaleDateString()}</CardDescription>
 								</CardHeader>
