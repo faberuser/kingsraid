@@ -58,9 +58,10 @@ RUN bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
-COPY --from=install-prod /temp/prod/node_modules node_modules
+COPY --from=install-prod /temp/prod/node_modules ./node_modules
 COPY --from=prerelease /usr/src/app/.next ./.next
-COPY --from=prerelease /usr/src/app/package.json .
+COPY --from=prerelease /usr/src/app/package.json ./package.json
+COPY --from=prerelease /usr/src/app/next.config.ts ./next.config.ts
 COPY --from=git-stage /usr/src/app/public ./public
 
 # expose the port
