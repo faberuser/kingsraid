@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect, useRef, Suspense } from "react"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Kbd } from "@/components/ui/kbd"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
@@ -9,7 +11,7 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { RotateCcw, ZoomIn, ZoomOut, Eye, EyeOff } from "lucide-react"
+import { RotateCcw, Info, Eye, EyeOff } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 
 interface ModelsProps {
@@ -219,9 +221,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
-	const [cameraPosition, setCameraPosition] = useState<[number, number, number]>(INITIAL_CAMERA_POSITION)
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
 	const controlsRef = useRef<any>(null)
+	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
 		// Auto-load all available components for the selected costume
@@ -232,19 +234,14 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	}, [modelFiles])
 
 	const resetCamera = () => {
-		setCameraPosition(INITIAL_CAMERA_POSITION)
+		if (cameraRef.current) {
+			cameraRef.current.position.set(...INITIAL_CAMERA_POSITION)
+			cameraRef.current.updateProjectionMatrix()
+		}
 		if (controlsRef.current) {
 			controlsRef.current.target.set(...INITIAL_CAMERA_TARGET)
 			controlsRef.current.update()
 		}
-	}
-
-	const zoomIn = () => {
-		setCameraPosition((prev) => [prev[0], prev[1], Math.max(prev[2] - 0.5, 0.5)])
-	}
-
-	const zoomOut = () => {
-		setCameraPosition((prev) => [prev[0], prev[1], Math.min(prev[2] + 0.5, 10)])
 	}
 
 	const toggleModelVisibility = (modelName: string) => {
@@ -280,7 +277,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 			{/* 3D Viewer */}
 			<div className="relative h-200 w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
 				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
-					<PerspectiveCamera makeDefault position={cameraPosition} />
+					<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 					<OrbitControls
 						ref={controlsRef}
 						enablePan={true}
@@ -288,7 +285,7 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 						enableRotate={true}
 						maxDistance={10}
 						minDistance={0.5}
-						target={[0, 1, 0]}
+						target={INITIAL_CAMERA_TARGET}
 					/>
 					<Suspense fallback={null}>
 						<Model modelFiles={modelFiles} visibleModels={visibleModels} />
@@ -298,14 +295,26 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 
 				{/* Camera Controls */}
 				<div className="absolute top-4 right-4 flex flex-col gap-2">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary">
+								<Info className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent className="space-y-1">
+							<div>
+								<Kbd>Left Click</Kbd> Rotate
+							</div>
+							<div>
+								<Kbd>Right Click</Kbd> Move
+							</div>
+							<div>
+								<Kbd>Scroll</Kbd> Zoom
+							</div>
+						</TooltipContent>
+					</Tooltip>
 					<Button size="sm" variant="secondary" onClick={resetCamera}>
 						<RotateCcw className="h-4 w-4" />
-					</Button>
-					<Button size="sm" variant="secondary" onClick={zoomIn}>
-						<ZoomIn className="h-4 w-4" />
-					</Button>
-					<Button size="sm" variant="secondary" onClick={zoomOut}>
-						<ZoomOut className="h-4 w-4" />
 					</Button>
 				</div>
 
