@@ -16,25 +16,26 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 interface BossesClientProps {
 	bosses: BossData[]
 	bossTypeMap: Record<string, string>
+	releaseOrder: Record<string, string>
 }
 
-export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps) {
+export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [reverseSort, setReverseSort] = useState(false)
 	const [selectedType, setSelectedType] = useState("all")
-
-	// Load sort state from localStorage on mount
-	useEffect(() => {
-		const savedReverseSort = localStorage.getItem("bossesReverseSort")
-		if (savedReverseSort === "true" || savedReverseSort === "false") {
-			setReverseSort(savedReverseSort === "true")
-		}
-	}, [])
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(
+		typeof window !== "undefined"
+			? (localStorage.getItem("bossesSortType") as "alphabetical" | "release") || "release"
+			: "release"
+	)
+	const [reverseSort, setReverseSort] = useState(
+		typeof window !== "undefined" ? localStorage.getItem("bossesReverseSort") === "true" : true
+	)
 
 	// Save sort state to localStorage when changed
 	useEffect(() => {
+		localStorage.setItem("bossesSortType", sortType)
 		localStorage.setItem("bossesReverseSort", reverseSort.toString())
-	}, [reverseSort])
+	}, [sortType, reverseSort])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -59,22 +60,35 @@ export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps)
 	// Filter and sort bosses
 	const filteredBosses = useMemo(() => {
 		let result = bosses
+
+		// Apply search filter
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
 			result = searchResults.map((item) => item.item)
 		}
+
 		// Filter by type
 		if (selectedType !== "all") {
 			result = result.filter((boss) => boss.infos.type?.includes(selectedType))
 		}
-		// Sort alphabetically
-		result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
+
+		// Sort by selected sort type
+		if (sortType === "release") {
+			result = [...result].sort((a, b) => {
+				const aOrder = parseInt(releaseOrder[a.infos.name] ?? "9999", 10)
+				const bOrder = parseInt(releaseOrder[b.infos.name] ?? "9999", 10)
+				return aOrder - bOrder
+			})
+		} else {
+			result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
+		}
+
 		// Reverse if needed
 		if (reverseSort) {
 			result = result.reverse()
 		}
 		return result
-	}, [bosses, searchQuery, fuse, reverseSort, selectedType])
+	}, [bosses, searchQuery, fuse, selectedType, sortType, reverseSort, releaseOrder])
 
 	return (
 		<div>
@@ -85,9 +99,38 @@ export default function BossesClient({ bosses, bossTypeMap }: BossesClientProps)
 						<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
 					</div>
 					<div className="flex flex-row">
-						<Button variant="outline" onClick={() => setReverseSort(!reverseSort)}>
-							{reverseSort ? <ChevronDown /> : <ChevronUp />}
-							{reverseSort ? "Z → A" : "A → Z"}
+						{/* Alphabetical Sort */}
+						<Button
+							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
+							onClick={() => {
+								if (sortType === "alphabetical") {
+									setReverseSort(!reverseSort)
+								} else {
+									setSortType("alphabetical")
+									setReverseSort(false)
+								}
+							}}
+						>
+							{sortType === "alphabetical" && reverseSort && <ChevronDown />}
+							{sortType === "alphabetical" && !reverseSort && <ChevronUp />}
+							{sortType === "alphabetical" && reverseSort ? "Z → A" : "A → Z"}
+						</Button>
+
+						{/* Release Sort */}
+						<Button
+							variant={`${sortType === "release" ? "outline" : "ghost"}`}
+							onClick={() => {
+								if (sortType === "release") {
+									setReverseSort(!reverseSort)
+								} else {
+									setSortType("release")
+									setReverseSort(true)
+								}
+							}}
+						>
+							{sortType === "release" && reverseSort && <ChevronUp />}
+							{sortType === "release" && !reverseSort && <ChevronDown />}
+							Release
 						</Button>
 					</div>
 				</div>

@@ -29,58 +29,6 @@ interface SearchItem {
 	aliases?: string[] | null
 }
 
-// Page items
-const pageItems: SearchItem[] = [
-	{
-		id: "home",
-		title: "Home",
-		description: "Welcome to King's Raid",
-		type: "page",
-		url: "/",
-		icon: Home,
-	},
-	{
-		id: "heroes",
-		title: "Heroes",
-		description: "Browse all heroes",
-		type: "page",
-		url: "/heroes",
-		icon: UserRound,
-	},
-	{
-		id: "artifacts",
-		title: "Artifacts",
-		description: "Browse all artifacts",
-		type: "page",
-		url: "/artifacts",
-		icon: Amphora,
-	},
-	{
-		id: "bosses",
-		title: "Bosses",
-		description: "Browse all bosses",
-		type: "page",
-		url: "/bosses",
-		icon: ShieldHalf,
-	},
-	{
-		id: "technomagic-gear",
-		title: "Technomagic Gear",
-		description: "Explore technomagic gear",
-		type: "page",
-		url: "/technomagic-gear",
-		icon: Zap,
-	},
-	{
-		id: "softcap",
-		title: "Softcap",
-		description: "Calculate softcap adjustments",
-		type: "page",
-		url: "/softcap",
-		icon: Calculator,
-	},
-]
-
 interface GlobalSearchProps {
 	searchData?: {
 		heroes?: HeroData[]
@@ -91,7 +39,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 	const [open, setOpen] = useState(false)
-	const [searchItems, setSearchItems] = useState<SearchItem[]>(pageItems)
+	const [searchItems, setSearchItems] = useState<SearchItem[]>([])
 	const [searchValue, setSearchValue] = useState("")
 	const router = useRouter()
 	const listRef = useRef<HTMLDivElement>(null)
@@ -111,7 +59,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 
 	// Build search items when searchData changes
 	useEffect(() => {
-		const items: SearchItem[] = [...pageItems]
+		const items: SearchItem[] = []
 
 		if (searchData?.heroes) {
 			searchData.heroes.forEach((hero, index) => {

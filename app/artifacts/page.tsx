@@ -1,9 +1,10 @@
 import ArtifactsClient from "@/app/artifacts/client"
 import { ArtifactData } from "@/model/Artifact"
-import { getData } from "@/lib/get-data"
+import { getData, getJsonData } from "@/lib/get-data"
 
 export default async function ArtifactsPage() {
 	const artifacts = (await getData("artifacts.json")) as ArtifactData[]
+	const releaseOrder = await getJsonData("artifact_release_order.json")
 
-	return <ArtifactsClient artifacts={artifacts} />
+	return <ArtifactsClient artifacts={artifacts} releaseOrder={releaseOrder} />
 }

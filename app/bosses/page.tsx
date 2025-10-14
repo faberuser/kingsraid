@@ -5,6 +5,7 @@ import { getData, getJsonData } from "@/lib/get-data"
 export default async function BossesPage() {
 	const bosses = (await getData("bosses")) as BossData[]
 	const bossTypeMap = await getJsonData("boss_type.json")
+	const releaseOrder = await getJsonData("boss_release_order.json")
 
-	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} />
+	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
 }

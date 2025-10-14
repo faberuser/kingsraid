@@ -91,6 +91,14 @@ export async function getData(
 	return options.sortByName ? sortByName(data) : data
 }
 
+// Helper to normalize names for comparison
+function normalizeName(str: string): string {
+	return str
+		.toLowerCase()
+		.replace(/[\s\-]+/g, " ")
+		.trim()
+}
+
 // Find single data by name/slug
 export async function findData(slug: string, source: string): Promise<DataItem | null> {
 	const normalizedSlug = decodeURIComponent(slug).toLowerCase().replace(/-/g, " ")
@@ -108,16 +116,16 @@ export async function findData(slug: string, source: string): Promise<DataItem |
 
 	if (!data) return null
 
-	// Try to find by exact name match (case insensitive)
+	// Try to find by normalized name match
 	let found = data.find((item) => {
-		return getName(item).toLowerCase() === normalizedSlug
+		return normalizeName(getName(item)) === normalizedSlug
 	})
 
 	// If not found by name, search by aliases (only for artifacts)
 	if (!found) {
 		found = data.find((item) => {
 			if ("aliases" in item && item.aliases) {
-				return item.aliases.some((alias) => alias.toLowerCase() === normalizedSlug)
+				return item.aliases.some((alias) => normalizeName(alias) === normalizedSlug)
 			}
 			return false
 		})

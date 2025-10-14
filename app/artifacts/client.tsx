@@ -13,24 +13,25 @@ import { Search, ChevronDown, ChevronUp } from "lucide-react"
 
 interface ArtifactsClientProps {
 	artifacts: ArtifactData[]
+	releaseOrder: Record<string, string>
 }
 
-export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
+export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [reverseSort, setReverseSort] = useState(false)
-
-	// Load reverseSort from localStorage on mount
-	useEffect(() => {
-		const savedReverseSort = localStorage.getItem("artifactsReverseSort")
-		if (savedReverseSort === "true" || savedReverseSort === "false") {
-			setReverseSort(savedReverseSort === "true")
-		}
-	}, [])
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(
+		typeof window !== "undefined"
+			? (localStorage.getItem("artifactsSortType") as "alphabetical" | "release") || "release"
+			: "release"
+	)
+	const [reverseSort, setReverseSort] = useState(
+		typeof window !== "undefined" ? localStorage.getItem("artifactsReverseSort") === "true" : true
+	)
 
 	// Save reverseSort to localStorage when changed
 	useEffect(() => {
+		localStorage.setItem("artifactsSortType", sortType)
 		localStorage.setItem("artifactsReverseSort", reverseSort.toString())
-	}, [reverseSort])
+	}, [sortType, reverseSort])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -44,18 +45,30 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	// Filter and sort artifacts
 	const filteredArtifacts = useMemo(() => {
 		let result = artifacts
+
+		// Apply search filter
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
 			result = searchResults.map((item) => item.item)
 		}
-		// Sort alphabetically
-		result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+
+		// Sort by selected sort type
+		if (sortType === "release") {
+			result = [...result].sort((a, b) => {
+				const aOrder = parseInt(releaseOrder[a.name] ?? "9999", 10)
+				const bOrder = parseInt(releaseOrder[b.name] ?? "9999", 10)
+				return aOrder - bOrder
+			})
+		} else {
+			result = [...result].sort((a, b) => a.name.localeCompare(b.name))
+		}
+
 		// Reverse if needed
 		if (reverseSort) {
 			result = result.reverse()
 		}
 		return result
-	}, [artifacts, searchQuery, fuse, reverseSort])
+	}, [artifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder])
 
 	return (
 		<div>
@@ -68,9 +81,38 @@ export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 						</div>
 					</div>
 					<div className="flex flex-row">
-						<Button variant="outline" onClick={() => setReverseSort(!reverseSort)}>
-							{reverseSort ? <ChevronDown /> : <ChevronUp />}
-							{reverseSort ? "Z → A" : "A → Z"}
+						{/* Alphabetical Sort */}
+						<Button
+							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
+							onClick={() => {
+								if (sortType === "alphabetical") {
+									setReverseSort(!reverseSort)
+								} else {
+									setSortType("alphabetical")
+									setReverseSort(false)
+								}
+							}}
+						>
+							{sortType === "alphabetical" && reverseSort && <ChevronDown />}
+							{sortType === "alphabetical" && !reverseSort && <ChevronUp />}
+							{sortType === "alphabetical" && reverseSort ? "Z → A" : "A → Z"}
+						</Button>
+
+						{/* Release Sort */}
+						<Button
+							variant={`${sortType === "release" ? "outline" : "ghost"}`}
+							onClick={() => {
+								if (sortType === "release") {
+									setReverseSort(!reverseSort)
+								} else {
+									setSortType("release")
+									setReverseSort(true)
+								}
+							}}
+						>
+							{sortType === "release" && reverseSort && <ChevronUp />}
+							{sortType === "release" && !reverseSort && <ChevronDown />}
+							Release
 						</Button>
 					</div>
 				</div>
