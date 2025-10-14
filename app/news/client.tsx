@@ -57,14 +57,16 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 							onClick={() => handleNewsClick(news)}
 						>
 							{imageSrc && (
-								<Image
-									width="0"
-									height="0"
-									sizes="80vw md:40vw"
-									src={imageSrc}
-									alt={news.title}
-									className="w-full h-auto lg:w-100 lg:h-full object-contain rounded px-6 mb-4 lg:mb-0 lg:px-0 lg:ml-6"
-								/>
+								<div className="w-full h-auto lg:w-150 lg:h-full flex items-center justify-center object-contain rounded px-6 mb-4 lg:mb-0 lg:px-0 lg:ml-6">
+									<Image
+										width="0"
+										height="0"
+										sizes="80vw md:40vw"
+										src={imageSrc}
+										alt={news.title}
+										className="w-full h-auto object-contain rounded"
+									/>
+								</div>
 							)}
 
 							<div className="flex flex-col justify-between gap-4 w-full">
