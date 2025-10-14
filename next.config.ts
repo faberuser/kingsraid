@@ -1,13 +1,11 @@
 import type { NextConfig } from "next"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
-const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || ""
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 
 const nextConfig: NextConfig = {
 	output: isStaticExport ? "export" : undefined,
 	basePath,
-	assetPrefix,
 	images: {
 		unoptimized: isStaticExport,
 		remotePatterns: [
