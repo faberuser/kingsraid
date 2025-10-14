@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight, Omega } from "lucide-react"
+import Image from "@/components/image"
 
 interface ImageZoomModalProps {
 	isOpen: boolean
@@ -283,7 +284,7 @@ export default function ImageZoomModal({
 								transformOrigin: "center center",
 							}}
 						>
-							<img
+							<Image
 								src={imageSrc}
 								alt={imageAlt}
 								style={{
