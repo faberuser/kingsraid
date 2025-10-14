@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import ArtifactClient from "@/app/artifacts/[...slug]/client"
 import { ArtifactData } from "@/model/Artifact"
-import { findData, SlugPageProps } from "@/lib/get-data"
+import { SlugPageProps, findData } from "@/lib/get-data"
 
 export async function generateStaticParams() {
 	const artifactsPath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "artifacts.json")
