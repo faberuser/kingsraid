@@ -440,6 +440,21 @@ async function getVoiceFiles(heroName: string): Promise<VoiceFiles> {
 	return voiceFiles
 }
 
+export async function generateStaticParams() {
+	const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
+	const slugs: string[] = []
+
+	if (fs.existsSync(heroesDir)) {
+		const files = fs.readdirSync(heroesDir).filter((file) => file.endsWith(".json"))
+		for (const file of files) {
+			const name = file.replace(".json", "")
+			slugs.push(name)
+		}
+	}
+
+	return slugs.map((slug) => ({ slug: [slug] }))
+}
+
 export default async function SlugPage({ params }: SlugPageProps) {
 	const { slug } = await params
 	const heroName = slug?.[0]
