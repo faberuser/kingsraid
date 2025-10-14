@@ -14,11 +14,16 @@ export async function generateStaticParams() {
 		const data: ArtifactData[] = JSON.parse(fileContent)
 		for (const artifact of data) {
 			if (artifact.name) {
-				slugs.push(artifact.name)
+				// Convert to slug format (lowercase with hyphens)
+				const slug = artifact.name.toLowerCase().replace(/\s+/g, "-")
+				slugs.push(slug)
 			}
-			// If you want to support aliases:
+			// Also generate slugs for aliases
 			if (artifact.aliases && Array.isArray(artifact.aliases)) {
-				slugs.push(...artifact.aliases)
+				for (const alias of artifact.aliases) {
+					const slug = alias.toLowerCase().replace(/\s+/g, "-")
+					slugs.push(slug)
+				}
 			}
 		}
 	}

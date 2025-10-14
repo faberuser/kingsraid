@@ -24,7 +24,11 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 			: "release"
 	)
 	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined" ? localStorage.getItem("artifactsReverseSort") === "true" : true
+		typeof window !== "undefined"
+			? localStorage.getItem("artifactsReverseSort") === null
+				? true
+				: localStorage.getItem("artifactsReverseSort") === "true"
+			: true
 	)
 
 	// Save reverseSort to localStorage when changed

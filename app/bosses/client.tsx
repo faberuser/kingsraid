@@ -28,7 +28,11 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 			: "release"
 	)
 	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined" ? localStorage.getItem("bossesReverseSort") === "true" : true
+		typeof window !== "undefined"
+			? localStorage.getItem("bossesReverseSort") === null
+				? true
+				: localStorage.getItem("bossesReverseSort") === "true"
+			: true
 	)
 
 	// Save sort state to localStorage when changed

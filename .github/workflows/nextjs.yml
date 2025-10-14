@@ -36,6 +36,7 @@ jobs:
         run: |
           echo "NEXT_PUBLIC_BASE_PATH=/kingsraid" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_ASSET_PREFIX=/kingsraid/" >> $GITHUB_ENV
+          echo "NEXT_STATIC_EXPORT=true" >> $GITHUB_ENV
 
       - name: Build Next.js app
         run: bun run build

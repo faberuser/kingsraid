@@ -32,7 +32,11 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 			: "release"
 	)
 	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined" ? localStorage.getItem("heroesReverseSort") === "true" : true
+		typeof window !== "undefined"
+			? localStorage.getItem("heroesReverseSort") === null
+				? true
+				: localStorage.getItem("heroesReverseSort") === "true"
+			: true
 	)
 
 	// Save sort state to localStorage when changed

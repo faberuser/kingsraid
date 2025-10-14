@@ -12,8 +12,11 @@ export async function generateStaticParams() {
 	if (fs.existsSync(bossesDir)) {
 		const files = fs.readdirSync(bossesDir).filter((file) => file.endsWith(".json"))
 		for (const file of files) {
+			// Remove .json extension
 			const name = file.replace(".json", "")
-			slugs.push(name)
+			// Convert to slug format (lowercase with hyphens)
+			const slug = name.toLowerCase().replace(/\s+/g, "-")
+			slugs.push(slug)
 		}
 	}
 
