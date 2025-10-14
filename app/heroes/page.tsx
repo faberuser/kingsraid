@@ -15,7 +15,7 @@ const heroClasses = [
 
 export default async function HeroesPage() {
 	const heroes = (await getData("heroes")) as HeroData[]
-	const releaseOrder = await getJsonData("release_order.json")
+	const releaseOrder = await getJsonData("hero_release_order.json")
 	const saReverse = (await getJsonDataList("sa_reverse.json")) as string[]
 
 	return <HeroesClient heroes={heroes} heroClasses={heroClasses} releaseOrder={releaseOrder} saReverse={saReverse} />

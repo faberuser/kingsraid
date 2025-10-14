@@ -23,23 +23,17 @@ interface HeroesClientProps {
 }
 
 export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReverse }: HeroesClientProps) {
+	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedClass, setSelectedClass] = useState("all")
 	const [selectedDamageType, setSelectedDamageType] = useState("all")
-	const [searchQuery, setSearchQuery] = useState("")
-	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
-	const [reverseSort, setReverseSort] = useState(true)
-
-	// Load sort state from localStorage on mount
-	useEffect(() => {
-		const savedSortType = localStorage.getItem("heroesSortType")
-		const savedReverseSort = localStorage.getItem("heroesReverseSort")
-		if (savedSortType === "alphabetical" || savedSortType === "release") {
-			setSortType(savedSortType)
-		}
-		if (savedReverseSort === "true" || savedReverseSort === "false") {
-			setReverseSort(savedReverseSort === "true")
-		}
-	}, [])
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(
+		typeof window !== "undefined"
+			? (localStorage.getItem("heroesSortType") as "alphabetical" | "release") || "release"
+			: "release"
+	)
+	const [reverseSort, setReverseSort] = useState(
+		typeof window !== "undefined" ? localStorage.getItem("heroesReverseSort") === "true" : true
+	)
 
 	// Save sort state to localStorage when changed
 	useEffect(() => {
@@ -95,7 +89,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		}
 
 		return result
-	}, [heroes, searchQuery, selectedClass, selectedDamageType, fuse, sortType, releaseOrder, reverseSort])
+	}, [heroes, searchQuery, fuse, selectedClass, selectedDamageType, sortType, reverseSort, releaseOrder])
 
 	const damageTypes = [
 		{ value: "all", name: "All" },
@@ -111,7 +105,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 						<div className="text-xl font-bold">Heroes</div>
 						<div className="text-muted-foreground text-sm">Showing {filteredHeroes.length} heroes</div>
 					</div>
-					<div className="flex flex-row gap-1">
+					<div className="flex flex-row">
 						{/* Alphabetical Sort */}
 						<Button
 							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
@@ -129,6 +123,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 							{sortType === "alphabetical" && reverseSort ? "Z → A" : "A → Z"}
 						</Button>
 
+						{/* Release Sort */}
 						<Button
 							variant={`${sortType === "release" ? "outline" : "ghost"}`}
 							onClick={() => {

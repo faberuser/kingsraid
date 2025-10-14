@@ -17,15 +17,9 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [reverseSort, setReverseSort] = useState(false)
-
-	// Load reverseSort from localStorage on mount
-	useEffect(() => {
-		const savedReverseSort = localStorage.getItem("artifactsReverseSort")
-		if (savedReverseSort === "true" || savedReverseSort === "false") {
-			setReverseSort(savedReverseSort === "true")
-		}
-	}, [])
+	const [reverseSort, setReverseSort] = useState(
+		typeof window !== "undefined" ? localStorage.getItem("artifactsReverseSort") === "true" : true
+	)
 
 	// Save reverseSort to localStorage when changed
 	useEffect(() => {
