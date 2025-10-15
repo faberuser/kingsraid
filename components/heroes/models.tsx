@@ -214,23 +214,19 @@ function Model({
 				// Store shared animations from the first model that has them
 				if (modelWithAnimations.animations.length > 0 && sharedAnimationsRef.current.length === 0) {
 					sharedAnimationsRef.current = modelWithAnimations.animations
-
-					// If parent hasn't populated available animations yet, derive and set them
-					if (setAvailableAnimations && (!availableAnimations || availableAnimations.length === 0)) {
-						const animNames = modelWithAnimations.animations
-							.map((clip) => clip.name)
-							.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
-						if (animNames.length > 0) {
-							setAvailableAnimations(animNames)
-							if (setSelectedAnimation) setSelectedAnimation(animNames[0])
-						}
-					}
+					console.log(
+						`[Model Load] Stored ${modelWithAnimations.animations.length} shared animations from ${modelFile.name}`
+					)
 				}
 
 				// Always create a mixer for every model
 				const mixer = new THREE.AnimationMixer(modelWithAnimations)
 				modelWithAnimations.mixer = mixer
 				mixersRef.current.set(modelFile.name, mixer)
+
+				console.log(
+					`[Model Load] Loaded ${modelFile.name}, has ${modelWithAnimations.animations.length} animations`
+				)
 
 				setLoadedModels((prev) => new Map(prev).set(modelFile.name, modelWithAnimations))
 			} catch (error) {
@@ -248,11 +244,17 @@ function Model({
 		const loadModelsSequentially = async () => {
 			if (setIsLoading) setIsLoading(true)
 
+			// Sort models to load body first (most important for animations), then others
 			const sortedModels = [...modelFiles].sort((a, b) => {
 				if (a.type === "body") return -1
 				if (b.type === "body") return 1
+				// Also prioritize arms/hair after body as they may contain animations
+				if (a.type === "arms" || a.type === "arm") return -1
+				if (b.type === "arms" || b.type === "arm") return 1
 				return 0
 			})
+
+			console.log(`[Model Load] Loading models in order:`, sortedModels.map((m) => m.type).join(", "))
 
 			for (const modelFile of sortedModels) {
 				if (visibleModels.has(modelFile.name)) {
@@ -270,9 +272,16 @@ function Model({
 	useEffect(() => {
 		// Wait a bit to ensure all models have loaded and shared animations are available
 		const timeoutId = setTimeout(() => {
+			console.log(
+				`[Animation Switch] Selected: ${selectedAnimation}, Loaded models: ${loadedModels.size}, Shared animations: ${sharedAnimationsRef.current.length}`
+			)
+
 			loadedModels.forEach((model, modelName) => {
 				const mixer = mixersRef.current.get(modelName)
-				if (!mixer) return
+				if (!mixer) {
+					console.warn(`[Animation Switch] No mixer found for ${modelName}`)
+					return
+				}
 
 				// Stop all current actions
 				const currentAction = activeActionsRef.current.get(modelName)
@@ -291,6 +300,11 @@ function Model({
 						const action = mixer.clipAction(clip)
 						action.reset().fadeIn(0.3).play()
 						activeActionsRef.current.set(modelName, action)
+						console.log(`[Animation Switch] Playing ${selectedAnimation} on ${modelName}`)
+					} else {
+						console.warn(
+							`[Animation Switch] Animation ${selectedAnimation} not found for ${modelName}. Available: ${animations.length}`
+						)
 					}
 				}
 			})
@@ -571,31 +585,64 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
 
-			// Load from the current costume's first model
-			const firstModels = heroModels[selectedCostume]
-			const firstModel = firstModels && firstModels.length > 0 ? firstModels[0] : null
-			if (!firstModel) return
+			// Load from the current costume's models - prioritize body, then first available
+			const costumeModels = heroModels[selectedCostume]
+			if (!costumeModels || costumeModels.length === 0) {
+				console.warn(`[Animation Load] No models found for costume ${selectedCostume}`)
+				return
+			}
+
+			// Try to find body model first, as it typically has the most complete animation set
+			const bodyModel = costumeModels.find((m) => m.type === "body")
+			const firstModel = bodyModel || costumeModels[0]
+
+			console.log(`[Animation Load] Loading animations from ${firstModel.type} model: ${firstModel.path}`)
 
 			try {
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
-					fbxLoader.load(`${modelDir}/${firstModel.path}`, resolve, undefined, reject)
+					const timeout = setTimeout(() => {
+						reject(new Error(`Timeout loading ${firstModel.path}`))
+					}, 30000) // 30 second timeout
+
+					fbxLoader.load(
+						`${modelDir}/${firstModel.path}`,
+						(loadedFbx) => {
+							clearTimeout(timeout)
+							resolve(loadedFbx)
+						},
+						undefined,
+						(error) => {
+							clearTimeout(timeout)
+							reject(error)
+						}
+					)
 				})
+
+				console.log(
+					`[Animation Load] Costume: ${selectedCostume}, Animations found: ${fbx.animations?.length || 0}`
+				)
 
 				if (fbx.animations && fbx.animations.length > 0) {
 					const animNames = fbx.animations
 						.map((clip) => clip.name)
 						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
 
+					console.log(`[Animation Load] Filtered animations: ${animNames.length}`, animNames)
+
 					if (animNames.length > 0) {
-						// Cache the animations for this costume
-						animationsCacheRef.current.set(selectedCostume, animNames)
-						setAvailableAnimations(animNames)
-						setSelectedAnimation(animNames[0])
+						// Use a microtask to ensure state updates are batched properly
+						Promise.resolve().then(() => {
+							// Cache the animations for this costume
+							animationsCacheRef.current.set(selectedCostume, animNames)
+							setAvailableAnimations(animNames)
+							setSelectedAnimation(animNames[0])
+						})
 					} else {
 						// Cache empty array for costumes with no animations
 						animationsCacheRef.current.set(selectedCostume, [])
 					}
 				} else {
+					console.warn(`[Animation Load] No animations in FBX for costume ${selectedCostume}`)
 					// Cache empty array for costumes with no animations
 					animationsCacheRef.current.set(selectedCostume, [])
 				}
