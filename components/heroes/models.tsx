@@ -11,11 +11,22 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { RotateCcw, Info, Eye, EyeOff } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
+import { RotateCcw, Info, Eye, EyeOff, Play, Pause } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
+// Suppress THREE.js PropertyBinding warnings for missing bones (common in FBX files)
+const originalWarn = console.warn
+console.warn = function (...args) {
+	const message = args[0]
+	if (typeof message === "string" && message.includes("THREE.PropertyBinding: No target node found")) {
+		return
+	}
+	originalWarn.apply(console, args)
+}
 
 interface ModelsProps {
 	heroData: HeroData
@@ -31,10 +42,20 @@ function Model({
 	modelFiles,
 	visibleModels,
 	selectedAnimation,
+	availableAnimations,
+	setAvailableAnimations,
+	setSelectedAnimation,
+	isPaused,
+	setIsLoading,
 }: {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
 	selectedAnimation: string | null
+	availableAnimations?: string[]
+	setAvailableAnimations?: (a: string[]) => void
+	setSelectedAnimation?: (s: string | null) => void
+	isPaused?: boolean
+	setIsLoading?: (loading: boolean) => void
 }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
@@ -145,7 +166,7 @@ function Model({
 					"handle",
 					"weapon",
 					"weapon01",
-					"weapon01",
+					"weapon02",
 					"weapon_blue",
 					"weapon_red",
 					"weapon_open",
@@ -193,6 +214,17 @@ function Model({
 				// Store shared animations from the first model that has them
 				if (modelWithAnimations.animations.length > 0 && sharedAnimationsRef.current.length === 0) {
 					sharedAnimationsRef.current = modelWithAnimations.animations
+
+					// If parent hasn't populated available animations yet, derive and set them
+					if (setAvailableAnimations && (!availableAnimations || availableAnimations.length === 0)) {
+						const animNames = modelWithAnimations.animations
+							.map((clip) => clip.name)
+							.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
+						if (animNames.length > 0) {
+							setAvailableAnimations(animNames)
+							if (setSelectedAnimation) setSelectedAnimation(animNames[0])
+						}
+					}
 				}
 
 				// Always create a mixer for every model
@@ -214,6 +246,8 @@ function Model({
 
 		// Load models sequentially: body first to ensure animations are available
 		const loadModelsSequentially = async () => {
+			if (setIsLoading) setIsLoading(true)
+
 			const sortedModels = [...modelFiles].sort((a, b) => {
 				if (a.type === "body") return -1
 				if (b.type === "body") return 1
@@ -225,6 +259,8 @@ function Model({
 					await loadModel(modelFile)
 				}
 			}
+
+			if (setIsLoading) setIsLoading(false)
 		}
 
 		loadModelsSequentially()
@@ -264,7 +300,9 @@ function Model({
 	}, [selectedAnimation, loadedModels])
 
 	useFrame((state, delta) => {
-		mixersRef.current.forEach((mixer) => mixer.update(delta))
+		if (!isPaused) {
+			mixersRef.current.forEach((mixer) => mixer.update(delta))
+		}
 	})
 
 	useEffect(() => {
@@ -283,60 +321,36 @@ function Model({
 	)
 }
 
-function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
+function ModelViewer({
+	modelFiles,
+	availableAnimations,
+	selectedAnimation,
+	setSelectedAnimation,
+	setAvailableAnimations,
+}: {
+	modelFiles: ModelFile[]
+	availableAnimations: string[]
+	selectedAnimation: string | null
+	setSelectedAnimation: (s: string | null) => void
+	setAvailableAnimations: (a: string[]) => void
+}) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
-	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
-	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+	const [isPaused, setIsPaused] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
+
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
 		// Auto-load all available components for the selected costume
 		if (modelFiles.length > 0) {
+			setIsLoading(true) // Start loading when models change
 			const modelNames = modelFiles.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles])
-
-	// Detect animations from loaded models
-	useEffect(() => {
-		const loadAnimations = async () => {
-			const fbxLoader = new FBXLoader()
-			const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
-			const modelDir = `${basePath}/kingsraid-models/models/heroes`
-
-			// Load the first model file to get animations
-			const firstModel = modelFiles[0]
-			if (!firstModel) return
-
-			try {
-				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
-					fbxLoader.load(`${modelDir}/${firstModel.path}`, resolve, undefined, reject)
-				})
-
-				if (fbx.animations && fbx.animations.length > 0) {
-					// Filter out weapon and extra animations, and format names
-					const animNames = fbx.animations
-						.map((clip) => clip.name)
-						.filter((name) => {
-							// Exclude weapon and extra animations
-							return !name.includes("_Weapon@") && !name.includes("Extra")
-						})
-					setAvailableAnimations(animNames)
-					// Auto-select first animation
-					if (animNames.length > 0) {
-						setSelectedAnimation(animNames[0])
-					}
-				}
-			} catch (error) {
-				console.error("Failed to load animations:", error)
-			}
-		}
-
-		loadAnimations()
 	}, [modelFiles])
 
 	// Format animation name for display
@@ -379,9 +393,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 
 	return (
 		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 h-200 max-h-200">
-			<div className="flex flex-col flex-wrap gap-6 h-full">
+			<div className="flex flex-col gap-4 lg:w-48 flex-shrink-0 overflow-hidden h-full">
 				{/* Individual Model Toggles */}
-				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2">
+				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
 					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values()).map((model) => (
 						<Button
 							key={model.name}
@@ -400,27 +414,40 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 					))}
 				</div>
 
-				<Separator />
-
 				{/* Animation Selection */}
 				{availableAnimations.length > 0 && (
-					<div className="space-y-2 w-full">
-						<div className="text-sm font-semibold">Animations ({availableAnimations.length})</div>
-						<div className="flex flex-col gap-1 max-h-150 overflow-y-auto custom-scrollbar px-1">
-							{availableAnimations.map((animName) => (
+					<>
+						<Separator className="flex-shrink-0" />
+
+						<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
+							<div className="flex items-center justify-between flex-shrink-0">
+								<div className="text-sm font-semibold">Animations ({availableAnimations.length})</div>
 								<Button
-									key={animName}
 									size="sm"
-									variant={selectedAnimation === animName ? "default" : "outline"}
-									onClick={() => setSelectedAnimation(animName)}
-									className="justify-start text-xs truncate overflow-hidden whitespace-nowrap"
-									title={animName}
+									variant="ghost"
+									onClick={() => setIsPaused(!isPaused)}
+									className="h-6 w-6 p-0"
+									title={isPaused ? "Play animation" : "Pause animation"}
 								>
-									{formatAnimationName(animName)}
+									{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
 								</Button>
-							))}
+							</div>
+							<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
+								{availableAnimations.map((animName) => (
+									<Button
+										key={animName}
+										size="sm"
+										variant={selectedAnimation === animName ? "default" : "outline"}
+										onClick={() => setSelectedAnimation(animName)}
+										className="justify-start text-xs truncate overflow-hidden whitespace-nowrap flex-shrink-0"
+										title={animName}
+									>
+										{formatAnimationName(animName)}
+									</Button>
+								))}
+							</div>
 						</div>
-					</div>
+					</>
 				)}
 			</div>
 
@@ -442,6 +469,11 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 							modelFiles={modelFiles}
 							visibleModels={visibleModels}
 							selectedAnimation={selectedAnimation}
+							availableAnimations={availableAnimations}
+							setAvailableAnimations={setAvailableAnimations}
+							setSelectedAnimation={setSelectedAnimation}
+							isPaused={isPaused}
+							setIsLoading={setIsLoading}
 						/>
 					</Suspense>
 					<gridHelper args={[10, 10]} />
@@ -485,6 +517,16 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 						)}
 					</div>
 				)}
+
+				{/* Loading overlay */}
+				{isLoading && (
+					<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center gap-3">
+							<Spinner className="h-5 w-5" />
+							<span className="text-sm font-medium">Loading models...</span>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)
@@ -493,6 +535,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string>("")
 	const [loading, setLoading] = useState(true)
+	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
+	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
 
 	useEffect(() => {
 		// Set default costume (prioritize non-default costumes)
@@ -504,6 +549,69 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 		}
 		setLoading(false)
 	}, [heroModels])
+
+	// Load animations for the selected costume
+	useEffect(() => {
+		if (!selectedCostume) return
+
+		// Check if we already have animations cached for this costume
+		if (animationsCacheRef.current.has(selectedCostume)) {
+			const cachedAnimations = animationsCacheRef.current.get(selectedCostume)!
+			setAvailableAnimations(cachedAnimations)
+			// Prefer "Idle" animation, fallback to first animation
+			const idleAnim = cachedAnimations.find((name) => name.includes("Idle"))
+			setSelectedAnimation(idleAnim || cachedAnimations[0] || null)
+			return
+		}
+
+		// Clear animations when switching to uncached costume
+		setAvailableAnimations([])
+		setSelectedAnimation(null)
+
+		const loadAnimations = async () => {
+			const fbxLoader = new FBXLoader()
+			const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+			const modelDir = `${basePath}/kingsraid-models/models/heroes`
+
+			// Load from the current costume's first model
+			const firstModels = heroModels[selectedCostume]
+			const firstModel = firstModels && firstModels.length > 0 ? firstModels[0] : null
+			if (!firstModel) return
+
+			try {
+				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
+					fbxLoader.load(`${modelDir}/${firstModel.path}`, resolve, undefined, reject)
+				})
+
+				if (fbx.animations && fbx.animations.length > 0) {
+					const animNames = fbx.animations
+						.map((clip) => clip.name)
+						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
+
+					if (animNames.length > 0) {
+						// Cache the animations for this costume
+						animationsCacheRef.current.set(selectedCostume, animNames)
+						setAvailableAnimations(animNames)
+						// Prefer "Idle" animation, fallback to first animation
+						const idleAnim = animNames.find((name) => name.includes("Idle"))
+						setSelectedAnimation(idleAnim || animNames[0])
+					} else {
+						// Cache empty array for costumes with no animations
+						animationsCacheRef.current.set(selectedCostume, [])
+					}
+				} else {
+					// Cache empty array for costumes with no animations
+					animationsCacheRef.current.set(selectedCostume, [])
+				}
+			} catch (error) {
+				console.error(`Failed to load animations for costume ${selectedCostume}:`, error)
+				// Cache empty array on error to avoid repeated failed loads
+				animationsCacheRef.current.set(selectedCostume, [])
+			}
+		}
+
+		loadAnimations()
+	}, [selectedCostume, heroModels])
 
 	if (loading) {
 		return (
@@ -579,7 +687,14 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					</CardHeader>
 					<CardContent>
 						{currentModels.length > 0 ? (
-							<ModelViewer modelFiles={currentModels} />
+							<ModelViewer
+								key="model-viewer-stable" // Stable key to prevent unmounting
+								modelFiles={currentModels}
+								availableAnimations={availableAnimations}
+								selectedAnimation={selectedAnimation}
+								setSelectedAnimation={setSelectedAnimation}
+								setAvailableAnimations={setAvailableAnimations}
+							/>
 						) : (
 							<div className="text-center text-muted-foreground py-8">
 								No models available for this costume
