@@ -42,18 +42,12 @@ function Model({
 	modelFiles,
 	visibleModels,
 	selectedAnimation,
-	availableAnimations,
-	setAvailableAnimations,
-	setSelectedAnimation,
 	isPaused,
 	setIsLoading,
 }: {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
 	selectedAnimation: string | null
-	availableAnimations?: string[]
-	setAvailableAnimations?: (a: string[]) => void
-	setSelectedAnimation?: (s: string | null) => void
 	isPaused?: boolean
 	setIsLoading?: (loading: boolean) => void
 }) {
@@ -62,14 +56,11 @@ function Model({
 	const mixersRef = useRef<Map<string, THREE.AnimationMixer>>(new Map())
 	const activeActionsRef = useRef<Map<string, THREE.AnimationAction>>(new Map())
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
-	const [loading, setLoading] = useState<Set<string>>(new Set())
 
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
-
-			setLoading((prev) => new Set(prev).add(modelFile.name))
 
 			try {
 				const fbxLoader = new FBXLoader()
@@ -224,12 +215,6 @@ function Model({
 				setLoadedModels((prev) => new Map(prev).set(modelFile.name, modelWithAnimations))
 			} catch (error) {
 				console.error(`Failed to load model ${modelFile.name}:`, error)
-			} finally {
-				setLoading((prev) => {
-					const newSet = new Set(prev)
-					newSet.delete(modelFile.name)
-					return newSet
-				})
 			}
 		}
 
@@ -462,9 +447,6 @@ function ModelViewer({
 							modelFiles={modelFiles}
 							visibleModels={visibleModels}
 							selectedAnimation={selectedAnimation}
-							availableAnimations={availableAnimations}
-							setAvailableAnimations={setAvailableAnimations}
-							setSelectedAnimation={setSelectedAnimation}
 							isPaused={isPaused}
 							setIsLoading={setIsLoading}
 						/>
