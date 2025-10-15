@@ -559,7 +559,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			const cachedAnimations = animationsCacheRef.current.get(selectedCostume)!
 			setAvailableAnimations(cachedAnimations)
 			// Prefer "Idle" animation, fallback to first animation
-			const idleAnim = cachedAnimations.find((name) => name.includes("Idle"))
+			const idleAnim = cachedAnimations.find((name) => name.includes("Idle_Idle"))
 			setSelectedAnimation(idleAnim || cachedAnimations[0] || null)
 			return
 		}
@@ -593,7 +593,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						animationsCacheRef.current.set(selectedCostume, animNames)
 						setAvailableAnimations(animNames)
 						// Prefer "Idle" animation, fallback to first animation
-						const idleAnim = animNames.find((name) => name.includes("Idle"))
+						const idleAnim = animNames.find((name) => name.includes("Idle_Idle"))
 						setSelectedAnimation(idleAnim || animNames[0])
 					} else {
 						// Cache empty array for costumes with no animations
