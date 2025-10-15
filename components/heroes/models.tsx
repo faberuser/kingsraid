@@ -392,8 +392,8 @@ function ModelViewer({
 	}
 
 	return (
-		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 h-200 max-h-200">
-			<div className="flex flex-col gap-4 lg:w-48 flex-shrink-0 overflow-hidden h-full">
+		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
+			<div className="flex flex-col gap-4 lg:w-48 flex-shrink-0 overflow-hidden lg:h-full">
 				{/* Individual Model Toggles */}
 				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
 					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values()).map((model) => (
@@ -452,7 +452,7 @@ function ModelViewer({
 			</div>
 
 			{/* 3D Viewer */}
-			<div className="relative w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
+			<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
 				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
 					<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 					<OrbitControls
