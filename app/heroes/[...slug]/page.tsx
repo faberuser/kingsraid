@@ -8,6 +8,8 @@ import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	// Determine component type - CHECK ORDER CAREFULLY
@@ -425,7 +427,7 @@ async function getVoiceFiles(heroName: string): Promise<VoiceFiles> {
 				const nameWithoutExt = filename.replace(/\.(wav|mp3|ogg)$/i, "")
 				return {
 					name: nameWithoutExt,
-					path: `/kingsraid-audio/voices/heroes/${lang}/${encodeURIComponent(filename)}`,
+					path: `${basePath}/kingsraid-audio/voices/heroes/${lang}/${encodeURIComponent(filename)}`,
 					displayName: nameWithoutExt,
 				}
 			})

@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { RotateCcw, Info, Eye, EyeOff } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
 interface ModelsProps {
 	heroData: HeroData
 	heroModels: { [costume: string]: ModelFile[] }
@@ -33,7 +35,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
-			const modelDir = `/kingsraid-models/models/heroes`
+			const modelDir = `${basePath}/kingsraid-models/models/heroes`
 
 			setLoading((prev) => new Set(prev).add(modelFile.name))
 
