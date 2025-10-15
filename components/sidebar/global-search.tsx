@@ -68,7 +68,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					title: hero.infos.name,
 					description: hero.infos.title,
 					type: "hero",
-					url: `/heroes/${encodeURIComponent(hero.infos.name)}`,
+					url: `/heroes/${encodeURIComponent(hero.infos.name.toLowerCase().replace(/\s+/g, "-"))}`,
 					icon: UserRound,
 					aliases: hero.aliases || null,
 				})
@@ -82,7 +82,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					title: artifact.name,
 					description: artifact.description,
 					type: "artifact",
-					url: `/artifacts/${encodeURIComponent(artifact.name)}`,
+					url: `/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`,
 					icon: Amphora,
 					aliases: artifact.aliases || null,
 				})
@@ -96,7 +96,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 					title: boss.infos.name,
 					description: boss.infos.title,
 					type: "boss",
-					url: `/bosses/${encodeURIComponent(boss.infos.name)}`,
+					url: `/bosses/${encodeURIComponent(boss.infos.name.toLowerCase().replace(/\s+/g, "-"))}`,
 					icon: ShieldHalf,
 					aliases: boss.aliases || null,
 				})
