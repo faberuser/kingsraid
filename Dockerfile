@@ -51,7 +51,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY --exclude=/user/src/app/public --from=git-stage /usr/src/app .
+COPY --exclude=/usr/src/app/{public,out} --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build

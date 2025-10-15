@@ -9,6 +9,7 @@ import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
@@ -443,6 +444,11 @@ async function getVoiceFiles(heroName: string): Promise<VoiceFiles> {
 }
 
 export async function generateStaticParams() {
+	// Only generate static params when building for static export (GitHub Pages)
+	if (!isStaticExport) {
+		return []
+	}
+
 	const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
 	const slugs: string[] = []
 

@@ -5,7 +5,14 @@ import ArtifactClient from "@/app/artifacts/[...slug]/client"
 import { ArtifactData } from "@/model/Artifact"
 import { SlugPageProps, findData } from "@/lib/get-data"
 
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
+
 export async function generateStaticParams() {
+	// Only generate static params when building for static export (GitHub Pages)
+	if (!isStaticExport) {
+		return []
+	}
+
 	const artifactsPath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "artifacts.json")
 	const slugs: string[] = []
 
