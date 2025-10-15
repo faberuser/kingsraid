@@ -214,19 +214,12 @@ function Model({
 				// Store shared animations from the first model that has them
 				if (modelWithAnimations.animations.length > 0 && sharedAnimationsRef.current.length === 0) {
 					sharedAnimationsRef.current = modelWithAnimations.animations
-					console.log(
-						`[Model Load] Stored ${modelWithAnimations.animations.length} shared animations from ${modelFile.name}`
-					)
 				}
 
 				// Always create a mixer for every model
 				const mixer = new THREE.AnimationMixer(modelWithAnimations)
 				modelWithAnimations.mixer = mixer
 				mixersRef.current.set(modelFile.name, mixer)
-
-				console.log(
-					`[Model Load] Loaded ${modelFile.name}, has ${modelWithAnimations.animations.length} animations`
-				)
 
 				setLoadedModels((prev) => new Map(prev).set(modelFile.name, modelWithAnimations))
 			} catch (error) {
@@ -254,8 +247,6 @@ function Model({
 				return 0
 			})
 
-			console.log(`[Model Load] Loading models in order:`, sortedModels.map((m) => m.type).join(", "))
-
 			for (const modelFile of sortedModels) {
 				if (visibleModels.has(modelFile.name)) {
 					await loadModel(modelFile)
@@ -272,16 +263,9 @@ function Model({
 	useEffect(() => {
 		// Wait a bit to ensure all models have loaded and shared animations are available
 		const timeoutId = setTimeout(() => {
-			console.log(
-				`[Animation Switch] Selected: ${selectedAnimation}, Loaded models: ${loadedModels.size}, Shared animations: ${sharedAnimationsRef.current.length}`
-			)
-
 			loadedModels.forEach((model, modelName) => {
 				const mixer = mixersRef.current.get(modelName)
-				if (!mixer) {
-					console.warn(`[Animation Switch] No mixer found for ${modelName}`)
-					return
-				}
+				if (!mixer) return
 
 				// Stop all current actions
 				const currentAction = activeActionsRef.current.get(modelName)
@@ -300,11 +284,6 @@ function Model({
 						const action = mixer.clipAction(clip)
 						action.reset().fadeIn(0.3).play()
 						activeActionsRef.current.set(modelName, action)
-						console.log(`[Animation Switch] Playing ${selectedAnimation} on ${modelName}`)
-					} else {
-						console.warn(
-							`[Animation Switch] Animation ${selectedAnimation} not found for ${modelName}. Available: ${animations.length}`
-						)
 					}
 				}
 			})
@@ -588,15 +567,12 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			// Load from the current costume's models - prioritize body, then first available
 			const costumeModels = heroModels[selectedCostume]
 			if (!costumeModels || costumeModels.length === 0) {
-				console.warn(`[Animation Load] No models found for costume ${selectedCostume}`)
 				return
 			}
 
 			// Try to find body model first, as it typically has the most complete animation set
 			const bodyModel = costumeModels.find((m) => m.type === "body")
 			const firstModel = bodyModel || costumeModels[0]
-
-			console.log(`[Animation Load] Loading animations from ${firstModel.type} model: ${firstModel.path}`)
 
 			try {
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
@@ -618,16 +594,10 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					)
 				})
 
-				console.log(
-					`[Animation Load] Costume: ${selectedCostume}, Animations found: ${fbx.animations?.length || 0}`
-				)
-
 				if (fbx.animations && fbx.animations.length > 0) {
 					const animNames = fbx.animations
 						.map((clip) => clip.name)
 						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
-
-					console.log(`[Animation Load] Filtered animations: ${animNames.length}`, animNames)
 
 					if (animNames.length > 0) {
 						// Use a microtask to ensure state updates are batched properly
@@ -642,7 +612,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						animationsCacheRef.current.set(selectedCostume, [])
 					}
 				} else {
-					console.warn(`[Animation Load] No animations in FBX for costume ${selectedCostume}`)
 					// Cache empty array for costumes with no animations
 					animationsCacheRef.current.set(selectedCostume, [])
 				}
