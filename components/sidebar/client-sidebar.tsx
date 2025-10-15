@@ -20,7 +20,7 @@ import GlobalSearch from "@/components/sidebar/global-search"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 

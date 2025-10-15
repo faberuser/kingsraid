@@ -8,8 +8,6 @@ const nextConfig: NextConfig = {
 	basePath,
 	images: {
 		unoptimized: isStaticExport,
-		loader: basePath ? "custom" : undefined,
-		loaderFile: basePath ? "./lib/image-loader.ts" : undefined,
 		remotePatterns: [
 			{
 				protocol: "https",

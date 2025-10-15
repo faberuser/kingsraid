@@ -1,4 +1,4 @@
-import Image from "next/image"
+import Image from "@/components/next-image"
 import Link from "next/link"
 import { useState } from "react"
 import { Spinner } from "@/components/ui/spinner"

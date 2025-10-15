@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { capitalize } from "@/lib/utils"
 
 interface PerksProps {

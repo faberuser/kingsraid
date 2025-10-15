@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { HeroData } from "@/model/Hero"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import ImageZoomModal from "@/components/image-modal"

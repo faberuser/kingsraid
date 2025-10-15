@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp } from "lucide-react"

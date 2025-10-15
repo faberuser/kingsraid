@@ -10,7 +10,7 @@ import Costumes from "@/components/heroes/costumes"
 import Models from "@/components/heroes/models"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { capitalize, classColorMapText } from "@/lib/utils"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { Separator } from "@/components/ui/separator"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 

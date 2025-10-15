@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { FeaturedHero } from "@/app/page"
 import { NewsItem } from "@/lib/steam-rss"
 import Autoplay from "embla-carousel-autoplay"

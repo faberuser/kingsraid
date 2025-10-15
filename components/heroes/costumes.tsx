@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { HeroData } from "@/model/Hero"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { capitalize } from "@/lib/utils"
 import { ZoomIn } from "lucide-react"
 import ImageZoomModal from "@/components/image-modal"

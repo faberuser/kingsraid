@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { useState, useEffect, useMemo } from "react"
 import Fuse from "fuse.js"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"

@@ -1,7 +1,7 @@
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import Image from "next/image"
+import Image from "@/components/next-image"
 import { classColorMapText, classColorMapBg } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 interface GearProps {
