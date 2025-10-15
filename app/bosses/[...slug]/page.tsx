@@ -5,7 +5,14 @@ import BossClient from "@/app/bosses/[...slug]/client"
 import { BossData } from "@/model/Boss"
 import { SlugPageProps, findData } from "@/lib/get-data"
 
+const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
+
 export async function generateStaticParams() {
+	// Only generate static params when building for static export (GitHub Pages)
+	if (!isStaticExport) {
+		return []
+	}
+
 	const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "bosses")
 	const slugs: string[] = []
 
