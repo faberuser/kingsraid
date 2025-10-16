@@ -1,8 +1,9 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Image (Default)
 on:
   push:
-    branches:
-      - main
+    branches: ["main"]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
           fetch-depth: 1
 
       - name: Free up disk space
@@ -23,7 +24,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build Docker image (Lightweight - no models/voices)
         run: docker build -t app:latest .
 
       - name: Login to GitHub Container Registry
