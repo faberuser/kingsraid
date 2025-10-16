@@ -6,7 +6,7 @@ A web application that provides a number of data from the mobile game King's Rai
 
 Data and illustrations are stored in [kingsraid-data](https://github.com/faberuser/kingsraid-data) (required). 3D model and audio files are in self-hosted Git servers [kingsraid-models](https://gitea.k-clowd.top/faberuser/kingsraid-models) and [kingsraid-audio](https://gitea.k-clowd.top/faberuser/kingsraid-audio) due to their large size (optional).
 
-**By default**, only the `kingsraid-data` submodule is cloned to keep the repository size manageable. The models and audio submodules are optional and only needed if you want the Models and Voices features.
+**By default**, only the `kingsraid-data` submodule is used to keep the repository size manageable. The models and audio submodules are optional and only needed if you want the Models and Voices features.
 
 ## Getting Started
 
@@ -17,18 +17,18 @@ Data and illustrations are stored in [kingsraid-data](https://github.com/faberus
 
 ### Installation
 
+Firstly, clone the repository:
+
+```bash
+git clone https://github.com/faberuser/kingsraid.git
+cd kingsraid
+```
+
 #### Default Setup
 
 This setup includes only the required data and is suitable for most deployments:
 
-1. Clone the repository:
-
-```bash
-git clone --recurse-submodules https://github.com/faberuser/kingsraid.git
-cd kingsraid
-```
-
-Or if already cloned without submodules:
+1. Initialize basic data submodule:
 
 ```bash
 git submodule update --init public/kingsraid-data
@@ -52,16 +52,9 @@ The Models and Voices tabs will be disabled by default.
 
 If you want the 3D model viewer and voice lines features:
 
-1. Clone the repository:
+1. **Uncomment** the models and audio submodules in `.gitmodules`:
 
-```bash
-git clone --recurse-submodules https://github.com/faberuser/kingsraid.git
-cd kingsraid
-```
-
-2. Uncomment the models and audio submodules in `.gitmodules`:
-
-Edit `.gitmodules` and uncomment these lines:
+Edit `.gitmodules` and **uncomment** these lines:
 
 ```properties
 # [submodule "public/kingsraid-models"]
@@ -72,31 +65,39 @@ Edit `.gitmodules` and uncomment these lines:
 # 	url = https://gitea.k-clowd.top/faberuser/kingsraid-audio
 ```
 
-3. Initialize the optional submodules:
+2. Initialize with the optional submodules:
 
 ```bash
 git submodule update --init public/kingsraid-data public/kingsraid-models public/kingsraid-audio
 ```
 
-4. Create environment file to enable these features:
+3. Create environment file to enable these features:
+
+Linux:
 
 ```bash
 echo "NEXT_PUBLIC_ENABLE_MODELS_VOICES=true" > .env
 ```
 
-5. Install dependencies:
+Windows:
+
+```bash
+"NEXT_PUBLIC_ENABLE_MODELS_VOICES=true" | Out-File -FilePath .env -Encoding utf8
+```
+
+4. Install dependencies:
 
 ```bash
 bun install
 ```
 
-6. Run the development server:
+5. Run the development server:
 
 ```bash
 bun dev
 ```
 
-7. Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Docker Deployment
 
@@ -144,8 +145,19 @@ docker-compose up -d
 
 1. Create environment file to use full image with models and voices:
 
+Linux:
+
 ```bash
-echo "IMAGE_TAG=full" > .env
+echo -e "IMAGE_TAG=full\nNEXT_PUBLIC_ENABLE_MODELS_VOICES=true" > .env
+```
+
+Windows:
+
+```bash
+@"
+IMAGE_TAG=full
+NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
+"@ | Out-File -FilePath .env -Encoding utf8
 ```
 
 2. Pull image and run container:
@@ -154,7 +166,7 @@ echo "IMAGE_TAG=full" > .env
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost:3000` (or the port specified in your environment).
+The application will be available at [http://localhost:3000](http://localhost:3000) (or the port specified in your environment).
 
 ## Environment Variables
 
@@ -162,9 +174,9 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 
 ### Environment Variables:
 
+-   `NEXT_PUBLIC_ENABLE_MODELS_VOICES`: Set to "true" to enable Models and Voices features
 -   `NEXT_PUBLIC_BASE_PATH`: Base path for the application (e.g., "/kingsraid" for GitHub Pages)
 -   `NEXT_STATIC_EXPORT`: Set to "true" when building for static export
--   `NEXT_PUBLIC_ENABLE_MODELS_VOICES`: Set to "true" to enable Models and Voices features
 -   `NEXT_PUBLIC_SITE_URL`: Site URL for metadata (optional)
 -   `IMAGE_TAG`: Docker image tag (optional, latest/full, default: latest)
 -   `CONTAINER_NAME`: Docker container name (optional, default: "kingsraid")
