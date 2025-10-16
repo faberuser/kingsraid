@@ -24,7 +24,7 @@ git clone https://github.com/faberuser/kingsraid.git
 cd kingsraid
 ```
 
-#### Default Setup
+### Default Setup
 
 This setup includes only the required data and is suitable for most deployments:
 
@@ -48,7 +48,7 @@ bun dev
 
 The Models and Voices tabs will be disabled by default.
 
-#### Full Setup (with Models & Voices)
+### Full Setup (with Models & Voices)
 
 If you want the 3D model viewer and voice lines features:
 
@@ -103,7 +103,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 The application can be deployed using Docker:
 
-#### Default Build
+### Default Build
 
 1. Build the image:
 
@@ -117,7 +117,7 @@ docker build -t kingsraid .
 docker run -p 3000:3000 kingsraid
 ```
 
-#### Full Build (with Models and Voices)
+### Full Build (with Models and Voices)
 
 To include 3D models and voices:
 
@@ -135,13 +135,13 @@ docker run -p 3000:3000 kingsraid
 
 ### Using Docker Compose
 
-#### Default
+### Default
 
 ```bash
 docker-compose up -d
 ```
 
-#### Full (with Models and Voices)
+### Full (with Models and Voices)
 
 1. Create environment file to use full image with models and voices:
 
