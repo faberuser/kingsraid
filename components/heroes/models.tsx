@@ -667,7 +667,10 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 									>
 										<div className="font-medium">{formatCostumeName(costume)}</div>
 										<div className="text-xs text-muted-foreground mt-1">
-											{heroModels[costume].map((m) => m.type).join(", ")}
+											{heroModels[costume]
+												.map((m) => m.type)
+												.sort((a, b) => a.localeCompare(b))
+												.join(", ")}
 										</div>
 									</div>
 								))}
