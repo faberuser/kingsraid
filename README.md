@@ -28,6 +28,12 @@ git clone --recurse-submodules https://github.com/faberuser/kingsraid.git
 cd kingsraid
 ```
 
+Or if already cloned without submodules:
+
+```bash
+git submodule update --init public/kingsraid-data
+```
+
 2. Install dependencies:
 
 ```bash
@@ -44,7 +50,7 @@ The Models and Voices tabs will be disabled by default.
 
 #### Full Setup (with Models & Voices)
 
-If you want the 3D model viewer and voice lines features (~2-3GB additional):
+If you want the 3D model viewer and voice lines features:
 
 1. Clone the repository:
 
@@ -69,7 +75,7 @@ Edit `.gitmodules` and uncomment these lines:
 3. Initialize the optional submodules:
 
 ```bash
-git submodule update --init public/kingsraid-models public/kingsraid-audio
+git submodule update --init public/kingsraid-data public/kingsraid-models public/kingsraid-audio
 ```
 
 4. Create environment file to enable these features:
