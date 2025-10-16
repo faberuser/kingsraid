@@ -18,7 +18,7 @@ import { Separator } from "@/components/ui/separator"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
-// Suppress THREE.js PropertyBinding warnings for missing bones (common in FBX files)
+// Suppress THREE.js PropertyBinding warnings for missing bones
 const originalWarn = console.warn
 console.warn = function (...args) {
 	const message = args[0]
@@ -27,6 +27,38 @@ console.warn = function (...args) {
 	}
 	originalWarn.apply(console, args)
 }
+
+const weaponTypes = [
+	"handle",
+	"weapon",
+	"weapon01",
+	"weapon02",
+	"weapon_blue",
+	"weapon_red",
+	"weapon_open",
+	"weapon_close",
+	"weapon_a",
+	"weapon_b",
+	"weapona",
+	"weaponb",
+	"weapon_r",
+	"weapon_l",
+	"weaponr",
+	"weaponl",
+	"weaponbottle",
+	"weaponpen",
+	"weaponscissors",
+	"weaponskein",
+	"shield",
+	"sword",
+	"lance",
+	"gunblade",
+	"axe",
+	"arrow",
+	"quiver",
+	"sheath",
+	"bag",
+]
 
 interface ModelsProps {
 	heroData: HeroData
@@ -152,39 +184,6 @@ function Model({
 					}
 				})
 
-				// Position models based on type
-				const weaponTypes = [
-					"handle",
-					"weapon",
-					"weapon01",
-					"weapon02",
-					"weapon_blue",
-					"weapon_red",
-					"weapon_open",
-					"weapon_close",
-					"weapon_a",
-					"weapon_b",
-					"weapona",
-					"weaponb",
-					"weapon_r",
-					"weapon_l",
-					"weaponr",
-					"weaponl",
-					"weaponbottle",
-					"weaponpen",
-					"weaponscissors",
-					"weaponskein",
-					"shield",
-					"sword",
-					"lance",
-					"gunblade",
-					"axe",
-					"arrow",
-					"quiver",
-					"sheath",
-					"bag",
-				]
-
 				if (
 					modelFile.type === "body" ||
 					modelFile.type === "arms" ||
@@ -304,13 +303,11 @@ function ModelViewer({
 	availableAnimations,
 	selectedAnimation,
 	setSelectedAnimation,
-	setAvailableAnimations,
 }: {
 	modelFiles: ModelFile[]
 	availableAnimations: string[]
 	selectedAnimation: string | null
 	setSelectedAnimation: (s: string | null) => void
-	setAvailableAnimations: (a: string[]) => void
 }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
@@ -323,10 +320,10 @@ function ModelViewer({
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
-		// Auto-load all available components for the selected costume
+		// Hide weapon types by default
 		if (modelFiles.length > 0) {
-			setIsLoading(true) // Start loading when models change
-			const modelNames = modelFiles.map((m) => m.name)
+			setIsLoading(true)
+			const modelNames = modelFiles.filter((m) => !weaponTypes.includes(m.type)).map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
 	}, [modelFiles])
@@ -336,10 +333,10 @@ function ModelViewer({
 		// Remove hero name prefix (e.g., "Hero_Aisha@Run_Run" -> "Run_Run")
 		let formatted = animName.split("@")[1] || animName
 
-		// Remove duplicate parts (e.g., "Run_Run" -> "Run")
+		// Remove repeated prefix (e.g., "Attack1_Attack1-1" -> "Attack1-1", "Cos20SL_Cos20SL_1" -> "Cos20SL_1")
 		const parts = formatted.split("_")
-		if (parts.length === 2 && parts[0] === parts[1]) {
-			formatted = parts[0]
+		if (parts.length > 1 && parts[1].startsWith(parts[0])) {
+			formatted = [parts[1], ...parts.slice(2)].join("_")
 		}
 
 		// Capitalize first letter
@@ -371,25 +368,27 @@ function ModelViewer({
 
 	return (
 		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
-			<div className="flex flex-col gap-4 lg:w-48 flex-shrink-0 overflow-hidden lg:h-full">
+			<div className="flex flex-col gap-4 lg:w-40 flex-shrink-0 overflow-hidden lg:h-full">
 				{/* Individual Model Toggles */}
 				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
-					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values()).map((model) => (
-						<Button
-							key={model.name}
-							size="sm"
-							variant={visibleModels.has(model.name) ? "default" : "outline"}
-							onClick={() => toggleModelVisibility(model.name)}
-							className="flex items-center gap-2 w-full"
-						>
-							{visibleModels.has(model.name) ? (
-								<Eye className="h-3 w-3" />
-							) : (
-								<EyeOff className="h-3 w-3" />
-							)}
-							<span className="capitalize">{model.type}</span>
-						</Button>
-					))}
+					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
+						.sort((a, b) => a.name.localeCompare(b.name))
+						.map((model) => (
+							<Button
+								key={model.name}
+								size="sm"
+								variant={visibleModels.has(model.name) ? "default" : "outline"}
+								onClick={() => toggleModelVisibility(model.name)}
+								className="flex items-center gap-2 w-full"
+							>
+								{visibleModels.has(model.name) ? (
+									<Eye className="h-3 w-3" />
+								) : (
+									<EyeOff className="h-3 w-3" />
+								)}
+								<span className="capitalize">{model.type}</span>
+							</Button>
+						))}
 				</div>
 
 				{/* Animation Selection */}
@@ -417,10 +416,11 @@ function ModelViewer({
 										size="sm"
 										variant={selectedAnimation === animName ? "default" : "outline"}
 										onClick={() => setSelectedAnimation(animName)}
-										className="justify-start text-xs truncate overflow-hidden whitespace-nowrap flex-shrink-0"
 										title={animName}
 									>
-										{formatAnimationName(animName)}
+										<span className="text-start text-xs truncate w-full">
+											{formatAnimationName(animName)}
+										</span>
 									</Button>
 								))}
 							</div>
@@ -643,7 +643,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	return (
 		<div className="flex flex-col lg:flex-row gap-6">
 			{/* Left sidebar for costume selection */}
-			<div className="w-full lg:w-70 flex-shrink-0 space-y-4">
+			<div className="w-full lg:w-60 flex-shrink-0 space-y-4">
 				{costumeOptions.length > 1 && (
 					<Card>
 						<CardHeader>
@@ -687,7 +687,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 								availableAnimations={availableAnimations}
 								selectedAnimation={selectedAnimation}
 								setSelectedAnimation={setSelectedAnimation}
-								setAvailableAnimations={setAvailableAnimations}
 							/>
 						) : (
 							<div className="text-center text-muted-foreground py-8">
