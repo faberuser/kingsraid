@@ -320,10 +320,14 @@ function ModelViewer({
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
-		// Hide weapon types by default
+		// Show non-weapons and weapons with defaultPosition === true by default
 		if (modelFiles.length > 0) {
 			setIsLoading(true)
-			const modelNames = modelFiles.filter((m) => !weaponTypes.includes(m.type)).map((m) => m.name)
+			const modelNames = modelFiles
+				.filter(
+					(m) => !weaponTypes.includes(m.type) || (weaponTypes.includes(m.type) && m.defaultPosition === true)
+				)
+				.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
 	}, [modelFiles])
