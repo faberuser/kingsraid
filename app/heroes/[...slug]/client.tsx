@@ -13,6 +13,7 @@ import { capitalize, classColorMapText } from "@/lib/utils"
 import Image from "@/components/next-image"
 import { Separator } from "@/components/ui/separator"
 import { Costume, ModelFile } from "@/model/Hero_Model"
+import DataHeavyContent from "@/components/data-heavy-content"
 
 interface HeroClientProps {
 	heroData: HeroData
@@ -112,11 +113,21 @@ export default function HeroClient({ heroData, costumes, heroModels, voiceFiles 
 				</TabsContent>
 
 				<TabsContent value="models" className="mt-4">
-					<Models heroData={heroData} heroModels={heroModels} />
+					<DataHeavyContent
+						description="This tab contains large 3D model files and textures that may consume significant mobile data."
+						estimatedSize="20-40 MB per costume"
+					>
+						<Models heroData={heroData} heroModels={heroModels} />
+					</DataHeavyContent>
 				</TabsContent>
 
 				<TabsContent value="voices" className="mt-4">
-					<Voices heroData={heroData} voiceFiles={voiceFiles} />
+					<DataHeavyContent
+						description="This tab contains multiple voice audio files that may consume mobile data when played."
+						estimatedSize="1-5 MB total"
+					>
+						<Voices heroData={heroData} voiceFiles={voiceFiles} />
+					</DataHeavyContent>
 				</TabsContent>
 			</Tabs>
 		</div>
