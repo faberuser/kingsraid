@@ -139,7 +139,7 @@ export default function Gear({ heroData }: GearProps) {
 														heroData.infos.class
 													)}`}
 												>
-													{ut.name}
+													Skill {utKey}: {ut.name}
 												</div>
 											</div>
 

@@ -10,6 +10,7 @@ import { VoiceFiles } from "@/components/heroes/voices"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
+const enableModelsVoices = process.env.NEXT_PUBLIC_ENABLE_MODELS_VOICES === "true"
 
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
@@ -483,11 +484,19 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get costume data server-side
 	const costumes = await getCostumeData(heroData.costumes)
 
-	// Get model data server-side
-	const heroModels = await getHeroModels(heroData.infos.name)
+	// Get model data server-side (only if enabled)
+	const heroModels = enableModelsVoices ? await getHeroModels(heroData.infos.name) : {}
 
-	// Get voice files server-side
-	const voiceFiles = await getVoiceFiles(heroData.infos.name)
+	// Get voice files server-side (only if enabled)
+	const voiceFiles = enableModelsVoices ? await getVoiceFiles(heroData.infos.name) : { en: [], jp: [], kr: [] }
 
-	return <HeroClient heroData={heroData} costumes={costumes} heroModels={heroModels} voiceFiles={voiceFiles} />
+	return (
+		<HeroClient
+			heroData={heroData}
+			costumes={costumes}
+			heroModels={heroModels}
+			voiceFiles={voiceFiles}
+			enableModelsVoices={enableModelsVoices}
+		/>
+	)
 }

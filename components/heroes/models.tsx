@@ -11,10 +11,54 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { RotateCcw, Info, Eye, EyeOff } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
+import { RotateCcw, Info, Eye, EyeOff, Play, Pause } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
+import { Separator } from "@/components/ui/separator"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
+// Suppress THREE.js PropertyBinding warnings for missing bones
+const originalWarn = console.warn
+console.warn = function (...args) {
+	const message = args[0]
+	if (typeof message === "string" && message.includes("THREE.PropertyBinding: No target node found")) {
+		return
+	}
+	originalWarn.apply(console, args)
+}
+
+const weaponTypes = [
+	"handle",
+	"weapon",
+	"weapon01",
+	"weapon02",
+	"weapon_blue",
+	"weapon_red",
+	"weapon_open",
+	"weapon_close",
+	"weapon_a",
+	"weapon_b",
+	"weapona",
+	"weaponb",
+	"weapon_r",
+	"weapon_l",
+	"weaponr",
+	"weaponl",
+	"weaponbottle",
+	"weaponpen",
+	"weaponscissors",
+	"weaponskein",
+	"shield",
+	"sword",
+	"lance",
+	"gunblade",
+	"axe",
+	"arrow",
+	"quiver",
+	"sheath",
+	"bag",
+]
 
 interface ModelsProps {
 	heroData: HeroData
@@ -26,18 +70,29 @@ type HeroModel = THREE.Group & {
 	animations?: THREE.AnimationClip[]
 }
 
-function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visibleModels: Set<string> }) {
+function Model({
+	modelFiles,
+	visibleModels,
+	selectedAnimation,
+	isPaused,
+	setIsLoading,
+}: {
+	modelFiles: ModelFile[]
+	visibleModels: Set<string>
+	selectedAnimation: string | null
+	isPaused?: boolean
+	setIsLoading?: (loading: boolean) => void
+}) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
-	const [mixers, setMixers] = useState<THREE.AnimationMixer[]>([])
-	const [loading, setLoading] = useState<Set<string>>(new Set())
+	const mixersRef = useRef<Map<string, THREE.AnimationMixer>>(new Map())
+	const activeActionsRef = useRef<Map<string, THREE.AnimationAction>>(new Map())
+	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
 
 	useEffect(() => {
 		const loadModel = async (modelFile: ModelFile) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
-
-			setLoading((prev) => new Set(prev).add(modelFile.name))
 
 			try {
 				const fbxLoader = new FBXLoader()
@@ -45,6 +100,19 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 				// Load FBX model
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
 					fbxLoader.load(`${modelDir}/${modelFile.path}`, resolve, undefined, reject)
+				})
+
+				const modelWithAnimations = fbx as HeroModel
+				modelWithAnimations.animations = fbx.animations || []
+
+				// Bind skeleton for skinned meshes (crucial for AssetStudio FBX files)
+				fbx.traverse((child) => {
+					if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
+						const skinnedMesh = child as THREE.SkinnedMesh
+						if (skinnedMesh.skeleton) {
+							skinnedMesh.bind(skinnedMesh.skeleton)
+						}
+					}
 				})
 
 				// Fix materials
@@ -74,9 +142,10 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 									opacity = material.opacity
 								}
 
-								// Create a new MeshToonMaterial
+								// For skinned meshes, use MeshStandardMaterial which supports skinning
+								// For non-skinned meshes, use MeshBasicMaterial
 								if (opacity === 0) {
-									// Use MeshBasicMaterial with transparency for invisible materials
+									// Use appropriate material with transparency for invisible materials
 									const transparentMaterial = new THREE.MeshBasicMaterial({
 										name: name,
 										transparent: true,
@@ -90,7 +159,7 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 										mesh.material = transparentMaterial
 									}
 								} else {
-									const basicMaterial = new THREE.MeshBasicMaterial({
+									const newMaterial = new THREE.MeshBasicMaterial({
 										name: name,
 										map: originalMap,
 										...(originalMap ? {} : { color: color }),
@@ -98,9 +167,9 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 									})
 
 									if (Array.isArray(mesh.material)) {
-										mesh.material[index] = basicMaterial
+										mesh.material[index] = newMaterial
 									} else {
-										mesh.material = basicMaterial
+										mesh.material = newMaterial
 									}
 								}
 							})
@@ -115,100 +184,110 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 					}
 				})
 
-				// Set up animations
-				const newMixers = [...mixers]
-				if (fbx.animations && fbx.animations.length > 0) {
-					const mixer = new THREE.AnimationMixer(fbx)
-					const action = mixer.clipAction(fbx.animations[0])
-					action.play()
-					newMixers.push(mixer)
-					;(fbx as HeroModel).mixer = mixer
-					;(fbx as HeroModel).animations = fbx.animations
-				}
-
-				const rotation = -Math.PI / 2 // Rotate -90 degrees to make it stand upright
-
-				// Position models based on type
-				const weaponTypes = [
-					"handle",
-					"weapon",
-					"weapon01",
-					"weapon01",
-					"weapon_blue",
-					"weapon_red",
-					"weapon_open",
-					"weapon_close",
-					"weapon_a",
-					"weapon_b",
-					"weapona",
-					"weaponb",
-					"weapon_r",
-					"weapon_l",
-					"weaponr",
-					"weaponl",
-					"weaponbottle",
-					"weaponpen",
-					"weaponscissors",
-					"weaponskein",
-					"shield",
-					"sword",
-					"lance",
-					"gunblade",
-					"axe",
-					"arrow",
-					"quiver",
-					"sheath",
-					"bag",
-				]
-
 				if (
 					modelFile.type === "body" ||
 					modelFile.type === "arms" ||
 					modelFile.type === "arm" ||
-					modelFile.type === "hair"
-					// modelFile.type === "mask"
+					modelFile.type === "hair" ||
+					modelFile.type === "mask"
 				) {
 					fbx.position.set(0, 0, 0)
-					fbx.rotation.x = rotation
 				} else if (weaponTypes.includes(modelFile.type)) {
 					if (!modelFile.defaultPosition) {
 						fbx.position.set(1, 0, 0)
 					}
-					fbx.rotation.x = rotation
 				} else {
 					// Default positioning for unknown types
 					fbx.position.set(0, 0, 0)
-					fbx.rotation.x = rotation
 				}
 
-				setLoadedModels((prev) => new Map(prev).set(modelFile.name, fbx as HeroModel))
-				setMixers(newMixers)
+				// Store shared animations from the first model that has them
+				if (modelWithAnimations.animations.length > 0 && sharedAnimationsRef.current.length === 0) {
+					sharedAnimationsRef.current = modelWithAnimations.animations
+				}
+
+				// Always create a mixer for every model
+				const mixer = new THREE.AnimationMixer(modelWithAnimations)
+				modelWithAnimations.mixer = mixer
+				mixersRef.current.set(modelFile.name, mixer)
+
+				setLoadedModels((prev) => new Map(prev).set(modelFile.name, modelWithAnimations))
 			} catch (error) {
 				console.error(`Failed to load model ${modelFile.name}:`, error)
-			} finally {
-				setLoading((prev) => {
-					const newSet = new Set(prev)
-					newSet.delete(modelFile.name)
-					return newSet
-				})
 			}
 		}
 
-		// Load only visible models
-		modelFiles.forEach((modelFile) => {
-			if (visibleModels.has(modelFile.name)) {
-				loadModel(modelFile)
-			}
-		})
+		// Load models sequentially: body first to ensure animations are available
+		const loadModelsSequentially = async () => {
+			if (setIsLoading) setIsLoading(true)
 
-		return () => {
-			mixers.forEach((mixer) => mixer.stopAllAction())
+			// Sort models to load body first (most important for animations), then others
+			const sortedModels = [...modelFiles].sort((a, b) => {
+				if (a.type === "body") return -1
+				if (b.type === "body") return 1
+				// Also prioritize arms/hair after body as they may contain animations
+				if (a.type === "arms" || a.type === "arm") return -1
+				if (b.type === "arms" || b.type === "arm") return 1
+				return 0
+			})
+
+			for (const modelFile of sortedModels) {
+				if (visibleModels.has(modelFile.name)) {
+					await loadModel(modelFile)
+				}
+			}
+
+			if (setIsLoading) setIsLoading(false)
 		}
+
+		loadModelsSequentially()
 	}, [modelFiles, visibleModels])
 
+	// Handle animation switching
+	useEffect(() => {
+		// Wait a bit to ensure all models have loaded and shared animations are available
+		const timeoutId = setTimeout(() => {
+			loadedModels.forEach((model, modelName) => {
+				const mixer = mixersRef.current.get(modelName)
+				if (!mixer) return
+
+				// Stop all current actions
+				const currentAction = activeActionsRef.current.get(modelName)
+				if (currentAction) {
+					currentAction.fadeOut(0.3)
+				}
+
+				// Play selected animation
+				if (selectedAnimation) {
+					// Try to find animation in model's animations first, then in shared animations
+					const animations =
+						model.animations && model.animations.length > 0 ? model.animations : sharedAnimationsRef.current
+
+					const clip = animations.find((c) => c.name === selectedAnimation)
+					if (clip) {
+						const action = mixer.clipAction(clip)
+						action.reset().fadeIn(0.3).play()
+						activeActionsRef.current.set(modelName, action)
+					}
+				}
+			})
+		}, 100)
+
+		return () => clearTimeout(timeoutId)
+	}, [selectedAnimation, loadedModels])
+
 	useFrame((state, delta) => {
-		mixers.forEach((mixer) => mixer.update(delta))
+		if (!isPaused) {
+			mixersRef.current.forEach((mixer) => mixer.update(delta))
+		}
 	})
+
+	useEffect(() => {
+		return () => {
+			mixersRef.current.forEach((mixer) => mixer.stopAllAction())
+			mixersRef.current.clear()
+		}
+	}, [])
 
 	return (
 		<group ref={groupRef}>
@@ -219,21 +298,54 @@ function Model({ modelFiles, visibleModels }: { modelFiles: ModelFile[]; visible
 	)
 }
 
-function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
+function ModelViewer({
+	modelFiles,
+	availableAnimations,
+	selectedAnimation,
+	setSelectedAnimation,
+}: {
+	modelFiles: ModelFile[]
+	availableAnimations: string[]
+	selectedAnimation: string | null
+	setSelectedAnimation: (s: string | null) => void
+}) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
+	const [isPaused, setIsPaused] = useState(false)
+	const [isLoading, setIsLoading] = useState(true)
+
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
-		// Auto-load all available components for the selected costume
+		// Show non-weapons and weapons with defaultPosition === true by default
 		if (modelFiles.length > 0) {
-			const modelNames = modelFiles.map((m) => m.name)
+			setIsLoading(true)
+			const modelNames = modelFiles
+				.filter(
+					(m) => !weaponTypes.includes(m.type) || (weaponTypes.includes(m.type) && m.defaultPosition === true)
+				)
+				.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
 	}, [modelFiles])
+
+	// Format animation name for display
+	const formatAnimationName = (animName: string): string => {
+		// Remove hero name prefix (e.g., "Hero_Aisha@Run_Run" -> "Run_Run")
+		let formatted = animName.split("@")[1] || animName
+
+		// Remove repeated prefix (e.g., "Attack1_Attack1-1" -> "Attack1-1", "Cos20SL_Cos20SL_1" -> "Cos20SL_1")
+		const parts = formatted.split("_")
+		if (parts.length > 1 && parts[1].startsWith(parts[0])) {
+			formatted = [parts[1], ...parts.slice(2)].join("_")
+		}
+
+		// Capitalize first letter
+		return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+	}
 
 	const resetCamera = () => {
 		if (cameraRef.current) {
@@ -259,25 +371,70 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 	}
 
 	return (
-		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6">
-			{/* Individual Model Toggles */}
-			<div className="flex flex-row flex-wrap lg:flex-col gap-2">
-				{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values()).map((model) => (
-					<Button
-						key={model.name}
-						size="sm"
-						variant={visibleModels.has(model.name) ? "default" : "outline"}
-						onClick={() => toggleModelVisibility(model.name)}
-						className="flex items-center gap-2 w-30"
-					>
-						{visibleModels.has(model.name) ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
-						<span className="capitalize">{model.type}</span>
-					</Button>
-				))}
+		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
+			<div className="flex flex-col gap-4 lg:w-40 flex-shrink-0 overflow-hidden lg:h-full">
+				{/* Individual Model Toggles */}
+				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
+					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
+						.sort((a, b) => a.name.localeCompare(b.name))
+						.map((model) => (
+							<Button
+								key={model.name}
+								size="sm"
+								variant={visibleModels.has(model.name) ? "default" : "outline"}
+								onClick={() => toggleModelVisibility(model.name)}
+								className="flex items-center gap-2 w-full"
+							>
+								{visibleModels.has(model.name) ? (
+									<Eye className="h-3 w-3" />
+								) : (
+									<EyeOff className="h-3 w-3" />
+								)}
+								<span className="capitalize">{model.type}</span>
+							</Button>
+						))}
+				</div>
+
+				{/* Animation Selection */}
+				{availableAnimations.length > 0 && (
+					<>
+						<Separator className="flex-shrink-0" />
+
+						<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
+							<div className="flex items-center justify-between flex-shrink-0">
+								<div className="text-sm font-semibold">Animations ({availableAnimations.length})</div>
+								<Button
+									size="sm"
+									variant="ghost"
+									onClick={() => setIsPaused(!isPaused)}
+									className="h-6 w-6 p-0"
+									title={isPaused ? "Play animation" : "Pause animation"}
+								>
+									{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+								</Button>
+							</div>
+							<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
+								{availableAnimations.map((animName) => (
+									<Button
+										key={animName}
+										size="sm"
+										variant={selectedAnimation === animName ? "default" : "outline"}
+										onClick={() => setSelectedAnimation(animName)}
+										title={animName}
+									>
+										<span className="text-start text-xs truncate w-full">
+											{formatAnimationName(animName)}
+										</span>
+									</Button>
+								))}
+							</div>
+						</div>
+					</>
+				)}
 			</div>
 
 			{/* 3D Viewer */}
-			<div className="relative h-200 w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
+			<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
 				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
 					<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 					<OrbitControls
@@ -290,7 +447,13 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 						target={INITIAL_CAMERA_TARGET}
 					/>
 					<Suspense fallback={null}>
-						<Model modelFiles={modelFiles} visibleModels={visibleModels} />
+						<Model
+							modelFiles={modelFiles}
+							visibleModels={visibleModels}
+							selectedAnimation={selectedAnimation}
+							isPaused={isPaused}
+							setIsLoading={setIsLoading}
+						/>
 					</Suspense>
 					<gridHelper args={[10, 10]} />
 				</Canvas>
@@ -322,9 +485,24 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 
 				{/* Models count */}
 				{modelFiles.some((m) => visibleModels.has(m.name)) && (
-					<div className="absolute bottom-4 left-4">
+					<div className="absolute bottom-4 left-4 space-y-1">
 						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
 							Models: {Array.from(visibleModels).length}/{modelFiles.length}
+						</div>
+						{selectedAnimation && (
+							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+								Animation: {formatAnimationName(selectedAnimation)}
+							</div>
+						)}
+					</div>
+				)}
+
+				{/* Loading overlay */}
+				{isLoading && (
+					<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center gap-3">
+							<Spinner className="h-5 w-5" />
+							<span className="text-sm font-medium">Loading models...</span>
 						</div>
 					</div>
 				)}
@@ -336,6 +514,9 @@ function ModelViewer({ modelFiles }: { modelFiles: ModelFile[] }) {
 export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string>("")
 	const [loading, setLoading] = useState(true)
+	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
+	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
 
 	useEffect(() => {
 		// Set default costume (prioritize non-default costumes)
@@ -347,6 +528,88 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 		}
 		setLoading(false)
 	}, [heroModels])
+
+	// Load animations for the selected costume
+	useEffect(() => {
+		if (!selectedCostume) return
+
+		// Check if we already have animations cached for this costume
+		if (animationsCacheRef.current.has(selectedCostume)) {
+			const cachedAnimations = animationsCacheRef.current.get(selectedCostume)!
+			setAvailableAnimations(cachedAnimations)
+			setSelectedAnimation(cachedAnimations[0] || null)
+			return
+		}
+
+		// Clear animations when switching to uncached costume
+		setAvailableAnimations([])
+		setSelectedAnimation(null)
+
+		const loadAnimations = async () => {
+			const fbxLoader = new FBXLoader()
+			const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+			const modelDir = `${basePath}/kingsraid-models/models/heroes`
+
+			// Load from the current costume's models - prioritize body, then first available
+			const costumeModels = heroModels[selectedCostume]
+			if (!costumeModels || costumeModels.length === 0) {
+				return
+			}
+
+			// Try to find body model first, as it typically has the most complete animation set
+			const bodyModel = costumeModels.find((m) => m.type === "body")
+			const firstModel = bodyModel || costumeModels[0]
+
+			try {
+				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
+					const timeout = setTimeout(() => {
+						reject(new Error(`Timeout loading ${firstModel.path}`))
+					}, 30000) // 30 second timeout
+
+					fbxLoader.load(
+						`${modelDir}/${firstModel.path}`,
+						(loadedFbx) => {
+							clearTimeout(timeout)
+							resolve(loadedFbx)
+						},
+						undefined,
+						(error) => {
+							clearTimeout(timeout)
+							reject(error)
+						}
+					)
+				})
+
+				if (fbx.animations && fbx.animations.length > 0) {
+					const animNames = fbx.animations
+						.map((clip) => clip.name)
+						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
+
+					if (animNames.length > 0) {
+						// Use a microtask to ensure state updates are batched properly
+						Promise.resolve().then(() => {
+							// Cache the animations for this costume
+							animationsCacheRef.current.set(selectedCostume, animNames)
+							setAvailableAnimations(animNames)
+							setSelectedAnimation(animNames[0])
+						})
+					} else {
+						// Cache empty array for costumes with no animations
+						animationsCacheRef.current.set(selectedCostume, [])
+					}
+				} else {
+					// Cache empty array for costumes with no animations
+					animationsCacheRef.current.set(selectedCostume, [])
+				}
+			} catch (error) {
+				console.error(`Failed to load animations for costume ${selectedCostume}:`, error)
+				// Cache empty array on error to avoid repeated failed loads
+				animationsCacheRef.current.set(selectedCostume, [])
+			}
+		}
+
+		loadAnimations()
+	}, [selectedCostume, heroModels])
 
 	if (loading) {
 		return (
@@ -384,7 +647,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	return (
 		<div className="flex flex-col lg:flex-row gap-6">
 			{/* Left sidebar for costume selection */}
-			<div className="w-full lg:w-70 flex-shrink-0 space-y-4">
+			<div className="w-full lg:w-60 flex-shrink-0 space-y-4">
 				{costumeOptions.length > 1 && (
 					<Card>
 						<CardHeader>
@@ -404,7 +667,10 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 									>
 										<div className="font-medium">{formatCostumeName(costume)}</div>
 										<div className="text-xs text-muted-foreground mt-1">
-											{heroModels[costume].map((m) => m.type).join(", ")}
+											{heroModels[costume]
+												.map((m) => m.type)
+												.sort((a, b) => a.localeCompare(b))
+												.join(", ")}
 										</div>
 									</div>
 								))}
@@ -422,7 +688,13 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 					</CardHeader>
 					<CardContent>
 						{currentModels.length > 0 ? (
-							<ModelViewer modelFiles={currentModels} />
+							<ModelViewer
+								key="model-viewer-stable" // Stable key to prevent unmounting
+								modelFiles={currentModels}
+								availableAnimations={availableAnimations}
+								selectedAnimation={selectedAnimation}
+								setSelectedAnimation={setSelectedAnimation}
+							/>
 						) : (
 							<div className="text-center text-muted-foreground py-8">
 								No models available for this costume

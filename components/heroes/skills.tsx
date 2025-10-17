@@ -8,12 +8,39 @@ interface SkillsProps {
 	heroData: HeroData
 }
 
+function parseSkillKey(key: string) {
+	const match = key.match(/^(\d+)(?:\s*\((\d+)\))?$/)
+	return {
+		baseNum: match ? match[1] : key, // base number as string
+		suffixNum: match && match[2] ? match[2] : null,
+		orig: key,
+	}
+}
+
 export default function Skills({ heroData }: SkillsProps) {
+	const skillsArr = heroData.skills
+		? Object.entries(heroData.skills)
+				.map(([key, skill]) => ({
+					key,
+					skill,
+					...parseSkillKey(key),
+				}))
+				.sort((a, b) => {
+					if (a.baseNum === b.baseNum) {
+						// Sort by suffixNum if present
+						const aSuffix = a.suffixNum ? parseInt(a.suffixNum) : 0
+						const bSuffix = b.suffixNum ? parseInt(b.suffixNum) : 0
+						return aSuffix - bSuffix
+					}
+					return parseInt(a.baseNum) - parseInt(b.baseNum)
+				})
+		: []
+
 	return (
 		<div className="space-y-4">
-			{heroData.skills ? (
-				Object.entries(heroData.skills).map(([skillKey, skill]) => (
-					<Card key={skillKey}>
+			{skillsArr.length > 0 ? (
+				skillsArr.map(({ key, skill, baseNum }) => (
+					<Card key={key}>
 						<CardContent className="flex flex-row gap-4">
 							{/* Skill Icon */}
 							<div className="hidden md:block flex-shrink-0">
@@ -42,7 +69,7 @@ export default function Skills({ heroData }: SkillsProps) {
 										/>
 									</div>
 									<div className="text-xl font-semibold flex items-center justify-center">
-										{skill.name}
+										Skill {key}: {skill.name}
 									</div>
 									<div className="flex gap-2 text-sm items-center jusify-center">
 										{skill.cost && (
@@ -67,13 +94,13 @@ export default function Skills({ heroData }: SkillsProps) {
 								<div>{skill.description}</div>
 
 								{/* Skill Books if available */}
-								{heroData.books && heroData.books[skillKey] && (
+								{heroData.books && heroData.books[baseNum] && (
 									<details className="mt-4 cursor-pointer">
 										<summary className="font-medium text-sm mb-2 text-muted-foreground">
 											Skill Books
 										</summary>
 										<div className="flex flex-col gap-2 text-xs">
-											{Object.entries(heroData.books[skillKey]).map(([level, effect]) => (
+											{Object.entries(heroData.books[baseNum]).map(([level, effect]) => (
 												<div key={level} className="px-2 py-1 border-l-2">
 													<div className="font-medium">
 														{level}: {effect}
