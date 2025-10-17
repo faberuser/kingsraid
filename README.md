@@ -52,26 +52,14 @@ The Models and Voices tabs will be disabled by default.
 
 If you want the 3D model viewer and voice lines features:
 
-1. **Uncomment** the models and audio submodules in `.gitmodules`:
-
-Edit `.gitmodules` and **uncomment** these lines:
-
-```properties
-# [submodule "public/kingsraid-models"]
-# 	path = public/kingsraid-models
-# 	url = https://gitea.k-clowd.top/faberuser/kingsraid-models
-# [submodule "public/kingsraid-audio"]
-# 	path = public/kingsraid-audio
-# 	url = https://gitea.k-clowd.top/faberuser/kingsraid-audio
-```
-
-2. Initialize with the optional submodules:
+1. Clone the optional repositories:
 
 ```bash
-git submodule update --init public/kingsraid-data public/kingsraid-models public/kingsraid-audio
+git clone https://gitea.k-clowd.top/faberuser/kingsraid-models public/kingsraid-models
+git clone https://gitea.k-clowd.top/faberuser/kingsraid-audio public/kingsraid-audio
 ```
 
-3. Create environment file to enable these features:
+2. Create environment file to enable these features:
 
 Linux:
 
@@ -85,13 +73,13 @@ Windows:
 "NEXT_PUBLIC_ENABLE_MODELS_VOICES=true" | Out-File -FilePath .env -Encoding utf8
 ```
 
-4. Install dependencies:
+3. Install dependencies:
 
 ```bash
 bun install
 ```
 
-5. Run the development server:
+4. Run the development server:
 
 ```bash
 bun dev

@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Optional submodules (initialized by users who want models/voices)
+/public/kingsraid-models/
+/public/kingsraid-audio/
