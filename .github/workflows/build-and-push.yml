@@ -1,4 +1,4 @@
-name: Build and Push Docker Image (Default)
+name: Build and Push Docker Image
 on:
   push:
     branches: ["main"]
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image (Lightweight - no models/voices)
+      - name: Build Docker image
         run: docker build -t app:latest .
 
       - name: Login to GitHub Container Registry

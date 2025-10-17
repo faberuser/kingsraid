@@ -135,32 +135,7 @@ docker run -p 3000:3000 kingsraid
 
 ### Using Docker Compose
 
-### Default
-
-```bash
-docker-compose up -d
-```
-
-### Full (with Models and Voices)
-
-1. Create environment file to use full image with models and voices:
-
-Linux:
-
-```bash
-echo -e "IMAGE_TAG=full\nNEXT_PUBLIC_ENABLE_MODELS_VOICES=true" > .env
-```
-
-Windows:
-
-```bash
-@"
-IMAGE_TAG=full
-NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-"@ | Out-File -FilePath .env -Encoding utf8
-```
-
-2. Pull image and run container:
+Due to GHCR limitation, Docker image only support standard version.
 
 ```bash
 docker-compose up -d
