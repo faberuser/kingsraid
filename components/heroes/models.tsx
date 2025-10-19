@@ -15,6 +15,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { RotateCcw, Info, Eye, EyeOff, Play, Pause } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
+import { Progress } from "@/components/ui/progress"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -76,12 +77,14 @@ function Model({
 	selectedAnimation,
 	isPaused,
 	setIsLoading,
+	setLoadingProgress,
 }: {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
 	selectedAnimation: string | null
 	isPaused?: boolean
 	setIsLoading?: (loading: boolean) => void
+	setLoadingProgress?: (progress: number) => void
 }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
@@ -220,6 +223,7 @@ function Model({
 		// Load models sequentially: body first to ensure animations are available
 		const loadModelsSequentially = async () => {
 			if (setIsLoading) setIsLoading(true)
+			if (setLoadingProgress) setLoadingProgress(0)
 
 			// Sort models to load body first (most important for animations), then others
 			const sortedModels = [...modelFiles].sort((a, b) => {
@@ -231,9 +235,13 @@ function Model({
 				return 0
 			})
 
-			for (const modelFile of sortedModels) {
-				if (visibleModels.has(modelFile.name)) {
-					await loadModel(modelFile)
+			const visibleModelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name))
+			const totalModels = visibleModelsToLoad.length
+
+			for (let i = 0; i < visibleModelsToLoad.length; i++) {
+				await loadModel(visibleModelsToLoad[i])
+				if (setLoadingProgress) {
+					setLoadingProgress(((i + 1) / totalModels) * 100)
 				}
 			}
 
@@ -303,18 +311,22 @@ function ModelViewer({
 	availableAnimations,
 	selectedAnimation,
 	setSelectedAnimation,
+	isLoading,
+	setIsLoading,
 }: {
 	modelFiles: ModelFile[]
 	availableAnimations: string[]
 	selectedAnimation: string | null
 	setSelectedAnimation: (s: string | null) => void
+	isLoading: boolean
+	setIsLoading: (loading: boolean) => void
 }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
 	const [isPaused, setIsPaused] = useState(false)
-	const [isLoading, setIsLoading] = useState(true)
+	const [loadingProgress, setLoadingProgress] = useState(0)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
@@ -384,6 +396,7 @@ function ModelViewer({
 								variant={visibleModels.has(model.name) ? "default" : "outline"}
 								onClick={() => toggleModelVisibility(model.name)}
 								className="flex items-center gap-2 w-full"
+								disabled={isLoading}
 							>
 								{visibleModels.has(model.name) ? (
 									<Eye className="h-3 w-3" />
@@ -409,24 +422,28 @@ function ModelViewer({
 									onClick={() => setIsPaused(!isPaused)}
 									className="h-6 w-6 p-0"
 									title={isPaused ? "Play animation" : "Pause animation"}
+									disabled={isLoading}
 								>
 									{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
 								</Button>
 							</div>
 							<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
-								{availableAnimations.map((animName) => (
-									<Button
-										key={animName}
-										size="sm"
-										variant={selectedAnimation === animName ? "default" : "outline"}
-										onClick={() => setSelectedAnimation(animName)}
-										title={animName}
-									>
-										<span className="text-start text-xs truncate w-full">
-											{formatAnimationName(animName)}
-										</span>
-									</Button>
-								))}
+								{[...availableAnimations]
+									.sort((a, b) => formatAnimationName(a).localeCompare(formatAnimationName(b)))
+									.map((animName) => (
+										<Button
+											key={animName}
+											size="sm"
+											variant={selectedAnimation === animName ? "default" : "outline"}
+											onClick={() => setSelectedAnimation(animName)}
+											title={animName}
+											disabled={isLoading}
+										>
+											<span className="text-start text-xs truncate w-full">
+												{formatAnimationName(animName)}
+											</span>
+										</Button>
+									))}
 							</div>
 						</div>
 					</>
@@ -453,6 +470,7 @@ function ModelViewer({
 							selectedAnimation={selectedAnimation}
 							isPaused={isPaused}
 							setIsLoading={setIsLoading}
+							setLoadingProgress={setLoadingProgress}
 						/>
 					</Suspense>
 					<gridHelper args={[10, 10]} />
@@ -462,7 +480,7 @@ function ModelViewer({
 				<div className="absolute top-4 right-4 flex flex-col gap-2">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button size="sm" variant="secondary">
+							<Button size="sm" variant="secondary" disabled={isLoading}>
 								<Info className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -478,7 +496,7 @@ function ModelViewer({
 							</div>
 						</TooltipContent>
 					</Tooltip>
-					<Button size="sm" variant="secondary" onClick={resetCamera}>
+					<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
 						<RotateCcw className="h-4 w-4" />
 					</Button>
 				</div>
@@ -500,9 +518,11 @@ function ModelViewer({
 				{/* Loading overlay */}
 				{isLoading && (
 					<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center gap-3">
-							<Spinner className="h-5 w-5" />
-							<span className="text-sm font-medium">Loading models...</span>
+						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
+							<Progress value={loadingProgress} className="h-2" />
+							<div className="text-xs text-muted-foreground text-right mb-0.5">
+								{Math.round(loadingProgress)}%
+							</div>
 						</div>
 					</div>
 				)}
@@ -516,6 +536,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [loading, setLoading] = useState(true)
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+	const [isLoadingModels, setIsLoadingModels] = useState(false)
 	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
 
 	useEffect(() => {
@@ -586,12 +607,25 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
 
 					if (animNames.length > 0) {
+						// Sort animations before caching and selecting
+						const sortedAnimNames = [...animNames].sort((a, b) => {
+							const formatName = (animName: string): string => {
+								let formatted = animName.split("@")[1] || animName
+								const parts = formatted.split("_")
+								if (parts.length > 1 && parts[1].startsWith(parts[0])) {
+									formatted = [parts[1], ...parts.slice(2)].join("_")
+								}
+								return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+							}
+							return formatName(a).localeCompare(formatName(b))
+						})
+
 						// Use a microtask to ensure state updates are batched properly
 						Promise.resolve().then(() => {
-							// Cache the animations for this costume
-							animationsCacheRef.current.set(selectedCostume, animNames)
-							setAvailableAnimations(animNames)
-							setSelectedAnimation(animNames[0])
+							// Cache the sorted animations for this costume
+							animationsCacheRef.current.set(selectedCostume, sortedAnimNames)
+							setAvailableAnimations(sortedAnimNames)
+							setSelectedAnimation(sortedAnimNames[0])
 						})
 					} else {
 						// Cache empty array for costumes with no animations
@@ -655,25 +689,37 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						</CardHeader>
 						<CardContent className="h-fit lg:h-200 overflow-y-auto custom-scrollbar">
 							<div className="grid grid-cols-1 gap-2">
-								{costumeOptions.map((costume) => (
-									<div
-										key={costume}
-										className={`p-2 rounded-lg border cursor-pointer transition-colors ${
-											costume === selectedCostume
-												? "border-primary bg-primary/5"
-												: "border-muted hover:border-primary/50"
-										}`}
-										onClick={() => setSelectedCostume(costume)}
-									>
-										<div className="font-medium">{formatCostumeName(costume)}</div>
-										<div className="text-xs text-muted-foreground mt-1">
-											{heroModels[costume]
-												.map((m) => m.type)
-												.sort((a, b) => a.localeCompare(b))
-												.join(", ")}
+								{[...costumeOptions]
+									.sort((a, b) => {
+										const aIsVari = a.startsWith("Vari")
+										const bIsVari = b.startsWith("Vari")
+
+										// If one is Vari and the other isn't, put Vari at the bottom
+										if (aIsVari && !bIsVari) return 1
+										if (!aIsVari && bIsVari) return -1
+
+										// Otherwise, sort alphabetically by formatted name
+										return formatCostumeName(a).localeCompare(formatCostumeName(b))
+									})
+									.map((costume) => (
+										<div
+											key={costume}
+											className={`p-2 rounded-lg border transition-colors ${
+												costume === selectedCostume
+													? "border-primary bg-primary/5"
+													: "border-muted hover:border-primary/50"
+											} ${isLoadingModels ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+											onClick={() => !isLoadingModels && setSelectedCostume(costume)}
+										>
+											<div className="font-medium">{formatCostumeName(costume)}</div>
+											<div className="text-xs text-muted-foreground mt-1">
+												{heroModels[costume]
+													.map((m) => m.type)
+													.sort((a, b) => a.localeCompare(b))
+													.join(", ")}
+											</div>
 										</div>
-									</div>
-								))}
+									))}
 							</div>
 						</CardContent>
 					</Card>
@@ -694,6 +740,8 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 								availableAnimations={availableAnimations}
 								selectedAnimation={selectedAnimation}
 								setSelectedAnimation={setSelectedAnimation}
+								isLoading={isLoadingModels}
+								setIsLoading={setIsLoadingModels}
 							/>
 						) : (
 							<div className="text-center text-muted-foreground py-8">
