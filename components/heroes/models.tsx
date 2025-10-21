@@ -12,10 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
-import { RotateCcw, Info, Eye, EyeOff, Play, Pause } from "lucide-react"
+import { RotateCcw, Info, Eye, EyeOff, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -328,6 +329,7 @@ function ModelViewer({
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
 	const [isPaused, setIsPaused] = useState(false)
 	const [loadingProgress, setLoadingProgress] = useState(0)
+	const [isCollapsed, setIsCollapsed] = useState(false)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
@@ -384,151 +386,178 @@ function ModelViewer({
 	}
 
 	return (
-		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
-			<div className="flex flex-col gap-4 lg:w-40 flex-shrink-0 overflow-hidden lg:h-full">
-				{/* Individual Model Toggles */}
-				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
-					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
-						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((model) => (
-							<Button
-								key={model.name}
-								size="sm"
-								variant={visibleModels.has(model.name) ? "default" : "outline"}
-								onClick={() => toggleModelVisibility(model.name)}
-								className="flex items-center gap-2 w-full"
-								disabled={isLoading}
-							>
-								{visibleModels.has(model.name) ? (
-									<Eye className="h-3 w-3" />
-								) : (
-									<EyeOff className="h-3 w-3" />
-								)}
-								<span className="capitalize">{model.type}</span>
-							</Button>
-						))}
-				</div>
+		<Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
+			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
+				{/* 3D Viewer */}
+				<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
+					{/* Sliding Controls Panel - slides in from left */}
+					<div
+						className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-64 transition-all duration-300 ease-in-out"
+						style={{
+							left: isCollapsed ? "-256px" : "0px",
+						}}
+					>
+						{/* Individual Model Toggles */}
+						<div className="flex flex-col items-center gap-2 flex-shrink-0">
+							{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map((model) => (
+									<Button
+										key={model.name}
+										size="sm"
+										variant={visibleModels.has(model.name) ? "default" : "outline"}
+										onClick={() => toggleModelVisibility(model.name)}
+										className="flex items-center gap-2 w-full"
+										disabled={isLoading}
+									>
+										{visibleModels.has(model.name) ? (
+											<Eye className="h-3 w-3" />
+										) : (
+											<EyeOff className="h-3 w-3" />
+										)}
+										<span className="capitalize">{model.type}</span>
+									</Button>
+								))}
+						</div>
 
-				{/* Animation Selection */}
-				{availableAnimations.length > 0 && (
-					<>
-						<Separator className="flex-shrink-0" />
+						{/* Animation Selection */}
+						{availableAnimations.length > 0 && (
+							<>
+								<Separator className="flex-shrink-0" />
 
-						<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
-							<div className="flex items-center justify-between flex-shrink-0">
-								<div className="text-sm font-semibold">Animations ({availableAnimations.length})</div>
-								<Button
-									size="sm"
-									variant="ghost"
-									onClick={() => setIsPaused(!isPaused)}
-									className="h-6 w-6 p-0"
-									title={isPaused ? "Play animation" : "Pause animation"}
-									disabled={isLoading}
-								>
-									{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
-								</Button>
-							</div>
-							<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
-								{[...availableAnimations]
-									.sort((a, b) => formatAnimationName(a).localeCompare(formatAnimationName(b)))
-									.map((animName) => (
+								<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
+									<div className="flex items-center justify-between flex-shrink-0">
+										<div className="text-sm font-semibold">
+											Animations ({availableAnimations.length})
+										</div>
 										<Button
-											key={animName}
 											size="sm"
-											variant={selectedAnimation === animName ? "default" : "outline"}
-											onClick={() => setSelectedAnimation(animName)}
-											title={animName}
+											variant="ghost"
+											onClick={() => setIsPaused(!isPaused)}
+											className="h-6 w-6 p-0"
+											title={isPaused ? "Play animation" : "Pause animation"}
 											disabled={isLoading}
 										>
-											<span className="text-start text-xs truncate w-full">
-												{formatAnimationName(animName)}
-											</span>
+											{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
 										</Button>
-									))}
-							</div>
-						</div>
-					</>
-				)}
-			</div>
-
-			{/* 3D Viewer */}
-			<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
-				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
-					<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
-					<OrbitControls
-						ref={controlsRef}
-						enablePan={true}
-						enableZoom={true}
-						enableRotate={true}
-						maxDistance={10}
-						minDistance={0.005}
-						target={INITIAL_CAMERA_TARGET}
-					/>
-					<Suspense fallback={null}>
-						<Model
-							modelFiles={modelFiles}
-							visibleModels={visibleModels}
-							selectedAnimation={selectedAnimation}
-							isPaused={isPaused}
-							setIsLoading={setIsLoading}
-							setLoadingProgress={setLoadingProgress}
-						/>
-					</Suspense>
-					<gridHelper args={[10, 10]} />
-				</Canvas>
-
-				{/* Camera Controls */}
-				<div className="absolute top-4 right-4 flex flex-col gap-2">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button size="sm" variant="secondary" disabled={isLoading}>
-								<Info className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent className="space-y-1">
-							<div>
-								<Kbd>Left Click</Kbd> Rotate
-							</div>
-							<div>
-								<Kbd>Right Click</Kbd> Move
-							</div>
-							<div>
-								<Kbd>Scroll</Kbd> Zoom
-							</div>
-						</TooltipContent>
-					</Tooltip>
-					<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
-						<RotateCcw className="h-4 w-4" />
-					</Button>
-				</div>
-
-				{/* Models count */}
-				{modelFiles.some((m) => visibleModels.has(m.name)) && (
-					<div className="absolute bottom-4 left-4 space-y-1">
-						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-							Models: {Array.from(visibleModels).length}/{modelFiles.length}
-						</div>
-						{selectedAnimation && (
-							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-								Animation: {formatAnimationName(selectedAnimation)}
-							</div>
+									</div>
+									<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
+										{[...availableAnimations]
+											.sort((a, b) =>
+												formatAnimationName(a).localeCompare(formatAnimationName(b))
+											)
+											.map((animName) => (
+												<Button
+													key={animName}
+													size="sm"
+													variant={selectedAnimation === animName ? "default" : "outline"}
+													onClick={() => setSelectedAnimation(animName)}
+													title={animName}
+													disabled={isLoading}
+												>
+													<span className="text-start text-xs truncate w-full">
+														{formatAnimationName(animName)}
+													</span>
+												</Button>
+											))}
+									</div>
+								</div>
+							</>
 						)}
 					</div>
-				)}
 
-				{/* Loading overlay */}
-				{isLoading && (
-					<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
-							<Progress value={loadingProgress} className="h-2" />
-							<div className="text-xs text-muted-foreground text-right mb-0.5">
-								{Math.round(loadingProgress)}%
+					{/* Collapse Toggle Button - moves with the panel */}
+					<CollapsibleTrigger asChild>
+						<Button
+							variant="secondary"
+							size="sm"
+							className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
+							style={{
+								left: isCollapsed ? "0px" : "256px",
+							}}
+							title={isCollapsed ? "Show controls" : "Hide controls"}
+						>
+							{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+						</Button>
+					</CollapsibleTrigger>
+
+					<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
+						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
+						<OrbitControls
+							ref={controlsRef}
+							enablePan={true}
+							enableZoom={true}
+							enableRotate={true}
+							maxDistance={10}
+							minDistance={0.005}
+							target={INITIAL_CAMERA_TARGET}
+						/>
+						<Suspense fallback={null}>
+							<Model
+								modelFiles={modelFiles}
+								visibleModels={visibleModels}
+								selectedAnimation={selectedAnimation}
+								isPaused={isPaused}
+								setIsLoading={setIsLoading}
+								setLoadingProgress={setLoadingProgress}
+							/>
+						</Suspense>
+						<gridHelper args={[10, 10]} />
+					</Canvas>
+
+					{/* Camera Controls */}
+					<div className="absolute top-4 right-4 flex flex-col gap-2">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" disabled={isLoading}>
+									<Info className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent className="space-y-1">
+								<div>
+									<Kbd>Left Click</Kbd> Rotate
+								</div>
+								<div>
+									<Kbd>Right Click</Kbd> Move
+								</div>
+								<div>
+									<Kbd>Scroll</Kbd> Zoom
+								</div>
+							</TooltipContent>
+						</Tooltip>
+						<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
+							<RotateCcw className="h-4 w-4" />
+						</Button>
+					</div>
+
+					{/* Models count */}
+					{modelFiles.some((m) => visibleModels.has(m.name)) && (
+						<div className="absolute bottom-4 left-4 space-y-1">
+							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+								Models: {Array.from(visibleModels).length}/{modelFiles.length}
+							</div>
+							{selectedAnimation && (
+								<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+									Animation: {formatAnimationName(selectedAnimation)}
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Loading overlay */}
+					{isLoading && (
+						<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+							<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
+								<Progress value={loadingProgress} className="h-2" />
+								<div className="text-xs text-muted-foreground text-right mb-0.5">
+									{Math.round(loadingProgress)}%
+								</div>
 							</div>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
-		</div>
+		</Collapsible>
 	)
 }
 
