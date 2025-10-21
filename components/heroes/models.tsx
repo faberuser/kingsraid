@@ -94,16 +94,32 @@ function Model({
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
 
 	useEffect(() => {
-		const loadModel = async (modelFile: ModelFile) => {
+		const loadModel = async (modelFile: ModelFile, modelIndex: number, totalModels: number) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
 
 			try {
 				const fbxLoader = new FBXLoader()
 
-				// Load FBX model
+				// Load FBX model with progress tracking
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
-					fbxLoader.load(`${modelDir}/${modelFile.path}`, resolve, undefined, reject)
+					fbxLoader.load(
+						`${modelDir}/${modelFile.path}`,
+						resolve,
+						(xhr) => {
+							// Calculate progress for this individual model
+							const modelProgress = xhr.total > 0 ? (xhr.loaded / xhr.total) * 100 : 0
+							// Calculate overall progress considering all models
+							const previousModelsProgress = (modelIndex / totalModels) * 100
+							const currentModelContribution = (1 / totalModels) * 100
+							const totalProgress =
+								previousModelsProgress + (modelProgress / 100) * currentModelContribution
+							if (setLoadingProgress) {
+								setLoadingProgress(totalProgress)
+							}
+						},
+						reject
+					)
 				})
 
 				const modelWithAnimations = fbx as HeroModel
@@ -241,10 +257,7 @@ function Model({
 			const totalModels = visibleModelsToLoad.length
 
 			for (let i = 0; i < visibleModelsToLoad.length; i++) {
-				await loadModel(visibleModelsToLoad[i])
-				if (setLoadingProgress) {
-					setLoadingProgress(((i + 1) / totalModels) * 100)
-				}
+				await loadModel(visibleModelsToLoad[i], i, totalModels)
 			}
 
 			if (setIsLoading) setIsLoading(false)
