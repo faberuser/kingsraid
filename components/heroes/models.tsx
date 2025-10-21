@@ -184,6 +184,7 @@ function Model({
 						}
 						mesh.castShadow = false
 						mesh.receiveShadow = false
+						mesh.frustumCulled = false
 					}
 				})
 
@@ -460,7 +461,7 @@ function ModelViewer({
 						enableZoom={true}
 						enableRotate={true}
 						maxDistance={10}
-						minDistance={0.5}
+						minDistance={0.005}
 						target={INITIAL_CAMERA_TARGET}
 					/>
 					<Suspense fallback={null}>
