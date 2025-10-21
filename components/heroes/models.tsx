@@ -818,11 +818,11 @@ function ModelViewer({
 							)}
 							<DialogFooter className="flex gap-2">
 								<Button variant="outline" onClick={copyToClipboard}>
-									<Copy className="h-4 w-4 mr-2" />
+									<Copy className="h-4 w-4" />
 									Copy to Clipboard
 								</Button>
 								<Button onClick={downloadScreenshot}>
-									<Download className="h-4 w-4 mr-2" />
+									<Download className="h-4 w-4" />
 									Download
 								</Button>
 							</DialogFooter>
