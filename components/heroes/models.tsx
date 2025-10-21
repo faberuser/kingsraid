@@ -683,6 +683,7 @@ function ModelViewer({
 								left: isCollapsed ? "0px" : "208px",
 							}}
 							title={isCollapsed ? "Show controls" : "Hide controls"}
+							disabled={isLoading}
 						>
 							{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
 						</Button>
@@ -701,10 +702,10 @@ function ModelViewer({
 						/>
 
 						{/* Lighting setup */}
-						<ambientLight intensity={1} />
+						<ambientLight intensity={3} />
 						<directionalLight
 							position={[0, 10, 0]}
-							intensity={0.7}
+							intensity={1}
 							castShadow
 							shadow-mapSize={2048}
 							shadow-camera-far={50}
@@ -866,12 +867,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	}
 
 	useEffect(() => {
-		// Set default costume to the first one after sorting
-		const costumes = Object.keys(heroModels)
-		if (costumes.length > 0) {
-			const sortedCostumes = getSortedCostumes(costumes)
-			setSelectedCostume(sortedCostumes[0])
-		}
+		// Don't set a default costume - let user choose
 		setLoading(false)
 	}, [heroModels])
 
@@ -910,7 +906,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
 					const timeout = setTimeout(() => {
 						reject(new Error(`Timeout loading ${firstModel.path}`))
-					}, 30000) // 30 second timeout
+					}, 60000) // 60 second timeout
 
 					fbxLoader.load(
 						`${modelDir}/${firstModel.path}`,
@@ -1047,10 +1043,14 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			<div className="flex-1 space-y-6">
 				<Card>
 					<CardHeader>
-						<CardTitle>{selectedCostume && selectedCostume}</CardTitle>
+						<CardTitle>{selectedCostume || "Select a Model"}</CardTitle>
 					</CardHeader>
 					<CardContent>
-						{currentModels.length > 0 ? (
+						{!selectedCostume ? (
+							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+								Select a costume from the list to view the 3D model
+							</div>
+						) : currentModels.length > 0 ? (
 							<ModelViewer
 								key="model-viewer-stable" // Stable key to prevent unmounting
 								modelFiles={currentModels}
@@ -1061,7 +1061,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 								setIsLoading={setIsLoadingModels}
 							/>
 						) : (
-							<div className="text-center text-muted-foreground py-8">
+							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
 								No models available for this costume
 							</div>
 						)}
