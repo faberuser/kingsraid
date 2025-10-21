@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/ui/kbd"
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
@@ -11,10 +11,32 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
-import { RotateCcw, Info, Eye, EyeOff, Play, Pause } from "lucide-react"
+import {
+	RotateCcw,
+	Info,
+	Eye,
+	EyeOff,
+	Play,
+	Pause,
+	ChevronLeft,
+	ChevronRight,
+	Camera,
+	Download,
+	Copy,
+} from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
+import { Progress } from "@/components/ui/progress"
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -76,12 +98,14 @@ function Model({
 	selectedAnimation,
 	isPaused,
 	setIsLoading,
+	setLoadingProgress,
 }: {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
 	selectedAnimation: string | null
 	isPaused?: boolean
 	setIsLoading?: (loading: boolean) => void
+	setLoadingProgress?: (progress: number) => void
 }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
@@ -90,16 +114,32 @@ function Model({
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
 
 	useEffect(() => {
-		const loadModel = async (modelFile: ModelFile) => {
+		const loadModel = async (modelFile: ModelFile, modelIndex: number, totalModels: number) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
 
 			try {
 				const fbxLoader = new FBXLoader()
 
-				// Load FBX model
+				// Load FBX model with progress tracking
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
-					fbxLoader.load(`${modelDir}/${modelFile.path}`, resolve, undefined, reject)
+					fbxLoader.load(
+						`${modelDir}/${modelFile.path}`,
+						resolve,
+						(xhr) => {
+							// Calculate progress for this individual model
+							const modelProgress = xhr.total > 0 ? (xhr.loaded / xhr.total) * 100 : 0
+							// Calculate overall progress considering all models
+							const previousModelsProgress = (modelIndex / totalModels) * 100
+							const currentModelContribution = (1 / totalModels) * 100
+							const totalProgress =
+								previousModelsProgress + (modelProgress / 100) * currentModelContribution
+							if (setLoadingProgress) {
+								setLoadingProgress(totalProgress)
+							}
+						},
+						reject
+					)
 				})
 
 				const modelWithAnimations = fbx as HeroModel
@@ -142,8 +182,6 @@ function Model({
 									opacity = material.opacity
 								}
 
-								// For skinned meshes, use MeshStandardMaterial which supports skinning
-								// For non-skinned meshes, use MeshBasicMaterial
 								if (opacity === 0) {
 									// Use appropriate material with transparency for invisible materials
 									const transparentMaterial = new THREE.MeshBasicMaterial({
@@ -179,8 +217,9 @@ function Model({
 								mesh.material = [...mesh.material]
 							}
 						}
-						mesh.castShadow = false
-						mesh.receiveShadow = false
+						mesh.castShadow = true
+						mesh.receiveShadow = true
+						mesh.frustumCulled = false
 					}
 				})
 
@@ -220,6 +259,7 @@ function Model({
 		// Load models sequentially: body first to ensure animations are available
 		const loadModelsSequentially = async () => {
 			if (setIsLoading) setIsLoading(true)
+			if (setLoadingProgress) setLoadingProgress(0)
 
 			// Sort models to load body first (most important for animations), then others
 			const sortedModels = [...modelFiles].sort((a, b) => {
@@ -231,10 +271,11 @@ function Model({
 				return 0
 			})
 
-			for (const modelFile of sortedModels) {
-				if (visibleModels.has(modelFile.name)) {
-					await loadModel(modelFile)
-				}
+			const visibleModelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name))
+			const totalModels = visibleModelsToLoad.length
+
+			for (let i = 0; i < visibleModelsToLoad.length; i++) {
+				await loadModel(visibleModelsToLoad[i], i, totalModels)
 			}
 
 			if (setIsLoading) setIsLoading(false)
@@ -298,26 +339,149 @@ function Model({
 	)
 }
 
+function Scene({ sceneName }: { sceneName: string | null }) {
+	const [sceneModel, setSceneModel] = useState<THREE.Group | null>(null)
+
+	useEffect(() => {
+		if (!sceneName || sceneName === "grid") {
+			setSceneModel(null)
+			return
+		}
+
+		const loadScene = async () => {
+			const fbxLoader = new FBXLoader()
+			const scenePath = `${basePath}/kingsraid-models/scenes/${sceneName}/${
+				sceneName.charAt(0).toUpperCase() + sceneName.slice(1)
+			}.fbx`
+
+			try {
+				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
+					fbxLoader.load(scenePath, resolve, undefined, reject)
+				})
+
+				// Fix materials and textures
+				fbx.traverse((child) => {
+					if ((child as THREE.Mesh).isMesh) {
+						const mesh = child as THREE.Mesh
+						if (mesh.material) {
+							const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+
+							materials.forEach((material, index) => {
+								let name = "unknown"
+								let originalMap = null
+								let color = new THREE.Color(0xcccccc)
+								let opacity = 1.0
+
+								if (
+									material instanceof THREE.MeshStandardMaterial ||
+									material instanceof THREE.MeshPhongMaterial ||
+									material instanceof THREE.MeshLambertMaterial ||
+									material instanceof THREE.MeshBasicMaterial ||
+									material instanceof THREE.MeshToonMaterial
+								) {
+									name = material.name || "unnamed"
+									originalMap = material.map
+									color = material.color || new THREE.Color(0xcccccc)
+									opacity = material.opacity
+								}
+
+								const newMaterial = new THREE.MeshStandardMaterial({
+									name: name,
+									map: originalMap,
+									...(originalMap ? {} : { color: color }),
+									...(opacity < 1 ? { transparent: true, opacity: opacity } : {}),
+									roughness: 1,
+									metalness: 0.0,
+								})
+
+								if (Array.isArray(mesh.material)) {
+									mesh.material[index] = newMaterial
+								} else {
+									mesh.material = newMaterial
+								}
+							})
+
+							if (Array.isArray(mesh.material)) {
+								mesh.material = [...mesh.material]
+							}
+						}
+						mesh.castShadow = false
+						mesh.receiveShadow = true
+						mesh.frustumCulled = false
+					}
+				})
+
+				setSceneModel(fbx)
+			} catch (error) {
+				console.error(`Failed to load scene ${sceneName}:`, error)
+				setSceneModel(null)
+			}
+		}
+
+		loadScene()
+	}, [sceneName])
+
+	if (!sceneModel) return null
+
+	return <primitive object={sceneModel} />
+}
+
+// Helper component to handle screenshot capture from within Canvas
+function ScreenshotHandler({ onCapture }: { onCapture: ((dataUrl: string) => void) | null }) {
+	const { gl } = useThree()
+
+	useEffect(() => {
+		if (onCapture) {
+			// Render one frame and capture
+			requestAnimationFrame(() => {
+				try {
+					const dataUrl = gl.domElement.toDataURL("image/png")
+					onCapture(dataUrl)
+				} catch (error) {
+					console.error("Failed to capture screenshot:", error)
+				}
+			})
+		}
+	}, [onCapture, gl])
+
+	return null
+}
+
 function ModelViewer({
 	modelFiles,
 	availableAnimations,
 	selectedAnimation,
 	setSelectedAnimation,
+	isLoading,
+	setIsLoading,
 }: {
 	modelFiles: ModelFile[]
 	availableAnimations: string[]
 	selectedAnimation: string | null
 	setSelectedAnimation: (s: string | null) => void
+	isLoading: boolean
+	setIsLoading: (loading: boolean) => void
 }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
 
 	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
 	const [isPaused, setIsPaused] = useState(false)
-	const [isLoading, setIsLoading] = useState(true)
+	const [loadingProgress, setLoadingProgress] = useState(0)
+	const [isCollapsed, setIsCollapsed] = useState(false)
+	const [selectedScene, setSelectedScene] = useState<string>("grid")
+	const [screenshotDialog, setScreenshotDialog] = useState(false)
+	const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
+	const [captureCallback, setCaptureCallback] = useState<((dataUrl: string) => void) | null>(null)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
+
+	// Available scenes (can be expanded by scanning the scenes directory)
+	const availableScenes = [
+		{ value: "grid", label: "Grid" },
+		{ value: "wardrobe", label: "Wardrobe" },
+	]
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
@@ -370,144 +534,304 @@ function ModelViewer({
 		})
 	}
 
-	return (
-		<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
-			<div className="flex flex-col gap-4 lg:w-40 flex-shrink-0 overflow-hidden lg:h-full">
-				{/* Individual Model Toggles */}
-				<div className="flex flex-row flex-wrap lg:flex-col items-center gap-2 flex-shrink-0">
-					{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
-						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((model) => (
-							<Button
-								key={model.name}
-								size="sm"
-								variant={visibleModels.has(model.name) ? "default" : "outline"}
-								onClick={() => toggleModelVisibility(model.name)}
-								className="flex items-center gap-2 w-full"
-							>
-								{visibleModels.has(model.name) ? (
-									<Eye className="h-3 w-3" />
-								) : (
-									<EyeOff className="h-3 w-3" />
-								)}
-								<span className="capitalize">{model.type}</span>
-							</Button>
-						))}
-				</div>
+	const captureScreenshot = () => {
+		// Set the capture callback which will trigger the ScreenshotHandler
+		setCaptureCallback(() => (dataUrl: string) => {
+			setScreenshotUrl(dataUrl)
+			setScreenshotDialog(true)
+			setCaptureCallback(null) // Reset after capture
+		})
+	}
 
-				{/* Animation Selection */}
-				{availableAnimations.length > 0 && (
-					<>
+	const downloadScreenshot = () => {
+		if (!screenshotUrl) return
+
+		const link = document.createElement("a")
+		link.download = `model-screenshot-${Date.now()}.png`
+		link.href = screenshotUrl
+		link.click()
+		setScreenshotDialog(false)
+	}
+
+	const copyToClipboard = async () => {
+		if (!screenshotUrl) return
+
+		try {
+			// Convert data URL to blob
+			const response = await fetch(screenshotUrl)
+			const blob = await response.blob()
+
+			// Copy to clipboard
+			await navigator.clipboard.write([
+				new ClipboardItem({
+					"image/png": blob,
+				}),
+			])
+
+			setScreenshotDialog(false)
+		} catch (error) {
+			console.error("Failed to copy to clipboard:", error)
+		}
+	}
+
+	return (
+		<Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
+			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
+				{/* 3D Viewer */}
+				<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
+					{/* Sliding Controls Panel - slides in from left */}
+					<div
+						className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
+						style={{
+							left: isCollapsed ? "-208px" : "0px",
+						}}
+					>
+						{/* Scene Selection */}
+						<div className="space-y-2 flex-shrink-0">
+							<Select value={selectedScene} onValueChange={setSelectedScene} disabled={isLoading}>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Select scene" />
+								</SelectTrigger>
+								<SelectContent>
+									{availableScenes.map((scene) => (
+										<SelectItem key={scene.value} value={scene.value}>
+											{scene.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
 						<Separator className="flex-shrink-0" />
 
-						<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
-							<div className="flex items-center justify-between flex-shrink-0">
-								<div className="text-sm font-semibold">Animations ({availableAnimations.length})</div>
-								<Button
-									size="sm"
-									variant="ghost"
-									onClick={() => setIsPaused(!isPaused)}
-									className="h-6 w-6 p-0"
-									title={isPaused ? "Play animation" : "Pause animation"}
-								>
-									{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
-								</Button>
-							</div>
-							<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
-								{availableAnimations.map((animName) => (
+						{/* Individual Model Toggles */}
+						<div className="flex flex-col items-center gap-2 flex-shrink-0">
+							{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map((model) => (
 									<Button
-										key={animName}
+										key={model.name}
 										size="sm"
-										variant={selectedAnimation === animName ? "default" : "outline"}
-										onClick={() => setSelectedAnimation(animName)}
-										title={animName}
+										variant={visibleModels.has(model.name) ? "default" : "outline"}
+										onClick={() => toggleModelVisibility(model.name)}
+										className="flex items-center gap-2 w-full"
+										disabled={isLoading}
 									>
-										<span className="text-start text-xs truncate w-full">
-											{formatAnimationName(animName)}
-										</span>
+										{visibleModels.has(model.name) ? (
+											<Eye className="h-3 w-3" />
+										) : (
+											<EyeOff className="h-3 w-3" />
+										)}
+										<span className="capitalize">{model.type}</span>
 									</Button>
 								))}
-							</div>
 						</div>
-					</>
-				)}
-			</div>
 
-			{/* 3D Viewer */}
-			<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
-				<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
-					<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
-					<OrbitControls
-						ref={controlsRef}
-						enablePan={true}
-						enableZoom={true}
-						enableRotate={true}
-						maxDistance={10}
-						minDistance={0.5}
-						target={INITIAL_CAMERA_TARGET}
-					/>
-					<Suspense fallback={null}>
-						<Model
-							modelFiles={modelFiles}
-							visibleModels={visibleModels}
-							selectedAnimation={selectedAnimation}
-							isPaused={isPaused}
-							setIsLoading={setIsLoading}
-						/>
-					</Suspense>
-					<gridHelper args={[10, 10]} />
-				</Canvas>
+						{/* Animation Selection */}
+						{availableAnimations.length > 0 && (
+							<>
+								<Separator className="flex-shrink-0" />
 
-				{/* Camera Controls */}
-				<div className="absolute top-4 right-4 flex flex-col gap-2">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button size="sm" variant="secondary">
-								<Info className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent className="space-y-1">
-							<div>
-								<Kbd>Left Click</Kbd> Rotate
-							</div>
-							<div>
-								<Kbd>Right Click</Kbd> Move
-							</div>
-							<div>
-								<Kbd>Scroll</Kbd> Zoom
-							</div>
-						</TooltipContent>
-					</Tooltip>
-					<Button size="sm" variant="secondary" onClick={resetCamera}>
-						<RotateCcw className="h-4 w-4" />
-					</Button>
-				</div>
-
-				{/* Models count */}
-				{modelFiles.some((m) => visibleModels.has(m.name)) && (
-					<div className="absolute bottom-4 left-4 space-y-1">
-						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-							Models: {Array.from(visibleModels).length}/{modelFiles.length}
-						</div>
-						{selectedAnimation && (
-							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-								Animation: {formatAnimationName(selectedAnimation)}
-							</div>
+								<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
+									<div className="flex items-center justify-between flex-shrink-0">
+										<div className="text-sm font-semibold">
+											Animations ({availableAnimations.length})
+										</div>
+										<Button
+											size="sm"
+											variant="ghost"
+											onClick={() => setIsPaused(!isPaused)}
+											className="h-6 w-6 p-0"
+											title={isPaused ? "Play animation" : "Pause animation"}
+											disabled={isLoading}
+										>
+											{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+										</Button>
+									</div>
+									<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
+										{[...availableAnimations]
+											.sort((a, b) =>
+												formatAnimationName(a).localeCompare(formatAnimationName(b))
+											)
+											.map((animName) => (
+												<Button
+													key={animName}
+													size="sm"
+													variant={selectedAnimation === animName ? "default" : "outline"}
+													onClick={() => setSelectedAnimation(animName)}
+													title={animName}
+													disabled={isLoading}
+												>
+													<span className="text-start text-xs truncate w-full">
+														{formatAnimationName(animName)}
+													</span>
+												</Button>
+											))}
+									</div>
+								</div>
+							</>
 						)}
 					</div>
-				)}
 
-				{/* Loading overlay */}
-				{isLoading && (
-					<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-						<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg flex items-center gap-3">
-							<Spinner className="h-5 w-5" />
-							<span className="text-sm font-medium">Loading models...</span>
-						</div>
+					{/* Collapse Toggle Button - moves with the panel */}
+					<CollapsibleTrigger asChild>
+						<Button
+							variant="secondary"
+							size="sm"
+							className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
+							style={{
+								left: isCollapsed ? "0px" : "208px",
+							}}
+							title={isCollapsed ? "Show controls" : "Hide controls"}
+							disabled={isLoading}
+						>
+							{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+						</Button>
+					</CollapsibleTrigger>
+
+					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }}>
+						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
+						<OrbitControls
+							ref={controlsRef}
+							enablePan={true}
+							enableZoom={true}
+							enableRotate={true}
+							maxDistance={10}
+							minDistance={0}
+							target={INITIAL_CAMERA_TARGET}
+						/>
+
+						{/* Lighting setup */}
+						<ambientLight intensity={3} />
+						<directionalLight
+							position={[0, 10, 0]}
+							intensity={1}
+							castShadow
+							shadow-mapSize={2048}
+							shadow-camera-far={50}
+							shadow-camera-left={-10}
+							shadow-camera-right={10}
+							shadow-camera-top={10}
+							shadow-camera-bottom={-10}
+						/>
+
+						<Suspense fallback={null}>
+							<Model
+								modelFiles={modelFiles}
+								visibleModels={visibleModels}
+								selectedAnimation={selectedAnimation}
+								isPaused={isPaused}
+								setIsLoading={setIsLoading}
+								setLoadingProgress={setLoadingProgress}
+							/>
+							{selectedScene === "grid" ? (
+								<gridHelper args={[10, 10]} />
+							) : (
+								<Scene sceneName={selectedScene} />
+							)}
+							<ScreenshotHandler onCapture={captureCallback} />
+						</Suspense>
+					</Canvas>
+
+					{/* Camera Controls */}
+					<div className="absolute top-4 right-4 flex flex-col gap-2">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" disabled={isLoading}>
+									<Info className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent className="space-y-1">
+								<div>
+									<Kbd>Left Click</Kbd> Rotate
+								</div>
+								<div>
+									<Kbd>Right Click</Kbd> Move
+								</div>
+								<div>
+									<Kbd>Scroll</Kbd> Zoom
+								</div>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
+									<RotateCcw className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>Reset Camera</div>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
+									<Camera className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>Take Screenshot</div>
+							</TooltipContent>
+						</Tooltip>
 					</div>
-				)}
+
+					{/* Models count */}
+					{modelFiles.some((m) => visibleModels.has(m.name)) && (
+						<div className="absolute bottom-4 left-4 space-y-1">
+							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+								Models: {Array.from(visibleModels).length}/{modelFiles.length}
+							</div>
+							{selectedAnimation && (
+								<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+									Animation: {formatAnimationName(selectedAnimation)}
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Loading overlay */}
+					{isLoading && (
+						<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+							<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
+								<Progress value={loadingProgress} className="h-2" />
+								<div className="text-xs text-muted-foreground text-right mb-0.5">
+									{Math.round(loadingProgress)}%
+								</div>
+							</div>
+						</div>
+					)}
+
+					{/* Screenshot Dialog */}
+					<Dialog open={screenshotDialog} onOpenChange={setScreenshotDialog}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Screenshot Captured</DialogTitle>
+								<DialogDescription>Choose how you want to save your screenshot.</DialogDescription>
+							</DialogHeader>
+							{screenshotUrl && (
+								<div className="flex justify-center">
+									<img
+										src={screenshotUrl}
+										alt="Screenshot preview"
+										className="max-w-full h-auto rounded-lg border"
+									/>
+								</div>
+							)}
+							<DialogFooter className="flex gap-2">
+								<Button variant="outline" onClick={copyToClipboard}>
+									<Copy className="h-4 w-4" />
+									Copy to Clipboard
+								</Button>
+								<Button onClick={downloadScreenshot}>
+									<Download className="h-4 w-4" />
+									Download
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+				</div>
 			</div>
-		</div>
+		</Collapsible>
 	)
 }
 
@@ -516,16 +840,34 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [loading, setLoading] = useState(true)
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
+	const [isLoadingModels, setIsLoadingModels] = useState(false)
 	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
 
+	// Helper function to format costume name
+	const formatCostumeName = (costumeName: string) => {
+		return costumeName
+			.replace(/^Cos\d+/, "") // Remove Cos prefix
+			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
+			.trim()
+	}
+
+	// Helper function to get sorted costumes (same logic as in the UI)
+	const getSortedCostumes = (costumes: string[]) => {
+		return [...costumes].sort((a, b) => {
+			const aIsVari = a.startsWith("Vari")
+			const bIsVari = b.startsWith("Vari")
+
+			// If one is Vari and the other isn't, put Vari at the bottom
+			if (aIsVari && !bIsVari) return 1
+			if (!aIsVari && bIsVari) return -1
+
+			// Otherwise, sort alphabetically by formatted name
+			return formatCostumeName(a).localeCompare(formatCostumeName(b))
+		})
+	}
+
 	useEffect(() => {
-		// Set default costume (prioritize non-default costumes)
-		const costumes = Object.keys(heroModels).sort()
-		if (costumes.length > 0) {
-			// Prefer costumes with "Cos" in the name, fallback to first available
-			const preferredCostume = costumes.find((c) => c.includes("Cos")) || costumes[0]
-			setSelectedCostume(preferredCostume)
-		}
+		// Don't set a default costume - let user choose
 		setLoading(false)
 	}, [heroModels])
 
@@ -564,7 +906,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
 					const timeout = setTimeout(() => {
 						reject(new Error(`Timeout loading ${firstModel.path}`))
-					}, 30000) // 30 second timeout
+					}, 60000) // 60 second timeout
 
 					fbxLoader.load(
 						`${modelDir}/${firstModel.path}`,
@@ -586,12 +928,25 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						.filter((name) => !name.includes("_Weapon@") && !name.includes("Extra"))
 
 					if (animNames.length > 0) {
+						// Sort animations before caching and selecting
+						const sortedAnimNames = [...animNames].sort((a, b) => {
+							const formatName = (animName: string): string => {
+								let formatted = animName.split("@")[1] || animName
+								const parts = formatted.split("_")
+								if (parts.length > 1 && parts[1].startsWith(parts[0])) {
+									formatted = [parts[1], ...parts.slice(2)].join("_")
+								}
+								return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+							}
+							return formatName(a).localeCompare(formatName(b))
+						})
+
 						// Use a microtask to ensure state updates are batched properly
 						Promise.resolve().then(() => {
-							// Cache the animations for this costume
-							animationsCacheRef.current.set(selectedCostume, animNames)
-							setAvailableAnimations(animNames)
-							setSelectedAnimation(animNames[0])
+							// Cache the sorted animations for this costume
+							animationsCacheRef.current.set(selectedCostume, sortedAnimNames)
+							setAvailableAnimations(sortedAnimNames)
+							setSelectedAnimation(sortedAnimNames[0])
 						})
 					} else {
 						// Cache empty array for costumes with no animations
@@ -624,14 +979,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	const costumeOptions = Object.keys(heroModels).sort()
 	const currentModels = selectedCostume ? heroModels[selectedCostume] || [] : []
 
-	// Helper function to format costume name
-	const formatCostumeName = (costumeName: string) => {
-		return costumeName
-			.replace(/^Cos\d+/, "") // Remove Cos prefix
-			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
-			.trim()
-	}
-
 	if (costumeOptions.length === 0) {
 		return (
 			<Card>
@@ -655,25 +1002,37 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 						</CardHeader>
 						<CardContent className="h-fit lg:h-200 overflow-y-auto custom-scrollbar">
 							<div className="grid grid-cols-1 gap-2">
-								{costumeOptions.map((costume) => (
-									<div
-										key={costume}
-										className={`p-2 rounded-lg border cursor-pointer transition-colors ${
-											costume === selectedCostume
-												? "border-primary bg-primary/5"
-												: "border-muted hover:border-primary/50"
-										}`}
-										onClick={() => setSelectedCostume(costume)}
-									>
-										<div className="font-medium">{formatCostumeName(costume)}</div>
-										<div className="text-xs text-muted-foreground mt-1">
-											{heroModels[costume]
-												.map((m) => m.type)
-												.sort((a, b) => a.localeCompare(b))
-												.join(", ")}
+								{[...costumeOptions]
+									.sort((a, b) => {
+										const aIsVari = a.startsWith("Vari")
+										const bIsVari = b.startsWith("Vari")
+
+										// If one is Vari and the other isn't, put Vari at the bottom
+										if (aIsVari && !bIsVari) return 1
+										if (!aIsVari && bIsVari) return -1
+
+										// Otherwise, sort alphabetically by formatted name
+										return formatCostumeName(a).localeCompare(formatCostumeName(b))
+									})
+									.map((costume) => (
+										<div
+											key={costume}
+											className={`p-2 rounded-lg border transition-colors ${
+												costume === selectedCostume
+													? "border-primary bg-primary/5"
+													: "border-muted hover:border-primary/50"
+											} ${isLoadingModels ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+											onClick={() => !isLoadingModels && setSelectedCostume(costume)}
+										>
+											<div className="font-medium">{formatCostumeName(costume)}</div>
+											<div className="text-xs text-muted-foreground mt-1">
+												{heroModels[costume]
+													.map((m) => m.type)
+													.sort((a, b) => a.localeCompare(b))
+													.join(", ")}
+											</div>
 										</div>
-									</div>
-								))}
+									))}
 							</div>
 						</CardContent>
 					</Card>
@@ -684,19 +1043,25 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			<div className="flex-1 space-y-6">
 				<Card>
 					<CardHeader>
-						<CardTitle>{selectedCostume && selectedCostume}</CardTitle>
+						<CardTitle>{selectedCostume || "Select a Model"}</CardTitle>
 					</CardHeader>
 					<CardContent>
-						{currentModels.length > 0 ? (
+						{!selectedCostume ? (
+							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+								Select a costume from the list to view the 3D model
+							</div>
+						) : currentModels.length > 0 ? (
 							<ModelViewer
 								key="model-viewer-stable" // Stable key to prevent unmounting
 								modelFiles={currentModels}
 								availableAnimations={availableAnimations}
 								selectedAnimation={selectedAnimation}
 								setSelectedAnimation={setSelectedAnimation}
+								isLoading={isLoadingModels}
+								setIsLoading={setIsLoadingModels}
 							/>
 						) : (
-							<div className="text-center text-muted-foreground py-8">
+							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
 								No models available for this costume
 							</div>
 						)}
