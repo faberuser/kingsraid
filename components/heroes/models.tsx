@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/ui/kbd"
-import { Canvas, useFrame } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
@@ -426,6 +426,27 @@ function Scene({ sceneName }: { sceneName: string | null }) {
 	return <primitive object={sceneModel} />
 }
 
+// Helper component to handle screenshot capture from within Canvas
+function ScreenshotHandler({ onCapture }: { onCapture: ((dataUrl: string) => void) | null }) {
+	const { gl } = useThree()
+
+	useEffect(() => {
+		if (onCapture) {
+			// Render one frame and capture
+			requestAnimationFrame(() => {
+				try {
+					const dataUrl = gl.domElement.toDataURL("image/png")
+					onCapture(dataUrl)
+				} catch (error) {
+					console.error("Failed to capture screenshot:", error)
+				}
+			})
+		}
+	}, [onCapture, gl])
+
+	return null
+}
+
 function ModelViewer({
 	modelFiles,
 	availableAnimations,
@@ -451,10 +472,10 @@ function ModelViewer({
 	const [selectedScene, setSelectedScene] = useState<string>("grid")
 	const [screenshotDialog, setScreenshotDialog] = useState(false)
 	const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
+	const [captureCallback, setCaptureCallback] = useState<((dataUrl: string) => void) | null>(null)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
-	const canvasRef = useRef<HTMLCanvasElement>(null)
 
 	// Available scenes (can be expanded by scanning the scenes directory)
 	const availableScenes = [
@@ -514,16 +535,12 @@ function ModelViewer({
 	}
 
 	const captureScreenshot = () => {
-		if (!canvasRef.current) return
-
-		try {
-			// Get the canvas data URL
-			const dataUrl = canvasRef.current.toDataURL("image/png")
+		// Set the capture callback which will trigger the ScreenshotHandler
+		setCaptureCallback(() => (dataUrl: string) => {
 			setScreenshotUrl(dataUrl)
 			setScreenshotDialog(true)
-		} catch (error) {
-			console.error("Failed to capture screenshot:", error)
-		}
+			setCaptureCallback(null) // Reset after capture
+		})
 	}
 
 	const downloadScreenshot = () => {
@@ -671,7 +688,7 @@ function ModelViewer({
 						</Button>
 					</CollapsibleTrigger>
 
-					<Canvas ref={canvasRef} shadows gl={{ toneMapping: THREE.NoToneMapping }}>
+					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }}>
 						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 						<OrbitControls
 							ref={controlsRef}
@@ -711,6 +728,7 @@ function ModelViewer({
 							) : (
 								<Scene sceneName={selectedScene} />
 							)}
+							<ScreenshotHandler onCapture={captureCallback} />
 						</Suspense>
 					</Canvas>
 
@@ -734,9 +752,16 @@ function ModelViewer({
 								</div>
 							</TooltipContent>
 						</Tooltip>
-						<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
-							<RotateCcw className="h-4 w-4" />
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
+									<RotateCcw className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>Reset Camera</div>
+							</TooltipContent>
+						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
