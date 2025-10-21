@@ -144,3 +144,8 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 -   `IMAGE_TAG`: Docker image tag (optional, latest/full, default: latest)
 -   `CONTAINER_NAME`: Docker container name (optional, default: "kingsraid")
 -   `DOCKER_PORT`: Docker port (optional, default: 3000)
+
+## Known Bugs
+
+-   There are several 3D models having face detached/wrong position
+    (Exported from AssetStudio, would appriciate if anyone know how to fix)
