@@ -696,7 +696,7 @@ function ModelViewer({
 							enableZoom={true}
 							enableRotate={true}
 							maxDistance={10}
-							minDistance={0.005}
+							minDistance={0}
 							target={INITIAL_CAMERA_TARGET}
 						/>
 
