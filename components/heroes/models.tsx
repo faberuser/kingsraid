@@ -11,12 +11,32 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Spinner } from "@/components/ui/spinner"
-import { RotateCcw, Info, Eye, EyeOff, Play, Pause, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+	RotateCcw,
+	Info,
+	Eye,
+	EyeOff,
+	Play,
+	Pause,
+	ChevronLeft,
+	ChevronRight,
+	Camera,
+	Download,
+	Copy,
+} from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -162,8 +182,6 @@ function Model({
 									opacity = material.opacity
 								}
 
-								// For skinned meshes, use MeshStandardMaterial which supports skinning
-								// For non-skinned meshes, use MeshBasicMaterial
 								if (opacity === 0) {
 									// Use appropriate material with transparency for invisible materials
 									const transparentMaterial = new THREE.MeshBasicMaterial({
@@ -199,8 +217,8 @@ function Model({
 								mesh.material = [...mesh.material]
 							}
 						}
-						mesh.castShadow = false
-						mesh.receiveShadow = false
+						mesh.castShadow = true
+						mesh.receiveShadow = true
 						mesh.frustumCulled = false
 					}
 				})
@@ -321,6 +339,93 @@ function Model({
 	)
 }
 
+function Scene({ sceneName }: { sceneName: string | null }) {
+	const [sceneModel, setSceneModel] = useState<THREE.Group | null>(null)
+
+	useEffect(() => {
+		if (!sceneName || sceneName === "grid") {
+			setSceneModel(null)
+			return
+		}
+
+		const loadScene = async () => {
+			const fbxLoader = new FBXLoader()
+			const scenePath = `${basePath}/kingsraid-models/scenes/${sceneName}/${
+				sceneName.charAt(0).toUpperCase() + sceneName.slice(1)
+			}.fbx`
+
+			try {
+				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
+					fbxLoader.load(scenePath, resolve, undefined, reject)
+				})
+
+				// Fix materials and textures
+				fbx.traverse((child) => {
+					if ((child as THREE.Mesh).isMesh) {
+						const mesh = child as THREE.Mesh
+						if (mesh.material) {
+							const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+
+							materials.forEach((material, index) => {
+								let name = "unknown"
+								let originalMap = null
+								let color = new THREE.Color(0xcccccc)
+								let opacity = 1.0
+
+								if (
+									material instanceof THREE.MeshStandardMaterial ||
+									material instanceof THREE.MeshPhongMaterial ||
+									material instanceof THREE.MeshLambertMaterial ||
+									material instanceof THREE.MeshBasicMaterial ||
+									material instanceof THREE.MeshToonMaterial
+								) {
+									name = material.name || "unnamed"
+									originalMap = material.map
+									color = material.color || new THREE.Color(0xcccccc)
+									opacity = material.opacity
+								}
+
+								const newMaterial = new THREE.MeshStandardMaterial({
+									name: name,
+									map: originalMap,
+									...(originalMap ? {} : { color: color }),
+									...(opacity < 1 ? { transparent: true, opacity: opacity } : {}),
+									roughness: 1,
+									metalness: 0.0,
+								})
+
+								if (Array.isArray(mesh.material)) {
+									mesh.material[index] = newMaterial
+								} else {
+									mesh.material = newMaterial
+								}
+							})
+
+							if (Array.isArray(mesh.material)) {
+								mesh.material = [...mesh.material]
+							}
+						}
+						mesh.castShadow = false
+						mesh.receiveShadow = true
+						mesh.frustumCulled = false
+					}
+				})
+
+				setSceneModel(fbx)
+			} catch (error) {
+				console.error(`Failed to load scene ${sceneName}:`, error)
+				setSceneModel(null)
+			}
+		}
+
+		loadScene()
+	}, [sceneName])
+
+	if (!sceneModel) return null
+
+	return <primitive object={sceneModel} />
+}
+
 function ModelViewer({
 	modelFiles,
 	availableAnimations,
@@ -343,9 +448,19 @@ function ModelViewer({
 	const [isPaused, setIsPaused] = useState(false)
 	const [loadingProgress, setLoadingProgress] = useState(0)
 	const [isCollapsed, setIsCollapsed] = useState(false)
+	const [selectedScene, setSelectedScene] = useState<string>("grid")
+	const [screenshotDialog, setScreenshotDialog] = useState(false)
+	const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
+	const canvasRef = useRef<HTMLCanvasElement>(null)
+
+	// Available scenes (can be expanded by scanning the scenes directory)
+	const availableScenes = [
+		{ value: "grid", label: "Grid" },
+		{ value: "wardrobe", label: "Wardrobe" },
+	]
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
@@ -398,6 +513,50 @@ function ModelViewer({
 		})
 	}
 
+	const captureScreenshot = () => {
+		if (!canvasRef.current) return
+
+		try {
+			// Get the canvas data URL
+			const dataUrl = canvasRef.current.toDataURL("image/png")
+			setScreenshotUrl(dataUrl)
+			setScreenshotDialog(true)
+		} catch (error) {
+			console.error("Failed to capture screenshot:", error)
+		}
+	}
+
+	const downloadScreenshot = () => {
+		if (!screenshotUrl) return
+
+		const link = document.createElement("a")
+		link.download = `model-screenshot-${Date.now()}.png`
+		link.href = screenshotUrl
+		link.click()
+		setScreenshotDialog(false)
+	}
+
+	const copyToClipboard = async () => {
+		if (!screenshotUrl) return
+
+		try {
+			// Convert data URL to blob
+			const response = await fetch(screenshotUrl)
+			const blob = await response.blob()
+
+			// Copy to clipboard
+			await navigator.clipboard.write([
+				new ClipboardItem({
+					"image/png": blob,
+				}),
+			])
+
+			setScreenshotDialog(false)
+		} catch (error) {
+			console.error("Failed to copy to clipboard:", error)
+		}
+	}
+
 	return (
 		<Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
 			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
@@ -405,11 +564,29 @@ function ModelViewer({
 				<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
 					{/* Sliding Controls Panel - slides in from left */}
 					<div
-						className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-64 transition-all duration-300 ease-in-out"
+						className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
 						style={{
-							left: isCollapsed ? "-256px" : "0px",
+							left: isCollapsed ? "-208px" : "0px",
 						}}
 					>
+						{/* Scene Selection */}
+						<div className="space-y-2 flex-shrink-0">
+							<Select value={selectedScene} onValueChange={setSelectedScene} disabled={isLoading}>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Select scene" />
+								</SelectTrigger>
+								<SelectContent>
+									{availableScenes.map((scene) => (
+										<SelectItem key={scene.value} value={scene.value}>
+											{scene.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<Separator className="flex-shrink-0" />
+
 						{/* Individual Model Toggles */}
 						<div className="flex flex-col items-center gap-2 flex-shrink-0">
 							{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
@@ -486,7 +663,7 @@ function ModelViewer({
 							size="sm"
 							className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
 							style={{
-								left: isCollapsed ? "0px" : "256px",
+								left: isCollapsed ? "0px" : "208px",
 							}}
 							title={isCollapsed ? "Show controls" : "Hide controls"}
 						>
@@ -494,7 +671,7 @@ function ModelViewer({
 						</Button>
 					</CollapsibleTrigger>
 
-					<Canvas gl={{ toneMapping: THREE.NoToneMapping }}>
+					<Canvas ref={canvasRef} shadows gl={{ toneMapping: THREE.NoToneMapping }}>
 						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 						<OrbitControls
 							ref={controlsRef}
@@ -505,6 +682,21 @@ function ModelViewer({
 							minDistance={0.005}
 							target={INITIAL_CAMERA_TARGET}
 						/>
+
+						{/* Lighting setup */}
+						<ambientLight intensity={1} />
+						<directionalLight
+							position={[0, 10, 0]}
+							intensity={0.7}
+							castShadow
+							shadow-mapSize={2048}
+							shadow-camera-far={50}
+							shadow-camera-left={-10}
+							shadow-camera-right={10}
+							shadow-camera-top={10}
+							shadow-camera-bottom={-10}
+						/>
+
 						<Suspense fallback={null}>
 							<Model
 								modelFiles={modelFiles}
@@ -514,8 +706,12 @@ function ModelViewer({
 								setIsLoading={setIsLoading}
 								setLoadingProgress={setLoadingProgress}
 							/>
+							{selectedScene === "grid" ? (
+								<gridHelper args={[10, 10]} />
+							) : (
+								<Scene sceneName={selectedScene} />
+							)}
 						</Suspense>
-						<gridHelper args={[10, 10]} />
 					</Canvas>
 
 					{/* Camera Controls */}
@@ -541,6 +737,16 @@ function ModelViewer({
 						<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
 							<RotateCcw className="h-4 w-4" />
 						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
+									<Camera className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>Take Screenshot</div>
+							</TooltipContent>
+						</Tooltip>
 					</div>
 
 					{/* Models count */}
@@ -568,6 +774,35 @@ function ModelViewer({
 							</div>
 						</div>
 					)}
+
+					{/* Screenshot Dialog */}
+					<Dialog open={screenshotDialog} onOpenChange={setScreenshotDialog}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Screenshot Captured</DialogTitle>
+								<DialogDescription>Choose how you want to save your screenshot.</DialogDescription>
+							</DialogHeader>
+							{screenshotUrl && (
+								<div className="flex justify-center">
+									<img
+										src={screenshotUrl}
+										alt="Screenshot preview"
+										className="max-w-full h-auto rounded-lg border"
+									/>
+								</div>
+							)}
+							<DialogFooter className="flex gap-2">
+								<Button variant="outline" onClick={copyToClipboard}>
+									<Copy className="h-4 w-4 mr-2" />
+									Copy to Clipboard
+								</Button>
+								<Button onClick={downloadScreenshot}>
+									<Download className="h-4 w-4 mr-2" />
+									Download
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</div>
 		</Collapsible>
@@ -582,13 +817,35 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 	const [isLoadingModels, setIsLoadingModels] = useState(false)
 	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
 
+	// Helper function to format costume name
+	const formatCostumeName = (costumeName: string) => {
+		return costumeName
+			.replace(/^Cos\d+/, "") // Remove Cos prefix
+			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
+			.trim()
+	}
+
+	// Helper function to get sorted costumes (same logic as in the UI)
+	const getSortedCostumes = (costumes: string[]) => {
+		return [...costumes].sort((a, b) => {
+			const aIsVari = a.startsWith("Vari")
+			const bIsVari = b.startsWith("Vari")
+
+			// If one is Vari and the other isn't, put Vari at the bottom
+			if (aIsVari && !bIsVari) return 1
+			if (!aIsVari && bIsVari) return -1
+
+			// Otherwise, sort alphabetically by formatted name
+			return formatCostumeName(a).localeCompare(formatCostumeName(b))
+		})
+	}
+
 	useEffect(() => {
-		// Set default costume (prioritize non-default costumes)
-		const costumes = Object.keys(heroModels).sort()
+		// Set default costume to the first one after sorting
+		const costumes = Object.keys(heroModels)
 		if (costumes.length > 0) {
-			// Prefer costumes with "Cos" in the name, fallback to first available
-			const preferredCostume = costumes.find((c) => c.includes("Cos")) || costumes[0]
-			setSelectedCostume(preferredCostume)
+			const sortedCostumes = getSortedCostumes(costumes)
+			setSelectedCostume(sortedCostumes[0])
 		}
 		setLoading(false)
 	}, [heroModels])
@@ -700,14 +957,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 
 	const costumeOptions = Object.keys(heroModels).sort()
 	const currentModels = selectedCostume ? heroModels[selectedCostume] || [] : []
-
-	// Helper function to format costume name
-	const formatCostumeName = (costumeName: string) => {
-		return costumeName
-			.replace(/^Cos\d+/, "") // Remove Cos prefix
-			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
-			.trim()
-	}
 
 	if (costumeOptions.length === 0) {
 		return (
