@@ -33,51 +33,53 @@ export function RecordingDialog({
 }: RecordingDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
-				<DialogHeader>
+			<DialogContent className="max-h-[90vh] flex flex-col">
+				<DialogHeader className="flex-shrink-0">
 					<DialogTitle>Recording Complete</DialogTitle>
 					<DialogDescription>Choose your preferred format and download the animation.</DialogDescription>
 				</DialogHeader>
-				{recordingUrl && (
-					<div className="flex justify-center">
-						<video
-							src={recordingUrl}
-							controls
-							autoPlay
-							loop
-							className="max-w-full h-auto rounded-lg border"
-						/>
-					</div>
-				)}
-				<div className="space-y-2">
-					<label className="text-sm font-medium">Download Format</label>
-					<RadioGroup value={downloadFormat} onValueChange={(value: any) => setDownloadFormat(value)}>
-						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="webm" id="webm" />
-							<label htmlFor="webm" className="text-sm cursor-pointer">
-								WebM (Best quality, smallest file, modern browsers)
-							</label>
+				<div className="overflow-y-auto flex-1 min-h-0 space-y-4">
+					{recordingUrl && (
+						<div className="flex justify-center">
+							<video
+								src={recordingUrl}
+								controls
+								autoPlay
+								loop
+								className="max-w-full max-h-[40vh] rounded-lg border object-contain"
+							/>
 						</div>
-						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="mp4" id="mp4" />
-							<label htmlFor="mp4" className="text-sm cursor-pointer">
-								MP4 (Most compatible, works everywhere)
-							</label>
-						</div>
-						<div className="flex items-center space-x-2">
-							<RadioGroupItem value="gif" id="gif" />
-							<label htmlFor="gif" className="text-sm cursor-pointer">
-								GIF (Animated image, may have quality limitations)
-							</label>
-						</div>
-					</RadioGroup>
-					{downloadFormat === "gif" && (
-						<p className="text-xs text-muted-foreground">
-							Note: GIF may result in larger file sizes, reduced quality and longer conversion times.
-						</p>
 					)}
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Download Format</label>
+						<RadioGroup value={downloadFormat} onValueChange={(value: any) => setDownloadFormat(value)}>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="webm" id="webm" />
+								<label htmlFor="webm" className="text-sm cursor-pointer">
+									WebM (Best quality, smallest file, modern browsers)
+								</label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="mp4" id="mp4" />
+								<label htmlFor="mp4" className="text-sm cursor-pointer">
+									MP4 (Most compatible, works everywhere)
+								</label>
+							</div>
+							<div className="flex items-center space-x-2">
+								<RadioGroupItem value="gif" id="gif" />
+								<label htmlFor="gif" className="text-sm cursor-pointer">
+									GIF (Animated image, may have quality limitations)
+								</label>
+							</div>
+						</RadioGroup>
+						{downloadFormat === "gif" && (
+							<p className="text-xs text-muted-foreground">
+								Note: GIF may result in larger file sizes, reduced quality and longer conversion times.
+							</p>
+						)}
+					</div>
 				</div>
-				<DialogFooter className="flex gap-2">
+				<DialogFooter className="flex gap-2 flex-shrink-0">
 					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isConverting}>
 						Close
 					</Button>
