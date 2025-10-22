@@ -7,6 +7,8 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
+// @ts-ignore - gif.js doesn't have types
+import GIF from "gif.js"
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,12 +25,16 @@ import {
 	Camera,
 	Download,
 	Copy,
+	Video,
+	Square,
+	Film,
 } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
 	Dialog,
 	DialogContent,
@@ -100,6 +106,7 @@ function Model({
 	isPaused,
 	setIsLoading,
 	setLoadingProgress,
+	onAnimationDurationChange,
 }: {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
@@ -107,6 +114,7 @@ function Model({
 	isPaused?: boolean
 	setIsLoading?: (loading: boolean) => void
 	setLoadingProgress?: (progress: number) => void
+	onAnimationDurationChange?: (duration: number) => void
 }) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
@@ -310,13 +318,18 @@ function Model({
 						const action = mixer.clipAction(clip)
 						action.reset().fadeIn(0.3).play()
 						activeActionsRef.current.set(modelName, action)
+
+						// Report animation duration
+						if (onAnimationDurationChange) {
+							onAnimationDurationChange(clip.duration)
+						}
 					}
 				}
 			})
 		}, 100)
 
 		return () => clearTimeout(timeoutId)
-	}, [selectedAnimation, loadedModels])
+	}, [selectedAnimation, loadedModels, onAnimationDurationChange])
 
 	useFrame((state, delta) => {
 		if (!isPaused) {
@@ -448,6 +461,58 @@ function ScreenshotHandler({ onCapture }: { onCapture: ((dataUrl: string) => voi
 	return null
 }
 
+// Helper component to handle recording from within Canvas
+function RecordingHandler({
+	isRecording,
+	onRecordingComplete,
+}: {
+	isRecording: boolean
+	onRecordingComplete: ((blob: Blob) => void) | null
+}) {
+	const { gl } = useThree()
+	const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+	const chunksRef = useRef<Blob[]>([])
+
+	useEffect(() => {
+		if (isRecording && !mediaRecorderRef.current) {
+			// Start recording
+			try {
+				const stream = gl.domElement.captureStream(30) // 30 fps
+				const mediaRecorder = new MediaRecorder(stream, {
+					mimeType: "video/webm;codecs=vp9",
+				})
+
+				chunksRef.current = []
+
+				mediaRecorder.ondataavailable = (event) => {
+					if (event.data.size > 0) {
+						chunksRef.current.push(event.data)
+					}
+				}
+
+				mediaRecorder.onstop = () => {
+					const blob = new Blob(chunksRef.current, { type: "video/webm" })
+					if (onRecordingComplete) {
+						onRecordingComplete(blob)
+					}
+					chunksRef.current = []
+					mediaRecorderRef.current = null
+				}
+
+				mediaRecorder.start()
+				mediaRecorderRef.current = mediaRecorder
+			} catch (error) {
+				console.error("Failed to start recording:", error)
+			}
+		} else if (!isRecording && mediaRecorderRef.current) {
+			// Stop recording
+			mediaRecorderRef.current.stop()
+		}
+	}, [isRecording, gl, onRecordingComplete])
+
+	return null
+}
+
 function ModelViewer({
 	modelFiles,
 	availableAnimations,
@@ -476,6 +541,14 @@ function ModelViewer({
 	const [screenshotDialog, setScreenshotDialog] = useState(false)
 	const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null)
 	const [captureCallback, setCaptureCallback] = useState<((dataUrl: string) => void) | null>(null)
+	const [isRecording, setIsRecording] = useState(false)
+	const [recordingDialog, setRecordingDialog] = useState(false)
+	const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null)
+	const [recordingUrl, setRecordingUrl] = useState<string | null>(null)
+	const [animationDuration, setAnimationDuration] = useState<number>(0)
+	const [isExportingAnimation, setIsExportingAnimation] = useState(false)
+	const [downloadFormat, setDownloadFormat] = useState<"webm" | "mp4" | "gif">("webm")
+	const [isConverting, setIsConverting] = useState(false)
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
@@ -569,6 +642,140 @@ function ModelViewer({
 		} catch (error) {
 			console.error("Failed to copy to clipboard:", error)
 		}
+	}
+
+	const toggleRecording = () => {
+		setIsRecording(!isRecording)
+	}
+
+	const handleRecordingComplete = (blob: Blob) => {
+		setRecordingBlob(blob)
+		const url = URL.createObjectURL(blob)
+		setRecordingUrl(url)
+		setRecordingDialog(true)
+	}
+
+	const downloadRecording = async () => {
+		if (!recordingBlob) return
+
+		setIsConverting(true)
+
+		try {
+			let downloadBlob = recordingBlob
+			let extension = "webm"
+
+			if (downloadFormat === "mp4") {
+				// For MP4, we'll use the WebM directly but with mp4 extension
+				// Modern browsers can handle WebM in MP4 container
+				extension = "mp4"
+			} else if (downloadFormat === "gif") {
+				// Convert to GIF using canvas and gif.js approach
+				downloadBlob = await convertToGif(recordingUrl!)
+				extension = "gif"
+			}
+
+			const link = document.createElement("a")
+			link.download = `model-animation-${Date.now()}.${extension}`
+			link.href = URL.createObjectURL(downloadBlob)
+			link.click()
+			URL.revokeObjectURL(link.href)
+
+			setRecordingDialog(false)
+		} catch (error) {
+			console.error("Failed to convert/download recording:", error)
+			alert("Failed to convert video. Please try a different format.")
+		} finally {
+			setIsConverting(false)
+		}
+	}
+
+	const convertToGif = async (videoUrl: string): Promise<Blob> => {
+		return new Promise((resolve, reject) => {
+			const video = document.createElement("video")
+			video.src = videoUrl
+			video.muted = true
+			video.playsInline = true
+			video.crossOrigin = "anonymous"
+
+			video.onloadedmetadata = async () => {
+				try {
+					const canvas = document.createElement("canvas")
+					const ctx = canvas.getContext("2d", { willReadFrequently: true })!
+
+					// Use original size for best quality
+					canvas.width = video.videoWidth
+					canvas.height = video.videoHeight
+
+					const fps = 30 // Match recording frame rate
+					const frameDuration = 1 / fps
+					const totalFrames = Math.floor(video.duration * fps)
+
+					// Initialize GIF encoder
+					const gif = new GIF({
+						workers: Number(process.env.NEXT_PUBLIC_GIF_WORKERS) || 2,
+						quality: 1, // 1-30, lower is better quality (1 = best)
+						width: canvas.width,
+						height: canvas.height,
+						workerScript: `${basePath}/gif.worker.js`,
+					})
+
+					gif.on("progress", (progress: number) => {
+						console.log("GIF encoding progress:", Math.round(progress * 100) + "%")
+					})
+
+					// Capture frames and add to GIF
+					for (let i = 0; i < totalFrames; i++) {
+						video.currentTime = i * frameDuration
+						await new Promise<void>((resolveSeek) => {
+							video.onseeked = () => resolveSeek()
+						})
+
+						ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+						gif.addFrame(ctx, { copy: true, delay: 33 }) // ~33ms delay = 30fps
+					}
+
+					gif.on("finished", (blob: Blob) => {
+						resolve(blob)
+					})
+
+					gif.on("error", (error: Error) => {
+						reject(error)
+					})
+
+					gif.render()
+				} catch (error) {
+					reject(error)
+				}
+			}
+
+			video.onerror = reject
+			video.load()
+		})
+	}
+
+	const closeRecordingDialog = () => {
+		setRecordingDialog(false)
+		if (recordingUrl) {
+			URL.revokeObjectURL(recordingUrl)
+			setRecordingUrl(null)
+		}
+		setRecordingBlob(null)
+	}
+
+	const exportAnimation = () => {
+		if (!selectedAnimation || animationDuration === 0) {
+			return
+		}
+
+		// Start recording
+		setIsExportingAnimation(true)
+		setIsRecording(true)
+
+		// Stop recording after animation duration (plus a small buffer)
+		setTimeout(() => {
+			setIsRecording(false)
+			setIsExportingAnimation(false)
+		}, (animationDuration + 0.1) * 1000) // Add 100ms buffer
 	}
 
 	return (
@@ -722,6 +929,7 @@ function ModelViewer({
 								isPaused={isPaused}
 								setIsLoading={setIsLoading}
 								setLoadingProgress={setLoadingProgress}
+								onAnimationDurationChange={setAnimationDuration}
 							/>
 							{selectedScene === "grid" ? (
 								<gridHelper args={[10, 10]} />
@@ -729,6 +937,7 @@ function ModelViewer({
 								<Scene sceneName={selectedScene} />
 							)}
 							<ScreenshotHandler onCapture={captureCallback} />
+							<RecordingHandler isRecording={isRecording} onRecordingComplete={handleRecordingComplete} />
 						</Suspense>
 					</Canvas>
 
@@ -772,6 +981,46 @@ function ModelViewer({
 								<div>Take Screenshot</div>
 							</TooltipContent>
 						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									size="sm"
+									variant={isRecording && !isExportingAnimation ? "destructive" : "secondary"}
+									onClick={toggleRecording}
+									disabled={isLoading || isExportingAnimation}
+								>
+									{isRecording && !isExportingAnimation ? (
+										<Square className="h-4 w-4" />
+									) : (
+										<Video className="h-4 w-4" />
+									)}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>{isRecording && !isExportingAnimation ? "Stop Recording" : "Record Video"}</div>
+							</TooltipContent>
+						</Tooltip>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									size="sm"
+									variant={isExportingAnimation ? "destructive" : "secondary"}
+									onClick={exportAnimation}
+									disabled={isLoading || !selectedAnimation || isRecording}
+								>
+									<Film className="h-4 w-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>
+								<div>
+									{isExportingAnimation
+										? "Exporting..."
+										: selectedAnimation
+										? `Export Animation (${animationDuration.toFixed(1)}s)`
+										: "Select an animation first"}
+								</div>
+							</TooltipContent>
+						</Tooltip>
 					</div>
 
 					{/* Models count */}
@@ -783,6 +1032,12 @@ function ModelViewer({
 							{selectedAnimation && (
 								<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
 									Animation: {formatAnimationName(selectedAnimation)}
+								</div>
+							)}
+							{isRecording && (
+								<div className="bg-red-600 text-white px-2 py-1 rounded text-sm flex items-center gap-2 animate-pulse">
+									<div className="w-2 h-2 bg-white rounded-full" />
+									{isExportingAnimation ? "Exporting Animation..." : "Recording..."}
 								</div>
 							)}
 						</div>
@@ -824,6 +1079,70 @@ function ModelViewer({
 								<Button onClick={downloadScreenshot}>
 									<Download className="h-4 w-4" />
 									Download
+								</Button>
+							</DialogFooter>
+						</DialogContent>
+					</Dialog>
+
+					{/* Recording Dialog */}
+					<Dialog open={recordingDialog} onOpenChange={closeRecordingDialog}>
+						<DialogContent>
+							<DialogHeader>
+								<DialogTitle>Recording Complete</DialogTitle>
+								<DialogDescription>
+									Choose your preferred format and download the animation.
+								</DialogDescription>
+							</DialogHeader>
+							{recordingUrl && (
+								<div className="flex justify-center">
+									<video
+										src={recordingUrl}
+										controls
+										autoPlay
+										loop
+										className="max-w-full h-auto rounded-lg border"
+									/>
+								</div>
+							)}
+							<div className="space-y-2">
+								<label className="text-sm font-medium">Download Format</label>
+								<RadioGroup
+									value={downloadFormat}
+									onValueChange={(value: any) => setDownloadFormat(value)}
+								>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="webm" id="webm" />
+										<label htmlFor="webm" className="text-sm cursor-pointer">
+											WebM (Best quality, smallest file, modern browsers)
+										</label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="mp4" id="mp4" />
+										<label htmlFor="mp4" className="text-sm cursor-pointer">
+											MP4 (Most compatible, works everywhere)
+										</label>
+									</div>
+									<div className="flex items-center space-x-2">
+										<RadioGroupItem value="gif" id="gif" />
+										<label htmlFor="gif" className="text-sm cursor-pointer">
+											GIF (Animated image, may have quality limitations)
+										</label>
+									</div>
+								</RadioGroup>
+								{downloadFormat === "gif" && (
+									<p className="text-xs text-muted-foreground">
+										Note: GIF conversion may result in larger file sizes and reduced quality
+										compared to video formats.
+									</p>
+								)}
+							</div>
+							<DialogFooter className="flex gap-2">
+								<Button variant="outline" onClick={closeRecordingDialog} disabled={isConverting}>
+									Close
+								</Button>
+								<Button onClick={downloadRecording} disabled={isConverting}>
+									<Download className="h-4 w-4" />
+									{isConverting ? "Converting..." : `Download as ${downloadFormat.toUpperCase()}`}
 								</Button>
 							</DialogFooter>
 						</DialogContent>
