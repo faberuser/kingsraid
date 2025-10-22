@@ -444,6 +444,38 @@ async function getVoiceFiles(heroName: string): Promise<VoiceFiles> {
 	return voiceFiles
 }
 
+async function getAvailableScenes(): Promise<Array<{ value: string; label: string }>> {
+	const scenesDir = path.join(process.cwd(), "public", "kingsraid-models", "scenes")
+	const scenes: Array<{ value: string; label: string }> = [{ value: "grid", label: "Grid" }]
+
+	try {
+		if (fs.existsSync(scenesDir)) {
+			const folders = fs.readdirSync(scenesDir, { withFileTypes: true })
+			const sceneFolders = folders
+				.filter((dirent) => dirent.isDirectory())
+				.map((dirent) => dirent.name)
+				.sort()
+
+			for (const folderName of sceneFolders) {
+				// Convert folder names to readable labels
+				const label = folderName
+					.replace(/([A-Z])/g, " $1")
+					.trim()
+					.replace(/^./, (str) => str.toUpperCase())
+
+				scenes.push({
+					value: folderName,
+					label: label,
+				})
+			}
+		}
+	} catch (error) {
+		console.error("Error reading scenes directory:", error)
+	}
+
+	return scenes
+}
+
 export async function generateStaticParams() {
 	// Only generate static params when building for static export (GitHub Pages)
 	if (!isStaticExport) {
@@ -490,12 +522,16 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get voice files server-side (only if enabled)
 	const voiceFiles = enableModelsVoices ? await getVoiceFiles(heroData.infos.name) : { en: [], jp: [], kr: [] }
 
+	// Get available scenes server-side (only if enabled)
+	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
+
 	return (
 		<HeroClient
 			heroData={heroData}
 			costumes={costumes}
 			heroModels={heroModels}
 			voiceFiles={voiceFiles}
+			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
 		/>
 	)

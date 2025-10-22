@@ -85,6 +85,7 @@ const weaponTypes = [
 interface ModelsProps {
 	heroData: HeroData
 	heroModels: { [costume: string]: ModelFile[] }
+	availableScenes?: Array<{ value: string; label: string }>
 }
 
 type HeroModel = THREE.Group & {
@@ -454,6 +455,7 @@ function ModelViewer({
 	setSelectedAnimation,
 	isLoading,
 	setIsLoading,
+	availableScenes = [],
 }: {
 	modelFiles: ModelFile[]
 	availableAnimations: string[]
@@ -461,6 +463,7 @@ function ModelViewer({
 	setSelectedAnimation: (s: string | null) => void
 	isLoading: boolean
 	setIsLoading: (loading: boolean) => void
+	availableScenes?: Array<{ value: string; label: string }>
 }) {
 	const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 	const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
@@ -476,12 +479,6 @@ function ModelViewer({
 
 	const controlsRef = useRef<any>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
-
-	// Available scenes (can be expanded by scanning the scenes directory)
-	const availableScenes = [
-		{ value: "grid", label: "Grid" },
-		{ value: "wardrobe", label: "Wardrobe" },
-	]
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
@@ -587,10 +584,11 @@ function ModelViewer({
 						}}
 					>
 						{/* Scene Selection */}
-						<div className="space-y-2 flex-shrink-0">
+						<div className="space-y-2">
+							<div className="text-sm font-semibold">Scene</div>
 							<Select value={selectedScene} onValueChange={setSelectedScene} disabled={isLoading}>
 								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Select scene" />
+									<SelectValue placeholder="Select Scene" />
 								</SelectTrigger>
 								<SelectContent>
 									{availableScenes.map((scene) => (
@@ -602,38 +600,41 @@ function ModelViewer({
 							</Select>
 						</div>
 
-						<Separator className="flex-shrink-0" />
+						<Separator />
 
 						{/* Individual Model Toggles */}
-						<div className="flex flex-col items-center gap-2 flex-shrink-0">
-							{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
-								.sort((a, b) => a.name.localeCompare(b.name))
-								.map((model) => (
-									<Button
-										key={model.name}
-										size="sm"
-										variant={visibleModels.has(model.name) ? "default" : "outline"}
-										onClick={() => toggleModelVisibility(model.name)}
-										className="flex items-center gap-2 w-full"
-										disabled={isLoading}
-									>
-										{visibleModels.has(model.name) ? (
-											<Eye className="h-3 w-3" />
-										) : (
-											<EyeOff className="h-3 w-3" />
-										)}
-										<span className="capitalize">{model.type}</span>
-									</Button>
-								))}
+						<div className="space-y-2">
+							<div className="text-sm font-semibold">Parts ({modelFiles.length})</div>
+							<div className="flex flex-col items-center gap-2">
+								{Array.from(new Map(modelFiles.map((model) => [model.name, model])).values())
+									.sort((a, b) => a.name.localeCompare(b.name))
+									.map((model) => (
+										<Button
+											key={model.name}
+											size="sm"
+											variant={visibleModels.has(model.name) ? "default" : "outline"}
+											onClick={() => toggleModelVisibility(model.name)}
+											className="flex items-center gap-2 w-full"
+											disabled={isLoading}
+										>
+											{visibleModels.has(model.name) ? (
+												<Eye className="h-3 w-3" />
+											) : (
+												<EyeOff className="h-3 w-3" />
+											)}
+											<span className="capitalize">{model.type}</span>
+										</Button>
+									))}
+							</div>
 						</div>
 
 						{/* Animation Selection */}
 						{availableAnimations.length > 0 && (
 							<>
-								<Separator className="flex-shrink-0" />
+								<Separator />
 
 								<div className="space-y-2 w-full flex-1 min-h-0 overflow-hidden flex flex-col">
-									<div className="flex items-center justify-between flex-shrink-0">
+									<div className="flex items-center justify-between">
 										<div className="text-sm font-semibold">
 											Animations ({availableAnimations.length})
 										</div>
@@ -648,7 +649,7 @@ function ModelViewer({
 											{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
 										</Button>
 									</div>
-									<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar px-1 flex-1 min-h-0">
+									<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-0">
 										{[...availableAnimations]
 											.sort((a, b) =>
 												formatAnimationName(a).localeCompare(formatAnimationName(b))
@@ -700,7 +701,6 @@ function ModelViewer({
 							minDistance={0}
 							target={INITIAL_CAMERA_TARGET}
 						/>
-
 						{/* Lighting setup */}
 						<ambientLight intensity={3} />
 						<directionalLight
@@ -714,7 +714,6 @@ function ModelViewer({
 							shadow-camera-top={10}
 							shadow-camera-bottom={-10}
 						/>
-
 						<Suspense fallback={null}>
 							<Model
 								modelFiles={modelFiles}
@@ -835,7 +834,7 @@ function ModelViewer({
 	)
 }
 
-export default function Models({ heroData, heroModels }: ModelsProps) {
+export default function Models({ heroData, heroModels, availableScenes = [] }: ModelsProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string>("")
 	const [loading, setLoading] = useState(true)
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
@@ -849,21 +848,6 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 			.replace(/^Cos\d+/, "") // Remove Cos prefix
 			.replace(/([A-Z])/g, " $1") // Add spaces before capitals
 			.trim()
-	}
-
-	// Helper function to get sorted costumes (same logic as in the UI)
-	const getSortedCostumes = (costumes: string[]) => {
-		return [...costumes].sort((a, b) => {
-			const aIsVari = a.startsWith("Vari")
-			const bIsVari = b.startsWith("Vari")
-
-			// If one is Vari and the other isn't, put Vari at the bottom
-			if (aIsVari && !bIsVari) return 1
-			if (!aIsVari && bIsVari) return -1
-
-			// Otherwise, sort alphabetically by formatted name
-			return formatCostumeName(a).localeCompare(formatCostumeName(b))
-		})
 	}
 
 	useEffect(() => {
@@ -1059,6 +1043,7 @@ export default function Models({ heroData, heroModels }: ModelsProps) {
 								setSelectedAnimation={setSelectedAnimation}
 								isLoading={isLoadingModels}
 								setIsLoading={setIsLoadingModels}
+								availableScenes={availableScenes}
 							/>
 						) : (
 							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
