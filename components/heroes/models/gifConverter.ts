@@ -20,7 +20,7 @@ export const convertToGif = async (videoUrl: string): Promise<Blob> => {
 				canvas.width = video.videoWidth
 				canvas.height = video.videoHeight
 
-				const fps = 30 // Match recording frame rate
+				const fps = 25 // Match recording frame rate
 				const frameDuration = 1 / fps
 				const totalFrames = Math.floor(video.duration * fps)
 
@@ -45,7 +45,7 @@ export const convertToGif = async (videoUrl: string): Promise<Blob> => {
 					})
 
 					ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-					gif.addFrame(ctx, { copy: true, delay: 33 }) // ~33ms delay = 30fps
+					gif.addFrame(ctx, { copy: true, delay: 40 }) // ~40ms delay = 25fps
 				}
 
 				gif.on("finished", (blob: Blob) => {
