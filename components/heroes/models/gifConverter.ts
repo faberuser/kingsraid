@@ -49,7 +49,7 @@ export const convertToGif = async (videoUrl: string): Promise<Blob> => {
 					})
 
 					ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-					gif.addFrame(ctx, { copy: true, delay: 40 }) // ~40ms delay = 25fps
+					gif.addFrame(ctx, { copy: true, delay: frameDuration * 1000 })
 				}
 
 				gif.on("finished", (blob: Blob) => {
