@@ -8,10 +8,8 @@ services:
             args:
                 - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://kingsraid.k-clowd.top}
                 - NEXT_PUBLIC_ENABLE_MODELS_VOICES=${NEXT_PUBLIC_ENABLE_MODELS_VOICES:-false}
-                - NEXT_PUBLIC_GIF_WORKERS=${NEXT_PUBLIC_GIF_WORKERS:-2}
         environment:
             - NEXT_PUBLIC_ENABLE_MODELS_VOICES=${NEXT_PUBLIC_ENABLE_MODELS_VOICES:-false}
-            - NEXT_PUBLIC_GIF_WORKERS=${NEXT_PUBLIC_GIF_WORKERS:-2}
         ports:
             - ${DOCKER_PORT:-3000}:3000
         restart: unless-stopped
