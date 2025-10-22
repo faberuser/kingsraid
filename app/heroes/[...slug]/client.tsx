@@ -20,6 +20,7 @@ interface HeroClientProps {
 	costumes: Costume[]
 	heroModels: { [costume: string]: ModelFile[] }
 	voiceFiles: VoiceFiles
+	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
 }
 
@@ -28,6 +29,7 @@ export default function HeroClient({
 	costumes,
 	heroModels,
 	voiceFiles,
+	availableScenes = [],
 	enableModelsVoices = false,
 }: HeroClientProps) {
 	return (
@@ -89,7 +91,7 @@ export default function HeroClient({
 			</div>
 
 			<Tabs defaultValue="profile" className="w-full mt-4">
-				<TabsList className="w-full">
+				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
 					<TabsTrigger value="profile">Profile</TabsTrigger>
 					<TabsTrigger value="skills">Skills</TabsTrigger>
 					<TabsTrigger value="perks">Perks</TabsTrigger>
@@ -106,23 +108,18 @@ export default function HeroClient({
 				<TabsContent value="profile" className="mt-4">
 					<Profile heroData={heroData} />
 				</TabsContent>
-
 				<TabsContent value="skills" className="mt-4">
 					<Skills heroData={heroData} />
 				</TabsContent>
-
 				<TabsContent value="perks" className="mt-4">
 					<Perks heroData={heroData} />
 				</TabsContent>
-
 				<TabsContent value="gear" className="mt-4">
 					<Gear heroData={heroData} />
 				</TabsContent>
-
 				<TabsContent value="costumes" className="mt-4">
 					<Costumes heroData={heroData} costumes={costumes} />
 				</TabsContent>
-
 				{enableModelsVoices && (
 					<>
 						<TabsContent value="models" className="mt-4">
@@ -130,7 +127,7 @@ export default function HeroClient({
 								description="This tab contains large 3D model files and textures that may consume significant mobile data."
 								estimatedSize="20-40 MB per costume"
 							>
-								<Models heroData={heroData} heroModels={heroModels} />
+								<Models heroData={heroData} heroModels={heroModels} availableScenes={availableScenes} />
 							</DataHeavyContent>
 						</TabsContent>
 

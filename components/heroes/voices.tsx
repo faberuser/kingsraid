@@ -160,15 +160,15 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 						{voiceFiles.kr.length > 0 && <TabsTrigger value="kr">Korean</TabsTrigger>}
 					</TabsList>
 
-					<TabsContent value="en" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
+					<TabsContent value="en" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar pr-1">
 						{renderVoiceList(voiceFiles.en)}
 					</TabsContent>
 
-					<TabsContent value="jp" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
+					<TabsContent value="jp" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar pr-1">
 						{renderVoiceList(voiceFiles.jp)}
 					</TabsContent>
 
-					<TabsContent value="kr" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar px-1">
+					<TabsContent value="kr" className="mt-0 max-h-180 overflow-y-auto custom-scrollbar pr-1">
 						{renderVoiceList(voiceFiles.kr)}
 					</TabsContent>
 				</Tabs>
