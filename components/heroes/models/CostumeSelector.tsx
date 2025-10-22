@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatCostumeName } from "./utils"
+import { formatCostumeName } from "@/components/heroes/models/utils"
 
 interface CostumeSelectorProps {
 	costumeOptions: string[]

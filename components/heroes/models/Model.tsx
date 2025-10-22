@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
 import { ModelFile } from "@/model/Hero_Model"
-import { weaponTypes } from "./types"
+import { weaponTypes } from "@/components/heroes/models/types"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 

@@ -8,17 +8,22 @@ import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Model } from "./Model"
-import { Scene } from "./Scene"
-import { ScreenshotHandler } from "./ScreenshotHandler"
-import { RecordingHandler } from "./RecordingHandler"
-import { ScreenshotDialog } from "./ScreenshotDialog"
-import { RecordingDialog } from "./RecordingDialog"
-import { ControlsPanel } from "./ControlsPanel"
-import { CameraControls } from "./CameraControls"
-import { convertToGif } from "./gifConverter"
-import { formatAnimationName } from "./utils"
-import { ModelViewerProps, INITIAL_CAMERA_POSITION, INITIAL_CAMERA_TARGET, weaponTypes } from "./types"
+import { Model } from "@/components/heroes/models/Model"
+import { Scene } from "@/components/heroes/models/Scene"
+import { ScreenshotHandler } from "@/components/heroes/models/ScreenshotHandler"
+import { RecordingHandler } from "@/components/heroes/models/RecordingHandler"
+import { ScreenshotDialog } from "@/components/heroes/models/ScreenshotDialog"
+import { RecordingDialog } from "@/components/heroes/models/RecordingDialog"
+import { ControlsPanel } from "@/components/heroes/models/ControlsPanel"
+import { CameraControls } from "@/components/heroes/models/CameraControls"
+import { convertToGif } from "@/components/heroes/models/gifConverter"
+import { formatAnimationName } from "@/components/heroes/models/utils"
+import {
+	ModelViewerProps,
+	INITIAL_CAMERA_POSITION,
+	INITIAL_CAMERA_TARGET,
+	weaponTypes,
+} from "@/components/heroes/models/types"
 
 export function ModelViewer({
 	modelFiles,

@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, EyeOff, Play, Pause } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
-import { formatAnimationName } from "./utils"
+import { formatAnimationName } from "@/components/heroes/models/utils"
 
 interface ControlsPanelProps {
 	isCollapsed: boolean
