@@ -141,6 +141,7 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 -   `NEXT_PUBLIC_BASE_PATH`: Base path for the application (e.g., "/kingsraid" for GitHub Pages)
 -   `NEXT_STATIC_EXPORT`: Set to "true" when building for static export
 -   `NEXT_PUBLIC_SITE_URL`: Site URL for metadata (optional)
+-   `NEXT_PUBLIC_GIF_WORKERS`: Workers for GIF conversion (optional, default: 2)
 -   `IMAGE_TAG`: Docker image tag (optional, latest/full, default: latest)
 -   `CONTAINER_NAME`: Docker container name (optional, default: "kingsraid")
 -   `DOCKER_PORT`: Docker port (optional, default: 3000)
