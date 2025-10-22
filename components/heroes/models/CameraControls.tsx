@@ -46,6 +46,9 @@ export function CameraControls({
 					<div>
 						<Kbd>Scroll</Kbd> Zoom
 					</div>
+					<div>
+						<Kbd>Space</Kbd> Play/Pause Animation
+					</div>
 				</TooltipContent>
 			</Tooltip>
 			<Tooltip>

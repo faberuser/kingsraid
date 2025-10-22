@@ -28,17 +28,17 @@ export function ScreenshotDialog({
 }: ScreenshotDialogProps) {
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
+			<DialogContent className="max-h-[90vh] flex flex-col">
 				<DialogHeader>
 					<DialogTitle>Screenshot Captured</DialogTitle>
 					<DialogDescription>Choose how you want to save your screenshot.</DialogDescription>
 				</DialogHeader>
 				{screenshotUrl && (
-					<div className="flex justify-center">
+					<div className="flex justify-center overflow-y-auto flex-1 min-h-0">
 						<img
 							src={screenshotUrl}
 							alt="Screenshot preview"
-							className="max-w-full h-auto rounded-lg border"
+							className="max-w-full h-auto rounded-lg border object-contain"
 						/>
 					</div>
 				)}

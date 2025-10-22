@@ -24,9 +24,13 @@ export const convertToGif = async (videoUrl: string): Promise<Blob> => {
 				const frameDuration = 1 / fps
 				const totalFrames = Math.floor(video.duration * fps)
 
+				// Detect CPU cores and use half of them (minimum 1, maximum 8)
+				const cpuCores = navigator.hardwareConcurrency || 4
+				const workerCount = Math.max(1, Math.min(8, Math.floor(cpuCores / 2)))
+
 				// Initialize GIF encoder
 				const gif = new GIF({
-					workers: Number(process.env.NEXT_PUBLIC_GIF_WORKERS) || 2,
+					workers: workerCount,
 					quality: 1, // 1-30, lower is better quality (1 = best)
 					width: canvas.width,
 					height: canvas.height,
@@ -45,7 +49,7 @@ export const convertToGif = async (videoUrl: string): Promise<Blob> => {
 					})
 
 					ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-					gif.addFrame(ctx, { copy: true, delay: 40 }) // ~40ms delay = 25fps
+					gif.addFrame(ctx, { copy: true, delay: frameDuration * 1000 })
 				}
 
 				gif.on("finished", (blob: Blob) => {

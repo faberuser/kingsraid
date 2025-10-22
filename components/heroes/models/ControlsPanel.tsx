@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -38,6 +39,28 @@ export function ControlsPanel({
 	isPaused,
 	setIsPaused,
 }: ControlsPanelProps) {
+	// Handle spacebar to pause/play animation (like YouTube)
+	useEffect(() => {
+		const handleKeyPress = (e: KeyboardEvent) => {
+			// Only toggle if spacebar is pressed and not focused on an input/button/select
+			if (
+				e.code === "Space" &&
+				!isLoading &&
+				availableAnimations.length > 0 &&
+				document.activeElement?.tagName !== "INPUT" &&
+				document.activeElement?.tagName !== "BUTTON" &&
+				document.activeElement?.tagName !== "SELECT" &&
+				document.activeElement?.tagName !== "TEXTAREA"
+			) {
+				e.preventDefault()
+				setIsPaused(!isPaused)
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyPress)
+		return () => window.removeEventListener("keydown", handleKeyPress)
+	}, [isPaused, setIsPaused, isLoading, availableAnimations.length])
+
 	return (
 		<div
 			className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
