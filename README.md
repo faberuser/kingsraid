@@ -137,11 +137,11 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 
 ### Environment Variables:
 
--   `NEXT_PUBLIC_ENABLE_MODELS_VOICES`: Set to "true" to enable Models and Voices features
--   `NEXT_PUBLIC_BASE_PATH`: Base path for the application (e.g., "/kingsraid" for GitHub Pages)
--   `NEXT_STATIC_EXPORT`: Set to "true" when building for static export
+-   `NEXT_PUBLIC_ENABLE_MODELS_VOICES`: Set to "true" to enable Models and Voices features (optional, default: false)
+-   `NEXT_PUBLIC_BASE_PATH`: Base path for the application (e.g., "/kingsraid" for GitHub Pages) (optional)
+-   `NEXT_STATIC_EXPORT`: Set to "true" when building for static export (optional, default: false)
 -   `NEXT_PUBLIC_SITE_URL`: Site URL for metadata (optional)
--   `IMAGE_TAG`: Docker image tag (optional, latest/full, default: latest)
+-   `DOCKER_IMAGE`: Docker image, mostly for custom registry in case you want full build (optional, default: ghcr.io/faberuser/kingsraid:latest)
 -   `CONTAINER_NAME`: Docker container name (optional, default: "kingsraid")
 -   `DOCKER_PORT`: Docker port (optional, default: 3000)
 
