@@ -149,9 +149,9 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 -   `NEXT_PUBLIC_BASE_PATH`: Base path for the application (e.g., "/kingsraid" for GitHub Pages) (optional)
 -   `NEXT_STATIC_EXPORT`: Set to "true" when building for static export (optional, default: false)
 -   `NEXT_PUBLIC_SITE_URL`: Site URL for metadata (optional)
--   `DOCKER_IMAGE`: Docker image, mostly for custom registry in case you want full build (optional, default: ghcr.io/faberuser/kingsraid:latest)
--   `CONTAINER_NAME`: Docker container name (optional, default: "kingsraid")
--   `DOCKER_PORT`: Docker port (optional, default: 3000)
+-   `DOCKER_IMAGE`: Docker Compose's image, mostly for custom registry in case you want full build (optional, default: "ghcr.io/faberuser/kingsraid:latest")
+-   `CONTAINER_NAME`: Docker Compose's container name (optional, default: "kingsraid")
+-   `DOCKER_PORT`: Docker Compose's container port (optional, default: 3000)
 
 ## Known Bugs
 
