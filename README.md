@@ -125,8 +125,16 @@ docker run -p 3000:3000 kingsraid
 
 Due to GHCR limitation, Docker image only support standard version.
 
+**To use the pre-built image (default, no build):**
+
 ```bash
 docker-compose up -d
+```
+
+**To build:**
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 ```
 
 The application will be available at [http://localhost:3000](http://localhost:3000) (or the port specified in your environment).

@@ -2,12 +2,6 @@ services:
     app:
         image: ${DOCKER_IMAGE:-ghcr.io/faberuser/kingsraid:latest}
         container_name: ${CONTAINER_NAME:-kingsraid}
-        build:
-            context: .
-            dockerfile: Dockerfile
-            args:
-                - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://kingsraid.k-clowd.top}
-                - NEXT_PUBLIC_ENABLE_MODELS_VOICES=${NEXT_PUBLIC_ENABLE_MODELS_VOICES:-false}
         environment:
             - NEXT_PUBLIC_ENABLE_MODELS_VOICES=${NEXT_PUBLIC_ENABLE_MODELS_VOICES:-false}
         ports:
