@@ -70,7 +70,8 @@ RUN cd /temp/dev && bun install --frozen-lockfile
 FROM base AS install-prod
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
+RUN cd /temp/prod && bun install --frozen-lockfile --production && \
+    bun add typescript --dev
 
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
