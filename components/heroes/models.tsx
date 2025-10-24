@@ -32,7 +32,10 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 		if (animationsCacheRef.current.has(selectedCostume)) {
 			const cachedAnimations = animationsCacheRef.current.get(selectedCostume)!
 			setAvailableAnimations(cachedAnimations)
-			setSelectedAnimation(cachedAnimations[0] || null)
+			// Set animation containing "InnIdle" as default if it exists, otherwise use first animation
+			const defaultAnimation =
+				cachedAnimations.find((name) => name.includes("InnIdle")) || cachedAnimations[0] || null
+			setSelectedAnimation(defaultAnimation)
 			return
 		}
 
@@ -77,7 +80,7 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 				if (fbx.animations && fbx.animations.length > 0) {
 					const animNames = fbx.animations
 						.map((clip: any) => clip.name)
-						.filter((name: string) => !name.includes("_Weapon@") && !name.includes("Extra"))
+						.filter((name: string) => !name.includes("_Weapon") && !name.includes("Extra"))
 
 					if (animNames.length > 0) {
 						// Sort animations before caching and selecting
@@ -85,12 +88,22 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 							return formatAnimationName(a).localeCompare(formatAnimationName(b))
 						})
 
+						// Move animation containing "InnIdle" to the top if it exists
+						const innIdleIndex = sortedAnimNames.findIndex((name) => name.includes("InnIdle"))
+						if (innIdleIndex > 0) {
+							const innIdle = sortedAnimNames.splice(innIdleIndex, 1)[0]
+							sortedAnimNames.unshift(innIdle)
+						}
+
 						// Use a microtask to ensure state updates are batched properly
 						Promise.resolve().then(() => {
 							// Cache the sorted animations for this costume
 							animationsCacheRef.current.set(selectedCostume, sortedAnimNames)
 							setAvailableAnimations(sortedAnimNames)
-							setSelectedAnimation(sortedAnimNames[0])
+							// Set animation containing "InnIdle" as default if it exists, otherwise use first animation
+							const defaultAnimation =
+								sortedAnimNames.find((name) => name.includes("InnIdle")) || sortedAnimNames[0]
+							setSelectedAnimation(defaultAnimation)
 						})
 					} else {
 						// Cache empty array for costumes with no animations

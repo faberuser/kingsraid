@@ -133,22 +133,20 @@ export function ControlsPanel({
 							</Button>
 						</div>
 						<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-0">
-							{[...availableAnimations]
-								.sort((a, b) => formatAnimationName(a).localeCompare(formatAnimationName(b)))
-								.map((animName) => (
-									<Button
-										key={animName}
-										size="sm"
-										variant={selectedAnimation === animName ? "default" : "outline"}
-										onClick={() => setSelectedAnimation(animName)}
-										title={animName}
-										disabled={isLoading}
-									>
-										<span className="text-start text-xs truncate w-full">
-											{formatAnimationName(animName)}
-										</span>
-									</Button>
-								))}
+							{[...availableAnimations].map((animName) => (
+								<Button
+									key={animName}
+									size="sm"
+									variant={selectedAnimation === animName ? "default" : "outline"}
+									onClick={() => setSelectedAnimation(animName)}
+									title={animName}
+									disabled={isLoading}
+								>
+									<span className="text-start text-xs truncate w-full">
+										{formatAnimationName(animName)}
+									</span>
+								</Button>
+							))}
 						</div>
 					</div>
 				</>
