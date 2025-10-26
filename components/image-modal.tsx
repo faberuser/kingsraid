@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight, Omega } from "lucide-react"
+import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "@/components/image"
 
 interface ImageZoomModalProps {
@@ -57,15 +57,14 @@ export default function ImageZoomModal({
 	}
 
 	// Reset zoom and pan when navigating
-	const resetView = () => {
-		setZoomLevel(1)
-		setPanPosition({ x: 0, y: 0 })
-	}
-
-	const handleNavigate = (direction: "prev" | "next") => {
-		resetView()
-		onNavigate?.(direction)
-	}
+	const handleNavigate = useCallback(
+		(direction: "prev" | "next") => {
+			setZoomLevel(1)
+			setPanPosition({ x: 0, y: 0 })
+			onNavigate?.(direction)
+		},
+		[onNavigate]
+	)
 
 	// Keyboard navigation
 	const handleKeyDown = useCallback(
@@ -78,7 +77,7 @@ export default function ImageZoomModal({
 				handleNavigate("next")
 			}
 		},
-		[isOpen, showNavigation, onNavigate, canNavigatePrev, canNavigateNext]
+		[isOpen, showNavigation, onNavigate, canNavigatePrev, canNavigateNext, handleNavigate]
 	)
 
 	// Add keyboard event listener

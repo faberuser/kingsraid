@@ -7,7 +7,7 @@ interface CostumeSelectorProps {
 	costumeOptions: string[]
 	selectedCostume: string
 	setSelectedCostume: (costume: string) => void
-	heroModels: { [costume: string]: any[] }
+	heroModels: { [costume: string]: Array<{ type: string }> }
 	isLoadingModels: boolean
 }
 

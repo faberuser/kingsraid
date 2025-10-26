@@ -10,6 +10,7 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog"
 import { Copy, Download } from "lucide-react"
+import Image from "@/components/image"
 
 interface ScreenshotDialogProps {
 	open: boolean
@@ -35,7 +36,7 @@ export function ScreenshotDialog({
 				</DialogHeader>
 				{screenshotUrl && (
 					<div className="flex justify-center overflow-y-auto flex-1 min-h-0">
-						<img
+						<Image
 							src={screenshotUrl}
 							alt="Screenshot preview"
 							className="max-w-full h-auto rounded-lg border object-contain"

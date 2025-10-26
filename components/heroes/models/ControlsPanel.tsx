@@ -1,12 +1,14 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, EyeOff, Play, Pause } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Eye, EyeOff, Play, Pause, Search, X } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
 import { formatAnimationName } from "@/components/heroes/models/utils"
+import Fuse from "fuse.js"
 
 interface ControlsPanelProps {
 	isCollapsed: boolean
@@ -39,6 +41,28 @@ export function ControlsPanel({
 	isPaused,
 	setIsPaused,
 }: ControlsPanelProps) {
+	const [searchQuery, setSearchQuery] = useState("")
+
+	// Configure Fuse.js for fuzzy searching
+	const fuse = useMemo(
+		() =>
+			new Fuse(availableAnimations, {
+				threshold: 0.4,
+				keys: [""],
+				includeScore: true,
+			}),
+		[availableAnimations]
+	)
+
+	// Filter animations based on search query
+	const filteredAnimations = useMemo(() => {
+		if (!searchQuery.trim()) {
+			return availableAnimations
+		}
+		const results = fuse.search(searchQuery)
+		return results.map((result) => result.item)
+	}, [searchQuery, availableAnimations, fuse])
+
 	// Handle spacebar to pause/play animation (like YouTube)
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
@@ -132,21 +156,53 @@ export function ControlsPanel({
 								{isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
 							</Button>
 						</div>
-						<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-0">
-							{[...availableAnimations].map((animName) => (
+
+						{/* Search Box */}
+						<div className="relative">
+							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+							<Input
+								type="text"
+								placeholder="Search..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="pl-8 pb-1.5 h-8 text-xs"
+								disabled={isLoading}
+							/>
+							{searchQuery && (
 								<Button
-									key={animName}
 									size="sm"
-									variant={selectedAnimation === animName ? "default" : "outline"}
-									onClick={() => setSelectedAnimation(animName)}
-									title={animName}
-									disabled={isLoading}
+									variant="ghost"
+									onClick={() => setSearchQuery("")}
+									className="absolute right-0 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+									title="Clear search"
 								>
-									<span className="text-start text-xs truncate w-full">
-										{formatAnimationName(animName)}
-									</span>
+									<X className="h-3 w-3" />
 								</Button>
-							))}
+							)}
+						</div>
+
+						{/* Animation List */}
+						<div className="flex flex-col gap-1 overflow-y-auto custom-scrollbar pr-1 flex-1 min-h-0">
+							{filteredAnimations.length > 0 ? (
+								filteredAnimations.map((animName) => (
+									<Button
+										key={animName}
+										size="sm"
+										variant={selectedAnimation === animName ? "default" : "outline"}
+										onClick={() => setSelectedAnimation(animName)}
+										title={animName}
+										disabled={isLoading}
+									>
+										<span className="text-start text-xs truncate w-full">
+											{formatAnimationName(animName)}
+										</span>
+									</Button>
+								))
+							) : (
+								<div className="text-xs text-muted-foreground text-center py-4">
+									No animations found
+								</div>
+							)}
 						</div>
 					</div>
 				</>

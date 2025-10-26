@@ -49,7 +49,9 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const [mounted, setMounted] = useState(false)
 
 	useEffect(() => {
-		setMounted(true)
+		// Schedule the state update to avoid synchronous setState in effect
+		const timer = setTimeout(() => setMounted(true), 0)
+		return () => clearTimeout(timer)
 	}, [])
 
 	const logoSrc = mounted && resolvedTheme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
@@ -59,14 +61,7 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 			<SidebarHeader className="px-5 py-4 border-b mt-1">
 				<Link href="/" className="flex items-center space-x-2">
 					{mounted && (
-						<Image
-							src={logoSrc}
-							alt="King's Raid Logo"
-							width={160}
-							height={40}
-							className="h-auto w-40"
-							priority
-						/>
+						<Image src={logoSrc} alt="King's Raid Logo" width={160} height={40} className="h-auto w-40" />
 					)}
 				</Link>
 			</SidebarHeader>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { HeroData } from "@/model/Hero"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
@@ -18,15 +18,9 @@ interface CostumesProps {
 }
 
 export default function Costumes({ heroData, costumes }: CostumesProps) {
-	const [selectedCostume, setSelectedCostume] = useState<string | null>(null)
-	const [isModalOpen, setIsModalOpen] = useState(false)
-
 	// Auto-select first costume when costumes are available
-	useEffect(() => {
-		if (costumes.length > 0 && !selectedCostume) {
-			setSelectedCostume(costumes[0].name)
-		}
-	}, [costumes, selectedCostume])
+	const [selectedCostume, setSelectedCostume] = useState<string | null>(costumes.length > 0 ? costumes[0].name : null)
+	const [isModalOpen, setIsModalOpen] = useState(false)
 
 	const handleImageClick = () => {
 		setIsModalOpen(true)

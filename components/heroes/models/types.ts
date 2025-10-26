@@ -33,7 +33,6 @@ export const weaponTypes = [
 ]
 
 export interface ModelsProps {
-	heroData: any
 	heroModels: { [costume: string]: ModelFile[] }
 	availableScenes?: Array<{ value: string; label: string }>
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib"
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -50,8 +51,7 @@ export function ModelViewer({
 	const [isExportingAnimation, setIsExportingAnimation] = useState(false)
 	const [downloadFormat, setDownloadFormat] = useState<"webm" | "mp4" | "gif">("webm")
 	const [isConverting, setIsConverting] = useState(false)
-
-	const controlsRef = useRef<any>(null)
+	const controlsRef = useRef<OrbitControlsImpl>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
@@ -65,7 +65,7 @@ export function ModelViewer({
 				.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles])
+	}, [modelFiles, setIsLoading])
 
 	const resetCamera = () => {
 		if (cameraRef.current) {

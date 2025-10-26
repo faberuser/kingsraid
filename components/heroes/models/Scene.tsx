@@ -10,12 +10,17 @@ export function Scene({ sceneName }: { sceneName: string | null }) {
 	const [sceneModel, setSceneModel] = useState<THREE.Group | null>(null)
 
 	useEffect(() => {
+		// Handle the case where there's no scene or it's grid
 		if (!sceneName || sceneName === "grid") {
-			setSceneModel(null)
+			// Use a microtask to avoid synchronous state update
+			Promise.resolve().then(() => setSceneModel(null))
 			return
 		}
 
 		const loadScene = async () => {
+			// Clear previous scene
+			setSceneModel(null)
+
 			const fbxLoader = new FBXLoader()
 			const scenePath = `${basePath}/kingsraid-models/scenes/${sceneName}/${
 				sceneName.charAt(0).toUpperCase() + sceneName.slice(1)
