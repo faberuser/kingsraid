@@ -34,8 +34,14 @@ export function ModelViewer({
 	isLoading,
 	setIsLoading,
 	availableScenes = [],
+	visibleModels: externalVisibleModels,
+	setVisibleModels: externalSetVisibleModels,
 }: ModelViewerProps) {
-	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
+	const [internalVisibleModels, setInternalVisibleModels] = useState<Set<string>>(new Set())
+
+	// Use external state if provided, otherwise use internal state
+	const visibleModels = externalVisibleModels ?? internalVisibleModels
+	const setVisibleModels = externalSetVisibleModels ?? setInternalVisibleModels
 	const [isPaused, setIsPaused] = useState(false)
 	const [loadingProgress, setLoadingProgress] = useState(0)
 	const [isCollapsed, setIsCollapsed] = useState(false)
@@ -65,7 +71,7 @@ export function ModelViewer({
 				.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles, setIsLoading])
+	}, [modelFiles, setIsLoading, setVisibleModels])
 
 	const resetCamera = () => {
 		if (cameraRef.current) {
@@ -266,6 +272,7 @@ export function ModelViewer({
 							<Model
 								modelFiles={modelFiles}
 								visibleModels={visibleModels}
+								setVisibleModels={setVisibleModels}
 								selectedAnimation={selectedAnimation}
 								isPaused={isPaused}
 								setIsLoading={setIsLoading}

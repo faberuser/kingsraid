@@ -45,6 +45,8 @@ export interface ModelViewerProps {
 	isLoading: boolean
 	setIsLoading: (loading: boolean) => void
 	availableScenes?: Array<{ value: string; label: string }>
+	visibleModels?: Set<string>
+	setVisibleModels?: React.Dispatch<React.SetStateAction<Set<string>>>
 }
 
 export const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]

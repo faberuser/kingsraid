@@ -73,7 +73,10 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 				if (fbx.animations && fbx.animations.length > 0) {
 					const animNames = fbx.animations
 						.map((clip: AnimationClip) => clip.name)
-						.filter((name: string) => !name.includes("_Weapon") && !name.includes("Extra"))
+						.filter((name: string) => !name.includes("Extra"))
+						.filter((name: string) => !name.includes("_Weapon@"))
+						.filter((name: string) => !name.includes("_Weapon_Facial@"))
+					// Hide weapon animations from UI
 
 					if (animNames.length > 0) {
 						// Sort animations before caching and selecting
