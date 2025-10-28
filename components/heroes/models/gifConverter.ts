@@ -1,4 +1,4 @@
-// @ts-ignore - gif.js doesn't have types
+// @ts-expect-error - gif.js doesn't have types
 import GIF from "gif.js"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""

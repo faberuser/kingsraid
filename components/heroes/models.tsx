@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { FBXLoader } from "three-stdlib"
+import { AnimationClip, Group } from "three"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { ModelViewer } from "@/components/heroes/models/ModelViewer"
 import { CostumeSelector } from "@/components/heroes/models/CostumeSelector"
 import { ModelsProps } from "@/components/heroes/models/types"
@@ -11,18 +11,12 @@ import { formatAnimationName } from "@/components/heroes/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
-export default function Models({ heroData, heroModels, availableScenes = [] }: ModelsProps) {
+export default function Models({ heroModels, availableScenes = [] }: ModelsProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string>("")
-	const [loading, setLoading] = useState(true)
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
 	const [isLoadingModels, setIsLoadingModels] = useState(false)
 	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per costume
-
-	useEffect(() => {
-		// Don't set a default costume - let user choose
-		setLoading(false)
-	}, [heroModels])
 
 	// Load animations for the selected costume
 	useEffect(() => {
@@ -58,7 +52,7 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 			const firstModel = bodyModel || costumeModels[0]
 
 			try {
-				const fbx = await new Promise<any>((resolve, reject) => {
+				const fbx = await new Promise<Group>((resolve, reject) => {
 					const timeout = setTimeout(() => {
 						reject(new Error(`Timeout loading ${firstModel.path}`))
 					}, 60000) // 60 second timeout
@@ -76,11 +70,13 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 						}
 					)
 				})
-
 				if (fbx.animations && fbx.animations.length > 0) {
 					const animNames = fbx.animations
-						.map((clip: any) => clip.name)
-						.filter((name: string) => !name.includes("_Weapon") && !name.includes("Extra"))
+						.map((clip: AnimationClip) => clip.name)
+						.filter((name: string) => !name.includes("Extra"))
+						.filter((name: string) => !name.includes("_Weapon@"))
+						.filter((name: string) => !name.includes("_Weapon_Facial@"))
+					// Hide weapon animations from UI
 
 					if (animNames.length > 0) {
 						// Sort animations before caching and selecting
@@ -123,16 +119,6 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 		loadAnimations()
 	}, [selectedCostume, heroModels])
 
-	if (loading) {
-		return (
-			<Card>
-				<CardContent>
-					<Skeleton className="w-full h-96 rounded-lg" />
-				</CardContent>
-			</Card>
-		)
-	}
-
 	const costumeOptions = Object.keys(heroModels).sort()
 	const currentModels = selectedCostume ? heroModels[selectedCostume] || [] : []
 
@@ -140,9 +126,7 @@ export default function Models({ heroData, heroModels, availableScenes = [] }: M
 		return (
 			<Card>
 				<CardContent>
-					<div className="text-center text-muted-foreground py-8">
-						No 3D models available for {heroData.infos.name}
-					</div>
+					<div className="text-center text-muted-foreground py-8">No 3D models available for this hero</div>
 				</CardContent>
 			</Card>
 		)

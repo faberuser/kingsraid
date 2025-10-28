@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
 	CommandDialog,
@@ -11,7 +11,7 @@ import {
 	CommandList,
 } from "@/components/ui/command"
 import { Button } from "@/components/ui/button"
-import { Search, Home, UserRound, Amphora, ShieldHalf, Zap, Calculator } from "lucide-react"
+import { Search, UserRound, Amphora, ShieldHalf } from "lucide-react"
 import { DialogTitle } from "@/components/ui/dialog"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
@@ -39,7 +39,6 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 	const [open, setOpen] = useState(false)
-	const [searchItems, setSearchItems] = useState<SearchItem[]>([])
 	const [searchValue, setSearchValue] = useState("")
 	const router = useRouter()
 	const listRef = useRef<HTMLDivElement>(null)
@@ -57,8 +56,8 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 		return () => document.removeEventListener("keydown", down)
 	}, [])
 
-	// Build search items when searchData changes
-	useEffect(() => {
+	// Compute search items from searchData using useMemo
+	const searchItems = useMemo(() => {
 		const items: SearchItem[] = []
 
 		if (searchData?.heroes) {
@@ -103,7 +102,7 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 			})
 		}
 
-		setSearchItems(items)
+		return items
 	}, [searchData])
 
 	// Reset scroll position when search value changes

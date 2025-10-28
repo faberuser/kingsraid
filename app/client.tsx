@@ -7,7 +7,7 @@ import Image from "@/components/next-image"
 import { FeaturedHero } from "@/app/page"
 import { NewsItem } from "@/lib/steam-rss"
 import Autoplay from "embla-carousel-autoplay"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { getImage, getContent, NewsDetailDialog } from "@/app/news/client"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
@@ -39,10 +39,10 @@ export default function HomeClient({ featuredHeroes, steamNews }: HomeClientProp
 				{/* Hero Section */}
 				<div className="text-center mb-12 mt-0 md:mt-24">
 					<div className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-[normal]">
-						King's Raid Info
+						King&apos;s Raid Info
 					</div>
 					<div className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Comprehensive resource for Kings Raid.
+						Comprehensive resource for King&apos;s Raid.
 					</div>
 				</div>
 
@@ -72,7 +72,7 @@ export default function HomeClient({ featuredHeroes, steamNews }: HomeClientProp
 				<div>
 					<div className="text-center mb-8">
 						<div className="text-3xl font-bold mb-2">Resources</div>
-						<div className="text-muted-foreground">King's Raid Communities</div>
+						<div className="text-muted-foreground">King&apos;s Raid Communities</div>
 					</div>
 					<Communities />
 				</div>
@@ -173,13 +173,8 @@ interface SteamRSSProps {
 }
 
 function SteamRSS({ news }: SteamRSSProps) {
-	const [mounted, setMounted] = useState(false)
 	const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null)
 	const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-	useEffect(() => {
-		setMounted(true)
-	}, [])
 
 	const handleNewsClick = (news: NewsItem) => {
 		setSelectedNews(news)
@@ -190,14 +185,6 @@ function SteamRSS({ news }: SteamRSSProps) {
 		return (
 			<div className="text-center py-8">
 				<div className="text-muted-foreground">No news available</div>
-			</div>
-		)
-	}
-
-	if (!mounted) {
-		return (
-			<div className="text-center py-8">
-				<div className="text-muted-foreground">Loading news...</div>
 			</div>
 		)
 	}

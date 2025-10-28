@@ -52,7 +52,10 @@ export function RecordingDialog({
 					)}
 					<div className="space-y-2">
 						<label className="text-sm font-medium">Download Format</label>
-						<RadioGroup value={downloadFormat} onValueChange={(value: any) => setDownloadFormat(value)}>
+						<RadioGroup
+							value={downloadFormat}
+							onValueChange={(value: "webm" | "mp4" | "gif") => setDownloadFormat(value)}
+						>
 							<div className="flex items-center space-x-2">
 								<RadioGroupItem value="webm" id="webm" />
 								<label htmlFor="webm" className="text-sm cursor-pointer">

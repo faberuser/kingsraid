@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib"
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -33,8 +34,14 @@ export function ModelViewer({
 	isLoading,
 	setIsLoading,
 	availableScenes = [],
+	visibleModels: externalVisibleModels,
+	setVisibleModels: externalSetVisibleModels,
 }: ModelViewerProps) {
-	const [visibleModels, setVisibleModels] = useState<Set<string>>(new Set())
+	const [internalVisibleModels, setInternalVisibleModels] = useState<Set<string>>(new Set())
+
+	// Use external state if provided, otherwise use internal state
+	const visibleModels = externalVisibleModels ?? internalVisibleModels
+	const setVisibleModels = externalSetVisibleModels ?? setInternalVisibleModels
 	const [isPaused, setIsPaused] = useState(false)
 	const [loadingProgress, setLoadingProgress] = useState(0)
 	const [isCollapsed, setIsCollapsed] = useState(false)
@@ -50,8 +57,7 @@ export function ModelViewer({
 	const [isExportingAnimation, setIsExportingAnimation] = useState(false)
 	const [downloadFormat, setDownloadFormat] = useState<"webm" | "mp4" | "gif">("webm")
 	const [isConverting, setIsConverting] = useState(false)
-
-	const controlsRef = useRef<any>(null)
+	const controlsRef = useRef<OrbitControlsImpl>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
 	useEffect(() => {
@@ -65,7 +71,7 @@ export function ModelViewer({
 				.map((m) => m.name)
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles])
+	}, [modelFiles, setIsLoading, setVisibleModels])
 
 	const resetCamera = () => {
 		if (cameraRef.current) {
@@ -266,6 +272,7 @@ export function ModelViewer({
 							<Model
 								modelFiles={modelFiles}
 								visibleModels={visibleModels}
+								setVisibleModels={setVisibleModels}
 								selectedAnimation={selectedAnimation}
 								isPaused={isPaused}
 								setIsLoading={setIsLoading}

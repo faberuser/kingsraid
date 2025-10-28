@@ -1,6 +1,7 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react"
+import type React from "react"
 import { useFrame } from "@react-three/fiber"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
@@ -12,11 +13,14 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 type HeroModel = THREE.Group & {
 	mixer?: THREE.AnimationMixer
 	animations?: THREE.AnimationClip[]
+	handPointR?: THREE.Object3D
+	handPointL?: THREE.Object3D
 }
 
 interface ModelProps {
 	modelFiles: ModelFile[]
 	visibleModels: Set<string>
+	setVisibleModels?: React.Dispatch<React.SetStateAction<Set<string>>>
 	selectedAnimation: string | null
 	isPaused?: boolean
 	setIsLoading?: (loading: boolean) => void
@@ -27,6 +31,7 @@ interface ModelProps {
 export function Model({
 	modelFiles,
 	visibleModels,
+	setVisibleModels,
 	selectedAnimation,
 	isPaused,
 	setIsLoading,
@@ -70,6 +75,17 @@ export function Model({
 
 				const modelWithAnimations = fbx as HeroModel
 				modelWithAnimations.animations = fbx.animations || []
+
+				// Find hand attachment points for weapon attachment
+				fbx.traverse((child) => {
+					const childNameLower = child.name.toLowerCase()
+					// Look for Point_hand_R/L (proper attachment points)
+					if (childNameLower === "point_hand_r") {
+						modelWithAnimations.handPointR = child
+					} else if (childNameLower === "point_hand_l") {
+						modelWithAnimations.handPointL = child
+					}
+				})
 
 				// Bind skeleton for skinned meshes (crucial for AssetStudio FBX files)
 				fbx.traverse((child) => {
@@ -158,9 +174,9 @@ export function Model({
 				) {
 					fbx.position.set(0, 0, 0)
 				} else if (weaponTypes.includes(modelFile.type)) {
-					if (!modelFile.defaultPosition) {
-						fbx.position.set(1, 0, 0)
-					}
+					// Weapons will be attached to hand points later
+					// Keep at origin for now, don't apply defaultPosition offset
+					fbx.position.set(0, 0, 0)
 				} else {
 					// Default positioning for unknown types
 					fbx.position.set(0, 0, 0)
@@ -197,23 +213,128 @@ export function Model({
 				return 0
 			})
 
-			const visibleModelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name))
-			const totalModels = visibleModelsToLoad.length
+			// Load visible models AND all weapon models (even if hidden, we need them to check for animations)
+			const modelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name) || weaponTypes.includes(m.type))
+			const totalModels = modelsToLoad.length
 
-			for (let i = 0; i < visibleModelsToLoad.length; i++) {
-				await loadModel(visibleModelsToLoad[i], i, totalModels)
+			for (let i = 0; i < modelsToLoad.length; i++) {
+				await loadModel(modelsToLoad[i], i, totalModels)
 			}
 
 			if (setIsLoading) setIsLoading(false)
 		}
 
 		loadModelsSequentially()
-	}, [modelFiles, visibleModels])
+	}, [modelFiles, visibleModels, loadedModels, setIsLoading, setLoadingProgress])
+
+	// Ensure weapons are hidden initially when models finish loading
+	useEffect(() => {
+		if (loadedModels.size === 0 || !setVisibleModels) return
+
+		// Find all weapon models and ensure they're not in visibleModels initially
+		// Skip weapons with defaultPosition (they're part of the body and should stay visible)
+		const weaponsToHide = new Set<string>()
+		modelFiles.forEach((modelFile) => {
+			if (
+				weaponTypes.includes(modelFile.type) &&
+				!modelFile.defaultPosition &&
+				loadedModels.has(modelFile.name)
+			) {
+				weaponsToHide.add(modelFile.name)
+				const weaponModel = loadedModels.get(modelFile.name)
+				if (weaponModel) {
+					weaponModel.visible = false
+				}
+			}
+		})
+
+		if (weaponsToHide.size > 0) {
+			setVisibleModels((prev) => {
+				const newSet = new Set(prev)
+				weaponsToHide.forEach((name) => newSet.delete(name))
+				return newSet
+			})
+		}
+	}, [loadedModels, modelFiles, setVisibleModels])
+
+	// Sync weapon visibility when visibleModels changes (from ControlsPanel toggles)
+	useEffect(() => {
+		loadedModels.forEach((model, modelName) => {
+			const modelFile = modelFiles.find((m) => m.name === modelName)
+			const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
+
+			if (isWeapon && !modelFile.defaultPosition) {
+				model.visible = visibleModels.has(modelName)
+			}
+		})
+	}, [visibleModels, loadedModels, modelFiles])
+
+	// Attach weapons to hand points after models are loaded
+	useEffect(() => {
+		const bodyEntry = Array.from(loadedModels.entries()).find(([name]) => {
+			const modelFile = modelFiles.find((m) => m.name === name)
+			return modelFile?.type === "body"
+		})
+
+		if (!bodyEntry) return
+
+		const [, bodyModel] = bodyEntry
+
+		// Skip if hand points are not found yet
+		if (!bodyModel.handPointR && !bodyModel.handPointL) {
+			return
+		}
+
+		// Find weapon models and attach them to hand points
+		// Skip weapons with defaultPosition (they're part of the body)
+		loadedModels.forEach((weaponModel, weaponName) => {
+			const modelFile = modelFiles.find((m) => m.name === weaponName)
+			if (!modelFile || !weaponTypes.includes(modelFile.type) || modelFile.defaultPosition) return
+
+			const isLeftHand =
+				modelFile.type === "shield" ||
+				modelFile.type === "weapon_l" ||
+				modelFile.type === "weaponl" ||
+				modelFile.type === "weapon02"
+
+			// Try preferred hand first, then fallback to whichever hand exists
+			let handPoint = isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
+			if (!handPoint) {
+				handPoint = isLeftHand ? bodyModel.handPointR : bodyModel.handPointL
+			}
+
+			if (handPoint && weaponModel.parent !== handPoint) {
+				// Only re-attach if not already attached to this hand point
+				if (weaponModel.parent) {
+					weaponModel.parent.remove(weaponModel)
+				}
+
+				handPoint.add(weaponModel)
+
+				weaponModel.position.set(0, 0, 0)
+				weaponModel.scale.set(1, 1, 1)
+				weaponModel.rotation.set(Math.PI / 2, 0, 0)
+			}
+		})
+	}, [loadedModels, modelFiles, visibleModels])
 
 	// Handle animation switching
 	useEffect(() => {
 		// Wait a bit to ensure all models have loaded and shared animations are available
 		const timeoutId = setTimeout(() => {
+			// Track which weapons should be visible
+			const weaponsToShow = new Set<string>()
+			const weaponsToHide = new Set<string>()
+
+			// First, collect ALL weapon models to ensure they start in the correct state
+			// Exclude weapons with defaultPosition (they're part of the body)
+			const allWeaponModels = new Set<string>()
+			modelFiles.forEach((modelFile) => {
+				if (weaponTypes.includes(modelFile.type) && !modelFile.defaultPosition) {
+					allWeaponModels.add(modelFile.name)
+				}
+			})
+
 			loadedModels.forEach((model, modelName) => {
 				const mixer = mixersRef.current.get(modelName)
 				if (!mixer) return
@@ -226,27 +347,91 @@ export function Model({
 
 				// Play selected animation
 				if (selectedAnimation) {
+					const modelFile = modelFiles.find((m) => m.name === modelName)
+					const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
+
+					// For weapons, try to find matching weapon animation
+					let animationToPlay = selectedAnimation
+
+					// Skip weapon animation logic for weapons with defaultPosition (they're part of the body)
+					if (isWeapon && !modelFile.defaultPosition) {
+						// Convert body animation to weapon animation
+						// Handle two cases:
+						// 1. Regular: "Hero_Aisha@Astand_Astand" -> "Hero_Aisha_Weapon@Astand_Astand"
+						// 2. Facial: "Hero_Isaiah_Facial@Aimsword_Aimsword" -> "Hero_Isaiah_Weapon_Facial@Aimsword_Aimsword"
+						let weaponAnimName: string
+						if (selectedAnimation.includes("_Facial@")) {
+							weaponAnimName = selectedAnimation.replace(/_Facial@/, "_Weapon_Facial@")
+						} else {
+							weaponAnimName = selectedAnimation.replace(/@/, "_Weapon@")
+						}
+
+						// Check if weapon animation exists in model's animations or shared animations
+						const animations =
+							model.animations && model.animations.length > 0
+								? model.animations
+								: sharedAnimationsRef.current
+
+						const weaponClip = animations.find((c) => c.name === weaponAnimName)
+						if (weaponClip) {
+							animationToPlay = weaponAnimName
+							weaponsToShow.add(modelName)
+							model.visible = true
+						} else {
+							weaponsToHide.add(modelName)
+							model.visible = false
+							return
+						}
+					}
+
 					// Try to find animation in model's animations first, then in shared animations
 					const animations =
 						model.animations && model.animations.length > 0 ? model.animations : sharedAnimationsRef.current
 
-					const clip = animations.find((c) => c.name === selectedAnimation)
+					const clip = animations.find((c) => c.name === animationToPlay)
 					if (clip) {
 						const action = mixer.clipAction(clip)
 						action.reset().fadeIn(0.3).play()
 						activeActionsRef.current.set(modelName, action)
 
-						// Report animation duration
-						if (onAnimationDurationChange) {
+						// Report animation duration (only from body/non-weapon models)
+						if (onAnimationDurationChange && !isWeapon) {
 							onAnimationDurationChange(clip.duration)
 						}
 					}
+				} else {
+					const modelFile = modelFiles.find((m) => m.name === modelName)
+					const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
+					if (isWeapon) {
+						weaponsToHide.add(modelName)
+					}
 				}
 			})
+
+			// Hide all weapons that weren't marked to show
+			allWeaponModels.forEach((weaponName) => {
+				if (!weaponsToShow.has(weaponName)) {
+					weaponsToHide.add(weaponName)
+					const weaponModel = loadedModels.get(weaponName)
+					if (weaponModel) {
+						weaponModel.visible = false
+					}
+				}
+			})
+
+			// Update visible models set
+			if (setVisibleModels && (weaponsToShow.size > 0 || weaponsToHide.size > 0)) {
+				setVisibleModels((prev) => {
+					const newSet = new Set(prev)
+					weaponsToShow.forEach((name) => newSet.add(name))
+					weaponsToHide.forEach((name) => newSet.delete(name))
+					return newSet
+				})
+			}
 		}, 100)
 
 		return () => clearTimeout(timeoutId)
-	}, [selectedAnimation, loadedModels, onAnimationDurationChange])
+	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, setVisibleModels])
 
 	useFrame((state, delta) => {
 		if (!isPaused) {
@@ -255,17 +440,29 @@ export function Model({
 	})
 
 	useEffect(() => {
+		const mixers = mixersRef.current
 		return () => {
-			mixersRef.current.forEach((mixer) => mixer.stopAllAction())
-			mixersRef.current.clear()
+			mixers.forEach((mixer) => mixer.stopAllAction())
+			mixers.clear()
 		}
 	}, [])
 
 	return (
 		<group ref={groupRef}>
-			{Array.from(loadedModels.entries()).map(([name, model]) =>
-				visibleModels.has(name) ? <primitive key={name} object={model} /> : null
-			)}
+			{Array.from(loadedModels.entries()).map(([name, model]) => {
+				const modelFile = modelFiles.find((m) => m.name === name)
+				const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
+
+				// For weapons without defaultPosition, always render them (so they stay attached to hand points)
+				// but visibility is controlled by model.visible property
+				// For weapons with defaultPosition and non-weapons, only render if in visibleModels
+				if (isWeapon && !modelFile.defaultPosition) {
+					return <primitive key={name} object={model} />
+				}
+
+				const isVisible = visibleModels.has(name)
+				return isVisible ? <primitive key={name} object={model} /> : null
+			})}
 		</group>
 	)
 }
