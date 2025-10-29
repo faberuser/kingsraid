@@ -64,6 +64,7 @@ export function ModelViewer({
 		// Show non-weapons and weapons with defaultPosition === true by default
 		if (modelFiles.length > 0) {
 			setIsLoading(true)
+			setLoadingProgress(0)
 			const modelNames = modelFiles
 				.filter(
 					(m) => !weaponTypes.includes(m.type) || (weaponTypes.includes(m.type) && m.defaultPosition === true)

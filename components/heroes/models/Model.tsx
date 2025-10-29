@@ -43,8 +43,27 @@ export function Model({
 	const mixersRef = useRef<Map<string, THREE.AnimationMixer>>(new Map())
 	const activeActionsRef = useRef<Map<string, THREE.AnimationAction>>(new Map())
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
+	const currentProgressRef = useRef<number>(0)
+	const isLoadingRef = useRef<boolean>(false)
+	const previousModelFilesRef = useRef<ModelFile[]>([])
 
 	useEffect(() => {
+		// Check if modelFiles have changed (costume switch)
+		const modelFilesChanged =
+			previousModelFilesRef.current.length !== modelFiles.length ||
+			previousModelFilesRef.current.some((prev, idx) => prev.path !== modelFiles[idx]?.path)
+
+		if (modelFilesChanged) {
+			// Reset everything when switching costumes
+			currentProgressRef.current = 0
+			isLoadingRef.current = false
+			setLoadedModels(new Map())
+			mixersRef.current.clear()
+			activeActionsRef.current.clear()
+			sharedAnimationsRef.current = []
+			previousModelFilesRef.current = [...modelFiles]
+		}
+
 		const loadModel = async (modelFile: ModelFile, modelIndex: number, totalModels: number) => {
 			if (loadedModels.has(modelFile.name)) return
 			const modelDir = `${basePath}/kingsraid-models/models/heroes`
@@ -59,14 +78,19 @@ export function Model({
 						resolve,
 						(xhr) => {
 							// Calculate progress for this individual model
-							const modelProgress = xhr.total > 0 ? (xhr.loaded / xhr.total) * 100 : 0
+							const modelProgress = xhr.total > 0 ? xhr.loaded / xhr.total : 0
 							// Calculate overall progress considering all models
-							const previousModelsProgress = (modelIndex / totalModels) * 100
-							const currentModelContribution = (1 / totalModels) * 100
+							const previousModelsProgress = modelIndex / totalModels
+							const currentModelContribution = 1 / totalModels
 							const totalProgress =
-								previousModelsProgress + (modelProgress / 100) * currentModelContribution
-							if (setLoadingProgress) {
-								setLoadingProgress(totalProgress)
+								(previousModelsProgress + modelProgress * currentModelContribution) * 100
+
+							// Ensure progress never goes backwards
+							if (totalProgress > currentProgressRef.current) {
+								currentProgressRef.current = totalProgress
+								if (setLoadingProgress) {
+									setLoadingProgress(totalProgress)
+								}
 							}
 						},
 						reject
@@ -200,6 +224,13 @@ export function Model({
 
 		// Load models sequentially: body first to ensure animations are available
 		const loadModelsSequentially = async () => {
+			// Prevent multiple simultaneous loads
+			if (isLoadingRef.current) return
+
+			// Reset progress tracking at the start
+			currentProgressRef.current = 0
+			isLoadingRef.current = true
+
 			if (setIsLoading) setIsLoading(true)
 			if (setLoadingProgress) setLoadingProgress(0)
 
@@ -221,11 +252,17 @@ export function Model({
 				await loadModel(modelsToLoad[i], i, totalModels)
 			}
 
+			// Ensure we reach 100% at the end
+			currentProgressRef.current = 100
+			if (setLoadingProgress) setLoadingProgress(100)
+
 			if (setIsLoading) setIsLoading(false)
+			isLoadingRef.current = false
 		}
 
 		loadModelsSequentially()
-	}, [modelFiles, visibleModels, loadedModels, setIsLoading, setLoadingProgress])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [modelFiles, visibleModels, setIsLoading, setLoadingProgress])
 
 	// Ensure weapons are hidden initially when models finish loading
 	useEffect(() => {
