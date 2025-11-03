@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Play, Pause, Search, X } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
-import { formatAnimationName } from "@/components/heroes/models/utils"
+import { formatAnimationName } from "@/components/models/utils"
 import Fuse from "fuse.js"
 
 interface ControlsPanelProps {

@@ -2,14 +2,30 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
+import { ModelFile } from "@/model/Hero_Model"
+import BossModels from "@/components/bosses/models"
+import DataHeavyContent from "@/components/data-heavy-content"
+
+interface BossModelData {
+	mesh: ModelFile | null
+}
 
 interface BossClientProps {
 	bossData: BossData
+	bossModels?: BossModelData
+	bossScenes?: Array<{ value: string; label: string }>
+	enableModelsVoices?: boolean
 }
 
-export default function BossClient({ bossData }: BossClientProps) {
+export default function BossClient({
+	bossData,
+	bossModels,
+	bossScenes = [],
+	enableModelsVoices = false,
+}: BossClientProps) {
 	const { infos, skills } = bossData
 
 	return (
@@ -76,56 +92,74 @@ export default function BossClient({ bossData }: BossClientProps) {
 				</div>
 			</div>
 
-			{/* Skills Section */}
-			<div className="mb-8">
-				<div className="text-2xl font-bold mb-6">Skills</div>
+			{/* Tabs Section */}
+			<Tabs defaultValue="skills" className="w-full mt-4">
+				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
+					<TabsTrigger value="skills">Skills</TabsTrigger>
+					{enableModelsVoices && bossModels && bossModels.mesh && (
+						<TabsTrigger value="models">Models</TabsTrigger>
+					)}
+				</TabsList>
 
-				<div className="space-y-4">
-					{Object.entries(skills).map(([skillId, skill]) => (
-						<Card key={skillId} className="gap-2">
-							<CardHeader>
-								<div className="flex items-start justify-between">
-									<div className="flex flex-row gap-2 items-center">
-										<CardTitle
-											className={`text-lg ${
-												infos["damage type"] === "Physical"
-													? "text-red-300"
-													: infos["damage type"] === "Magical"
-													? "text-blue-300"
-													: "text-yellow-400"
-											}`}
-										>
-											{skill.name}
-										</CardTitle>
-										<div className="flex gap-2">
-											{skill.cost && (
-												<Badge
-													variant="default"
-													className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
-												>
-													Cost: {skill.cost}
-												</Badge>
-											)}
-											{skill.cooldown && (
-												<Badge
-													variant="default"
-													className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
-												>
-													Cooldown: {skill.cooldown}s
-												</Badge>
-											)}
+				<TabsContent value="skills" className="mt-4">
+					<div className="space-y-4">
+						{Object.entries(skills).map(([skillId, skill]) => (
+							<Card key={skillId} className="gap-2">
+								<CardHeader>
+									<div className="flex items-start justify-between">
+										<div className="flex flex-row gap-2 items-center">
+											<CardTitle
+												className={`text-lg ${
+													infos["damage type"] === "Physical"
+														? "text-red-300"
+														: infos["damage type"] === "Magical"
+														? "text-blue-300"
+														: "text-yellow-400"
+												}`}
+											>
+												{skill.name}
+											</CardTitle>
+											<div className="flex gap-2">
+												{skill.cost && (
+													<Badge
+														variant="default"
+														className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
+													>
+														Cost: {skill.cost}
+													</Badge>
+												)}
+												{skill.cooldown && (
+													<Badge
+														variant="default"
+														className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
+													>
+														Cooldown: {skill.cooldown}s
+													</Badge>
+												)}
+											</div>
 										</div>
+										<Badge variant="secondary">#{skillId}</Badge>
 									</div>
-									<Badge variant="secondary">#{skillId}</Badge>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="text-sm">{skill.description}</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
-			</div>
+								</CardHeader>
+								<CardContent>
+									<div className="text-sm">{skill.description}</div>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+				</TabsContent>
+
+				{enableModelsVoices && bossModels && bossModels.mesh && (
+					<TabsContent value="models" className="mt-4">
+						<DataHeavyContent
+							description="This tab contains large 3D model files and textures that may consume significant mobile data."
+							estimatedSize="30-60 MB"
+						>
+							<BossModels bossModels={bossModels} bossScenes={bossScenes} bossName={infos.name} />
+						</DataHeavyContent>
+					</TabsContent>
+				)}
+			</Tabs>
 		</div>
 	)
 }

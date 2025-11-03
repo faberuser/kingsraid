@@ -6,7 +6,8 @@ import { useFrame } from "@react-three/fiber"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
 import { ModelFile } from "@/model/Hero_Model"
-import { weaponTypes } from "@/components/heroes/models/types"
+import { weaponTypes } from "@/components/models/types"
+import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -26,6 +27,8 @@ interface ModelProps {
 	setIsLoading?: (loading: boolean) => void
 	setLoadingProgress?: (progress: number) => void
 	onAnimationDurationChange?: (duration: number) => void
+	modelType?: "heroes" | "bosses"
+	bossName?: string
 }
 
 export function Model({
@@ -37,6 +40,8 @@ export function Model({
 	setIsLoading,
 	setLoadingProgress,
 	onAnimationDurationChange,
+	modelType = "heroes",
+	bossName,
 }: ModelProps) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
@@ -66,7 +71,7 @@ export function Model({
 
 		const loadModel = async (modelFile: ModelFile, modelIndex: number, totalModels: number) => {
 			if (loadedModels.has(modelFile.name)) return
-			const modelDir = `${basePath}/kingsraid-models/models/heroes`
+			const modelDir = `${basePath}/kingsraid-models/models/${modelType}`
 
 			try {
 				const fbxLoader = new FBXLoader()
@@ -197,6 +202,37 @@ export function Model({
 					modelFile.type === "mask"
 				) {
 					fbx.position.set(0, 0, 0)
+
+					// Apply boss model offsets if available
+					if (modelType === "bosses" && bossName) {
+						const config = await loadBossOffsetConfig(bossName)
+						const modelOffset = config?.model
+
+						// Apply scale (default 0.1 for boss models, or from config)
+						const scaleValue = modelOffset?.scale || { x: 0.1, y: 0.1, z: 0.1 }
+						fbx.scale.set(scaleValue.x ?? 0.1, scaleValue.y ?? 0.1, scaleValue.z ?? 0.1)
+
+						// Apply position offset if provided
+						if (modelOffset?.position) {
+							fbx.position.set(
+								modelOffset.position.x ?? 0,
+								modelOffset.position.y ?? 0,
+								modelOffset.position.z ?? 0
+							)
+						}
+
+						// Apply rotation offset if provided (in radians)
+						if (modelOffset?.rotation) {
+							fbx.rotation.set(
+								modelOffset.rotation.x ?? 0,
+								modelOffset.rotation.y ?? 0,
+								modelOffset.rotation.z ?? 0
+							)
+						}
+					} else if (modelType === "bosses") {
+						// Default scale for bosses if no config
+						fbx.scale.set(0.1, 0.1, 0.1)
+					}
 				} else if (weaponTypes.includes(modelFile.type)) {
 					// Weapons will be attached to hand points later
 					// Keep at origin for now, don't apply defaultPosition offset

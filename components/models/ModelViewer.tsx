@@ -9,22 +9,22 @@ import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Model } from "@/components/heroes/models/Model"
-import { Scene } from "@/components/heroes/models/Scene"
-import { ScreenshotHandler } from "@/components/heroes/models/ScreenshotHandler"
-import { RecordingHandler } from "@/components/heroes/models/RecordingHandler"
-import { ScreenshotDialog } from "@/components/heroes/models/ScreenshotDialog"
-import { RecordingDialog } from "@/components/heroes/models/RecordingDialog"
-import { ControlsPanel } from "@/components/heroes/models/ControlsPanel"
-import { CameraControls } from "@/components/heroes/models/CameraControls"
-import { convertToGif } from "@/components/heroes/models/gifConverter"
-import { formatAnimationName } from "@/components/heroes/models/utils"
+import { Model } from "@/components/models/Model"
+import { Scene } from "@/components/models/Scene"
+import { ScreenshotHandler } from "@/components/models/ScreenshotHandler"
+import { RecordingHandler } from "@/components/models/RecordingHandler"
+import { ScreenshotDialog } from "@/components/models/ScreenshotDialog"
+import { RecordingDialog } from "@/components/models/RecordingDialog"
+import { ControlsPanel } from "@/components/models/ControlsPanel"
+import { CameraControls } from "@/components/models/CameraControls"
+import { convertToGif } from "@/components/models/gifConverter"
+import { formatAnimationName } from "@/components/models/utils"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
 	INITIAL_CAMERA_TARGET,
 	weaponTypes,
-} from "@/components/heroes/models/types"
+} from "@/components/models/types"
 
 export function ModelViewer({
 	modelFiles,
@@ -36,6 +36,8 @@ export function ModelViewer({
 	availableScenes = [],
 	visibleModels: externalVisibleModels,
 	setVisibleModels: externalSetVisibleModels,
+	modelType = "heroes",
+	bossName,
 }: ModelViewerProps) {
 	const [internalVisibleModels, setInternalVisibleModels] = useState<Set<string>>(new Set())
 
@@ -279,6 +281,8 @@ export function ModelViewer({
 								setIsLoading={setIsLoading}
 								setLoadingProgress={setLoadingProgress}
 								onAnimationDurationChange={setAnimationDuration}
+								modelType={modelType}
+								bossName={bossName}
 							/>
 							{selectedScene === "grid" ? (
 								<gridHelper args={[10, 10]} />

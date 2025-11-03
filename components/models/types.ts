@@ -47,6 +47,8 @@ export interface ModelViewerProps {
 	availableScenes?: Array<{ value: string; label: string }>
 	visibleModels?: Set<string>
 	setVisibleModels?: React.Dispatch<React.SetStateAction<Set<string>>>
+	modelType?: "heroes" | "bosses"
+	bossName?: string
 }
 
 export const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
