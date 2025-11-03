@@ -70,39 +70,39 @@ export default function BossClient({
 						</div>
 					</div>
 				</div>
-
-				<div className="grid md:grid-cols-2 gap-6">
-					<Card className="gap-2">
-						<CardHeader>
-							<CardTitle>Characteristics</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="text-sm">{infos.characteristics}</div>
-						</CardContent>
-					</Card>
-
-					<Card className="gap-2">
-						<CardHeader>
-							<CardTitle>Recommended Heroes</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="text-sm">{infos["recommended heroes"]}</div>
-						</CardContent>
-					</Card>
-				</div>
 			</div>
 
 			{/* Tabs Section */}
-			<Tabs defaultValue="skills" className="w-full mt-4">
+			<Tabs defaultValue="profile_skills" className="w-full mt-4">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
-					<TabsTrigger value="skills">Skills</TabsTrigger>
+					<TabsTrigger value="profile_skills">Profile & Skills</TabsTrigger>
 					{enableModelsVoices && bossModels && bossModels.mesh && (
 						<TabsTrigger value="models">Models</TabsTrigger>
 					)}
 				</TabsList>
 
-				<TabsContent value="skills" className="mt-4">
+				<TabsContent value="profile_skills" className="mt-4">
 					<div className="space-y-4">
+						<div className="grid md:grid-cols-2 gap-6">
+							<Card className="gap-2">
+								<CardHeader>
+									<CardTitle>Characteristics</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className="text-sm">{infos.characteristics}</div>
+								</CardContent>
+							</Card>
+
+							<Card className="gap-2">
+								<CardHeader>
+									<CardTitle>Recommended Heroes</CardTitle>
+								</CardHeader>
+								<CardContent>
+									<div className="text-sm">{infos["recommended heroes"]}</div>
+								</CardContent>
+							</Card>
+						</div>
+
 						{Object.entries(skills).map(([skillId, skill]) => (
 							<Card key={skillId} className="gap-2">
 								<CardHeader>
