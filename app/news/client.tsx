@@ -9,6 +9,7 @@ import Image from "@/components/next-image"
 import { Eye, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
 
 export const getImage = (html: string): string | null => {
 	const imgMatch = html.match(/<img[^>]*>/i)
@@ -72,7 +73,11 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 							<div className="flex flex-col justify-between gap-4 w-full">
 								<div className="flex flex-col gap-4">
 									<CardHeader>
-										<CardTitle className="text-xl font-semibold">{news.title}</CardTitle>
+										<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
+											<div className="text-xl font-semibold">{news.title}</div>
+											{new Date().getTime() - new Date(news.date).getTime() <
+												7 * 24 * 60 * 60 * 1000 && <Badge className="text-xs">New</Badge>}
+										</CardTitle>
 										<CardDescription className="text-sm whitespace-nowrap">
 											{new Date(news.date).toLocaleDateString()}
 										</CardDescription>
