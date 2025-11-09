@@ -247,7 +247,7 @@ export function ModelViewer({
 						</Button>
 					</CollapsibleTrigger>
 
-					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }}>
+					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
 						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 						<OrbitControls
 							ref={controlsRef}

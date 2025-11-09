@@ -87,7 +87,7 @@ export function ControlsPanel({
 
 	return (
 		<div
-			className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
+			className="absolute top-0 h-full z-10 bg-background/70 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
 			style={{
 				left: isCollapsed ? "-208px" : "0px",
 			}}

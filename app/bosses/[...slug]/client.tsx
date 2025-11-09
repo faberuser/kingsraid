@@ -9,9 +9,8 @@ import { ModelFile } from "@/model/Hero_Model"
 import BossModels from "@/components/bosses/models"
 import DataHeavyContent from "@/components/data-heavy-content"
 
-interface BossModelData {
-	mesh: ModelFile | null
-}
+// Boss models are now organized by variant (similar to hero costumes)
+type BossModelData = Record<string, ModelFile[]>
 
 interface BossClientProps {
 	bossData: BossData
@@ -76,7 +75,7 @@ export default function BossClient({
 			<Tabs defaultValue="profile_skills" className="w-full mt-4">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
 					<TabsTrigger value="profile_skills">Profile & Skills</TabsTrigger>
-					{enableModelsVoices && bossModels && bossModels.mesh && (
+					{enableModelsVoices && bossModels && Object.keys(bossModels).length > 0 && (
 						<TabsTrigger value="models">Models</TabsTrigger>
 					)}
 				</TabsList>
@@ -149,7 +148,7 @@ export default function BossClient({
 					</div>
 				</TabsContent>
 
-				{enableModelsVoices && bossModels && bossModels.mesh && (
+				{enableModelsVoices && bossModels && Object.keys(bossModels).length > 0 && (
 					<TabsContent value="models" className="mt-4">
 						<DataHeavyContent
 							description="This tab contains large 3D model files and textures that may consume significant mobile data."

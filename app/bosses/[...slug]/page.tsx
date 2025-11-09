@@ -48,7 +48,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	// Get boss model data server-side (only if enabled)
-	const bossModels = enableModelsVoices ? await getBossModels(bossData.infos.name) : { mesh: null }
+	const bossModels = enableModelsVoices ? await getBossModels(bossData.infos.name) : {}
 
 	// Get boss scenes server-side (only if enabled)
 	const bossScenes = enableModelsVoices ? await getBossScenes(bossData.infos.name) : []

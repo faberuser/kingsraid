@@ -109,9 +109,18 @@ export function Model({
 				fbx.traverse((child) => {
 					const childNameLower = child.name.toLowerCase()
 					// Look for Point_hand_R/L (proper attachment points)
-					if (childNameLower === "point_hand_r") {
+					// Also try variations like Point_Hand_R, point_Hand_R, etc.
+					if (
+						childNameLower.includes("point") &&
+						childNameLower.includes("hand") &&
+						childNameLower.includes("r")
+					) {
 						modelWithAnimations.handPointR = child
-					} else if (childNameLower === "point_hand_l") {
+					} else if (
+						childNameLower.includes("point") &&
+						childNameLower.includes("hand") &&
+						childNameLower.includes("l")
+					) {
 						modelWithAnimations.handPointL = child
 					}
 				})
@@ -234,8 +243,19 @@ export function Model({
 						fbx.scale.set(0.1, 0.1, 0.1)
 					}
 				} else if (weaponTypes.includes(modelFile.type)) {
+					// Apply boss scaling to weapons as well
+					if (modelType === "bosses" && bossName) {
+						const config = await loadBossOffsetConfig(bossName)
+						const modelOffset = config?.model
+						const scaleValue = modelOffset?.scale || { x: 0.1, y: 0.1, z: 0.1 }
+						fbx.scale.set(scaleValue.x ?? 0.1, scaleValue.y ?? 0.1, scaleValue.z ?? 0.1)
+					} else if (modelType === "bosses") {
+						// Default scale for boss weapons if no config
+						fbx.scale.set(0.1, 0.1, 0.1)
+					}
+
 					// Weapons will be attached to hand points later
-					// Keep at origin for now, don't apply defaultPosition offset
+					// Keep at origin for now
 					fbx.position.set(0, 0, 0)
 				} else {
 					// Default positioning for unknown types
@@ -284,6 +304,20 @@ export function Model({
 			const modelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name) || weaponTypes.includes(m.type))
 			const totalModels = modelsToLoad.length
 
+			// For bosses, add weapons to visibleModels before loading
+			if (modelType === "bosses" && setVisibleModels) {
+				const weaponNames = modelsToLoad
+					.filter((m) => weaponTypes.includes(m.type) && !m.defaultPosition)
+					.map((m) => m.name)
+				if (weaponNames.length > 0) {
+					setVisibleModels((prev) => {
+						const newSet = new Set(prev)
+						weaponNames.forEach((name) => newSet.add(name))
+						return newSet
+					})
+				}
+			}
+
 			for (let i = 0; i < modelsToLoad.length; i++) {
 				await loadModel(modelsToLoad[i], i, totalModels)
 			}
@@ -300,35 +334,61 @@ export function Model({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [modelFiles, visibleModels, setIsLoading, setLoadingProgress])
 
-	// Ensure weapons are hidden initially when models finish loading
+	// Ensure weapons visibility based on model type
 	useEffect(() => {
 		if (loadedModels.size === 0 || !setVisibleModels) return
 
-		// Find all weapon models and ensure they're not in visibleModels initially
-		// Skip weapons with defaultPosition (they're part of the body and should stay visible)
-		const weaponsToHide = new Set<string>()
-		modelFiles.forEach((modelFile) => {
-			if (
-				weaponTypes.includes(modelFile.type) &&
-				!modelFile.defaultPosition &&
-				loadedModels.has(modelFile.name)
-			) {
-				weaponsToHide.add(modelFile.name)
-				const weaponModel = loadedModels.get(modelFile.name)
-				if (weaponModel) {
-					weaponModel.visible = false
+		// For heroes: hide weapons initially (user toggles them on)
+		// For bosses: keep weapons visible by default
+		if (modelType === "heroes") {
+			const weaponsToHide = new Set<string>()
+			modelFiles.forEach((modelFile) => {
+				if (
+					weaponTypes.includes(modelFile.type) &&
+					!modelFile.defaultPosition &&
+					loadedModels.has(modelFile.name)
+				) {
+					weaponsToHide.add(modelFile.name)
+					const weaponModel = loadedModels.get(modelFile.name)
+					if (weaponModel) {
+						weaponModel.visible = false
+					}
 				}
-			}
-		})
-
-		if (weaponsToHide.size > 0) {
-			setVisibleModels((prev) => {
-				const newSet = new Set(prev)
-				weaponsToHide.forEach((name) => newSet.delete(name))
-				return newSet
 			})
+
+			if (weaponsToHide.size > 0) {
+				setVisibleModels((prev) => {
+					const newSet = new Set(prev)
+					weaponsToHide.forEach((name) => newSet.delete(name))
+					return newSet
+				})
+			}
+		} else if (modelType === "bosses") {
+			// For bosses, ensure weapons are in visibleModels
+			const weaponsToShow = new Set<string>()
+			modelFiles.forEach((modelFile) => {
+				if (
+					weaponTypes.includes(modelFile.type) &&
+					!modelFile.defaultPosition &&
+					loadedModels.has(modelFile.name)
+				) {
+					weaponsToShow.add(modelFile.name)
+					const weaponModel = loadedModels.get(modelFile.name)
+					if (weaponModel) {
+						weaponModel.visible = true
+					}
+				}
+			})
+
+			if (weaponsToShow.size > 0) {
+				setVisibleModels((prev) => {
+					const newSet = new Set(prev)
+					weaponsToShow.forEach((name) => newSet.add(name))
+					return newSet
+				})
+			}
 		}
-	}, [loadedModels, modelFiles, setVisibleModels])
+	}, [loadedModels, modelFiles, setVisibleModels, modelType])
 
 	// Sync weapon visibility when visibleModels changes (from ControlsPanel toggles)
 	useEffect(() => {
@@ -389,7 +449,7 @@ export function Model({
 				weaponModel.rotation.set(Math.PI / 2, 0, 0)
 			}
 		})
-	}, [loadedModels, modelFiles, visibleModels])
+	}, [loadedModels, modelFiles, visibleModels, modelType])
 
 	// Handle animation switching
 	useEffect(() => {

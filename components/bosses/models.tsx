@@ -1,18 +1,18 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useRef } from "react"
 import { FBXLoader } from "three-stdlib"
 import { AnimationClip, Group } from "three"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { ModelViewer } from "@/components/models/ModelViewer"
+import { BossModelSelector } from "@/components/bosses/BossModelSelector"
 import { ModelFile } from "@/model/Hero_Model"
 import { formatAnimationName } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
-interface BossModelData {
-	mesh: ModelFile | null
-}
+// Boss models are now organized by variant (similar to hero costumes)
+type BossModelData = Record<string, ModelFile[]>
 
 interface BossModelsProps {
 	bossModels: BossModelData
@@ -21,31 +21,59 @@ interface BossModelsProps {
 }
 
 export default function BossModels({ bossModels, bossScenes = [], bossName }: BossModelsProps) {
+	const modelOptions = Object.keys(bossModels).sort()
+
+	const [selectedModel, setSelectedModel] = useState<string>(() => {
+		// Auto-select the first model if available
+		return modelOptions.length > 0 ? modelOptions[0] : ""
+	})
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
 	const [isLoadingModels, setIsLoadingModels] = useState(false)
-	const [visibleModels, setVisibleModels] = useState<Set<string>>(() => {
-		// Initialize with the boss mesh name if available
-		return bossModels.mesh ? new Set([bossModels.mesh.name]) : new Set()
-	})
-	const animationsLoadedRef = useRef(false)
+	const animationsCacheRef = useRef<Map<string, string[]>>(new Map()) // Cache animations per model variant
 
-	// Load animations from the boss mesh
+	// Load animations for the selected model variant
 	useEffect(() => {
-		if (!bossModels.mesh || animationsLoadedRef.current) return
+		if (!selectedModel) return
+
+		// Check if we already have animations cached for this model variant
+		if (animationsCacheRef.current.has(selectedModel)) {
+			const cachedAnimations = animationsCacheRef.current.get(selectedModel)!
+			setAvailableAnimations(cachedAnimations)
+			// Set first animation or idle as default
+			const defaultAnimation =
+				cachedAnimations.find((name) => name.includes("Idle") || name.includes("idle")) ||
+				cachedAnimations[0] ||
+				null
+			setSelectedAnimation(defaultAnimation)
+			return
+		}
+
+		// Clear animations when switching to uncached model variant
+		setAvailableAnimations([])
+		setSelectedAnimation(null)
 
 		const loadAnimations = async () => {
 			const fbxLoader = new FBXLoader()
 			const modelDir = `${basePath}/kingsraid-models/models/bosses`
 
+			// Load from the current model variant
+			const modelVariantFiles = bossModels[selectedModel]
+			if (!modelVariantFiles || modelVariantFiles.length === 0) {
+				return
+			}
+
+			// Use the first model file (should be the body)
+			const firstModel = modelVariantFiles[0]
+
 			try {
 				const fbx = await new Promise<Group>((resolve, reject) => {
 					const timeout = setTimeout(() => {
-						reject(new Error(`Timeout loading ${bossModels.mesh!.path}`))
+						reject(new Error(`Timeout loading ${firstModel.path}`))
 					}, 60000) // 60 second timeout
 
 					fbxLoader.load(
-						`${modelDir}/${bossModels.mesh!.path}`,
+						`${modelDir}/${firstModel.path}`,
 						(loadedFbx) => {
 							clearTimeout(timeout)
 							resolve(loadedFbx)
@@ -65,6 +93,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 						.filter((name: string) => !name.includes("_Weapon@"))
 
 					if (animNames.length > 0) {
+						// Sort animations before caching and selecting
 						const sortedAnimNames = [...animNames].sort((a, b) => {
 							return formatAnimationName(a).localeCompare(formatAnimationName(b))
 						})
@@ -78,27 +107,38 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 							sortedAnimNames.unshift(idle)
 						}
 
-						setAvailableAnimations(sortedAnimNames)
-						setSelectedAnimation(sortedAnimNames[0])
-						animationsLoadedRef.current = true
+						// Use a microtask to ensure state updates are batched properly
+						Promise.resolve().then(() => {
+							// Cache the sorted animations for this model variant
+							animationsCacheRef.current.set(selectedModel, sortedAnimNames)
+							setAvailableAnimations(sortedAnimNames)
+							// Set idle or first animation as default
+							const defaultAnimation =
+								sortedAnimNames.find((name) => name.includes("Idle") || name.includes("idle")) ||
+								sortedAnimNames[0]
+							setSelectedAnimation(defaultAnimation)
+						})
+					} else {
+						// Cache empty array for model variants with no animations
+						animationsCacheRef.current.set(selectedModel, [])
 					}
+				} else {
+					// Cache empty array for model variants with no animations
+					animationsCacheRef.current.set(selectedModel, [])
 				}
 			} catch (error) {
-				console.error(`Failed to load animations for boss:`, error)
+				console.error(`Failed to load animations for boss model ${selectedModel}:`, error)
+				// Cache empty array on error to avoid repeated failed loads
+				animationsCacheRef.current.set(selectedModel, [])
 			}
 		}
 
 		loadAnimations()
-	}, [bossModels.mesh])
+	}, [selectedModel, bossModels])
 
-	// All available models - just the boss mesh
-	const allModels = useMemo(() => {
-		const models: ModelFile[] = []
-		if (bossModels.mesh) models.push(bossModels.mesh)
-		return models
-	}, [bossModels.mesh])
+	const currentModels = selectedModel ? bossModels[selectedModel] || [] : []
 
-	if (!bossModels.mesh) {
+	if (modelOptions.length === 0) {
 		return (
 			<Card>
 				<CardContent>
@@ -109,14 +149,16 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Boss Model</CardTitle>
-			</CardHeader>
-			<CardContent>
+		<div className="space-y-6">
+			{/* Main content */}
+			{!selectedModel ? (
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+					Select a model from the list to view the 3D model
+				</div>
+			) : currentModels.length > 0 ? (
 				<ModelViewer
 					key="boss-model-viewer-stable"
-					modelFiles={allModels}
+					modelFiles={currentModels}
 					availableAnimations={availableAnimations}
 					selectedAnimation={selectedAnimation}
 					setSelectedAnimation={setSelectedAnimation}
@@ -124,11 +166,23 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 					setIsLoading={setIsLoadingModels}
 					availableScenes={bossScenes}
 					modelType="bosses"
-					visibleModels={visibleModels}
-					setVisibleModels={setVisibleModels}
 					bossName={bossName}
 				/>
-			</CardContent>
-		</Card>
+			) : (
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+					No models available for this variant
+				</div>
+			)}
+
+			{/* Model selection panel below */}
+			<BossModelSelector
+				modelOptions={modelOptions}
+				selectedModel={selectedModel}
+				setSelectedModel={setSelectedModel}
+				bossModels={bossModels}
+				isLoadingModels={isLoadingModels}
+				isOpen={true}
+			/>
+		</div>
 	)
 }

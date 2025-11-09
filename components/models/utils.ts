@@ -36,3 +36,15 @@ export const formatCostumeName = (costumeName: string) => {
 		.replace(/([A-Z])/g, " $1") // Add spaces before capitals
 		.trim()
 }
+
+/**
+ * Format model variant name for display (works for both heroes and bosses)
+ * Converts "Vari01" to "Variant 1", "Cos18Chuseok" to "Costume 18 Chuseok"
+ */
+export const formatModelName = (modelName: string) => {
+	return modelName
+		.replace(/^Vari(\d+)$/, "Variant $1")
+		.replace(/^Cos(\d+)/, "Costume $1 ")
+		.replace(/([A-Z])/g, " $1")
+		.trim()
+}
