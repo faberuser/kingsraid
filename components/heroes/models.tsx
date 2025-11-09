@@ -136,7 +136,7 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 		<div className="space-y-6">
 			{/* Main content */}
 			{!selectedCostume ? (
-				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
 					Select a costume from the list to view the 3D model
 				</div>
 			) : currentModels.length > 0 ? (
@@ -151,7 +151,7 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 					availableScenes={availableScenes}
 				/>
 			) : (
-				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
 					No models available for this costume
 				</div>
 			)}

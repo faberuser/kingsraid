@@ -152,7 +152,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 		<div className="space-y-6">
 			{/* Main content */}
 			{!selectedModel ? (
-				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
 					Select a model from the list to view the 3D model
 				</div>
 			) : currentModels.length > 0 ? (
@@ -169,7 +169,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 					bossName={bossName}
 				/>
 			) : (
-				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
 					No models available for this variant
 				</div>
 			)}
