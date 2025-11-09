@@ -5,9 +5,10 @@ import { FBXLoader } from "three-stdlib"
 import { AnimationClip, Group } from "three"
 import { Card, CardContent } from "@/components/ui/card"
 import { ModelViewer } from "@/components/models/ModelViewer"
-import { CostumeSelector } from "@/components/heroes/CostumeSelector"
 import { ModelsProps } from "@/components/models/types"
 import { formatAnimationName } from "@/components/models/utils"
+import { ModelSelector } from "@/components/models/ModelSelector"
+import { formatCostumeName } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -157,13 +158,14 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 			)}
 
 			{/* Costume selection panel below */}
-			<CostumeSelector
-				costumeOptions={costumeOptions}
-				selectedCostume={selectedCostume}
-				setSelectedCostume={setSelectedCostume}
-				heroModels={heroModels}
+			<ModelSelector
+				modelOptions={costumeOptions}
+				selectedModel={selectedCostume}
+				setSelectedModel={setSelectedCostume}
+				models={heroModels}
 				isLoadingModels={isLoadingModels}
 				isOpen={true}
+				formatName={formatCostumeName}
 			/>
 		</div>
 	)

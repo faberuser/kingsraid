@@ -5,9 +5,10 @@ import { FBXLoader } from "three-stdlib"
 import { AnimationClip, Group } from "three"
 import { Card, CardContent } from "@/components/ui/card"
 import { ModelViewer } from "@/components/models/ModelViewer"
-import { BossModelSelector } from "@/components/bosses/BossModelSelector"
 import { ModelFile } from "@/model/Hero_Model"
 import { formatAnimationName } from "@/components/models/utils"
+import { ModelSelector } from "@/components/models/ModelSelector"
+import { formatModelName } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -175,13 +176,14 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 			)}
 
 			{/* Model selection panel below */}
-			<BossModelSelector
+			<ModelSelector
 				modelOptions={modelOptions}
 				selectedModel={selectedModel}
 				setSelectedModel={setSelectedModel}
-				bossModels={bossModels}
+				models={bossModels}
 				isLoadingModels={isLoadingModels}
 				isOpen={true}
+				formatName={formatModelName}
 			/>
 		</div>
 	)
