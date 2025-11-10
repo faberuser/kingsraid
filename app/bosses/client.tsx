@@ -12,6 +12,7 @@ import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Spinner } from "@/components/ui/spinner"
 
 interface BossesClientProps {
 	bosses: BossData[]
@@ -22,6 +23,7 @@ interface BossesClientProps {
 export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
+	const [loadingCard, setLoadingCard] = useState<string | null>(null)
 	const [sortType, setSortType] = useState<"alphabetical" | "release">(
 		typeof window !== "undefined"
 			? (localStorage.getItem("bossesSortType") as "alphabetical" | "release") || "release"
@@ -192,8 +194,9 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 						key={boss.infos.name}
 						href={`/bosses/${encodeURIComponent(boss.infos.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
+						onClick={() => setLoadingCard(boss.infos.name)}
 					>
-						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4">
+						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
 							<CardHeader>
 								<div className="flex items-center gap-4">
 									<div className="w-16 h-16 flex items-center justify-center">
@@ -239,6 +242,11 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 									</div>
 								</div>
 							</CardContent>
+							{loadingCard === boss.infos.name && (
+								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+									<Spinner className="size-8" />
+								</div>
+							)}
 						</Card>
 					</Link>
 				))}

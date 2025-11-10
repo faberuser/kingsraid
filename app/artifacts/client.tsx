@@ -10,6 +10,7 @@ import Image from "@/components/next-image"
 import { ArtifactData } from "@/model/Artifact"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactsClientProps {
 	artifacts: ArtifactData[]
@@ -18,6 +19,7 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
+	const [loadingCard, setLoadingCard] = useState<string | null>(null)
 	const [sortType, setSortType] = useState<"alphabetical" | "release">(
 		typeof window !== "undefined"
 			? (localStorage.getItem("artifactsSortType") as "alphabetical" | "release") || "release"
@@ -144,8 +146,9 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
+						onClick={() => setLoadingCard(artifact.name)}
 					>
-						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2">
+						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2 relative">
 							<CardHeader>
 								<div className="flex items-center gap-4">
 									{artifact.thumbnail && (
@@ -177,6 +180,11 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 									)}
 								</div>
 							</CardContent>
+							{loadingCard === artifact.name && (
+								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+									<Spinner className="size-8" />
+								</div>
+							)}
 						</Card>
 					</Link>
 				))}
