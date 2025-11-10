@@ -33,6 +33,7 @@ const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	{ pattern: "_Sheath", type: "sheath" },
 	{ pattern: "_Bag", type: "bag" },
 	{ pattern: "_Mesh", type: "body" }, // Keep Mesh as body type
+	{ pattern: "_Body", type: "body" }, // Keep Mesh as body type
 ]
 
 function getModelType(folderName: string): ModelFile["type"] | null {

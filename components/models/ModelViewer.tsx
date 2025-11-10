@@ -260,7 +260,7 @@ export function ModelViewer({
 							enablePan={true}
 							enableZoom={true}
 							enableRotate={true}
-							maxDistance={10}
+							maxDistance={20}
 							minDistance={0}
 							target={INITIAL_CAMERA_TARGET}
 						/>
