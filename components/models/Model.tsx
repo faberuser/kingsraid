@@ -304,20 +304,6 @@ export function Model({
 			const modelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name) || weaponTypes.includes(m.type))
 			const totalModels = modelsToLoad.length
 
-			// For bosses, add weapons to visibleModels before loading
-			if (modelType === "bosses" && setVisibleModels) {
-				const weaponNames = modelsToLoad
-					.filter((m) => weaponTypes.includes(m.type) && !m.defaultPosition)
-					.map((m) => m.name)
-				if (weaponNames.length > 0) {
-					setVisibleModels((prev) => {
-						const newSet = new Set(prev)
-						weaponNames.forEach((name) => newSet.add(name))
-						return newSet
-					})
-				}
-			}
-
 			for (let i = 0; i < modelsToLoad.length; i++) {
 				await loadModel(modelsToLoad[i], i, totalModels)
 			}
@@ -334,12 +320,11 @@ export function Model({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [modelFiles, visibleModels, setIsLoading, setLoadingProgress])
 
-	// Ensure weapons visibility based on model type
+	// Ensure weapons visibility based on model type (only run once after initial load)
 	useEffect(() => {
 		if (loadedModels.size === 0 || !setVisibleModels) return
 
 		// For heroes: hide weapons initially (user toggles them on)
-		// For bosses: keep weapons visible by default
 		if (modelType === "heroes") {
 			const weaponsToHide = new Set<string>()
 			modelFiles.forEach((modelFile) => {
@@ -363,32 +348,11 @@ export function Model({
 					return newSet
 				})
 			}
-		} else if (modelType === "bosses") {
-			// For bosses, ensure weapons are in visibleModels
-			const weaponsToShow = new Set<string>()
-			modelFiles.forEach((modelFile) => {
-				if (
-					weaponTypes.includes(modelFile.type) &&
-					!modelFile.defaultPosition &&
-					loadedModels.has(modelFile.name)
-				) {
-					weaponsToShow.add(modelFile.name)
-					const weaponModel = loadedModels.get(modelFile.name)
-					if (weaponModel) {
-						weaponModel.visible = true
-					}
-				}
-			})
-
-			if (weaponsToShow.size > 0) {
-				setVisibleModels((prev) => {
-					const newSet = new Set(prev)
-					weaponsToShow.forEach((name) => newSet.add(name))
-					return newSet
-				})
-			}
 		}
-	}, [loadedModels, modelFiles, setVisibleModels, modelType])
+		// For bosses: weapons should already be in visibleModels from ModelViewer initialization
+		// The sync effect below will handle visibility based on visibleModels
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [loadedModels.size, modelType]) // Only run when models finish loading or modelType changes
 
 	// Sync weapon visibility when visibleModels changes (from ControlsPanel toggles)
 	useEffect(() => {
@@ -397,7 +361,8 @@ export function Model({
 			const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
 
 			if (isWeapon && !modelFile.defaultPosition) {
-				model.visible = visibleModels.has(modelName)
+				const shouldBeVisible = visibleModels.has(modelName)
+				model.visible = shouldBeVisible
 			}
 		})
 	}, [visibleModels, loadedModels, modelFiles])
@@ -535,36 +500,45 @@ export function Model({
 				} else {
 					const modelFile = modelFiles.find((m) => m.name === modelName)
 					const isWeapon = modelFile && weaponTypes.includes(modelFile.type)
-					if (isWeapon) {
+					// For heroes without animation selected, hide weapons
+					// For bosses, keep weapons visible by default
+					if (isWeapon && modelType === "heroes") {
 						weaponsToHide.add(modelName)
 					}
 				}
 			})
 
-			// Hide all weapons that weren't marked to show
-			allWeaponModels.forEach((weaponName) => {
-				if (!weaponsToShow.has(weaponName)) {
-					weaponsToHide.add(weaponName)
-					const weaponModel = loadedModels.get(weaponName)
-					if (weaponModel) {
-						weaponModel.visible = false
+			// Hide all weapons that weren't marked to show (only for heroes)
+			// For bosses, keep weapons visible unless explicitly hidden
+			if (modelType === "heroes") {
+				allWeaponModels.forEach((weaponName) => {
+					if (!weaponsToShow.has(weaponName)) {
+						weaponsToHide.add(weaponName)
+						const weaponModel = loadedModels.get(weaponName)
+						if (weaponModel) {
+							weaponModel.visible = false
+						}
 					}
-				}
-			})
+				})
+			}
 
 			// Update visible models set
 			if (setVisibleModels && (weaponsToShow.size > 0 || weaponsToHide.size > 0)) {
 				setVisibleModels((prev) => {
 					const newSet = new Set(prev)
 					weaponsToShow.forEach((name) => newSet.add(name))
-					weaponsToHide.forEach((name) => newSet.delete(name))
+					// For bosses, only remove weapons from visibleModels if they were explicitly marked to hide
+					// For heroes, remove all weapons in weaponsToHide
+					if (modelType === "heroes") {
+						weaponsToHide.forEach((name) => newSet.delete(name))
+					}
 					return newSet
 				})
 			}
 		}, 100)
 
 		return () => clearTimeout(timeoutId)
-	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, setVisibleModels])
+	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, setVisibleModels, modelType])
 
 	useFrame((state, delta) => {
 		if (!isPaused) {

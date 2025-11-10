@@ -64,17 +64,23 @@ export function ModelViewer({
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
+		// For bosses, also show all weapons by default
 		if (modelFiles.length > 0) {
 			setIsLoading(true)
 			setLoadingProgress(0)
 			const modelNames = modelFiles
 				.filter(
-					(m) => !weaponTypes.includes(m.type) || (weaponTypes.includes(m.type) && m.defaultPosition === true)
+					(m) =>
+						!weaponTypes.includes(m.type) || // Non-weapons
+						(weaponTypes.includes(m.type) && m.defaultPosition === true) || // Default position weapons
+						(modelType === "bosses" && weaponTypes.includes(m.type)) // All boss weapons
 				)
 				.map((m) => m.name)
+
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles, setIsLoading, setVisibleModels])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [modelFiles, modelType]) // Removed setIsLoading and setVisibleModels - they're stable functions
 
 	const resetCamera = () => {
 		if (cameraRef.current) {
