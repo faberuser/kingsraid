@@ -51,6 +51,18 @@ export function Model({
 	const currentProgressRef = useRef<number>(0)
 	const isLoadingRef = useRef<boolean>(false)
 	const previousModelFilesRef = useRef<ModelFile[]>([])
+	const [bossConfig, setBossConfig] = useState<Awaited<ReturnType<typeof loadBossOffsetConfig>>>(null)
+	const attachedWeaponsRef = useRef<Set<string>>(new Set()) // Track which weapons have been attached
+	const frameCountRef = useRef<number>(0) // Count frames to wait for skeleton stability
+
+	// Load boss offset config for boss models
+	useEffect(() => {
+		if (modelType === "bosses" && bossName) {
+			loadBossOffsetConfig(bossName).then((config) => {
+				setBossConfig(config)
+			})
+		}
+	}, [modelType, bossName])
 
 	useEffect(() => {
 		// Check if modelFiles have changed (costume switch)
@@ -66,6 +78,8 @@ export function Model({
 			mixersRef.current.clear()
 			activeActionsRef.current.clear()
 			sharedAnimationsRef.current = []
+			attachedWeaponsRef.current.clear() // Reset attached weapons tracking
+			frameCountRef.current = 0 // Reset frame counter for weapon attachment
 			previousModelFilesRef.current = [...modelFiles]
 		}
 
@@ -217,9 +231,9 @@ export function Model({
 						const config = await loadBossOffsetConfig(bossName)
 						const modelOffset = config?.model
 
-						// Apply scale (default 0.1 for boss models, or from config)
-						const scaleValue = modelOffset?.scale || { x: 0.1, y: 0.1, z: 0.1 }
-						fbx.scale.set(scaleValue.x ?? 0.1, scaleValue.y ?? 0.1, scaleValue.z ?? 0.1)
+						// Apply scale (default 1 for boss models, or from config)
+						const scaleValue = modelOffset?.scale || { x: 1, y: 1, z: 1 }
+						fbx.scale.set(scaleValue.x ?? 1, scaleValue.y ?? 1, scaleValue.z ?? 1)
 
 						// Apply position offset if provided
 						if (modelOffset?.position) {
@@ -240,23 +254,67 @@ export function Model({
 						}
 					} else if (modelType === "bosses") {
 						// Default scale for bosses if no config
-						fbx.scale.set(0.1, 0.1, 0.1)
+						fbx.scale.set(1, 1, 1)
 					}
 				} else if (weaponTypes.includes(modelFile.type)) {
-					// Apply boss scaling to weapons as well
+					// Apply boss transformations to weapons
 					if (modelType === "bosses" && bossName) {
-						const config = await loadBossOffsetConfig(bossName)
-						const modelOffset = config?.model
-						const scaleValue = modelOffset?.scale || { x: 0.1, y: 0.1, z: 0.1 }
-						fbx.scale.set(scaleValue.x ?? 0.1, scaleValue.y ?? 0.1, scaleValue.z ?? 0.1)
-					} else if (modelType === "bosses") {
-						// Default scale for boss weapons if no config
-						fbx.scale.set(0.1, 0.1, 0.1)
-					}
+						// Check if weapon has defaultPosition set (from getBossModels)
+						if (modelFile.defaultPosition) {
+							// Apply the same scale as the body model from offset.json
+							const config = await loadBossOffsetConfig(bossName)
+							const modelOffset = config?.model
+							const scaleValue = modelOffset?.scale || { x: 1, y: 1, z: 1 }
 
-					// Weapons will be attached to hand points later
-					// Keep at origin for now
-					fbx.position.set(0, 0, 0)
+							// Apply body's scale to weapon so they match
+							fbx.scale.set(scaleValue.x ?? 1, scaleValue.y ?? 1, scaleValue.z ?? 1)
+
+							// Apply weapon rotation correction from offset.json if provided
+							const weaponOffset = config?.weapon
+							if (weaponOffset?.rotation) {
+								fbx.rotation.set(
+									weaponOffset.rotation.x ?? fbx.rotation.x,
+									weaponOffset.rotation.y ?? fbx.rotation.y,
+									weaponOffset.rotation.z ?? fbx.rotation.z
+								)
+							}
+
+							// Keep FBX's original position
+							fbx.updateMatrixWorld(true)
+						} else {
+							// Weapon needs hand attachment - start invisible until attached
+							fbx.visible = false
+
+							// Load config for weapons that need hand attachment
+							const config = await loadBossOffsetConfig(bossName)
+							const modelOffset = config?.model
+							const scaleValue = modelOffset?.scale || { x: 1, y: 1, z: 1 }
+							fbx.scale.set(scaleValue.x ?? 1, scaleValue.y ?? 1, scaleValue.z ?? 1)
+							// Keep at origin for hand attachment
+							fbx.position.set(0, 0, 0)
+						}
+					} else if (modelType === "bosses") {
+						// Boss weapon without config - needs hand attachment, start invisible
+						if (!modelFile.defaultPosition) {
+							fbx.visible = false
+						}
+
+						fbx.scale.set(1, 1, 1)
+						fbx.position.set(0, 0, 0)
+
+						// Force matrix update
+						fbx.updateMatrix()
+						fbx.updateMatrixWorld(true)
+					} else {
+						// Hero weapons will be attached to hand points later - start invisible
+						if (!modelFile.defaultPosition) {
+							fbx.visible = false
+						}
+
+						// Weapons will be attached to hand points later
+						// Keep at origin for now
+						fbx.position.set(0, 0, 0)
+					}
 				} else {
 					// Default positioning for unknown types
 					fbx.position.set(0, 0, 0)
@@ -354,6 +412,40 @@ export function Model({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loadedModels.size, modelType]) // Only run when models finish loading or modelType changes
 
+	// Parent weapons with defaultPosition to body model so they inherit transforms
+	useEffect(() => {
+		if (modelType !== "bosses") return
+
+		const bodyEntry = Array.from(loadedModels.entries()).find(([name]) => {
+			const modelFile = modelFiles.find((m) => m.name === name)
+			return modelFile?.type === "body"
+		})
+
+		if (bodyEntry) {
+			const [, bodyModel] = bodyEntry
+
+			loadedModels.forEach((weaponModel, weaponName) => {
+				const modelFile = modelFiles.find((m) => m.name === weaponName)
+				if (!modelFile || !weaponTypes.includes(modelFile.type) || !modelFile.defaultPosition) return
+
+				if (weaponModel.parent !== bodyModel) {
+					// Convert weapon's world position to be relative to body
+					const weaponWorldPos = weaponModel.position.clone()
+					const weaponWorldRot = weaponModel.rotation.clone()
+					const weaponWorldScale = weaponModel.scale.clone()
+
+					bodyModel.add(weaponModel)
+
+					// Restore world transforms as local transforms relative to body
+					weaponModel.position.copy(weaponWorldPos)
+					weaponModel.rotation.copy(weaponWorldRot)
+					weaponModel.scale.copy(weaponWorldScale)
+					weaponModel.updateMatrix()
+				}
+			})
+		}
+	}, [loadedModels, modelFiles, modelType])
+
 	// Sync weapon visibility when visibleModels changes (from ControlsPanel toggles)
 	useEffect(() => {
 		loadedModels.forEach((model, modelName) => {
@@ -362,59 +454,18 @@ export function Model({
 
 			if (isWeapon && !modelFile.defaultPosition) {
 				const shouldBeVisible = visibleModels.has(modelName)
-				model.visible = shouldBeVisible
+
+				// Don't make weapon visible if it hasn't been attached yet
+				if (shouldBeVisible && !attachedWeaponsRef.current.has(modelName)) {
+					return
+				}
+
+				if (model.visible !== shouldBeVisible) {
+					model.visible = shouldBeVisible
+				}
 			}
 		})
 	}, [visibleModels, loadedModels, modelFiles])
-
-	// Attach weapons to hand points after models are loaded
-	useEffect(() => {
-		const bodyEntry = Array.from(loadedModels.entries()).find(([name]) => {
-			const modelFile = modelFiles.find((m) => m.name === name)
-			return modelFile?.type === "body"
-		})
-
-		if (!bodyEntry) return
-
-		const [, bodyModel] = bodyEntry
-
-		// Skip if hand points are not found yet
-		if (!bodyModel.handPointR && !bodyModel.handPointL) {
-			return
-		}
-
-		// Find weapon models and attach them to hand points
-		// Skip weapons with defaultPosition (they're part of the body)
-		loadedModels.forEach((weaponModel, weaponName) => {
-			const modelFile = modelFiles.find((m) => m.name === weaponName)
-			if (!modelFile || !weaponTypes.includes(modelFile.type) || modelFile.defaultPosition) return
-
-			const isLeftHand =
-				modelFile.type === "shield" ||
-				modelFile.type === "weapon_l" ||
-				modelFile.type === "weaponl" ||
-				modelFile.type === "weapon02"
-
-			// Try preferred hand first, then fallback to whichever hand exists
-			let handPoint = isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
-			if (!handPoint) {
-				handPoint = isLeftHand ? bodyModel.handPointR : bodyModel.handPointL
-			}
-
-			if (handPoint && weaponModel.parent !== handPoint) {
-				// Only re-attach if not already attached to this hand point
-				if (weaponModel.parent) {
-					weaponModel.parent.remove(weaponModel)
-				}
-
-				handPoint.add(weaponModel)
-
-				weaponModel.position.set(0, 0, 0)
-				weaponModel.scale.set(1, 1, 1)
-				weaponModel.rotation.set(Math.PI / 2, 0, 0)
-			}
-		})
-	}, [loadedModels, modelFiles, visibleModels, modelType])
 
 	// Handle animation switching
 	useEffect(() => {
@@ -541,8 +592,84 @@ export function Model({
 	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, setVisibleModels, modelType])
 
 	useFrame((state, delta) => {
+		// UPDATE ANIMATION MIXERS FIRST before weapon attachment
+		// This ensures hand bones are in animated pose, not bind pose
 		if (!isPaused) {
 			mixersRef.current.forEach((mixer) => mixer.update(delta))
+		}
+
+		// Reattach weapons to hand points for the first 10 frames to ensure skeleton stability
+		const FRAMES_TO_REATTACH = 10
+
+		const bodyEntry = Array.from(loadedModels.entries()).find(([name]) => {
+			const modelFile = modelFiles.find((m) => m.name === name)
+			return modelFile?.type === "body"
+		})
+
+		if (bodyEntry && frameCountRef.current < FRAMES_TO_REATTACH) {
+			const [, bodyModel] = bodyEntry
+
+			// Check if an animation is actually playing on the body
+			const bodyMixer = mixersRef.current.get(bodyEntry[0])
+			const hasActiveAnimation = bodyMixer && activeActionsRef.current.size > 0
+
+			// Only attach weapons if animation is playing (hand bone in correct pose)
+			if (!hasActiveAnimation) {
+				// Animation not started yet, skip this frame
+				return
+			}
+
+			// Check if hand points exist and weapons are loaded
+			if (bodyModel.handPointR || bodyModel.handPointL) {
+				const weaponsNeedingAttachment = modelFiles.filter(
+					(mf) => weaponTypes.includes(mf.type) && !mf.defaultPosition
+				)
+				const allWeaponsLoaded = weaponsNeedingAttachment.every((mf) => loadedModels.has(mf.name))
+
+				if (allWeaponsLoaded && weaponsNeedingAttachment.length > 0) {
+					frameCountRef.current++
+
+					// Reattach weapons every frame for first FRAMES_TO_REATTACH frames
+					loadedModels.forEach((weaponModel, weaponName) => {
+						const modelFile = modelFiles.find((m) => m.name === weaponName)
+						if (!modelFile || !weaponTypes.includes(modelFile.type) || modelFile.defaultPosition) return
+
+						const isLeftHand =
+							modelFile.type === "shield" ||
+							modelFile.type === "weapon_l" ||
+							modelFile.type === "weaponl" ||
+							modelFile.type === "weapon02"
+
+						let handPoint = isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
+						if (!handPoint) {
+							handPoint = isLeftHand ? bodyModel.handPointR : bodyModel.handPointL
+						}
+
+						if (handPoint) {
+							// Remove from current parent if attached
+							if (weaponModel.parent) {
+								weaponModel.parent.remove(weaponModel)
+							}
+
+							// Use weapon rotation from config if available, otherwise default to 90 degrees
+							const weaponRotation = bossConfig?.weapon?.rotation || { x: Math.PI / 2, y: 0, z: 0 }
+
+							weaponModel.position.set(0, 0, 0)
+							weaponModel.scale.set(1, 1, 1)
+							weaponModel.rotation.set(
+								weaponRotation.x ?? Math.PI / 2,
+								weaponRotation.y ?? 0,
+								weaponRotation.z ?? 0
+							)
+							weaponModel.updateMatrix()
+
+							handPoint.add(weaponModel)
+							attachedWeaponsRef.current.add(weaponName)
+							weaponModel.visible = true
+						}
+					})
+				}
+			}
 		}
 	})
 

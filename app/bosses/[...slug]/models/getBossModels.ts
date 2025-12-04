@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { ModelFile } from "@/model/Hero_Model"
+import { weaponTypes } from "@/components/models/types"
 
 // Changed to return a record of model variants (similar to hero costumes)
 export type BossModelData = Record<string, ModelFile[]>
@@ -55,6 +56,18 @@ export async function getBossModels(bossName: string): Promise<BossModelData> {
 		if (!fs.existsSync(bossFolderPath)) {
 			console.warn(`Boss folder not found: ${bossName}`)
 			return bossModelData
+		}
+
+		// Check if boss has weapon_default config
+		let weaponDefault = false
+		try {
+			const offsetPath = path.join(bossFolderPath, "offset.json")
+			if (fs.existsSync(offsetPath)) {
+				const offsetConfig = JSON.parse(fs.readFileSync(offsetPath, "utf-8"))
+				weaponDefault = offsetConfig.weapon_default === true
+			}
+		} catch {
+			console.debug(`No offset config for ${bossName}`)
 		}
 
 		// Read the boss folder
@@ -118,15 +131,21 @@ export async function getBossModels(bossName: string): Promise<BossModelData> {
 				const type = getModelType(folderName)
 				if (!type) continue
 
-				// Weapons should be visible by default for bosses (unlike heroes)
-				// but still need defaultPosition=false so they get attached to hand points
+				// Check if this type is a weapon
+				const isWeapon = weaponTypes.includes(type)
 				const isBodyPart = type === "body"
+
+				// Set defaultPosition based on:
+				// - Body parts: always true (no hand attachment needed)
+				// - Weapons with weaponDefault=true: true (weapon already in correct position, no hand attachment)
+				// - Weapons with weaponDefault=false: false (needs hand attachment)
+				const defaultPosition = isBodyPart || (isWeapon && weaponDefault)
 
 				models.push({
 					name: `${variantName}_${type}`,
 					path: `${bossName}/${folderName}/${fbxFile}`,
 					type: type,
-					defaultPosition: isBodyPart, // Only body has defaultPosition, weapons need attachment but should be visible
+					defaultPosition: defaultPosition,
 				})
 			}
 

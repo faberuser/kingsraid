@@ -7,6 +7,8 @@ export interface OffsetConfig {
 export interface BossOffsetConfig {
 	scene?: OffsetConfig
 	model?: OffsetConfig
+	weapon_default?: boolean
+	weapon?: OffsetConfig // Optional weapon-specific transforms
 }
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
