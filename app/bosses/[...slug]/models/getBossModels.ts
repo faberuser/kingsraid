@@ -150,6 +150,16 @@ export async function getBossModels(bossName: string): Promise<BossModelData> {
 			}
 
 			if (models.length > 0) {
+				// CRITICAL: Sort models to ensure body is always first
+				// Animations are loaded from the first model, which must be the body
+				models.sort((a, b) => {
+					// Body parts come first
+					if (a.type === "body" && b.type !== "body") return -1
+					if (a.type !== "body" && b.type === "body") return 1
+					// Then sort alphabetically by type for consistency
+					return a.type.localeCompare(b.type)
+				})
+
 				bossModelData[variantName] = models
 			}
 		}
