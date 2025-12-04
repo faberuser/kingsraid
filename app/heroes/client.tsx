@@ -181,9 +181,10 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 										<Image
 											src={heroClass.icon}
 											alt={heroClass.name}
-											width={24}
-											height={24}
-											className="inline"
+											width="0"
+											height="0"
+											sizes="100vw"
+											className="w-auto h-full object-cover inline"
 										/>
 									) : (
 										<div className="w-4 h-4 flex items-center justify-center text-xs font-bold">
