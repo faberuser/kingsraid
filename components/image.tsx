@@ -7,8 +7,8 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export default function Image({ src, ...props }: ImageProps) {
-	// Only prepend basePath for local images (not external URLs)
-	if (!src.startsWith("http")) {
+	// Only prepend basePath for local images (not external URLs or data URLs)
+	if (!src.startsWith("http") && !src.startsWith("data:")) {
 		src = `${basePath}${src.startsWith("/") ? src : "/" + src}`
 	}
 

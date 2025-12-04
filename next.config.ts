@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "clan.fastly.steamstatic.com",
+				hostname: "*.steamstatic.com",
 				pathname: "/images/**",
 			},
 		],

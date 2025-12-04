@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react"
 import { FBXLoader } from "three-stdlib"
 import { AnimationClip, Group } from "three"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ModelViewer } from "@/components/heroes/models/ModelViewer"
-import { CostumeSelector } from "@/components/heroes/models/CostumeSelector"
-import { ModelsProps } from "@/components/heroes/models/types"
-import { formatAnimationName } from "@/components/heroes/models/utils"
+import { Card, CardContent } from "@/components/ui/card"
+import { ModelViewer } from "@/components/models/ModelViewer"
+import { ModelsProps } from "@/components/models/types"
+import { formatAnimationName } from "@/components/models/utils"
+import { ModelSelector } from "@/components/models/ModelSelector"
+import { formatCostumeName } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -133,48 +134,39 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 	}
 
 	return (
-		<div className="flex flex-col lg:flex-row gap-6">
-			{/* Left sidebar for costume selection */}
-			<div className="w-full lg:w-60 flex-shrink-0 space-y-4">
-				<CostumeSelector
-					costumeOptions={costumeOptions}
-					selectedCostume={selectedCostume}
-					setSelectedCostume={setSelectedCostume}
-					heroModels={heroModels}
-					isLoadingModels={isLoadingModels}
-				/>
-			</div>
-
+		<div className="space-y-6">
 			{/* Main content */}
-			<div className="flex-1 space-y-6">
-				<Card>
-					<CardHeader>
-						<CardTitle>{selectedCostume || "Select a Model"}</CardTitle>
-					</CardHeader>
-					<CardContent>
-						{!selectedCostume ? (
-							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
-								Select a costume from the list to view the 3D model
-							</div>
-						) : currentModels.length > 0 ? (
-							<ModelViewer
-								key="model-viewer-stable" // Stable key to prevent unmounting
-								modelFiles={currentModels}
-								availableAnimations={availableAnimations}
-								selectedAnimation={selectedAnimation}
-								setSelectedAnimation={setSelectedAnimation}
-								isLoading={isLoadingModels}
-								setIsLoading={setIsLoadingModels}
-								availableScenes={availableScenes}
-							/>
-						) : (
-							<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200">
-								No models available for this costume
-							</div>
-						)}
-					</CardContent>
-				</Card>
-			</div>
+			{!selectedCostume ? (
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
+					Select a costume from the list to view the 3D model
+				</div>
+			) : currentModels.length > 0 ? (
+				<ModelViewer
+					key="model-viewer-stable"
+					modelFiles={currentModels}
+					availableAnimations={availableAnimations}
+					selectedAnimation={selectedAnimation}
+					setSelectedAnimation={setSelectedAnimation}
+					isLoading={isLoadingModels}
+					setIsLoading={setIsLoadingModels}
+					availableScenes={availableScenes}
+				/>
+			) : (
+				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
+					No models available for this costume
+				</div>
+			)}
+
+			{/* Costume selection panel below */}
+			<ModelSelector
+				modelOptions={costumeOptions}
+				selectedModel={selectedCostume}
+				setSelectedModel={setSelectedCostume}
+				models={heroModels}
+				isLoadingModels={isLoadingModels}
+				isOpen={true}
+				formatName={formatCostumeName}
+			/>
 		</div>
 	)
 }

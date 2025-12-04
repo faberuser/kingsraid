@@ -14,6 +14,12 @@ import { Spinner } from "@/components/ui/spinner"
 
 const communities = [
 	{
+		name: "Official X (Twitter)",
+		thumbnail: "/images/communities/x.png",
+		url: "https://x.com/kingsraid_msg",
+		description: "Follow the official X account for the latest updates and announcements.",
+	},
+	{
 		name: "Official Discord",
 		thumbnail: "/images/communities/official-discord.png",
 		url: "https://discord.com/invite/TyvYcF4gjn",

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
+import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -22,14 +23,57 @@ export function Scene({ sceneName }: { sceneName: string | null }) {
 			setSceneModel(null)
 
 			const fbxLoader = new FBXLoader()
-			const scenePath = `${basePath}/kingsraid-models/scenes/${sceneName}/${
-				sceneName.charAt(0).toUpperCase() + sceneName.slice(1)
-			}.fbx`
+
+			// Determine if this is a boss battlefield scene or a regular scene
+			let scenePath: string
+			let bossName: string | null = null
+
+			if (sceneName.startsWith("bosses/")) {
+				// Boss battlefield - use the full path as provided
+				const parts = sceneName.split("/")
+				bossName = parts[1] // Get boss name (e.g., "Xanadus")
+				scenePath = `${basePath}/kingsraid-models/models/${sceneName}/${
+					sceneName.split("/").pop() || sceneName
+				}.fbx`
+			} else {
+				// Regular scene from scenes folder
+				scenePath = `${basePath}/kingsraid-models/scenes/${sceneName}/${
+					sceneName.charAt(0).toUpperCase() + sceneName.slice(1)
+				}.fbx`
+			}
 
 			try {
 				const fbx = await new Promise<THREE.Group>((resolve, reject) => {
 					fbxLoader.load(scenePath, resolve, undefined, reject)
 				})
+
+				// Load boss offset configuration if this is a boss scene
+				if (bossName && sceneName.startsWith("bosses/")) {
+					const config = await loadBossOffsetConfig(bossName)
+					const sceneOffset = config?.scene
+
+					// Apply scale (default 0.1 for boss scenes, or from config)
+					const scaleValue = sceneOffset?.scale || { x: 0.1, y: 0.1, z: 0.1 }
+					fbx.scale.set(scaleValue.x ?? 0.1, scaleValue.y ?? 0.1, scaleValue.z ?? 0.1)
+
+					// Apply position offset if provided
+					if (sceneOffset?.position) {
+						fbx.position.set(
+							sceneOffset.position.x ?? 0,
+							sceneOffset.position.y ?? 0,
+							sceneOffset.position.z ?? 0
+						)
+					}
+
+					// Apply rotation offset if provided (in radians)
+					if (sceneOffset?.rotation) {
+						fbx.rotation.set(
+							sceneOffset.rotation.x ?? 0,
+							sceneOffset.rotation.y ?? 0,
+							sceneOffset.rotation.z ?? 0
+						)
+					}
+				}
 
 				// Fix materials and textures
 				fbx.traverse((child) => {

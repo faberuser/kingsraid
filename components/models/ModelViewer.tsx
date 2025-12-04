@@ -9,22 +9,22 @@ import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Model } from "@/components/heroes/models/Model"
-import { Scene } from "@/components/heroes/models/Scene"
-import { ScreenshotHandler } from "@/components/heroes/models/ScreenshotHandler"
-import { RecordingHandler } from "@/components/heroes/models/RecordingHandler"
-import { ScreenshotDialog } from "@/components/heroes/models/ScreenshotDialog"
-import { RecordingDialog } from "@/components/heroes/models/RecordingDialog"
-import { ControlsPanel } from "@/components/heroes/models/ControlsPanel"
-import { CameraControls } from "@/components/heroes/models/CameraControls"
-import { convertToGif } from "@/components/heroes/models/gifConverter"
-import { formatAnimationName } from "@/components/heroes/models/utils"
+import { Model } from "@/components/models/Model"
+import { Scene } from "@/components/models/Scene"
+import { ScreenshotHandler } from "@/components/models/ScreenshotHandler"
+import { RecordingHandler } from "@/components/models/RecordingHandler"
+import { ScreenshotDialog } from "@/components/models/ScreenshotDialog"
+import { RecordingDialog } from "@/components/models/RecordingDialog"
+import { ControlsPanel } from "@/components/models/ControlsPanel"
+import { CameraControls } from "@/components/models/CameraControls"
+import { convertToGif } from "@/components/models/gifConverter"
+import { formatAnimationName } from "@/components/models/utils"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
 	INITIAL_CAMERA_TARGET,
 	weaponTypes,
-} from "@/components/heroes/models/types"
+} from "@/components/models/types"
 
 export function ModelViewer({
 	modelFiles,
@@ -36,6 +36,8 @@ export function ModelViewer({
 	availableScenes = [],
 	visibleModels: externalVisibleModels,
 	setVisibleModels: externalSetVisibleModels,
+	modelType = "heroes",
+	bossName,
 }: ModelViewerProps) {
 	const [internalVisibleModels, setInternalVisibleModels] = useState<Set<string>>(new Set())
 
@@ -62,16 +64,23 @@ export function ModelViewer({
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
+		// For bosses, also show all weapons by default
 		if (modelFiles.length > 0) {
 			setIsLoading(true)
+			setLoadingProgress(0)
 			const modelNames = modelFiles
 				.filter(
-					(m) => !weaponTypes.includes(m.type) || (weaponTypes.includes(m.type) && m.defaultPosition === true)
+					(m) =>
+						!weaponTypes.includes(m.type) || // Non-weapons
+						(weaponTypes.includes(m.type) && m.defaultPosition === true) || // Default position weapons
+						(modelType === "bosses" && weaponTypes.includes(m.type)) // All boss weapons
 				)
 				.map((m) => m.name)
+
 			setVisibleModels(new Set(modelNames))
 		}
-	}, [modelFiles, setIsLoading, setVisibleModels])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [modelFiles, modelType]) // Removed setIsLoading and setVisibleModels - they're stable functions
 
 	const resetCamera = () => {
 		if (cameraRef.current) {
@@ -244,14 +253,14 @@ export function ModelViewer({
 						</Button>
 					</CollapsibleTrigger>
 
-					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }}>
+					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
 						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
 						<OrbitControls
 							ref={controlsRef}
 							enablePan={true}
 							enableZoom={true}
 							enableRotate={true}
-							maxDistance={10}
+							maxDistance={20}
 							minDistance={0}
 							target={INITIAL_CAMERA_TARGET}
 						/>
@@ -278,6 +287,8 @@ export function ModelViewer({
 								setIsLoading={setIsLoading}
 								setLoadingProgress={setLoadingProgress}
 								onAnimationDurationChange={setAnimationDuration}
+								modelType={modelType}
+								bossName={bossName}
 							/>
 							{selectedScene === "grid" ? (
 								<gridHelper args={[10, 10]} />

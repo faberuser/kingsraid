@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Play, Pause, Search, X } from "lucide-react"
 import { ModelFile } from "@/model/Hero_Model"
-import { formatAnimationName } from "@/components/heroes/models/utils"
+import { formatAnimationName } from "@/components/models/utils"
 import Fuse from "fuse.js"
 
 interface ControlsPanelProps {
@@ -87,7 +87,7 @@ export function ControlsPanel({
 
 	return (
 		<div
-			className="absolute top-0 h-full z-10 bg-background/95 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
+			className="absolute top-0 h-full z-10 bg-background/70 backdrop-blur-sm border-r shadow-xl p-4 overflow-y-auto flex flex-col gap-4 w-52 transition-all duration-300 ease-in-out"
 			style={{
 				left: isCollapsed ? "-208px" : "0px",
 			}}
