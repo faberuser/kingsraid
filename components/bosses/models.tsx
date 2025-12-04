@@ -66,6 +66,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 
 			// Use the first model file (should be the body)
 			const firstModel = modelVariantFiles[0]
+			const modelPath = `${modelDir}/${firstModel.path}`
 
 			try {
 				const fbx = await new Promise<Group>((resolve, reject) => {
@@ -74,12 +75,12 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 					}, 60000) // 60 second timeout
 
 					fbxLoader.load(
-						`${modelDir}/${firstModel.path}`,
+						modelPath,
 						(loadedFbx) => {
 							clearTimeout(timeout)
 							resolve(loadedFbx)
 						},
-						undefined,
+						undefined, // onProgress callback
 						(error) => {
 							clearTimeout(timeout)
 							reject(error)
