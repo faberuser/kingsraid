@@ -69,9 +69,9 @@ export default function Profile({ heroData }: ProfileProps) {
 				</Card>
 			</div>
 
-			<div className="grid lg:grid-cols-2 gap-6">
+			<div className="grid lg:grid-cols-3 gap-6">
 				{/* Story Section */}
-				<Card>
+				<Card className="col-span-3 lg:col-span-1">
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Background Story</div>
 						<Separator className="mb-4" />
@@ -82,7 +82,7 @@ export default function Profile({ heroData }: ProfileProps) {
 				</Card>
 
 				{/* Splash Art */}
-				<Card>
+				<Card className="col-span-3 lg:col-span-2">
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Splashart</div>
 						<Separator className="mb-4" />
