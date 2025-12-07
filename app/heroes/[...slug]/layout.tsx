@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const displayName = heroData.infos.name
-	const assetPath = "/kingsraid-data/assets/" + heroData.infos.thumbnail
+	const displayName = heroData.profile.name
+	const assetPath = "/kingsraid-data/assets/" + heroData.profile.thumbnail
 	const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {

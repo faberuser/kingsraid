@@ -64,10 +64,10 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 			searchData.heroes.forEach((hero, index) => {
 				items.push({
 					id: `hero-${index}`,
-					title: hero.infos.name,
-					description: hero.infos.title,
+					title: hero.profile.name,
+					description: hero.profile.title,
 					type: "hero",
-					url: `/heroes/${encodeURIComponent(hero.infos.name.toLowerCase().replace(/\s+/g, "-"))}`,
+					url: `/heroes/${encodeURIComponent(hero.profile.name.toLowerCase().replace(/\s+/g, "-"))}`,
 					icon: UserRound,
 					aliases: hero.aliases || null,
 				})
@@ -92,10 +92,10 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 			searchData.bosses.forEach((boss, index) => {
 				items.push({
 					id: `boss-${index}`,
-					title: boss.infos.name,
-					description: boss.infos.title,
+					title: boss.profile.name,
+					description: boss.profile.title,
 					type: "boss",
-					url: `/bosses/${encodeURIComponent(boss.infos.name.toLowerCase().replace(/\s+/g, "-"))}`,
+					url: `/bosses/${encodeURIComponent(boss.profile.name.toLowerCase().replace(/\s+/g, "-"))}`,
 					icon: ShieldHalf,
 					aliases: boss.aliases || null,
 				})

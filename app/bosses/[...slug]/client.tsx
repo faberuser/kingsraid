@@ -25,7 +25,7 @@ export default function BossClient({
 	bossScenes = [],
 	enableModelsVoices = false,
 }: BossClientProps) {
-	const { infos, skills } = bossData
+	const { profile, skills } = bossData
 
 	return (
 		<div>
@@ -35,8 +35,8 @@ export default function BossClient({
 					<div className="flex items-center justify-center self-stretch">
 						<div className="w-30 h-30">
 							<Image
-								src={`/kingsraid-data/assets/${infos.thumbnail}`}
-								alt={infos.name}
+								src={`/kingsraid-data/assets/${profile.thumbnail}`}
+								alt={profile.name}
 								width="0"
 								height="0"
 								sizes="10vw"
@@ -45,26 +45,26 @@ export default function BossClient({
 						</div>
 					</div>
 					<div className="flex-1">
-						<div className="text-3xl font-bold mb-2">{infos.name}</div>
-						<div className="text-xl text-muted-foreground mb-4">{infos.title}</div>
+						<div className="text-3xl font-bold mb-2">{profile.name}</div>
+						<div className="text-xl text-muted-foreground mb-4">{profile.title}</div>
 						<div className="flex flex-wrap gap-2 mb-4">
-							{bossData.infos.type.map((type) => (
+							{bossData.profile.type.map((type) => (
 								<Badge key={type} variant="default">
 									{type}
 								</Badge>
 							))}
-							<Badge variant="secondary">{infos.race}</Badge>
+							<Badge variant="secondary">{profile.race}</Badge>
 							<Badge
 								variant="default"
 								className={
-									infos["damage type"] === "Physical"
+									profile.damage_type === "Physical"
 										? "bg-red-300"
-										: infos["damage type"] === "Magical"
+										: profile.damage_type === "Magical"
 										? "bg-blue-300"
 										: "bg-yellow-400"
 								}
 							>
-								{infos["damage type"]}
+								{profile.damage_type}
 							</Badge>
 						</div>
 					</div>
@@ -88,7 +88,7 @@ export default function BossClient({
 									<CardTitle>Characteristics</CardTitle>
 								</CardHeader>
 								<CardContent>
-									<div className="text-sm">{infos.characteristics}</div>
+									<div className="text-sm">{profile.characteristics}</div>
 								</CardContent>
 							</Card>
 
@@ -97,7 +97,7 @@ export default function BossClient({
 									<CardTitle>Recommended Heroes</CardTitle>
 								</CardHeader>
 								<CardContent>
-									<div className="text-sm">{infos["recommended heroes"]}</div>
+									<div className="text-sm">{profile.recommended_heroes}</div>
 								</CardContent>
 							</Card>
 						</div>
@@ -109,9 +109,9 @@ export default function BossClient({
 										<div className="flex flex-row gap-2 items-center">
 											<CardTitle
 												className={`text-lg ${
-													infos["damage type"] === "Physical"
+													profile.damage_type === "Physical"
 														? "text-red-300"
-														: infos["damage type"] === "Magical"
+														: profile.damage_type === "Magical"
 														? "text-blue-300"
 														: "text-yellow-400"
 												}`}
@@ -154,7 +154,7 @@ export default function BossClient({
 							description="This tab contains large 3D model files and textures that may consume significant mobile data."
 							estimatedSize="30-60 MB"
 						>
-							<BossModels bossModels={bossModels} bossScenes={bossScenes} bossName={infos.name} />
+							<BossModels bossModels={bossModels} bossScenes={bossScenes} bossName={profile.name} />
 						</DataHeavyContent>
 					</TabsContent>
 				)}

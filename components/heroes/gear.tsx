@@ -45,7 +45,7 @@ export default function Gear({ heroData }: GearProps) {
 									</div>
 									<div
 										className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-											heroData.infos.class
+											heroData.profile.class
 										)}`}
 									>
 										{heroData.uw.name}
@@ -71,7 +71,7 @@ export default function Gear({ heroData }: GearProps) {
 																variant="secondary"
 																key={level}
 																className={`p-2 rounded text-center ${classColorMapBg(
-																	heroData.infos.class
+																	heroData.profile.class
 																)}`}
 															>
 																★{level}: {value}
@@ -136,7 +136,7 @@ export default function Gear({ heroData }: GearProps) {
 												</div>
 												<div
 													className={`text-lg font-semibold flex justify-center items-center ${classColorMapText(
-														heroData.infos.class
+														heroData.profile.class
 													)}`}
 												>
 													Skill {utKey}: {ut.name}
@@ -162,7 +162,7 @@ export default function Gear({ heroData }: GearProps) {
 																				variant="secondary"
 																				key={level}
 																				className={`p-2 rounded text-center ${classColorMapBg(
-																					heroData.infos.class
+																					heroData.profile.class
 																				)}`}
 																			>
 																				★{level}: {value}
@@ -229,7 +229,7 @@ export default function Gear({ heroData }: GearProps) {
 										</div>
 										<div
 											className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-												heroData.infos.class
+												heroData.profile.class
 											)}`}
 										>
 											{heroData.uw.name}
@@ -276,12 +276,12 @@ export default function Gear({ heroData }: GearProps) {
 													<div
 														key={level}
 														className={`px-3 py-2 rounded ${classColorMapBg(
-															heroData.infos.class
+															heroData.profile.class
 														)}`}
 													>
 														<div
 															className={`font-medium ${classColorMapText(
-																heroData.infos.class
+																heroData.profile.class
 															)}`}
 														>
 															Stage {level}

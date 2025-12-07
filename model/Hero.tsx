@@ -1,22 +1,21 @@
 export interface HeroData {
-	infos: {
-		"name": string
-		"title": string
-		"class": string
-		"position": string
-		"attack range": string
-		"damage type": string
-		"gender": string
-		"age": string
-		"height": string
-		"race": string
-		"constellation": string
-		"birth of month": string
-		"like": string
-		"dislike": string
-		"story": string
-		"thumbnail": string
-		"story_"?: string
+	profile: {
+		name: string
+		title: string
+		class: string
+		position: string
+		attack_range: string
+		damage_type: string
+		gender: string
+		age: string
+		height: string
+		race: string
+		constellation: string
+		birth_of_month: string
+		like: string
+		dislike: string
+		story: string
+		thumbnail: string
 	}
 	skills: {
 		[key: string]: {

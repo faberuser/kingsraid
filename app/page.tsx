@@ -66,9 +66,9 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 
 				if (costumeImage) {
 					featuredHeroes.push({
-						name: heroData.infos.name,
-						title: heroData.infos.title,
-						class: heroData.infos.class,
+						name: heroData.profile.name,
+						title: heroData.profile.title,
+						class: heroData.profile.class,
 						image: costumeImage,
 					})
 				}

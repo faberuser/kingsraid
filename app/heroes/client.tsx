@@ -66,25 +66,25 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 		// Apply class filter
 		if (selectedClass !== "all") {
-			result = result.filter((hero) => hero.infos?.class?.toLowerCase() === selectedClass.toLowerCase())
+			result = result.filter((hero) => hero.profile?.class?.toLowerCase() === selectedClass.toLowerCase())
 		}
 
 		// Apply damage type filter
 		if (selectedDamageType !== "all") {
 			result = result.filter(
-				(hero) => hero.infos?.["damage type"]?.toLowerCase() === selectedDamageType.toLowerCase()
+				(hero) => hero.profile?.damage_type?.toLowerCase() === selectedDamageType.toLowerCase()
 			)
 		}
 
 		// Sort by selected sort type
 		if (sortType === "release") {
 			result = [...result].sort((a, b) => {
-				const aOrder = parseInt(releaseOrder[a.infos.name] ?? "9999", 10)
-				const bOrder = parseInt(releaseOrder[b.infos.name] ?? "9999", 10)
+				const aOrder = parseInt(releaseOrder[a.profile.name] ?? "9999", 10)
+				const bOrder = parseInt(releaseOrder[b.profile.name] ?? "9999", 10)
 				return aOrder - bOrder
 			})
 		} else {
-			result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
+			result = [...result].sort((a, b) => a.profile.name.localeCompare(b.profile.name))
 		}
 
 		// Reverse if needed
@@ -221,10 +221,10 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 			<div className="flex flex-row gap-2 sm:gap-4 flex-wrap w-full justify-center mt-4">
 				{filteredHeroes.map((hero) => (
 					<HeroCard
-						key={hero.infos.name}
-						name={hero.infos.name}
+						key={hero.profile.name}
+						name={hero.profile.name}
 						splashart={hero.splashart}
-						reverseSA={saReverse.includes(hero.infos.name)}
+						reverseSA={saReverse.includes(hero.profile.name)}
 					/>
 				))}
 			</div>

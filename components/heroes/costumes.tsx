@@ -42,7 +42,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	if (!heroData.costumes) {
 		return (
 			<div className="text-center text-muted-foreground py-8">
-				No costume data available for {capitalize(heroData.infos.name)}
+				No costume data available for {capitalize(heroData.profile.name)}
 			</div>
 		)
 	}
@@ -66,7 +66,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 									<CostumeCard
 										key={costume.name}
 										costume={costume}
-										heroName={heroData.infos.name}
+										heroName={heroData.profile.name}
 										isSelected={selectedCostume === costume.name}
 										onClick={() => setSelectedCostume(costume.name)}
 									/>
@@ -97,7 +97,7 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 									>
 										<Image
 											src={`/kingsraid-data/assets/${selectedCostumeData.path}`}
-											alt={`${heroData.infos.name} - ${selectedCostumeData.displayName}`}
+											alt={`${heroData.profile.name} - ${selectedCostumeData.displayName}`}
 											width="0"
 											height="0"
 											sizes="80vw md:60vw"
@@ -133,8 +133,8 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 					isOpen={isModalOpen}
 					onOpenChange={setIsModalOpen}
 					imageSrc={`/kingsraid-data/assets/${selectedCostumeData.path}`}
-					imageAlt={`${heroData.infos.name} - ${selectedCostume}`}
-					title={`${capitalize(heroData.infos.name)} - ${selectedCostumeData.displayName}`}
+					imageAlt={`${heroData.profile.name} - ${selectedCostume}`}
+					title={`${capitalize(heroData.profile.name)} - ${selectedCostumeData.displayName}`}
 					showNavigation={costumes.length > 1}
 					currentIndex={currentCostumeIndex}
 					totalCount={costumes.length}

@@ -12,7 +12,7 @@ interface ProfileProps {
 }
 
 export default function Profile({ heroData }: ProfileProps) {
-	const { infos } = heroData
+	const { profile } = heroData
 	const [isModalOpen, setIsModalOpen] = useState(false)
 
 	const handleImageClick = () => {
@@ -30,22 +30,22 @@ export default function Profile({ heroData }: ProfileProps) {
 						<div className="space-y-3">
 							<div className="flex justify-between py-2">
 								<div className="font-medium ">Age</div>
-								<div>{infos.age}</div>
+								<div>{profile.age}</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
 								<div className="font-medium ">Height</div>
-								<div>{infos.height} cm</div>
+								<div>{profile.height} cm</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
 								<div className="font-medium ">Birthday</div>
-								<div>{infos["birth of month"]}</div>
+								<div>{profile.birth_of_month}</div>
 							</div>
 							<Separator />
 							<div className="flex justify-between py-2">
 								<div className="font-medium ">Constellation</div>
-								<div>{infos.constellation}</div>
+								<div>{profile.constellation}</div>
 							</div>
 						</div>
 					</CardContent>
@@ -58,11 +58,11 @@ export default function Profile({ heroData }: ProfileProps) {
 						<div className="space-y-4">
 							<div>
 								<div className="font-medium text-green-600 text-sm">LIKES</div>
-								<div className="mt-1 p-3 rounded border-l-4 border-green-400">{infos.like}</div>
+								<div className="mt-1 p-3 rounded border-l-4 border-green-400">{profile.like}</div>
 							</div>
 							<div>
 								<div className="font-medium text-red-600 text-sm">DISLIKES</div>
-								<div className="mt-1 p-3 rounded border-l-4 border-red-400">{infos.dislike}</div>
+								<div className="mt-1 p-3 rounded border-l-4 border-red-400">{profile.dislike}</div>
 							</div>
 						</div>
 					</CardContent>
@@ -76,7 +76,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						<div className="text-xl font-semibold pb-2">Background Story</div>
 						<Separator className="mb-4" />
 						<div className="prose max-w-none">
-							<div className="text-justify">{infos.story}</div>
+							<div className="text-justify">{profile.story}</div>
 						</div>
 					</CardContent>
 				</Card>
@@ -92,7 +92,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						>
 							<Image
 								src={`/kingsraid-data/assets/${heroData.splashart}`}
-								alt={`${heroData.infos.name} Splashart`}
+								alt={`${heroData.profile.name} Splashart`}
 								width="0"
 								height="0"
 								sizes="80vw md:40vw"
@@ -107,8 +107,8 @@ export default function Profile({ heroData }: ProfileProps) {
 							isOpen={isModalOpen}
 							onOpenChange={setIsModalOpen}
 							imageSrc={`/kingsraid-data/assets/${heroData.splashart}`}
-							imageAlt={`${heroData.infos.name} Splashart`}
-							title={`${capitalize(heroData.infos.name)} Splashart`}
+							imageAlt={`${heroData.profile.name} Splashart`}
+							title={`${capitalize(heroData.profile.name)} Splashart`}
 						/>
 					</CardContent>
 				</Card>

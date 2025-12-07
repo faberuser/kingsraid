@@ -37,7 +37,7 @@ function getName(item: DataItem): string {
 	if ("name" in item) {
 		return item.name
 	}
-	return item.infos.name
+	return item.profile.name
 }
 
 // Helper function to sort data by name

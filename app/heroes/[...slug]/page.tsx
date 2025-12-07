@@ -53,10 +53,10 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const costumes = await getCostumeData(heroData.costumes)
 
 	// Get model data server-side (only if enabled)
-	const heroModels = enableModelsVoices ? await getHeroModels(heroData.infos.name) : {}
+	const heroModels = enableModelsVoices ? await getHeroModels(heroData.profile.name) : {}
 
 	// Get voice files server-side (only if enabled)
-	const voiceFiles = enableModelsVoices ? await getVoiceFiles(heroData.infos.name) : { en: [], jp: [], kr: [] }
+	const voiceFiles = enableModelsVoices ? await getVoiceFiles(heroData.profile.name) : { en: [], jp: [], kr: [] }
 
 	// Get available scenes server-side (only if enabled)
 	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
