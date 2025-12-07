@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import React from "react"
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -49,4 +50,39 @@ export function classColorMapBg(className: string) {
 		case "priest":
 			return "bg-blue-200/10"
 	}
+}
+
+/**
+ * Parses text with color codes like [ffc800]text[-] and returns JSX with colored spans
+ * @param text - Text containing color codes in format [HEX_COLOR]text[-]
+ * @returns Array of React elements with colored text
+ */
+export function parseColoredText(text: string): React.ReactNode[] {
+	// Regular expression to match [COLOR]text[-] pattern
+	const colorPattern = /\[([0-9a-fA-F]{6})\](.*?)\[-\]/g
+	const parts: React.ReactNode[] = []
+	let lastIndex = 0
+	let match
+
+	while ((match = colorPattern.exec(text)) !== null) {
+		// Add text before the colored section
+		if (match.index > lastIndex) {
+			parts.push(text.substring(lastIndex, match.index))
+		}
+
+		// Add colored text
+		const color = `#${match[1]}`
+		const coloredText = match[2]
+		parts.push(React.createElement("span", { key: match.index, style: { color } }, coloredText))
+
+		lastIndex = match.index + match[0].length
+	}
+
+	// Add remaining text after the last match
+	if (lastIndex < text.length) {
+		parts.push(text.substring(lastIndex))
+	}
+
+	// If no matches found, return the original text
+	return parts.length > 0 ? parts : [text]
 }

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import Image from "@/components/next-image"
+import { parseColoredText } from "@/lib/utils"
 
 interface SkillsProps {
 	heroData: HeroData
@@ -91,7 +92,7 @@ export default function Skills({ heroData }: SkillsProps) {
 									</div>
 								</div>
 								<Separator className="mb-3" />
-								<div>{skill.description}</div>
+								<div>{parseColoredText(skill.description)}</div>
 
 								{/* Skill Books if available */}
 								{heroData.books && heroData.books[baseNum] && (
@@ -103,7 +104,7 @@ export default function Skills({ heroData }: SkillsProps) {
 											{Object.entries(heroData.books[baseNum]).map(([level, effect]) => (
 												<div key={level} className="px-2 py-1 border-l-2">
 													<div className="font-medium">
-														{level}: {effect}
+														{level}: {parseColoredText(effect)}
 													</div>
 												</div>
 											))}

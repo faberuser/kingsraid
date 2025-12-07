@@ -2,7 +2,7 @@ import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import Image from "@/components/next-image"
-import { classColorMapText, classColorMapBg } from "@/lib/utils"
+import { classColorMapText, classColorMapBg, parseColoredText } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 interface GearProps {
 	heroData: HeroData
@@ -53,7 +53,7 @@ export default function Gear({ heroData }: GearProps) {
 								</div>
 
 								<Separator className="mb-3" />
-								<div className="mb-4">{heroData.uw.description}</div>
+								<div className="mb-4">{parseColoredText(heroData.uw.description)}</div>
 
 								{/* UW Values */}
 								{heroData.uw.value && (
@@ -90,7 +90,7 @@ export default function Gear({ heroData }: GearProps) {
 										Weapon Story
 									</summary>
 									<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
-										{heroData.uw.story}
+										{parseColoredText(heroData.uw.story)}
 									</div>
 								</details>
 							</div>
@@ -143,7 +143,7 @@ export default function Gear({ heroData }: GearProps) {
 												</div>
 											</div>
 
-											<div className="mb-3">{ut.description}</div>
+											<div className="mb-3">{parseColoredText(ut.description)}</div>
 
 											{/* UT Values */}
 											{ut.value && (
@@ -182,7 +182,7 @@ export default function Gear({ heroData }: GearProps) {
 													Treasure Story
 												</summary>
 												<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
-													{ut.story}
+													{parseColoredText(ut.story)}
 												</div>
 											</details>
 										</div>
@@ -262,7 +262,7 @@ export default function Gear({ heroData }: GearProps) {
 
 									<div>
 										<div className="font-medium ">Effect</div>
-										<div>{heroData.sw.description}</div>
+										<div>{parseColoredText(heroData.sw.description)}</div>
 									</div>
 
 									{/* SW Advancement */}
@@ -286,7 +286,7 @@ export default function Gear({ heroData }: GearProps) {
 														>
 															Stage {level}
 														</div>
-														<div>{effect}</div>
+														<div>{parseColoredText(effect)}</div>
 													</div>
 												))}
 											</div>
@@ -299,7 +299,7 @@ export default function Gear({ heroData }: GearProps) {
 											Soul Weapon Story
 										</summary>
 										<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
-											{heroData.sw.story}
+											{parseColoredText(heroData.sw.story)}
 										</div>
 									</details>
 								</div>

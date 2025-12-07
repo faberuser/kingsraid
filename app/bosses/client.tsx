@@ -24,24 +24,33 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
 	const [loadingCard, setLoadingCard] = useState<string | null>(null)
-	const [sortType, setSortType] = useState<"alphabetical" | "release">(
-		typeof window !== "undefined"
-			? (localStorage.getItem("bossesSortType") as "alphabetical" | "release") || "release"
-			: "release"
-	)
-	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined"
-			? localStorage.getItem("bossesReverseSort") === null
-				? true
-				: localStorage.getItem("bossesReverseSort") === "true"
-			: true
-	)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
+	const [reverseSort, setReverseSort] = useState(true)
+	const [mounted, setMounted] = useState(false)
+
+	// Load sort preferences from localStorage after hydration
+	useEffect(() => {
+		// eslint-disable-next-line
+		setMounted(true)
+		const storedSortType = localStorage.getItem("bossesSortType")
+		const storedReverseSort = localStorage.getItem("bossesReverseSort")
+
+		if (storedSortType === "alphabetical" || storedSortType === "release") {
+			setSortType(storedSortType)
+		}
+
+		if (storedReverseSort !== null) {
+			setReverseSort(storedReverseSort === "true")
+		}
+	}, [])
 
 	// Save sort state to localStorage when changed
 	useEffect(() => {
-		localStorage.setItem("bossesSortType", sortType)
-		localStorage.setItem("bossesReverseSort", reverseSort.toString())
-	}, [sortType, reverseSort])
+		if (mounted) {
+			localStorage.setItem("bossesSortType", sortType)
+			localStorage.setItem("bossesReverseSort", reverseSort.toString())
+		}
+	}, [sortType, reverseSort, mounted])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -95,6 +104,15 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 		}
 		return result
 	}, [bosses, searchQuery, fuse, selectedType, sortType, reverseSort, releaseOrder])
+
+	// Show loading spinner until hydrated
+	if (!mounted) {
+		return (
+			<div className="flex items-center justify-center h-96">
+				<Spinner className="h-8 w-8" />
+			</div>
+		)
+	}
 
 	return (
 		<div>

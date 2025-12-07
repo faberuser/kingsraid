@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
-import HeroesClient from "@/app/heroes/client"
-import { getData, getJsonData, getJsonDataList } from "@/lib/get-data"
+import HeroesPageWrapper from "@/app/heroes/page-wrapper"
+import { getData, getJsonData, getJsonDataList, getNewDataHeroNames } from "@/lib/get-data"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
@@ -14,9 +14,22 @@ const heroClasses = [
 ]
 
 export default async function HeroesPage() {
-	const heroes = (await getData("heroes")) as HeroData[]
-	const releaseOrder = await getJsonData("table-data/hero_release_order.json")
+	const heroesLegacy = (await getData("heroes", { useNewData: false })) as HeroData[]
+	const heroesNew = (await getData("heroes", { useNewData: true })) as HeroData[]
+	const releaseOrderLegacy = await getJsonData("table-data/hero_release_order.json")
+	const releaseOrderNew = await getJsonData("table-data/hero_release_order_new.json")
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
+	const newDataHeroNames = await getNewDataHeroNames()
 
-	return <HeroesClient heroes={heroes} heroClasses={heroClasses} releaseOrder={releaseOrder} saReverse={saReverse} />
+	return (
+		<HeroesPageWrapper
+			heroesLegacy={heroesLegacy}
+			heroesNew={heroesNew}
+			heroClasses={heroClasses}
+			releaseOrderLegacy={releaseOrderLegacy}
+			releaseOrderNew={releaseOrderNew}
+			saReverse={saReverse}
+			newDataHeroNames={newDataHeroNames}
+		/>
+	)
 }

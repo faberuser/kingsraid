@@ -10,6 +10,7 @@ import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp } from "lucide-react"
 import HeroCard from "@/components/heroes/card"
+import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesClientProps {
 	heroes: HeroData[]
@@ -26,24 +27,33 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedClass, setSelectedClass] = useState("all")
 	const [selectedDamageType, setSelectedDamageType] = useState("all")
-	const [sortType, setSortType] = useState<"alphabetical" | "release">(
-		typeof window !== "undefined"
-			? (localStorage.getItem("heroesSortType") as "alphabetical" | "release") || "release"
-			: "release"
-	)
-	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined"
-			? localStorage.getItem("heroesReverseSort") === null
-				? true
-				: localStorage.getItem("heroesReverseSort") === "true"
-			: true
-	)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
+	const [reverseSort, setReverseSort] = useState(true)
+	const [mounted, setMounted] = useState(false)
+
+	// Load sort preferences from localStorage after hydration
+	useEffect(() => {
+		// eslint-disable-next-line
+		setMounted(true)
+		const storedSortType = localStorage.getItem("heroesSortType")
+		const storedReverseSort = localStorage.getItem("heroesReverseSort")
+
+		if (storedSortType === "alphabetical" || storedSortType === "release") {
+			setSortType(storedSortType)
+		}
+
+		if (storedReverseSort !== null) {
+			setReverseSort(storedReverseSort === "true")
+		}
+	}, [])
 
 	// Save sort state to localStorage when changed
 	useEffect(() => {
-		localStorage.setItem("heroesSortType", sortType)
-		localStorage.setItem("heroesReverseSort", reverseSort.toString())
-	}, [sortType, reverseSort])
+		if (mounted) {
+			localStorage.setItem("heroesSortType", sortType)
+			localStorage.setItem("heroesReverseSort", reverseSort.toString())
+		}
+	}, [sortType, reverseSort, mounted])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -100,6 +110,15 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		{ value: "magical", name: "Magical" },
 		{ value: "physical", name: "Physical" },
 	]
+
+	// Show loading spinner until hydrated
+	if (!mounted) {
+		return (
+			<div className="flex items-center justify-center h-96">
+				<Spinner className="h-8 w-8" />
+			</div>
+		)
+	}
 
 	return (
 		<div>

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import ImageZoomModal from "@/components/image-modal"
 import { ZoomIn } from "lucide-react"
-import { capitalize } from "@/lib/utils"
+import { capitalize, parseColoredText } from "@/lib/utils"
 
 interface ProfileProps {
 	heroData: HeroData
@@ -76,7 +76,7 @@ export default function Profile({ heroData }: ProfileProps) {
 						<div className="text-xl font-semibold pb-2">Background Story</div>
 						<Separator className="mb-4" />
 						<div className="prose max-w-none">
-							<div className="text-justify">{profile.story}</div>
+							<div className="text-justify">{parseColoredText(profile.story)}</div>
 						</div>
 					</CardContent>
 				</Card>
