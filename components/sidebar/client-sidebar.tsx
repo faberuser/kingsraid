@@ -11,7 +11,7 @@ import {
 	SidebarHeader,
 	SidebarFooter,
 } from "@/components/ui/sidebar"
-import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Github, Zap, Calculator } from "lucide-react"
+import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Github, Calculator } from "lucide-react"
 import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
@@ -32,7 +32,6 @@ export const items = [
 	{ title: "Artifacts", url: "/artifacts", icon: Amphora },
 	{ title: "Bosses", url: "/bosses", icon: ShieldHalf },
 	{ title: "Softcap", url: "/softcap", icon: Calculator },
-	{ title: "Technomagic Gear", url: "/technomagic-gear", icon: Zap },
 ]
 
 interface ClientSidebarProps {

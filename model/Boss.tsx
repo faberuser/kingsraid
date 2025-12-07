@@ -1,12 +1,12 @@
 export interface BossInfo {
-	"name": string
-	"title": string
-	"type": string[]
-	"race": string
-	"damage type": string
-	"recommended heroes": string
-	"characteristics": string
-	"thumbnail": string
+	name: string
+	title: string
+	type: string[]
+	race: string
+	damage_type: string
+	recommended_heroes: string
+	characteristics: string
+	thumbnail: string
 }
 
 export interface Skill {
@@ -17,7 +17,7 @@ export interface Skill {
 }
 
 export interface BossData {
-	infos: BossInfo
+	profile: BossInfo
 	skills: {
 		[skillId: string]: Skill
 	}

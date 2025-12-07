@@ -24,29 +24,38 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
 	const [loadingCard, setLoadingCard] = useState<string | null>(null)
-	const [sortType, setSortType] = useState<"alphabetical" | "release">(
-		typeof window !== "undefined"
-			? (localStorage.getItem("bossesSortType") as "alphabetical" | "release") || "release"
-			: "release"
-	)
-	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined"
-			? localStorage.getItem("bossesReverseSort") === null
-				? true
-				: localStorage.getItem("bossesReverseSort") === "true"
-			: true
-	)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
+	const [reverseSort, setReverseSort] = useState(true)
+	const [mounted, setMounted] = useState(false)
+
+	// Load sort preferences from localStorage after hydration
+	useEffect(() => {
+		// eslint-disable-next-line
+		setMounted(true)
+		const storedSortType = localStorage.getItem("bossesSortType")
+		const storedReverseSort = localStorage.getItem("bossesReverseSort")
+
+		if (storedSortType === "alphabetical" || storedSortType === "release") {
+			setSortType(storedSortType)
+		}
+
+		if (storedReverseSort !== null) {
+			setReverseSort(storedReverseSort === "true")
+		}
+	}, [])
 
 	// Save sort state to localStorage when changed
 	useEffect(() => {
-		localStorage.setItem("bossesSortType", sortType)
-		localStorage.setItem("bossesReverseSort", reverseSort.toString())
-	}, [sortType, reverseSort])
+		if (mounted) {
+			localStorage.setItem("bossesSortType", sortType)
+			localStorage.setItem("bossesReverseSort", reverseSort.toString())
+		}
+	}, [sortType, reverseSort, mounted])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(bosses, {
-			keys: ["infos.name", "infos.title", "aliases"],
+			keys: ["profile.name", "profile.title", "aliases"],
 			threshold: 0.3,
 			includeScore: true,
 		})
@@ -56,7 +65,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 	const bossTypes = useMemo(() => {
 		const types = new Set<string>()
 		bosses.forEach((boss) => {
-			boss.infos.type?.forEach((t) => types.add(t))
+			boss.profile.type?.forEach((t) => types.add(t))
 		})
 		// Sort by the order in bossTypeMap
 		const typeOrder = Object.keys(bossTypeMap)
@@ -75,18 +84,18 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 
 		// Filter by type
 		if (selectedType !== "all") {
-			result = result.filter((boss) => boss.infos.type?.includes(selectedType))
+			result = result.filter((boss) => boss.profile.type?.includes(selectedType))
 		}
 
 		// Sort by selected sort type
 		if (sortType === "release") {
 			result = [...result].sort((a, b) => {
-				const aOrder = parseInt(releaseOrder[a.infos.name] ?? "9999", 10)
-				const bOrder = parseInt(releaseOrder[b.infos.name] ?? "9999", 10)
+				const aOrder = parseInt(releaseOrder[a.profile.name] ?? "9999", 10)
+				const bOrder = parseInt(releaseOrder[b.profile.name] ?? "9999", 10)
 				return aOrder - bOrder
 			})
 		} else {
-			result = [...result].sort((a, b) => a.infos.name.localeCompare(b.infos.name))
+			result = [...result].sort((a, b) => a.profile.name.localeCompare(b.profile.name))
 		}
 
 		// Reverse if needed
@@ -95,6 +104,15 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 		}
 		return result
 	}, [bosses, searchQuery, fuse, selectedType, sortType, reverseSort, releaseOrder])
+
+	// Show loading spinner until hydrated
+	if (!mounted) {
+		return (
+			<div className="flex items-center justify-center h-96">
+				<Spinner className="h-8 w-8" />
+			</div>
+		)
+	}
 
 	return (
 		<div>
@@ -191,18 +209,18 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{filteredBosses.map((boss) => (
 					<Link
-						key={boss.infos.name}
-						href={`/bosses/${encodeURIComponent(boss.infos.name.toLowerCase().replace(/\s+/g, "-"))}`}
+						key={boss.profile.name}
+						href={`/bosses/${encodeURIComponent(boss.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
-						onClick={() => setLoadingCard(boss.infos.name)}
+						onClick={() => setLoadingCard(boss.profile.name)}
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
 							<CardHeader>
 								<div className="flex items-center gap-4">
 									<div className="w-16 h-16 flex items-center justify-center">
 										<Image
-											src={`/kingsraid-data/assets/${boss.infos.thumbnail}`}
-											alt={boss.infos.name}
+											src={`/kingsraid-data/assets/${boss.profile.thumbnail}`}
+											alt={boss.profile.name}
 											width="0"
 											height="0"
 											sizes="30vw md:10vw"
@@ -210,39 +228,39 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 										/>
 									</div>
 									<div className="flex-1">
-										<CardTitle className="text-lg">{boss.infos.name}</CardTitle>
-										<CardDescription className="text-sm">{boss.infos.title}</CardDescription>
+										<CardTitle className="text-lg">{boss.profile.name}</CardTitle>
+										<CardDescription className="text-sm">{boss.profile.title}</CardDescription>
 									</div>
 								</div>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-3">
 									<div className="flex flex-wrap gap-2">
-										{boss.infos.type.map((type) => (
+										{boss.profile.type.map((type) => (
 											<Badge key={type} variant="default">
 												{type}
 											</Badge>
 										))}
-										<Badge variant="secondary">{boss.infos.race}</Badge>
+										<Badge variant="secondary">{boss.profile.race}</Badge>
 										<Badge
 											variant="default"
 											className={
-												boss.infos["damage type"] === "Physical"
+												boss.profile.damage_type === "Physical"
 													? "bg-red-300"
-													: boss.infos["damage type"] === "Magical"
+													: boss.profile.damage_type === "Magical"
 													? "bg-blue-300"
 													: "bg-yellow-400"
 											}
 										>
-											{boss.infos["damage type"]}
+											{boss.profile.damage_type}
 										</Badge>
 									</div>
 									<div className="text-sm text-muted-foreground line-clamp-3">
-										{boss.infos.characteristics}
+										{boss.profile.characteristics}
 									</div>
 								</div>
 							</CardContent>
-							{loadingCard === boss.infos.name && (
+							{loadingCard === boss.profile.name && (
 								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
 									<Spinner className="size-8" />
 								</div>

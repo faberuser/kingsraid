@@ -37,7 +37,7 @@ function getName(item: DataItem): string {
 	if ("name" in item) {
 		return item.name
 	}
-	return item.infos.name
+	return item.profile.name
 }
 
 // Helper function to sort data by name
@@ -62,9 +62,11 @@ export async function getJsonDataList(jsonFile: string): Promise<string[]> {
 // Get all data from a file or directory
 export async function getData(
 	source: string,
-	options: { sortByName?: boolean } = { sortByName: true }
+	options: { sortByName?: boolean; useNewData?: boolean } = { sortByName: true, useNewData: false }
 ): Promise<DataItem[]> {
-	const fullPath = buildPath("table-data", source)
+	// If useNewData is true and source is "heroes", use "heroes-new" instead
+	const actualSource = options.useNewData && source === "heroes" ? "heroes-new" : source
+	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory
 	if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
@@ -100,9 +102,15 @@ function normalizeName(str: string): string {
 }
 
 // Find single data by name/slug
-export async function findData(slug: string, source: string): Promise<DataItem | null> {
+export async function findData(
+	slug: string,
+	source: string,
+	options: { useNewData?: boolean } = { useNewData: false }
+): Promise<DataItem | null> {
 	const normalizedSlug = decodeURIComponent(slug).toLowerCase().replace(/-/g, " ")
-	const fullPath = buildPath("table-data", source)
+	// If useNewData is true and source is "heroes", use "heroes-new" instead
+	const actualSource = options.useNewData && source === "heroes" ? "heroes-new" : source
+	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory (for heroes/bosses)
 	if (fs.existsSync(fullPath) && fs.statSync(fullPath).isDirectory()) {
@@ -132,4 +140,24 @@ export async function findData(slug: string, source: string): Promise<DataItem |
 	}
 
 	return found ?? null
+}
+
+// Check if a hero exists in the new data folder
+export async function heroExistsInNewData(heroName: string): Promise<boolean> {
+	const normalizedName = decodeURIComponent(heroName).toLowerCase().replace(/-/g, " ")
+	const capitalizedName = capitalize(normalizedName)
+	const filePath = buildPath("table-data", "heroes-new", `${capitalizedName}.json`)
+	return fs.existsSync(filePath)
+}
+
+// Get list of heroes that exist in new data folder
+export async function getNewDataHeroNames(): Promise<string[]> {
+	const newHeroesPath = buildPath("table-data", "heroes-new")
+
+	if (!fs.existsSync(newHeroesPath)) {
+		return []
+	}
+
+	const files = fs.readdirSync(newHeroesPath).filter((file) => file.endsWith(".json"))
+	return files.map((file) => file.replace(".json", ""))
 }

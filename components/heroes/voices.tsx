@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Play, Pause, Volume2 } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface VoicesProps {
@@ -69,7 +68,7 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 
 	const formatVoiceName = (name: string) => {
 		// Remove hero name prefix and file extension
-		const heroName = heroData.infos.name
+		const heroName = heroData.profile.name
 		let displayName = name.replace(`${heroName}-`, "").replace(/\.(wav|mp3|ogg)$/i, "")
 
 		// Format the voice type
@@ -124,7 +123,7 @@ export default function Voices({ heroData, voiceFiles }: VoicesProps) {
 		)
 	}
 
-	const availableLanguages = Object.entries(voiceFiles).filter(([_, files]) => files.length > 0)
+	const availableLanguages = Object.entries(voiceFiles).filter(([, files]) => files.length > 0)
 
 	if (availableLanguages.length === 0) {
 		return (

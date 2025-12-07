@@ -40,8 +40,8 @@ export default function HeroClient({
 				<div className="flex items-center justify-center self-stretch">
 					<div className="w-32 h-32 md:w-40 md:h-40">
 						<Image
-							src={`/kingsraid-data/assets/${heroData.infos.thumbnail}`}
-							alt={heroData.infos.name}
+							src={`/kingsraid-data/assets/${heroData.profile.thumbnail}`}
+							alt={heroData.profile.name}
 							width="0"
 							height="0"
 							sizes="30vw md:10vw"
@@ -53,9 +53,9 @@ export default function HeroClient({
 				{/* Hero Basic Info */}
 				<div className="flex-grow">
 					<div className="mb-2 text-center sm:text-start">
-						<div className="text-3xl font-bold">{capitalize(heroData.infos.name)}</div>
-						<div className={`text-lg font-semibold ${classColorMapText(heroData.infos.class)}`}>
-							{heroData.infos.title}
+						<div className="text-3xl font-bold">{capitalize(heroData.profile.name)}</div>
+						<div className={`text-lg font-semibold ${classColorMapText(heroData.profile.class)}`}>
+							{heroData.profile.title}
 						</div>
 					</div>
 
@@ -64,27 +64,27 @@ export default function HeroClient({
 					<div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-3 text-sm">
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Class</div>
-							<div className="font-medium">{heroData.infos.class}</div>
+							<div className="font-medium">{heroData.profile.class}</div>
 						</div>
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Position</div>
-							<div className="font-medium">{heroData.infos.position}</div>
+							<div className="font-medium">{heroData.profile.position}</div>
 						</div>
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Damage Type</div>
-							<div className="font-medium">{heroData.infos["damage type"]}</div>
+							<div className="font-medium">{heroData.profile.damage_type}</div>
 						</div>
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Attack Range</div>
-							<div className="font-medium">{heroData.infos["attack range"]}</div>
+							<div className="font-medium">{heroData.profile.attack_range}</div>
 						</div>
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Gender</div>
-							<div className="font-medium">{heroData.infos.gender}</div>
+							<div className="font-medium">{heroData.profile.gender}</div>
 						</div>
 						<div className="flex flex-col space-y-1 text-center md:text-left">
 							<div className="text-xs text-gray-500 uppercase tracking-wide">Race</div>
-							<div className="font-medium">{heroData.infos.race}</div>
+							<div className="font-medium">{heroData.profile.race}</div>
 						</div>
 					</div>
 				</div>

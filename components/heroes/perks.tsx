@@ -1,7 +1,7 @@
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
-import { capitalize } from "@/lib/utils"
+import { capitalize, parseColoredText } from "@/lib/utils"
 
 interface PerksProps {
 	heroData: HeroData
@@ -49,7 +49,7 @@ export default function Perks({ heroData }: PerksProps) {
 														</div>
 													)}
 													<div className="flex-grow flex items-center">
-														<div>{perk.effect}</div>
+														<div>{parseColoredText(perk.effect)}</div>
 													</div>
 												</div>
 											) : (
@@ -68,7 +68,9 @@ export default function Perks({ heroData }: PerksProps) {
 																/>
 																<div className="font-medium text-yellow-800">Light</div>
 															</div>
-															<div className="text-sm">{perk.light.effect}</div>
+															<div className="text-sm">
+																{parseColoredText(perk.light.effect)}
+															</div>
 														</div>
 													)}
 
@@ -85,7 +87,9 @@ export default function Perks({ heroData }: PerksProps) {
 																/>
 																<div className="font-medium text-purple-800">Dark</div>
 															</div>
-															<div className="text-sm">{perk.dark.effect}</div>
+															<div className="text-sm">
+																{parseColoredText(perk.dark.effect)}
+															</div>
 														</div>
 													)}
 												</div>

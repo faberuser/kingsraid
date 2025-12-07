@@ -1,8 +1,8 @@
 import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
-import HeroClient from "@/app/heroes/[...slug]/client"
-import { SlugPageProps, findData } from "@/lib/get-data"
+import HeroPageWrapper from "@/app/heroes/[...slug]/page-wrapper"
+import { SlugPageProps, findData, heroExistsInNewData } from "@/lib/get-data"
 import { HeroData } from "@/model/Hero"
 import { getCostumeData } from "@/app/heroes/[...slug]/models/getCostumes"
 import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
@@ -43,30 +43,47 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const heroData = (await findData(heroName, "heroes")) as HeroData | null
+	// Fetch legacy data
+	const heroDataLegacy = (await findData(heroName, "heroes", { useNewData: false })) as HeroData | null
 
-	if (!heroData) {
+	if (!heroDataLegacy) {
 		notFound()
 	}
 
-	// Get costume data server-side
-	const costumes = await getCostumeData(heroData.costumes)
+	// Check if hero exists in new data and fetch if it does
+	const existsInNewData = await heroExistsInNewData(heroName)
+	const heroDataNew = existsInNewData
+		? ((await findData(heroName, "heroes", { useNewData: true })) as HeroData | null)
+		: null
+
+	// Get costume data server-side for both versions
+	const costumesLegacy = await getCostumeData(heroDataLegacy.costumes)
+	const costumesNew = heroDataNew ? await getCostumeData(heroDataNew.costumes) : []
 
 	// Get model data server-side (only if enabled)
-	const heroModels = enableModelsVoices ? await getHeroModels(heroData.infos.name) : {}
+	const heroModelsLegacy = enableModelsVoices ? await getHeroModels(heroDataLegacy.profile.name) : {}
+	const heroModelsNew = enableModelsVoices && heroDataNew ? await getHeroModels(heroDataNew.profile.name) : {}
 
 	// Get voice files server-side (only if enabled)
-	const voiceFiles = enableModelsVoices ? await getVoiceFiles(heroData.infos.name) : { en: [], jp: [], kr: [] }
+	const voiceFilesLegacy = enableModelsVoices
+		? await getVoiceFiles(heroDataLegacy.profile.name)
+		: { en: [], jp: [], kr: [] }
+	const voiceFilesNew =
+		enableModelsVoices && heroDataNew ? await getVoiceFiles(heroDataNew.profile.name) : { en: [], jp: [], kr: [] }
 
 	// Get available scenes server-side (only if enabled)
 	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
 
 	return (
-		<HeroClient
-			heroData={heroData}
-			costumes={costumes}
-			heroModels={heroModels}
-			voiceFiles={voiceFiles}
+		<HeroPageWrapper
+			heroDataLegacy={heroDataLegacy}
+			heroDataNew={heroDataNew}
+			costumesLegacy={costumesLegacy}
+			costumesNew={costumesNew}
+			heroModelsLegacy={heroModelsLegacy}
+			heroModelsNew={heroModelsNew}
+			voiceFilesLegacy={voiceFilesLegacy}
+			voiceFilesNew={voiceFilesNew}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
 		/>

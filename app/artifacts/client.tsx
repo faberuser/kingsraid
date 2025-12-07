@@ -20,24 +20,33 @@ interface ArtifactsClientProps {
 export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [loadingCard, setLoadingCard] = useState<string | null>(null)
-	const [sortType, setSortType] = useState<"alphabetical" | "release">(
-		typeof window !== "undefined"
-			? (localStorage.getItem("artifactsSortType") as "alphabetical" | "release") || "release"
-			: "release"
-	)
-	const [reverseSort, setReverseSort] = useState(
-		typeof window !== "undefined"
-			? localStorage.getItem("artifactsReverseSort") === null
-				? true
-				: localStorage.getItem("artifactsReverseSort") === "true"
-			: true
-	)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
+	const [reverseSort, setReverseSort] = useState(true)
+	const [mounted, setMounted] = useState(false)
 
-	// Save reverseSort to localStorage when changed
+	// Load sort preferences from localStorage after hydration
 	useEffect(() => {
-		localStorage.setItem("artifactsSortType", sortType)
-		localStorage.setItem("artifactsReverseSort", reverseSort.toString())
-	}, [sortType, reverseSort])
+		// eslint-disable-next-line
+		setMounted(true)
+		const storedSortType = localStorage.getItem("artifactsSortType")
+		const storedReverseSort = localStorage.getItem("artifactsReverseSort")
+
+		if (storedSortType === "alphabetical" || storedSortType === "release") {
+			setSortType(storedSortType)
+		}
+
+		if (storedReverseSort !== null) {
+			setReverseSort(storedReverseSort === "true")
+		}
+	}, [])
+
+	// Save sort state to localStorage when changed
+	useEffect(() => {
+		if (mounted) {
+			localStorage.setItem("artifactsSortType", sortType)
+			localStorage.setItem("artifactsReverseSort", reverseSort.toString())
+		}
+	}, [sortType, reverseSort, mounted])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -75,6 +84,15 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 		}
 		return result
 	}, [artifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder])
+
+	// Show loading spinner until hydrated
+	if (!mounted) {
+		return (
+			<div className="flex items-center justify-center h-96">
+				<Spinner className="h-8 w-8" />
+			</div>
+		)
+	}
 
 	return (
 		<div>
