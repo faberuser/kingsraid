@@ -53,9 +53,9 @@ export function classColorMapBg(className: string) {
 }
 
 /**
- * Parses text with color codes like [ffc800]text[-] and returns JSX with colored spans
- * @param text - Text containing color codes in format [HEX_COLOR]text[-]
- * @returns Array of React elements with colored text
+ * Parses text with color codes like [ffc800]text[-] and newlines, returns JSX with colored spans and line breaks
+ * @param text - Text containing color codes in format [HEX_COLOR]text[-] and \n for newlines
+ * @returns Array of React elements with colored text and line breaks
  */
 export function parseColoredText(text: string): React.ReactNode[] {
 	// Regular expression to match [COLOR]text[-] pattern
@@ -63,26 +63,54 @@ export function parseColoredText(text: string): React.ReactNode[] {
 	const parts: React.ReactNode[] = []
 	let lastIndex = 0
 	let match
+	let keyCounter = 0
 
 	while ((match = colorPattern.exec(text)) !== null) {
-		// Add text before the colored section
+		// Add text before the colored section (with newlines converted to <br />)
 		if (match.index > lastIndex) {
-			parts.push(text.substring(lastIndex, match.index))
+			const plainText = text.substring(lastIndex, match.index)
+			parts.push(...splitTextWithNewlines(plainText, keyCounter))
+			keyCounter += plainText.split("\n").length
 		}
 
 		// Add colored text
 		const color = `#${match[1]}`
 		const coloredText = match[2]
-		parts.push(React.createElement("span", { key: match.index, style: { color } }, coloredText))
+		parts.push(React.createElement("span", { key: `color-${keyCounter++}`, style: { color } }, coloredText))
 
 		lastIndex = match.index + match[0].length
 	}
 
-	// Add remaining text after the last match
+	// Add remaining text after the last match (with newlines converted to <br />)
 	if (lastIndex < text.length) {
-		parts.push(text.substring(lastIndex))
+		const plainText = text.substring(lastIndex)
+		parts.push(...splitTextWithNewlines(plainText, keyCounter))
 	}
 
-	// If no matches found, return the original text
-	return parts.length > 0 ? parts : [text]
+	// If no matches found, still process newlines
+	if (parts.length === 0) {
+		parts.push(...splitTextWithNewlines(text, 0))
+	}
+
+	return parts
+}
+
+/**
+ * Helper function to split text by newlines and insert <br /> elements
+ */
+function splitTextWithNewlines(text: string, startKey: number): React.ReactNode[] {
+	const lines = text.split("\n")
+	const result: React.ReactNode[] = []
+
+	lines.forEach((line, index) => {
+		if (line) {
+			result.push(line)
+		}
+		// Add <br /> after each line except the last one
+		if (index < lines.length - 1) {
+			result.push(React.createElement("br", { key: `br-${startKey}-${index}` }))
+		}
+	})
+
+	return result
 }
