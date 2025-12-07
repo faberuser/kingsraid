@@ -4,7 +4,7 @@ import { getData, getJsonData } from "@/lib/get-data"
 
 export default async function ArtifactsPage() {
 	const artifacts = (await getData("artifacts.json")) as ArtifactData[]
-	const releaseOrder = await getJsonData("artifact_release_order.json")
+	const releaseOrder = await getJsonData("table-data/artifact_release_order.json")
 
 	return <ArtifactsClient artifacts={artifacts} releaseOrder={releaseOrder} />
 }
