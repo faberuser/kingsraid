@@ -42,6 +42,8 @@ export default function SidebarInsetClient({ children }: { children: React.React
 										New data from Content Creator CBT.
 										<br />
 										Costumes, Models, Voices use legacy data.
+										<br />
+										<b>WIP:</b> Value parsing still incomplete.
 									</p>
 								</TooltipContent>
 							</Tooltip>
