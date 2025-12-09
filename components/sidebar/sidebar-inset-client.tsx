@@ -39,14 +39,14 @@ export default function SidebarInsetClient({ children }: { children: React.React
 								</TooltipTrigger>
 								<TooltipContent className="max-w-sm">
 									<p className="text-sm">
-										New data from Content Creator CBT.
+										Latest data from Content Creator CBT.
 										<br />
 										Costumes, Models, Voices use legacy data.
 									</p>
 								</TooltipContent>
 							</Tooltip>
 							<span className={`text-sm font-medium ${isNew ? "text-primary" : "text-muted-foreground"}`}>
-								New
+								Latest
 							</span>
 							<Switch checked={!isNew} onCheckedChange={toggleVersion} />
 							<span className={`text-sm font-medium ${isNew ? "text-muted-foreground" : "text-primary"}`}>
