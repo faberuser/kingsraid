@@ -22,7 +22,7 @@ interface SoftcapData {
 }
 
 async function getSoftcapData(): Promise<SoftcapData> {
-	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "softcap.json")
+	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "softcap.json")
 	if (!fs.existsSync(filePath)) {
 		return {}
 	}
