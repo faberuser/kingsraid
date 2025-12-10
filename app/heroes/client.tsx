@@ -58,7 +58,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
 		return new Fuse(heroes, {
-			keys: ["infos.name", "infos.title", "aliases"],
+			keys: ["profile.name", "profile.title", "aliases"],
 			threshold: 0.3,
 			includeScore: true,
 		})
