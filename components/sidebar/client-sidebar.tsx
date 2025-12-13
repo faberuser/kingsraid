@@ -10,7 +10,10 @@ import {
 	SidebarMenuButton,
 	SidebarHeader,
 	SidebarFooter,
+	SidebarTrigger,
+	useSidebar,
 } from "@/components/ui/sidebar"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Github, Calculator } from "lucide-react"
 import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
@@ -46,6 +49,7 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const pathname = usePathname()
 	const { resolvedTheme } = useTheme()
 	const [mounted, setMounted] = useState(false)
+	const { state } = useSidebar()
 
 	useEffect(() => {
 		// Schedule the state update to avoid synchronous setState in effect
@@ -56,20 +60,33 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const logoSrc = mounted && resolvedTheme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
 
 	return (
-		<Sidebar>
-			<SidebarHeader className="px-5 py-4 border-b mt-1">
-				<Link href="/" className="flex items-center space-x-2">
-					{mounted && (
-						<Image src={logoSrc} alt="King's Raid Logo" width={160} height={40} className="h-auto w-40" />
+		<Sidebar collapsible="icon">
+			<SidebarHeader className={"px-5 py-4 border-b mt-1 " + (state === "collapsed" ? "p-2" : "")}>
+				<div className="flex items-center justify-between gap-2">
+					{state === "collapsed" ? null : (
+						<Link href="/" className="flex items-center space-x-2 group-data-[collapsible=icon]:hidden">
+							{mounted && (
+								<Image
+									src={logoSrc}
+									alt="King's Raid Logo"
+									width={160}
+									height={40}
+									className="h-auto w-full max-w-[160px]"
+								/>
+							)}
+						</Link>
 					)}
-				</Link>
+					<SidebarTrigger className="ml-auto" />
+				</div>
 			</SidebarHeader>
 
 			<SidebarContent className="gap-0">
 				{/* Search Section */}
 				<SidebarGroup>
-					<SidebarGroupContent className="px-2 mt-2">
-						<GlobalSearch searchData={searchData} />
+					<SidebarGroupContent
+						className={"px-2 mt-2 " + (state === "collapsed" ? "p-0 flex justify-center items-center" : "")}
+					>
+						<GlobalSearch searchData={searchData} state={state} />
 					</SidebarGroupContent>
 				</SidebarGroup>
 
@@ -85,19 +102,26 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 
 								return (
 									<SidebarMenuItem key={item.title}>
-										<SidebarMenuButton asChild>
-											<Link
-												href={item.url}
-												className={`flex items-center space-x-2 pl-5 py-6 rounded-md transition-colors ${
-													isActive
-														? "bg-gray-200 dark:bg-gray-800"
-														: "hover:bg-gray-100 dark:hover:bg-gray-700"
-												}`}
-											>
-												<item.icon />
-												<div className="text-lg">{item.title}</div>
-											</Link>
-										</SidebarMenuButton>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<SidebarMenuButton asChild>
+													<Link
+														href={item.url}
+														className={`flex items-center space-x-2 pl-5 py-6 rounded-md transition-colors ${
+															isActive
+																? "bg-gray-200 dark:bg-gray-800"
+																: "hover:bg-gray-100 dark:hover:bg-gray-700"
+														}`}
+													>
+														<item.icon />
+														<div className="text-lg">{item.title}</div>
+													</Link>
+												</SidebarMenuButton>
+											</TooltipTrigger>
+											<TooltipContent side="right" className="group-data-[state=expanded]:hidden">
+												{item.title}
+											</TooltipContent>
+										</Tooltip>
 									</SidebarMenuItem>
 								)
 							})}
@@ -106,7 +130,13 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 				</SidebarGroup>
 			</SidebarContent>
 
-			<SidebarFooter className="px-5 py-4 border-t flex flex-row justify-between">
+			<SidebarFooter
+				className={
+					state === "expanded"
+						? "px-5 py-4 border-t flex flex-row justify-between"
+						: "py-1 flex flex-column items-center"
+				}
+			>
 				<ModeToggle />
 				<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
 					<Button variant="outline" size="icon" className="bg-background">
