@@ -17,7 +17,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 	const { showToggle } = useHeroToggle()
 
 	return (
-		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8"}`}>
+		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
 			{/* Back Button */}
 			<div
 				className={`mb-2 flex flex-row items-center gap-2 ${

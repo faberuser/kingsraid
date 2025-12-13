@@ -35,9 +35,10 @@ interface GlobalSearchProps {
 		artifacts?: ArtifactData[]
 		bosses?: BossData[]
 	}
+	state: "collapsed" | "expanded"
 }
 
-export default function GlobalSearch({ searchData }: GlobalSearchProps) {
+export default function GlobalSearch({ searchData, state }: GlobalSearchProps) {
 	const [open, setOpen] = useState(false)
 	const [searchValue, setSearchValue] = useState("")
 	const router = useRouter()
@@ -163,14 +164,21 @@ export default function GlobalSearch({ searchData }: GlobalSearchProps) {
 		<>
 			<Button
 				variant="outline"
-				className="w-full justify-start text-sm text-muted-foreground"
+				className={
+					"w-full justify-start text-sm text-muted-foreground " +
+					(state === "collapsed" ? "p-1.75 has-[>svg]:px-1.75" : "")
+				}
 				onClick={() => setOpen(true)}
 			>
 				<Search className="mr-1 h-4 w-4" />
-				Search...
-				<KbdGroup className="ml-auto">
-					<Kbd>Ctrl + K</Kbd>
-				</KbdGroup>
+				{state === "collapsed" ? null : (
+					<>
+						Search...
+						<KbdGroup className="ml-auto">
+							<Kbd>Ctrl + K</Kbd>
+						</KbdGroup>
+					</>
+				)}
 			</Button>
 
 			<CommandDialog open={open} onOpenChange={handleOpenChange}>

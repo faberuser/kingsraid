@@ -2,7 +2,7 @@ import "@/app/globals.css"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import SidebarProviderWithStorage from "@/components/sidebar/sidebar-provider-with-storage"
 import SidebarWrapper from "@/components/sidebar/sidebar-wrapper"
 import SidebarInsetClient from "@/components/sidebar/sidebar-inset-client"
 import { HeroToggleProvider } from "@/contexts/hero-toggle-context"
@@ -43,10 +43,10 @@ export default function RootLayout({
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 						<HeroDataVersionProvider>
 							<HeroToggleProvider>
-								<SidebarProvider>
+								<SidebarProviderWithStorage>
 									<SidebarWrapper />
 									<SidebarInsetClient>{children}</SidebarInsetClient>
-								</SidebarProvider>
+								</SidebarProviderWithStorage>
 							</HeroToggleProvider>
 						</HeroDataVersionProvider>
 					</ThemeProvider>
