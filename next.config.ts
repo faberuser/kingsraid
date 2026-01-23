@@ -16,14 +16,6 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	...(isStaticExport && {
-		// Exclude API routes from static export
-		exportPathMap: async function (defaultPathMap) {
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const { "/api/list-model-files": _, ...pathMap } = defaultPathMap
-			return pathMap
-		},
-	}),
 }
 
 export default nextConfig
