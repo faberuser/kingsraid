@@ -36,8 +36,15 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Temporarily move API routes (not supported in static export)
+        run: mv app/api app/api.bak || true
+
       - name: Build Next.js app
         run: bun run build
+
+      - name: Restore API routes
+        run: mv app/api.bak app/api || true
+        if: always()
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
