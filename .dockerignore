@@ -1,6 +1,7 @@
 .next
 out
 node_modules
-.git/modules/public/kingsraid-data
-.git/modules/public/kingsraid-models
-.git/modules/public/kingsraid-audio
+.git
+# .git/modules/public/kingsraid-data
+# .git/modules/public/kingsraid-models
+# .git/modules/public/kingsraid-audio
