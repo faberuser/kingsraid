@@ -1,0 +1,38 @@
+import { NextRequest, NextResponse } from "next/server"
+import fs from "fs"
+import path from "path"
+
+export async function GET(request: NextRequest) {
+	const searchParams = request.nextUrl.searchParams
+	const modelPath = searchParams.get("path")
+	const modelType = searchParams.get("type") || "heroes"
+
+	if (!modelPath) {
+		return NextResponse.json({ error: "Model path is required" }, { status: 400 })
+	}
+
+	try {
+		// Get the folder path (remove the filename)
+		const folderPath = modelPath.substring(0, modelPath.lastIndexOf("/"))
+		const fullPath = path.join(process.cwd(), "public", "kingsraid-models", "models", modelType, folderPath)
+
+		// Check if directory exists
+		if (!fs.existsSync(fullPath)) {
+			return NextResponse.json({ error: "Directory not found" }, { status: 404 })
+		}
+
+		// Read all files in the directory
+		const files = fs.readdirSync(fullPath)
+
+		// Filter for model and texture files
+		const modelFiles = files.filter((file) => {
+			const ext = path.extname(file).toLowerCase()
+			return [".fbx", ".png", ".jpg", ".jpeg", ".tga", ".dds"].includes(ext)
+		})
+
+		return NextResponse.json({ files: modelFiles })
+	} catch (error) {
+		console.error("Error listing model files:", error)
+		return NextResponse.json({ error: "Failed to list files" }, { status: 500 })
+	}
+}

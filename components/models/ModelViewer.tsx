@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib"
+import JSZip from "jszip"
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -60,6 +61,7 @@ export function ModelViewer({
 	const [downloadFormat, setDownloadFormat] = useState<"webm" | "mp4" | "gif">("webm")
 	const [isConverting, setIsConverting] = useState(false)
 	const [isFullscreen, setIsFullscreen] = useState(false)
+	const [isDownloading, setIsDownloading] = useState(false)
 	const controlsRef = useRef<OrbitControlsImpl>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 	const viewerContainerRef = useRef<HTMLDivElement>(null)
@@ -224,6 +226,102 @@ export function ModelViewer({
 		setIsFullscreen(!isFullscreen)
 	}
 
+	const downloadModels = async () => {
+		if (isDownloading) return
+
+		setIsDownloading(true)
+		const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+		const modelDir = `${basePath}/kingsraid-models/models/${modelType}`
+
+		try {
+			const zip = new JSZip()
+			const modelsFolder = zip.folder("models")
+
+			// Create a README with scale information
+			const scaleInfo = `King's Raid Model Pack
+Downloaded: ${new Date().toLocaleString()}
+
+BLENDER IMPORT INSTRUCTIONS:
+
+The FBX files are VERY SMALL by default when exported from the game.
+
+METHOD 1: Scale During Import
+1. File > Import > FBX (.fbx) OR 
+   Drag and Drop the FBX file into Blender
+2. In the "Transform" section (right panel), set "Scale" to 1000
+3. Click "Import FBX"
+
+METHOD 2: Scale After Import
+1. Import the FBX normally
+2. Select all imported objects (press A)
+3. Press S (scale), type 1000, then Enter
+
+Downloaded Models:
+`
+
+			// Download ALL model files
+			const allModelFiles = modelFiles
+
+			// Add README
+			modelsFolder?.file("README.txt", scaleInfo + allModelFiles.map((m) => `- ${m.name}`).join("\n"))
+
+			for (const modelFile of allModelFiles) {
+				try {
+					// Get the folder path and base name
+					const folderPath = modelFile.path.substring(0, modelFile.path.lastIndexOf("/"))
+					const folderName = folderPath.split("/").pop() || modelFile.name
+
+					const modelZipFolder = modelsFolder?.folder(folderName)
+
+					// Get list of all files in the model directory
+					const fileListResponse = await fetch(
+						`/api/list-model-files?path=${encodeURIComponent(modelFile.path)}&type=${modelType}`,
+					)
+
+					if (fileListResponse.ok) {
+						const { files } = await fileListResponse.json()
+
+						// Download all files (FBX + textures)
+						for (const fileName of files) {
+							try {
+								const fileResponse = await fetch(`${modelDir}/${folderPath}/${fileName}`)
+								if (fileResponse.ok) {
+									const blob = await fileResponse.blob()
+									modelZipFolder?.file(fileName, blob)
+								}
+							} catch {
+								console.error(`Failed to fetch ${fileName}`)
+							}
+						}
+					} else {
+						// Fallback: just download the FBX file
+						const fbxFileName = modelFile.path.split("/").pop() || ""
+						const fbxResponse = await fetch(`${modelDir}/${modelFile.path}`)
+						if (fbxResponse.ok) {
+							const blob = await fbxResponse.blob()
+							modelZipFolder?.file(fbxFileName, blob)
+						}
+					}
+				} catch (error) {
+					console.error(`Failed to fetch ${modelFile.path}:`, error)
+				}
+			}
+
+			// Generate and download the zip
+			const content = await zip.generateAsync({ type: "blob" })
+			const link = document.createElement("a")
+			link.href = URL.createObjectURL(content)
+			link.download = `kingsraid-models-${Date.now()}.zip`
+			link.click()
+			URL.revokeObjectURL(link.href)
+		} catch (error) {
+			console.error("Failed to download models:", error)
+			alert("Failed to download models. Please try again.")
+		} finally {
+			setIsDownloading(false)
+		}
+	}
+
 	// Listen for ESC key to exit fullscreen
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -331,6 +429,8 @@ export function ModelViewer({
 				animationDuration={animationDuration}
 				isFullscreen={isFullscreen}
 				toggleFullscreen={toggleFullscreen}
+				downloadModels={downloadModels}
+				isDownloading={isDownloading}
 			/>
 
 			{/* Models count */}

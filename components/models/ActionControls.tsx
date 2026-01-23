@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/ui/kbd"
-import { RotateCcw, Info, Camera, Video, Square, Film, Maximize, Minimize } from "lucide-react"
+import { RotateCcw, Info, Camera, Video, Square, Film, Maximize, Minimize, Download } from "lucide-react"
 
 interface ActionControlsProps {
 	isLoading: boolean
@@ -17,6 +17,8 @@ interface ActionControlsProps {
 	animationDuration: number
 	isFullscreen: boolean
 	toggleFullscreen: () => void
+	downloadModels: () => void
+	isDownloading: boolean
 }
 
 export function ActionControls({
@@ -31,6 +33,8 @@ export function ActionControls({
 	animationDuration,
 	isFullscreen,
 	toggleFullscreen,
+	downloadModels,
+	isDownloading,
 }: ActionControlsProps) {
 	return (
 		<div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -63,6 +67,21 @@ export function ActionControls({
 				</TooltipTrigger>
 				<TooltipContent>
 					<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
+				</TooltipContent>
+			</Tooltip>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						size="sm"
+						variant="secondary"
+						onClick={downloadModels}
+						disabled={isLoading || isDownloading}
+					>
+						<Download className="h-4 w-4" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
 				</TooltipContent>
 			</Tooltip>
 			<Tooltip>
