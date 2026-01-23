@@ -1,7 +1,7 @@
 name: Deploy Next.js site to Pages
 
 on:
-  push:
+  pull_request:
     branches: ["main"]
   workflow_dispatch:
 

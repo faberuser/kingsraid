@@ -1,0 +1,36 @@
+name: Build and Push Docker Image (Models and Voices Enabled)
+on:
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Registry
+        run: |
+          echo "${{ secrets.TOKEN }}" | docker login ${{ vars.REGISTRY }} -u ${{ secrets.USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg NEXT_PUBLIC_ENABLE_MODELS_VOICES=true \
+            -t ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest \
+            .
+
+      - name: Push Image to Registry
+        run: |
+          docker push ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest
