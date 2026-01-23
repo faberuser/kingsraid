@@ -11,14 +11,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 1
 
       - name: Login to Registry
         run: |
           echo "${{ secrets.TOKEN }}" | docker login ${{ vars.REGISTRY }} -u ${{ secrets.USERNAME }} --password-stdin
 
-      - name: Build Docker image
+      - name: Build Docker Image
         run: |
           docker build \
             --build-arg NEXT_PUBLIC_ENABLE_MODELS_VOICES=true \

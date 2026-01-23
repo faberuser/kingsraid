@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android
 
-      - name: Build Docker image
+      - name: Build Docker Image
         run: docker build -t app:latest .
 
       - name: Login to GitHub Container Registry
