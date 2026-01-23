@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/ui/kbd"
-import { RotateCcw, Info, Camera, Video, Square, Film } from "lucide-react"
+import { RotateCcw, Info, Camera, Video, Square, Film, Maximize, Minimize, Download } from "lucide-react"
 
-interface CameraControlsProps {
+interface ActionControlsProps {
 	isLoading: boolean
 	resetCamera: () => void
 	captureScreenshot: () => void
@@ -15,9 +15,13 @@ interface CameraControlsProps {
 	exportAnimation: () => void
 	selectedAnimation: string | null
 	animationDuration: number
+	isFullscreen: boolean
+	toggleFullscreen: () => void
+	downloadModels: () => void
+	isDownloading: boolean
 }
 
-export function CameraControls({
+export function ActionControls({
 	isLoading,
 	resetCamera,
 	captureScreenshot,
@@ -27,7 +31,11 @@ export function CameraControls({
 	exportAnimation,
 	selectedAnimation,
 	animationDuration,
-}: CameraControlsProps) {
+	isFullscreen,
+	toggleFullscreen,
+	downloadModels,
+	isDownloading,
+}: ActionControlsProps) {
 	return (
 		<div className="absolute top-4 right-4 flex flex-col gap-2">
 			<Tooltip>
@@ -49,6 +57,31 @@ export function CameraControls({
 					<div>
 						<Kbd>Space</Kbd> Play/Pause Animation
 					</div>
+				</TooltipContent>
+			</Tooltip>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button size="sm" variant="secondary" onClick={toggleFullscreen} disabled={isLoading}>
+						{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
+				</TooltipContent>
+			</Tooltip>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button
+						size="sm"
+						variant="secondary"
+						onClick={downloadModels}
+						disabled={isLoading || isDownloading}
+					>
+						<Download className="h-4 w-4" />
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>
+					<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
 				</TooltipContent>
 			</Tooltip>
 			<Tooltip>
@@ -106,8 +139,8 @@ export function CameraControls({
 						{isExportingAnimation
 							? "Exporting..."
 							: selectedAnimation
-							? `Export Animation (${animationDuration.toFixed(1)}s)`
-							: "Select an animation first"}
+								? `Export Animation (${animationDuration.toFixed(1)}s)`
+								: "Select an animation first"}
 					</div>
 				</TooltipContent>
 			</Tooltip>

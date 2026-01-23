@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib"
+import JSZip from "jszip"
 import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -16,7 +17,7 @@ import { RecordingHandler } from "@/components/models/RecordingHandler"
 import { ScreenshotDialog } from "@/components/models/ScreenshotDialog"
 import { RecordingDialog } from "@/components/models/RecordingDialog"
 import { ControlsPanel } from "@/components/models/ControlsPanel"
-import { CameraControls } from "@/components/models/CameraControls"
+import { ActionControls } from "@/components/models/ActionControls"
 import { convertToGif } from "@/components/models/gifConverter"
 import { formatAnimationName } from "@/components/models/utils"
 import {
@@ -59,8 +60,11 @@ export function ModelViewer({
 	const [isExportingAnimation, setIsExportingAnimation] = useState(false)
 	const [downloadFormat, setDownloadFormat] = useState<"webm" | "mp4" | "gif">("webm")
 	const [isConverting, setIsConverting] = useState(false)
+	const [isFullscreen, setIsFullscreen] = useState(false)
+	const [isDownloading, setIsDownloading] = useState(false)
 	const controlsRef = useRef<OrbitControlsImpl>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
+	const viewerContainerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
@@ -73,7 +77,7 @@ export function ModelViewer({
 					(m) =>
 						!weaponTypes.includes(m.type) || // Non-weapons
 						(weaponTypes.includes(m.type) && m.defaultPosition === true) || // Default position weapons
-						(modelType === "bosses" && weaponTypes.includes(m.type)) // All boss weapons
+						(modelType === "bosses" && weaponTypes.includes(m.type)), // All boss weapons
 				)
 				.map((m) => m.name)
 
@@ -209,161 +213,292 @@ export function ModelViewer({
 		setIsRecording(true)
 
 		// Stop recording after animation duration (plus a small buffer)
-		setTimeout(() => {
-			setIsRecording(false)
-			setIsExportingAnimation(false)
-		}, (animationDuration + 0.1) * 1000) // Add 100ms buffer
+		setTimeout(
+			() => {
+				setIsRecording(false)
+				setIsExportingAnimation(false)
+			},
+			(animationDuration + 0.1) * 1000,
+		) // Add 100ms buffer
 	}
+
+	const toggleFullscreen = () => {
+		setIsFullscreen(!isFullscreen)
+	}
+
+	const downloadModels = async () => {
+		if (isDownloading) return
+
+		setIsDownloading(true)
+		const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+		const modelDir = `${basePath}/kingsraid-models/models/${modelType}`
+
+		try {
+			const zip = new JSZip()
+			const modelsFolder = zip.folder("models")
+
+			// Create a README with scale information
+			const scaleInfo = `King's Raid Model Pack
+Downloaded: ${new Date().toLocaleString()}
+
+BLENDER IMPORT INSTRUCTIONS:
+
+The FBX files are VERY SMALL by default when exported from the game.
+
+METHOD 1: Scale During Import
+1. File > Import > FBX (.fbx) OR 
+   Drag and Drop the FBX file into Blender
+2. In the "Transform" section (right panel), set "Scale" to 1000
+3. Click "Import FBX"
+
+METHOD 2: Scale After Import
+1. Import the FBX normally
+2. Select all imported objects (press A)
+3. Press S (scale), type 1000, then Enter
+
+Downloaded Models:
+`
+
+			// Download ALL model files
+			const allModelFiles = modelFiles
+
+			// Add README
+			modelsFolder?.file("README.txt", scaleInfo + allModelFiles.map((m) => `- ${m.name}`).join("\n"))
+
+			for (const modelFile of allModelFiles) {
+				try {
+					// Get the folder path and base name
+					const folderPath = modelFile.path.substring(0, modelFile.path.lastIndexOf("/"))
+					const folderName = folderPath.split("/").pop() || modelFile.name
+
+					const modelZipFolder = modelsFolder?.folder(folderName)
+
+					// Get list of all files in the model directory
+					const fileListResponse = await fetch(
+						`/api/list-model-files?path=${encodeURIComponent(modelFile.path)}&type=${modelType}`,
+					)
+
+					if (fileListResponse.ok) {
+						const { files } = await fileListResponse.json()
+
+						// Download all files (FBX + textures)
+						for (const fileName of files) {
+							try {
+								const fileResponse = await fetch(`${modelDir}/${folderPath}/${fileName}`)
+								if (fileResponse.ok) {
+									const blob = await fileResponse.blob()
+									modelZipFolder?.file(fileName, blob)
+								}
+							} catch {
+								console.error(`Failed to fetch ${fileName}`)
+							}
+						}
+					} else {
+						// Fallback: just download the FBX file
+						const fbxFileName = modelFile.path.split("/").pop() || ""
+						const fbxResponse = await fetch(`${modelDir}/${modelFile.path}`)
+						if (fbxResponse.ok) {
+							const blob = await fbxResponse.blob()
+							modelZipFolder?.file(fbxFileName, blob)
+						}
+					}
+				} catch (error) {
+					console.error(`Failed to fetch ${modelFile.path}:`, error)
+				}
+			}
+
+			// Generate and download the zip
+			const content = await zip.generateAsync({ type: "blob" })
+			const link = document.createElement("a")
+			link.href = URL.createObjectURL(content)
+			link.download = `kingsraid-models-${Date.now()}.zip`
+			link.click()
+			URL.revokeObjectURL(link.href)
+		} catch (error) {
+			console.error("Failed to download models:", error)
+			alert("Failed to download models. Please try again.")
+		} finally {
+			setIsDownloading(false)
+		}
+	}
+
+	// Listen for ESC key to exit fullscreen
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape" && isFullscreen) {
+				setIsFullscreen(false)
+			}
+		}
+
+		window.addEventListener("keydown", handleKeyDown)
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown)
+		}
+	}, [isFullscreen])
+
+	const renderViewerContent = () => (
+		<>
+			{/* Sliding Controls Panel - slides in from left */}
+			<ControlsPanel
+				isCollapsed={isCollapsed}
+				isLoading={isLoading}
+				selectedScene={selectedScene}
+				setSelectedScene={setSelectedScene}
+				availableScenes={availableScenes}
+				modelFiles={modelFiles}
+				visibleModels={visibleModels}
+				toggleModelVisibility={toggleModelVisibility}
+				availableAnimations={availableAnimations}
+				selectedAnimation={selectedAnimation}
+				setSelectedAnimation={setSelectedAnimation}
+				isPaused={isPaused}
+				setIsPaused={setIsPaused}
+			/>
+
+			{/* Collapse Toggle Button - moves with the panel */}
+			{!isFullscreen && (
+				<CollapsibleTrigger asChild>
+					<Button
+						variant="secondary"
+						size="sm"
+						className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
+						style={{
+							left: isCollapsed ? "0px" : "208px",
+						}}
+						title={isCollapsed ? "Show controls" : "Hide controls"}
+						disabled={isLoading}
+					>
+						{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+					</Button>
+				</CollapsibleTrigger>
+			)}
+
+			<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
+				<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
+				<OrbitControls
+					ref={controlsRef}
+					enablePan={true}
+					enableZoom={true}
+					enableRotate={true}
+					maxDistance={20}
+					minDistance={0}
+					target={INITIAL_CAMERA_TARGET}
+				/>
+				{/* Lighting setup */}
+				<ambientLight intensity={3} />
+				<directionalLight
+					position={[0, 10, 0]}
+					intensity={1}
+					castShadow
+					shadow-mapSize={2048}
+					shadow-camera-far={50}
+					shadow-camera-left={-10}
+					shadow-camera-right={10}
+					shadow-camera-top={10}
+					shadow-camera-bottom={-10}
+				/>
+				<Suspense fallback={null}>
+					<Model
+						modelFiles={modelFiles}
+						visibleModels={visibleModels}
+						setVisibleModels={setVisibleModels}
+						selectedAnimation={selectedAnimation}
+						isPaused={isPaused}
+						setIsLoading={setIsLoading}
+						setLoadingProgress={setLoadingProgress}
+						onAnimationDurationChange={setAnimationDuration}
+						modelType={modelType}
+						bossName={bossName}
+					/>
+					{selectedScene === "grid" ? <gridHelper args={[10, 10]} /> : <Scene sceneName={selectedScene} />}
+					<ScreenshotHandler onCapture={captureCallback} />
+					<RecordingHandler isRecording={isRecording} onRecordingComplete={handleRecordingComplete} />
+				</Suspense>
+			</Canvas>
+
+			{/* Camera Controls */}
+			<ActionControls
+				isLoading={isLoading}
+				resetCamera={resetCamera}
+				captureScreenshot={captureScreenshot}
+				isRecording={isRecording}
+				isExportingAnimation={isExportingAnimation}
+				toggleRecording={toggleRecording}
+				exportAnimation={exportAnimation}
+				selectedAnimation={selectedAnimation}
+				animationDuration={animationDuration}
+				isFullscreen={isFullscreen}
+				toggleFullscreen={toggleFullscreen}
+				downloadModels={downloadModels}
+				isDownloading={isDownloading}
+			/>
+
+			{/* Models count */}
+			{modelFiles.some((m) => visibleModels.has(m.name)) && (
+				<div className="absolute bottom-4 left-4 space-y-1">
+					<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+						Models: {Array.from(visibleModels).length}/{modelFiles.length}
+					</div>
+					{selectedAnimation && (
+						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+							Animation: {formatAnimationName(selectedAnimation)}
+						</div>
+					)}
+					{isRecording && (
+						<div className="bg-red-600 text-white px-2 py-1 rounded text-sm flex items-center gap-2 animate-pulse">
+							<div className="w-2 h-2 bg-white rounded-full" />
+							{isExportingAnimation ? "Exporting Animation..." : "Recording..."}
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* Loading overlay */}
+			{isLoading && (
+				<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+					<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
+						<Progress value={loadingProgress} className="h-2" />
+						<div className="text-xs text-muted-foreground text-right mb-0.5">
+							{Math.round(loadingProgress)}%
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Screenshot Dialog */}
+			<ScreenshotDialog
+				open={screenshotDialog}
+				onOpenChange={setScreenshotDialog}
+				screenshotUrl={screenshotUrl}
+				onDownload={downloadScreenshot}
+				onCopyToClipboard={copyToClipboard}
+			/>
+
+			{/* Recording Dialog */}
+			<RecordingDialog
+				open={recordingDialog}
+				onOpenChange={closeRecordingDialog}
+				recordingUrl={recordingUrl}
+				downloadFormat={downloadFormat}
+				setDownloadFormat={setDownloadFormat}
+				onDownload={downloadRecording}
+				isConverting={isConverting}
+			/>
+		</>
+	)
 
 	return (
 		<Collapsible open={!isCollapsed} onOpenChange={(open) => setIsCollapsed(!open)}>
 			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
-				{/* 3D Viewer */}
-				<div className="relative w-full h-200 lg:h-auto bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 rounded-lg overflow-hidden">
-					{/* Sliding Controls Panel - slides in from left */}
-					<ControlsPanel
-						isCollapsed={isCollapsed}
-						isLoading={isLoading}
-						selectedScene={selectedScene}
-						setSelectedScene={setSelectedScene}
-						availableScenes={availableScenes}
-						modelFiles={modelFiles}
-						visibleModels={visibleModels}
-						toggleModelVisibility={toggleModelVisibility}
-						availableAnimations={availableAnimations}
-						selectedAnimation={selectedAnimation}
-						setSelectedAnimation={setSelectedAnimation}
-						isPaused={isPaused}
-						setIsPaused={setIsPaused}
-					/>
-
-					{/* Collapse Toggle Button - moves with the panel */}
-					<CollapsibleTrigger asChild>
-						<Button
-							variant="secondary"
-							size="sm"
-							className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
-							style={{
-								left: isCollapsed ? "0px" : "208px",
-							}}
-							title={isCollapsed ? "Show controls" : "Hide controls"}
-							disabled={isLoading}
-						>
-							{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-						</Button>
-					</CollapsibleTrigger>
-
-					<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
-						<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
-						<OrbitControls
-							ref={controlsRef}
-							enablePan={true}
-							enableZoom={true}
-							enableRotate={true}
-							maxDistance={20}
-							minDistance={0}
-							target={INITIAL_CAMERA_TARGET}
-						/>
-						{/* Lighting setup */}
-						<ambientLight intensity={3} />
-						<directionalLight
-							position={[0, 10, 0]}
-							intensity={1}
-							castShadow
-							shadow-mapSize={2048}
-							shadow-camera-far={50}
-							shadow-camera-left={-10}
-							shadow-camera-right={10}
-							shadow-camera-top={10}
-							shadow-camera-bottom={-10}
-						/>
-						<Suspense fallback={null}>
-							<Model
-								modelFiles={modelFiles}
-								visibleModels={visibleModels}
-								setVisibleModels={setVisibleModels}
-								selectedAnimation={selectedAnimation}
-								isPaused={isPaused}
-								setIsLoading={setIsLoading}
-								setLoadingProgress={setLoadingProgress}
-								onAnimationDurationChange={setAnimationDuration}
-								modelType={modelType}
-								bossName={bossName}
-							/>
-							{selectedScene === "grid" ? (
-								<gridHelper args={[10, 10]} />
-							) : (
-								<Scene sceneName={selectedScene} />
-							)}
-							<ScreenshotHandler onCapture={captureCallback} />
-							<RecordingHandler isRecording={isRecording} onRecordingComplete={handleRecordingComplete} />
-						</Suspense>
-					</Canvas>
-
-					{/* Camera Controls */}
-					<CameraControls
-						isLoading={isLoading}
-						resetCamera={resetCamera}
-						captureScreenshot={captureScreenshot}
-						isRecording={isRecording}
-						isExportingAnimation={isExportingAnimation}
-						toggleRecording={toggleRecording}
-						exportAnimation={exportAnimation}
-						selectedAnimation={selectedAnimation}
-						animationDuration={animationDuration}
-					/>
-
-					{/* Models count */}
-					{modelFiles.some((m) => visibleModels.has(m.name)) && (
-						<div className="absolute bottom-4 left-4 space-y-1">
-							<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-								Models: {Array.from(visibleModels).length}/{modelFiles.length}
-							</div>
-							{selectedAnimation && (
-								<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-									Animation: {formatAnimationName(selectedAnimation)}
-								</div>
-							)}
-							{isRecording && (
-								<div className="bg-red-600 text-white px-2 py-1 rounded text-sm flex items-center gap-2 animate-pulse">
-									<div className="w-2 h-2 bg-white rounded-full" />
-									{isExportingAnimation ? "Exporting Animation..." : "Recording..."}
-								</div>
-							)}
-						</div>
-					)}
-
-					{/* Loading overlay */}
-					{isLoading && (
-						<div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-							<div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-lg min-w-72 max-w-md flex flex-row items-center gap-3">
-								<Progress value={loadingProgress} className="h-2" />
-								<div className="text-xs text-muted-foreground text-right mb-0.5">
-									{Math.round(loadingProgress)}%
-								</div>
-							</div>
-						</div>
-					)}
-
-					{/* Screenshot Dialog */}
-					<ScreenshotDialog
-						open={screenshotDialog}
-						onOpenChange={setScreenshotDialog}
-						screenshotUrl={screenshotUrl}
-						onDownload={downloadScreenshot}
-						onCopyToClipboard={copyToClipboard}
-					/>
-
-					{/* Recording Dialog */}
-					<RecordingDialog
-						open={recordingDialog}
-						onOpenChange={closeRecordingDialog}
-						recordingUrl={recordingUrl}
-						downloadFormat={downloadFormat}
-						setDownloadFormat={setDownloadFormat}
-						onDownload={downloadRecording}
-						isConverting={isConverting}
-					/>
+				<div
+					ref={viewerContainerRef}
+					className={`relative w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden transition-all duration-300 ${
+						isFullscreen
+							? "!fixed inset-0 z-50 !w-screen !h-screen !rounded-none"
+							: "h-200 lg:h-auto rounded-lg"
+					}`}
+				>
+					{renderViewerContent()}
 				</div>
 			</div>
 		</Collapsible>

@@ -9,12 +9,15 @@ import { Switch } from "@/components/ui/switch"
 import { useHeroDataVersion } from "@/hooks/use-hero-data-version"
 import { useHeroToggle } from "@/contexts/hero-toggle-context"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function SidebarInsetClient({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const { isNew, toggleVersion } = useHeroDataVersion()
 	const { showToggle } = useHeroToggle()
+	const isMobile = useIsMobile()
 
 	return (
 		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
@@ -31,29 +34,44 @@ export default function SidebarInsetClient({ children }: { children: React.React
 					</Button>
 				)}
 				{showToggle && (
-					<TooltipProvider>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Info className="h-4 w-4 text-muted-foreground cursor-help" />
-								</TooltipTrigger>
-								<TooltipContent className="max-w-sm">
+					<div className="flex items-center gap-2">
+						{isMobile ? (
+							<Popover>
+								<PopoverTrigger asChild>
+									<Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+								</PopoverTrigger>
+								<PopoverContent className="max-w-sm">
 									<p className="text-sm">
 										Latest data from Content Creator CBT.
 										<br />
 										Costumes, Models, Voices use legacy data.
 									</p>
-								</TooltipContent>
-							</Tooltip>
-							<span className={`text-sm font-medium ${isNew ? "text-primary" : "text-muted-foreground"}`}>
-								Latest
-							</span>
-							<Switch checked={!isNew} onCheckedChange={toggleVersion} />
-							<span className={`text-sm font-medium ${isNew ? "text-muted-foreground" : "text-primary"}`}>
-								Legacy
-							</span>
-						</div>
-					</TooltipProvider>
+								</PopoverContent>
+							</Popover>
+						) : (
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Info className="h-4 w-4 text-muted-foreground cursor-help" />
+									</TooltipTrigger>
+									<TooltipContent className="max-w-sm">
+										<p className="text-sm">
+											Latest data from Content Creator CBT.
+											<br />
+											Costumes, Models, Voices use legacy data.
+										</p>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
+						)}
+						<span className={`text-sm font-medium ${isNew ? "text-primary" : "text-muted-foreground"}`}>
+							Latest
+						</span>
+						<Switch checked={!isNew} onCheckedChange={toggleVersion} />
+						<span className={`text-sm font-medium ${isNew ? "text-muted-foreground" : "text-primary"}`}>
+							Legacy
+						</span>
+					</div>
 				)}
 				<div className="md:hidden">
 					<MobileMenu />
