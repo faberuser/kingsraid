@@ -1,6 +1,6 @@
 name: Build and Push Docker Image (Models and Voices Enabled)
 on:
-  pull_request:
+  push:
     branches: ["main"]
   workflow_dispatch:
 
@@ -13,17 +13,23 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to Registry
-        run: |
-          echo "${{ secrets.TOKEN }}" | docker login ${{ vars.REGISTRY }} -u ${{ secrets.USERNAME }} --password-stdin
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.TOKEN }}
 
-      - name: Build Docker Image
-        run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_ENABLE_MODELS_VOICES=true \
-            -t ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest \
-            .
-
-      - name: Push Image to Registry
-        run: |
-          docker push ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest
+          build-args: |
+            NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
