@@ -16,7 +16,7 @@ jobs:
           submodules: true
           fetch-depth: 1
 
-      - name: Free up disk space
+      - name: Free up Disk Space
         run: |
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android
 
@@ -32,7 +32,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and Push
         uses: docker/build-push-action@v6
         with:
           context: .
