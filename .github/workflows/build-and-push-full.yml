@@ -1,4 +1,4 @@
-name: Build and Push Docker Image (Models and Voices Enabled)
+name: Build and Push Docker Image (Models and Voices)
 on:
   push:
     branches: ["main"]
@@ -8,6 +8,13 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
+      - name: Clean up Docker resources
+        run: |
+          docker system prune -af --volumes || true
+          docker builder prune -af || true
+          # Remove old images, keeping only the latest
+          docker images ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid --format "{{.ID}} {{.CreatedAt}}" | tail -n +2 | awk '{print $1}' | xargs -r docker rmi -f || true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -31,5 +38,10 @@ jobs:
           tags: ${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:latest
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:buildcache
+          cache-to: type=registry,ref=${{ vars.REGISTRY }}/${{ vars.NAMESPACE }}/kingsraid:buildcache,mode=max
+
+      - name: Clean up after build
+        if: always()
+        run: |
+          docker system prune -af --volumes || true
