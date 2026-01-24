@@ -22,6 +22,7 @@ env:
 
 jobs:
   build:
+    name: Build Next.js
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -55,6 +56,7 @@ jobs:
           path: ./out
 
   deploy:
+    name: Deploy to GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
