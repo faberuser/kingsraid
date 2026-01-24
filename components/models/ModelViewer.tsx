@@ -369,22 +369,20 @@ Downloaded Models:
 			/>
 
 			{/* Collapse Toggle Button - moves with the panel */}
-			{!isFullscreen && (
-				<CollapsibleTrigger asChild>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
-						style={{
-							left: isCollapsed ? "0px" : "208px",
-						}}
-						title={isCollapsed ? "Show controls" : "Hide controls"}
-						disabled={isLoading}
-					>
-						{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-					</Button>
-				</CollapsibleTrigger>
-			)}
+			<CollapsibleTrigger asChild>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
+					style={{
+						left: isCollapsed ? "0px" : "208px",
+					}}
+					title={isCollapsed ? "Show controls" : "Hide controls"}
+					disabled={isLoading}
+				>
+					{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+				</Button>
+			</CollapsibleTrigger>
 
 			<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
 				<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
