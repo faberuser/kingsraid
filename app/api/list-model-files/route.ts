@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
+// This route is only available in non-static builds (requires file system access)
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams
 	const modelPath = searchParams.get("path")

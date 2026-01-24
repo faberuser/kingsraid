@@ -336,6 +336,20 @@ Downloaded Models:
 		}
 	}, [isFullscreen])
 
+	// Hide body scrollbar when in fullscreen
+	useEffect(() => {
+		if (isFullscreen) {
+			document.body.style.overflow = "hidden"
+		} else {
+			document.body.style.overflow = ""
+		}
+
+		// Cleanup on unmount
+		return () => {
+			document.body.style.overflow = ""
+		}
+	}, [isFullscreen])
+
 	const renderViewerContent = () => (
 		<>
 			{/* Sliding Controls Panel - slides in from left */}
