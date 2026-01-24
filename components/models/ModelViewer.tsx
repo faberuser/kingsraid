@@ -19,7 +19,6 @@ import { RecordingDialog } from "@/components/models/RecordingDialog"
 import { ControlsPanel } from "@/components/models/ControlsPanel"
 import { ActionControls } from "@/components/models/ActionControls"
 import { convertToGif } from "@/components/models/gifConverter"
-import { formatAnimationName } from "@/components/models/utils"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
@@ -370,22 +369,20 @@ Downloaded Models:
 			/>
 
 			{/* Collapse Toggle Button - moves with the panel */}
-			{!isFullscreen && (
-				<CollapsibleTrigger asChild>
-					<Button
-						variant="secondary"
-						size="sm"
-						className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
-						style={{
-							left: isCollapsed ? "0px" : "208px",
-						}}
-						title={isCollapsed ? "Show controls" : "Hide controls"}
-						disabled={isLoading}
-					>
-						{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-					</Button>
-				</CollapsibleTrigger>
-			)}
+			<CollapsibleTrigger asChild>
+				<Button
+					variant="secondary"
+					size="sm"
+					className="absolute top-1/2 -translate-y-1/2 z-20 h-16 w-6 p-0 shadow-lg rounded-l-none rounded-r-lg transition-all duration-300 ease-in-out"
+					style={{
+						left: isCollapsed ? "0px" : "208px",
+					}}
+					title={isCollapsed ? "Show controls" : "Hide controls"}
+					disabled={isLoading}
+				>
+					{isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+				</Button>
+			</CollapsibleTrigger>
 
 			<Canvas shadows gl={{ toneMapping: THREE.NoToneMapping }} resize={{ polyfill: ResizeObserver }}>
 				<PerspectiveCamera ref={cameraRef} makeDefault position={INITIAL_CAMERA_POSITION} />
@@ -446,26 +443,6 @@ Downloaded Models:
 				downloadModels={downloadModels}
 				isDownloading={isDownloading}
 			/>
-
-			{/* Models count */}
-			{modelFiles.some((m) => visibleModels.has(m.name)) && (
-				<div className="absolute bottom-4 left-4 space-y-1">
-					<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-						Models: {Array.from(visibleModels).length}/{modelFiles.length}
-					</div>
-					{selectedAnimation && (
-						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-							Animation: {formatAnimationName(selectedAnimation)}
-						</div>
-					)}
-					{isRecording && (
-						<div className="bg-red-600 text-white px-2 py-1 rounded text-sm flex items-center gap-2 animate-pulse">
-							<div className="w-2 h-2 bg-white rounded-full" />
-							{isExportingAnimation ? "Exporting Animation..." : "Recording..."}
-						</div>
-					)}
-				</div>
-			)}
 
 			{/* Loading overlay */}
 			{isLoading && (

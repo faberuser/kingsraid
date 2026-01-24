@@ -1,9 +1,23 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/ui/kbd"
-import { RotateCcw, Info, Camera, Video, Square, Film, Maximize, Minimize, Download } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+	RotateCcw,
+	Info,
+	Camera,
+	Video,
+	Square,
+	Film,
+	Maximize,
+	Minimize,
+	Download,
+	ChevronDown,
+	ChevronUp,
+} from "lucide-react"
 
 interface ActionControlsProps {
 	isLoading: boolean
@@ -36,114 +50,125 @@ export function ActionControls({
 	downloadModels,
 	isDownloading,
 }: ActionControlsProps) {
+	const [isOpen, setIsOpen] = useState(true)
+
 	return (
-		<div className="absolute top-4 right-4 flex flex-col gap-2">
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button size="sm" variant="secondary" disabled={isLoading}>
-						<Info className="h-4 w-4" />
+		<Collapsible open={isOpen} onOpenChange={setIsOpen} className="absolute top-4 right-4">
+			<div className="flex flex-col gap-2">
+				<CollapsibleTrigger asChild>
+					<Button size="sm" variant="secondary" className="w-10">
+						{isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
 					</Button>
-				</TooltipTrigger>
-				<TooltipContent className="space-y-1">
-					<div>
-						<Kbd>Left Click</Kbd> Rotate
-					</div>
-					<div>
-						<Kbd>Right Click</Kbd> Move
-					</div>
-					<div>
-						<Kbd>Scroll</Kbd> Zoom
-					</div>
-					<div>
-						<Kbd>Space</Kbd> Play/Pause Animation
-					</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button size="sm" variant="secondary" onClick={toggleFullscreen} disabled={isLoading}>
-						{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						size="sm"
-						variant="secondary"
-						onClick={downloadModels}
-						disabled={isLoading || isDownloading}
-					>
-						<Download className="h-4 w-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
-						<RotateCcw className="h-4 w-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>Reset Camera</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
-						<Camera className="h-4 w-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>Take Screenshot</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						size="sm"
-						variant={isRecording && !isExportingAnimation ? "destructive" : "secondary"}
-						onClick={toggleRecording}
-						disabled={isLoading || isExportingAnimation}
-					>
-						{isRecording && !isExportingAnimation ? (
-							<Square className="h-4 w-4" />
-						) : (
-							<Video className="h-4 w-4" />
-						)}
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>{isRecording && !isExportingAnimation ? "Stop Recording" : "Record Video"}</div>
-				</TooltipContent>
-			</Tooltip>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Button
-						size="sm"
-						variant={isExportingAnimation ? "destructive" : "secondary"}
-						onClick={exportAnimation}
-						disabled={isLoading || !selectedAnimation || isRecording}
-					>
-						<Film className="h-4 w-4" />
-					</Button>
-				</TooltipTrigger>
-				<TooltipContent>
-					<div>
-						{isExportingAnimation
-							? "Exporting..."
-							: selectedAnimation
-								? `Export Animation (${animationDuration.toFixed(1)}s)`
-								: "Select an animation first"}
-					</div>
-				</TooltipContent>
-			</Tooltip>
-		</div>
+				</CollapsibleTrigger>
+				<CollapsibleContent className="flex flex-col gap-2">
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" disabled={isLoading}>
+								<Info className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent className="space-y-1">
+							<div>
+								<Kbd>Left Click</Kbd> Rotate
+							</div>
+							<div>
+								<Kbd>Right Click</Kbd> Move
+							</div>
+							<div>
+								<Kbd>Scroll</Kbd> Zoom
+							</div>
+							<div>
+								<Kbd>Space</Kbd> Play/Pause Animation
+							</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" onClick={toggleFullscreen} disabled={isLoading}>
+								{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								size="sm"
+								variant="secondary"
+								onClick={downloadModels}
+								disabled={isLoading || isDownloading}
+							>
+								<Download className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
+								<RotateCcw className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>Reset Camera</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
+								<Camera className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>Take Screenshot</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								size="sm"
+								variant={isRecording && !isExportingAnimation ? "destructive" : "secondary"}
+								onClick={toggleRecording}
+								disabled={isLoading || isExportingAnimation}
+							>
+								{isRecording && !isExportingAnimation ? (
+									<Square className="h-4 w-4" />
+								) : (
+									<Video className="h-4 w-4" />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>{isRecording && !isExportingAnimation ? "Stop Recording" : "Record Video"}</div>
+						</TooltipContent>
+					</Tooltip>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								size="sm"
+								variant={isExportingAnimation ? "destructive" : "secondary"}
+								onClick={exportAnimation}
+								disabled={isLoading || !selectedAnimation || isRecording}
+							>
+								<Film className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>
+								{isExportingAnimation
+									? "Exporting..."
+									: selectedAnimation
+										? `Export Animation (${animationDuration.toFixed(1)}s)`
+										: "Select an animation first"}
+							</div>
+						</TooltipContent>
+					</Tooltip>
+				</CollapsibleContent>
+			</div>
+		</Collapsible>
 	)
 }
