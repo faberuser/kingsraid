@@ -19,7 +19,6 @@ import { RecordingDialog } from "@/components/models/RecordingDialog"
 import { ControlsPanel } from "@/components/models/ControlsPanel"
 import { ActionControls } from "@/components/models/ActionControls"
 import { convertToGif } from "@/components/models/gifConverter"
-import { formatAnimationName } from "@/components/models/utils"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
@@ -446,26 +445,6 @@ Downloaded Models:
 				downloadModels={downloadModels}
 				isDownloading={isDownloading}
 			/>
-
-			{/* Models count */}
-			{modelFiles.some((m) => visibleModels.has(m.name)) && (
-				<div className="absolute bottom-4 left-4 space-y-1">
-					<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-						Models: {Array.from(visibleModels).length}/{modelFiles.length}
-					</div>
-					{selectedAnimation && (
-						<div className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-							Animation: {formatAnimationName(selectedAnimation)}
-						</div>
-					)}
-					{isRecording && (
-						<div className="bg-red-600 text-white px-2 py-1 rounded text-sm flex items-center gap-2 animate-pulse">
-							<div className="w-2 h-2 bg-white rounded-full" />
-							{isExportingAnimation ? "Exporting Animation..." : "Recording..."}
-						</div>
-					)}
-				</div>
-			)}
 
 			{/* Loading overlay */}
 			{isLoading && (
