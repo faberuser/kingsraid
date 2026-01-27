@@ -173,3 +173,132 @@ export const formatModelName = (modelName: string) => {
 		.replace(/([A-Z])/g, " $1")
 		.trim()
 }
+
+/**
+ * Animation to voice mapping
+ * Maps animation names to their corresponding voice file patterns
+ */
+const ANIMATION_VOICE_MAP: Record<string, string[]> = {
+	// Skills
+	skill1: ["Skill1", "Skill1_b", "Skill1_c"],
+	skill2: ["Skill2", "Skill2_b", "Skill2_c"],
+	skill3: ["Skill3", "Skill3_b", "Skill3_c"],
+	skill4: ["Skill4", "Skill4_b", "Skill4_c"],
+	skill5: ["Skill5", "Skill5_b", "Skill5_c"],
+	// Attacks
+	attack: ["Attack", "Attack1", "Attack2", "Attack3", "Attack4"],
+	attack1: ["Attack1", "Attack"],
+	attack2: ["Attack2", "Attack"],
+	attack3: ["Attack3", "Attack"],
+	attack4: ["Attack4", "Attack"],
+	// Combat
+	damage: ["Damage_01", "Damage_02", "Damage"],
+	dead: ["Dead"],
+	victory: ["Victory", "Victory_b"],
+	// Interactions
+	inntouch: ["Touch", "Touch1", "Touch2"],
+	innidle: ["InnIdle", "Idle"],
+	touch: ["Touch", "Touch1", "Touch2"],
+	think: ["Think1", "Think2", "Think"],
+	happy: ["Happy1", "Happy2", "Happy"],
+	laugh: ["Laugh"],
+	casting: ["Casting1", "Casting2", "Casting"],
+	// Other
+	trs: ["trs"],
+	get: ["get-01", "get-01_b", "get-02_c"],
+}
+
+/**
+ * Find matching voice file for an animation
+ * @param animationName - The animation name (e.g., "Hero_Aisha@Skill1_Skill1")
+ * @param voiceFiles - Array of voice files for the selected language
+ * @param heroName - The hero's name for matching
+ * @returns The voice file path or null if not found
+ */
+export const findVoiceForAnimation = (
+	animationName: string,
+	voiceFiles: Array<{ name: string; path: string; displayName: string }>,
+	heroName: string,
+): string | null => {
+	if (!animationName || !voiceFiles || voiceFiles.length === 0) {
+		return null
+	}
+
+	// Extract the animation type from the animation name
+	// Format: "Hero_Name@AnimType_AnimType" or "Hero_Name@AnimType_AnimType-1"
+	const atIndex = animationName.indexOf("@")
+	if (atIndex === -1) {
+		return null
+	}
+
+	const animPart = animationName.substring(atIndex + 1).toLowerCase()
+
+	// Extract sequence info if present (e.g., "skill1_skill1-2" -> base: "skill1", sequence: "2")
+	const sequenceMatch = animPart.match(/([a-z]+\d+)[-_](\d+)/)
+	const sequenceNum = sequenceMatch ? sequenceMatch[2] : null
+	const isFirstInSequence = sequenceNum === "1" || sequenceNum === null
+
+	// Helper function to check if voice name matches pattern
+	const matchesVoicePattern = (voiceNameLower: string, heroNameLower: string, patternLower: string): boolean => {
+		if (!voiceNameLower.startsWith(`${heroNameLower}-`)) {
+			return false
+		}
+
+		// Check for pattern with language suffix (e.g., "vox_skill1_jp" or "vox_skill1_en")
+		// Also check for pattern at end of name without suffix (e.g., "vox_skill1" for English files)
+		const hasPatternWithSuffix =
+			voiceNameLower.includes(`vox_${patternLower}_`) || voiceNameLower.includes(`vox-${patternLower}_`)
+
+		// For files without language suffix (common in English), check if pattern is at the end
+		// e.g., "aisha-vox_skill1" should match pattern "skill1"
+		const endsWithPattern =
+			voiceNameLower.endsWith(`vox_${patternLower}`) || voiceNameLower.endsWith(`vox-${patternLower}`)
+
+		return hasPatternWithSuffix || endsWithPattern
+	}
+
+	// Try to match against known animation types
+	for (const [animKey, voicePatterns] of Object.entries(ANIMATION_VOICE_MAP)) {
+		if (animPart.includes(animKey)) {
+			// Try each voice pattern for this animation type
+			for (const pattern of voicePatterns) {
+				const heroNameLower = heroName.toLowerCase()
+
+				// First, try to find a sequence-specific voice (e.g., Skill1-2_jp.wav)
+				if (sequenceNum) {
+					const patternWithSeq = `${pattern.toLowerCase()}-${sequenceNum}`
+					const sequenceVoice = voiceFiles.find((voice) => {
+						const voiceNameLower = voice.name.toLowerCase()
+						return matchesVoicePattern(voiceNameLower, heroNameLower, patternWithSeq)
+					})
+
+					if (sequenceVoice) {
+						return sequenceVoice.path
+					}
+				}
+
+				// Only play base voice on the FIRST animation of a sequence
+				// This prevents the same voice from playing on Skill2-1, Skill2-2, Skill2-3
+				// when there's no sequence-specific voice file
+				if (!isFirstInSequence) {
+					// Not the first in sequence and no sequence-specific voice found
+					// Skip playing the base voice
+					continue
+				}
+
+				// Try to find the base voice (e.g., Skill1_jp.wav or Skill1.wav)
+				const patternLower = pattern.toLowerCase()
+				const matchingVoice = voiceFiles.find((voice) => {
+					const voiceNameLower = voice.name.toLowerCase()
+					return matchesVoicePattern(voiceNameLower, heroNameLower, patternLower)
+				})
+
+				if (matchingVoice) {
+					return matchingVoice.path
+				}
+			}
+		}
+	}
+
+	return null
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense } from "react"
+import { useState, useEffect, useRef, Suspense, useCallback } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
@@ -24,7 +24,9 @@ import {
 	INITIAL_CAMERA_POSITION,
 	INITIAL_CAMERA_TARGET,
 	weaponTypes,
+	VoiceLanguage,
 } from "@/components/models/types"
+import { findVoiceForAnimation } from "@/components/models/utils"
 
 export function ModelViewer({
 	modelFiles,
@@ -38,6 +40,7 @@ export function ModelViewer({
 	setVisibleModels: externalSetVisibleModels,
 	modelType = "heroes",
 	bossName,
+	voiceFiles,
 }: ModelViewerProps) {
 	const [internalVisibleModels, setInternalVisibleModels] = useState<Set<string>>(new Set())
 
@@ -64,6 +67,106 @@ export function ModelViewer({
 	const controlsRef = useRef<OrbitControlsImpl>(null)
 	const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 	const viewerContainerRef = useRef<HTMLDivElement>(null)
+
+	// Audio state
+	const [isMuted, setIsMuted] = useState(true) // Muted by default
+	const [voiceLanguage, setVoiceLanguage] = useState<VoiceLanguage>("en") // English by default
+	const audioRef = useRef<HTMLAudioElement | null>(null)
+	const lastPlayedAnimationRef = useRef<string | null>(null)
+
+	// Extract hero name from model files path
+	// Path format: "Hero_Mitra_Vari05_Body/Hero_Mitra_Vari05_Body.FBX"
+	// We need to extract just "Mitra" from this
+	const heroName = (() => {
+		if (modelFiles.length === 0) return ""
+		const folderName = modelFiles[0].path.split("/")[0] // e.g., "Hero_Mitra_Vari05_Body"
+		// Extract hero name: remove "Hero_" prefix and everything after the hero name
+		const match = folderName.match(/^Hero_([A-Za-z]+)/)
+		return match ? match[1] : ""
+	})()
+
+	// Stop and cleanup audio
+	const stopAudio = useCallback(() => {
+		if (audioRef.current) {
+			audioRef.current.pause()
+			audioRef.current.src = ""
+			audioRef.current = null
+		}
+	}, [])
+
+	// Play voice for animation
+	const playVoiceForAnimation = useCallback(
+		(animation: string | null) => {
+			// Don't play if muted, no animation, or no voice files
+			if (isMuted || !animation || !voiceFiles || modelType !== "heroes") {
+				return
+			}
+
+			// Don't replay the same animation's voice (unless it's a new play request)
+			if (lastPlayedAnimationRef.current === animation) {
+				return
+			}
+			lastPlayedAnimationRef.current = animation
+
+			const currentVoiceFiles = voiceFiles[voiceLanguage]
+			if (!currentVoiceFiles || currentVoiceFiles.length === 0) {
+				return
+			}
+
+			const voicePath = findVoiceForAnimation(animation, currentVoiceFiles, heroName)
+			if (voicePath) {
+				// Stop previous audio properly
+				stopAudio()
+
+				// Create and play new audio
+				const audio = new Audio(voicePath)
+				audioRef.current = audio
+
+				// Use a small delay to ensure previous audio is fully stopped
+				// This prevents the AbortError when rapidly switching animations
+				const playPromise = audio.play()
+				if (playPromise !== undefined) {
+					playPromise.catch(() => {
+						// Silently ignore AbortError - this happens when audio is interrupted
+						// which is expected behavior when switching animations quickly
+					})
+				}
+			}
+		},
+		[isMuted, voiceFiles, voiceLanguage, heroName, modelType, stopAudio],
+	)
+
+	// Play voice when animation changes
+	useEffect(() => {
+		// Reset the ref so the voice can play for this animation
+		lastPlayedAnimationRef.current = null
+		playVoiceForAnimation(selectedAnimation)
+	}, [selectedAnimation, playVoiceForAnimation])
+
+	// Play voice when unmuting (if there's an animation selected)
+	useEffect(() => {
+		if (!isMuted && selectedAnimation) {
+			lastPlayedAnimationRef.current = null
+			playVoiceForAnimation(selectedAnimation)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isMuted])
+
+	// Replay voice when language changes (if not muted)
+	useEffect(() => {
+		if (!isMuted && selectedAnimation) {
+			lastPlayedAnimationRef.current = null
+			playVoiceForAnimation(selectedAnimation)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [voiceLanguage])
+
+	// Cleanup audio on unmount
+	useEffect(() => {
+		return () => {
+			stopAudio()
+		}
+	}, [stopAudio])
 
 	useEffect(() => {
 		// Show non-weapons and weapons with defaultPosition === true by default
@@ -444,6 +547,14 @@ Downloaded Models:
 				toggleFullscreen={toggleFullscreen}
 				downloadModels={downloadModels}
 				isDownloading={isDownloading}
+				isMuted={isMuted}
+				setIsMuted={setIsMuted}
+				voiceLanguage={voiceLanguage}
+				setVoiceLanguage={setVoiceLanguage}
+				hasVoiceFiles={
+					voiceFiles !== undefined &&
+					(voiceFiles.en.length > 0 || voiceFiles.jp.length > 0 || voiceFiles.kr.length > 0)
+				}
 			/>
 
 			{/* Loading overlay */}

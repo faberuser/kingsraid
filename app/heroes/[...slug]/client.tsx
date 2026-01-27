@@ -127,7 +127,11 @@ export default function HeroClient({
 								description="This tab contains large 3D model files and textures that may consume significant mobile data."
 								estimatedSize="20-40 MB per costume"
 							>
-								<Models heroModels={heroModels} availableScenes={availableScenes} />
+								<Models
+									heroModels={heroModels}
+									availableScenes={availableScenes}
+									voiceFiles={voiceFiles}
+								/>
 							</DataHeavyContent>
 						</TabsContent>
 

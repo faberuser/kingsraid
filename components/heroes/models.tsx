@@ -12,7 +12,7 @@ import { formatCostumeName } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
-export default function Models({ heroModels, availableScenes = [] }: ModelsProps) {
+export default function Models({ heroModels, availableScenes = [], voiceFiles }: ModelsProps) {
 	const [selectedCostume, setSelectedCostume] = useState<string>("")
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
@@ -68,7 +68,7 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 						(error) => {
 							clearTimeout(timeout)
 							reject(error)
-						}
+						},
 					)
 				})
 				if (fbx.animations && fbx.animations.length > 0) {
@@ -150,6 +150,7 @@ export default function Models({ heroModels, availableScenes = [] }: ModelsProps
 					isLoading={isLoadingModels}
 					setIsLoading={setIsLoadingModels}
 					availableScenes={availableScenes}
+					voiceFiles={voiceFiles}
 				/>
 			) : (
 				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
