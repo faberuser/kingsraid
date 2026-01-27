@@ -420,6 +420,8 @@ Downloaded Models:
 						onAnimationDurationChange={setAnimationDuration}
 						modelType={modelType}
 						bossName={bossName}
+						availableAnimations={availableAnimations}
+						onAnimationChange={setSelectedAnimation}
 					/>
 					{selectedScene === "grid" ? <gridHelper args={[10, 10]} /> : <Scene sceneName={selectedScene} />}
 					<ScreenshotHandler onCapture={captureCallback} />
