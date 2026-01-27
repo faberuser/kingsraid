@@ -8,6 +8,7 @@ import * as THREE from "three"
 import { ModelFile } from "@/model/Hero_Model"
 import { weaponTypes } from "@/components/models/types"
 import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
+import { findNextInSequence, findSequenceStart } from "@/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -29,6 +30,8 @@ interface ModelProps {
 	onAnimationDurationChange?: (duration: number) => void
 	modelType?: "heroes" | "bosses"
 	bossName?: string
+	availableAnimations?: string[]
+	onAnimationChange?: (animation: string) => void
 }
 
 export function Model({
@@ -42,12 +45,15 @@ export function Model({
 	onAnimationDurationChange,
 	modelType = "heroes",
 	bossName,
+	availableAnimations = [],
+	onAnimationChange,
 }: ModelProps) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
 	const mixersRef = useRef<Map<string, THREE.AnimationMixer>>(new Map())
 	const activeActionsRef = useRef<Map<string, THREE.AnimationAction>>(new Map())
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
+	const sequenceCallbackRef = useRef<(() => void) | null>(null)
 	const currentProgressRef = useRef<number>(0)
 	const isLoadingRef = useRef<boolean>(false)
 	const previousModelFilesRef = useRef<ModelFile[]>([])
@@ -465,11 +471,25 @@ export function Model({
 
 	// Handle animation switching - preserve weapon visibility state (user controls it manually)
 	useEffect(() => {
+		// Clean up previous sequence callback
+		if (sequenceCallbackRef.current) {
+			sequenceCallbackRef.current = null
+		}
+
 		// Wait a bit to ensure all models have loaded and shared animations are available
 		const timeoutId = setTimeout(() => {
+			// Check if current animation has a next in sequence
+			const nextAnimation = selectedAnimation ? findNextInSequence(selectedAnimation, availableAnimations) : null
+			// Check if current animation is part of a sequence (has a -N suffix)
+			const sequenceStart = selectedAnimation ? findSequenceStart(selectedAnimation, availableAnimations) : null
+			const isPartOfSequence = nextAnimation !== null || sequenceStart !== null
+
 			loadedModels.forEach((model, modelName) => {
 				const mixer = mixersRef.current.get(modelName)
 				if (!mixer) return
+
+				// Remove previous event listeners
+				mixer.removeEventListener("finished", handleAnimationFinished)
 
 				// Stop all current actions
 				const currentAction = activeActionsRef.current.get(modelName)
@@ -521,20 +541,72 @@ export function Model({
 					const clip = animations.find((c) => c.name === animationToPlay)
 					if (clip) {
 						const action = mixer.clipAction(clip)
-						action.reset().fadeIn(0.3).play()
+						action.reset().fadeIn(0.3)
+
+						// If part of a sequence, play once without looping
+						if (isPartOfSequence) {
+							action.setLoop(THREE.LoopOnce, 1)
+							action.clampWhenFinished = true
+						}
+
+						action.play()
 						activeActionsRef.current.set(modelName, action)
 
 						// Report animation duration (only from body/non-weapon models)
 						if (onAnimationDurationChange && !isWeapon) {
 							onAnimationDurationChange(clip.duration)
 						}
+
+						// Add finished event listener for sequence handling (only for body model)
+						if (isPartOfSequence && !isWeapon && onAnimationChange) {
+							mixer.addEventListener("finished", handleAnimationFinished)
+						}
 					}
 				}
 			})
+
+			// Store the callback for playing next animation
+			// If there's a next animation in sequence, play it; otherwise loop back to sequence start
+			if (isPartOfSequence && onAnimationChange) {
+				if (nextAnimation) {
+					// Continue to next animation in sequence
+					sequenceCallbackRef.current = () => {
+						onAnimationChange(nextAnimation)
+					}
+				} else if (sequenceStart) {
+					// Loop back to the start of the sequence
+					sequenceCallbackRef.current = () => {
+						onAnimationChange(sequenceStart)
+					}
+				}
+			}
 		}, 100)
 
-		return () => clearTimeout(timeoutId)
-	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles])
+		// Handler for animation finished event
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		function handleAnimationFinished(_event: THREE.Event<"finished", THREE.AnimationMixer>) {
+			// Only trigger once (from the first mixer that finishes)
+			if (sequenceCallbackRef.current) {
+				const callback = sequenceCallbackRef.current
+				sequenceCallbackRef.current = null
+				// Use requestAnimationFrame to avoid state update during render
+				requestAnimationFrame(() => {
+					callback()
+				})
+			}
+		}
+
+		// Capture current mixers for cleanup
+		const currentMixers = mixersRef.current
+
+		return () => {
+			clearTimeout(timeoutId)
+			// Clean up event listeners on unmount
+			currentMixers.forEach((mixer) => {
+				mixer.removeEventListener("finished", handleAnimationFinished)
+			})
+		}
+	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, availableAnimations, onAnimationChange])
 
 	useFrame((state, delta) => {
 		// UPDATE ANIMATION MIXERS FIRST before weapon attachment

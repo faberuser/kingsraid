@@ -1,4 +1,5 @@
 import { ModelFile } from "@/model/Hero_Model"
+import { VoiceFiles } from "@/components/heroes/voices"
 
 export const weaponTypes = [
 	"handle",
@@ -35,6 +36,7 @@ export const weaponTypes = [
 export interface ModelsProps {
 	heroModels: { [costume: string]: ModelFile[] }
 	availableScenes?: Array<{ value: string; label: string }>
+	voiceFiles?: VoiceFiles
 }
 
 export interface ModelViewerProps {
@@ -49,7 +51,10 @@ export interface ModelViewerProps {
 	setVisibleModels?: React.Dispatch<React.SetStateAction<Set<string>>>
 	modelType?: "heroes" | "bosses"
 	bossName?: string
+	voiceFiles?: VoiceFiles
 }
+
+export type VoiceLanguage = "en" | "jp" | "kr"
 
 export const INITIAL_CAMERA_POSITION: [number, number, number] = [0, 1, 3]
 export const INITIAL_CAMERA_TARGET: [number, number, number] = [0, 1, 0]
