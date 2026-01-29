@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
-import { getData, getJsonData, getJsonDataList, getNewDataHeroNames } from "@/lib/get-data"
+import { getData, getJsonData, getJsonDataList, getHeroNamesForVersion } from "@/lib/get-data"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
@@ -14,22 +14,34 @@ const heroClasses = [
 ]
 
 export default async function HeroesPage() {
-	const heroesLegacy = (await getData("heroes", { useNewData: false })) as HeroData[]
-	const heroesNew = (await getData("heroes", { useNewData: true })) as HeroData[]
+	// Fetch heroes data for all three versions
+	const heroesCbt = (await getData("heroes", { heroDataVersion: "cbt" })) as HeroData[]
+	const heroesCcbt = (await getData("heroes", { heroDataVersion: "ccbt" })) as HeroData[]
+	const heroesLegacy = (await getData("heroes", { heroDataVersion: "legacy" })) as HeroData[]
+
+	// Fetch release order for all three versions
+	const releaseOrderCbt = await getJsonData("table-data/hero_release_order_cbt.json")
+	const releaseOrderCcbt = await getJsonData("table-data/hero_release_order_ccbt.json")
 	const releaseOrderLegacy = await getJsonData("table-data/hero_release_order.json")
-	const releaseOrderNew = await getJsonData("table-data/hero_release_order_new.json")
+
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
-	const newDataHeroNames = await getNewDataHeroNames()
+
+	// Get hero names for each version
+	const cbtHeroNames = await getHeroNamesForVersion("cbt")
+	const ccbtHeroNames = await getHeroNamesForVersion("ccbt")
 
 	return (
 		<HeroesPageWrapper
+			heroesCbt={heroesCbt}
+			heroesCcbt={heroesCcbt}
 			heroesLegacy={heroesLegacy}
-			heroesNew={heroesNew}
 			heroClasses={heroClasses}
+			releaseOrderCbt={releaseOrderCbt}
+			releaseOrderCcbt={releaseOrderCcbt}
 			releaseOrderLegacy={releaseOrderLegacy}
-			releaseOrderNew={releaseOrderNew}
 			saReverse={saReverse}
-			newDataHeroNames={newDataHeroNames}
+			cbtHeroNames={cbtHeroNames}
+			ccbtHeroNames={ccbtHeroNames}
 		/>
 	)
 }

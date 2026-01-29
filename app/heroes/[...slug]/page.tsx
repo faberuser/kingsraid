@@ -2,7 +2,7 @@ import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
 import HeroPageWrapper from "@/app/heroes/[...slug]/page-wrapper"
-import { SlugPageProps, findData, heroExistsInNewData } from "@/lib/get-data"
+import { SlugPageProps, findData, heroExistsInVersion } from "@/lib/get-data"
 import { HeroData } from "@/model/Hero"
 import { getCostumeData } from "@/app/heroes/[...slug]/models/getCostumes"
 import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
@@ -43,47 +43,60 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	// Fetch legacy data
-	const heroDataLegacy = (await findData(heroName, "heroes", { useNewData: false })) as HeroData | null
+	// Fetch legacy data (always exists as base)
+	const heroDataLegacy = (await findData(heroName, "heroes", { heroDataVersion: "legacy" })) as HeroData | null
 
 	if (!heroDataLegacy) {
 		notFound()
 	}
 
-	// Check if hero exists in new data and fetch if it does
-	const existsInNewData = await heroExistsInNewData(heroName)
-	const heroDataNew = existsInNewData
-		? ((await findData(heroName, "heroes", { useNewData: true })) as HeroData | null)
+	// Check if hero exists in CBT and CCBT data and fetch if it does
+	const existsInCbt = await heroExistsInVersion(heroName, "cbt")
+	const existsInCcbt = await heroExistsInVersion(heroName, "ccbt")
+
+	const heroDataCbt = existsInCbt
+		? ((await findData(heroName, "heroes", { heroDataVersion: "cbt" })) as HeroData | null)
+		: null
+	const heroDataCcbt = existsInCcbt
+		? ((await findData(heroName, "heroes", { heroDataVersion: "ccbt" })) as HeroData | null)
 		: null
 
-	// Get costume data server-side for both versions
+	// Get costume data server-side for all versions
 	const costumesLegacy = await getCostumeData(heroDataLegacy.costumes)
-	const costumesNew = heroDataNew ? await getCostumeData(heroDataNew.costumes) : []
+	const costumesCbt = heroDataCbt ? await getCostumeData(heroDataCbt.costumes) : []
+	const costumesCcbt = heroDataCcbt ? await getCostumeData(heroDataCcbt.costumes) : []
 
 	// Get model data server-side (only if enabled)
 	const heroModelsLegacy = enableModelsVoices ? await getHeroModels(heroDataLegacy.profile.name) : {}
-	const heroModelsNew = enableModelsVoices && heroDataNew ? await getHeroModels(heroDataNew.profile.name) : {}
+	const heroModelsCbt = enableModelsVoices && heroDataCbt ? await getHeroModels(heroDataCbt.profile.name) : {}
+	const heroModelsCcbt = enableModelsVoices && heroDataCcbt ? await getHeroModels(heroDataCcbt.profile.name) : {}
 
 	// Get voice files server-side (only if enabled)
 	const voiceFilesLegacy = enableModelsVoices
 		? await getVoiceFiles(heroDataLegacy.profile.name)
 		: { en: [], jp: [], kr: [] }
-	const voiceFilesNew =
-		enableModelsVoices && heroDataNew ? await getVoiceFiles(heroDataNew.profile.name) : { en: [], jp: [], kr: [] }
+	const voiceFilesCbt =
+		enableModelsVoices && heroDataCbt ? await getVoiceFiles(heroDataCbt.profile.name) : { en: [], jp: [], kr: [] }
+	const voiceFilesCcbt =
+		enableModelsVoices && heroDataCcbt ? await getVoiceFiles(heroDataCcbt.profile.name) : { en: [], jp: [], kr: [] }
 
 	// Get available scenes server-side (only if enabled)
 	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
 
 	return (
 		<HeroPageWrapper
+			heroDataCbt={heroDataCbt}
+			heroDataCcbt={heroDataCcbt}
 			heroDataLegacy={heroDataLegacy}
-			heroDataNew={heroDataNew}
+			costumesCbt={costumesCbt}
+			costumesCcbt={costumesCcbt}
 			costumesLegacy={costumesLegacy}
-			costumesNew={costumesNew}
+			heroModelsCbt={heroModelsCbt}
+			heroModelsCcbt={heroModelsCcbt}
 			heroModelsLegacy={heroModelsLegacy}
-			heroModelsNew={heroModelsNew}
+			voiceFilesCbt={voiceFilesCbt}
+			voiceFilesCcbt={voiceFilesCcbt}
 			voiceFilesLegacy={voiceFilesLegacy}
-			voiceFilesNew={voiceFilesNew}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
 		/>
