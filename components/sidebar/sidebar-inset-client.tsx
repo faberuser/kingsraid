@@ -45,7 +45,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 						{isMobile ? (
 							<Popover>
 								<PopoverTrigger asChild>
-									<Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+									<Info className="h-4 w-4 text-muted-foreground" />
 								</PopoverTrigger>
 								<PopoverContent className="max-w-fit">
 									<p className="text-sm">{HeroDataVersionDescriptions[version]}</p>
@@ -55,7 +55,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Info className="h-4 w-4 text-muted-foreground cursor-help" />
+										<Info className="h-4 w-4 text-muted-foreground" />
 									</TooltipTrigger>
 									<TooltipContent className="max-w-fit">
 										<p className="text-sm">{HeroDataVersionDescriptions[version]}</p>
