@@ -4,59 +4,115 @@ import HeroClient from "@/app/heroes/[...slug]/client"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
-import { useHeroDataVersion } from "@/hooks/use-hero-data-version"
+import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
 import { useHeroToggle } from "@/contexts/hero-toggle-context"
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroPageWrapperProps {
-	heroDataLegacy: HeroData | null
-	heroDataNew: HeroData | null
+	heroDataCbt: HeroData | null
+	heroDataCcbt: HeroData | null
+	heroDataLegacy: HeroData
+	costumesCbt: Costume[]
+	costumesCcbt: Costume[]
 	costumesLegacy: Costume[]
-	costumesNew: Costume[]
+	heroModelsCbt: { [costume: string]: ModelFile[] }
+	heroModelsCcbt: { [costume: string]: ModelFile[] }
 	heroModelsLegacy: { [costume: string]: ModelFile[] }
-	heroModelsNew: { [costume: string]: ModelFile[] }
+	voiceFilesCbt: VoiceFiles
+	voiceFilesCcbt: VoiceFiles
 	voiceFilesLegacy: VoiceFiles
-	voiceFilesNew: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
 }
 
 export default function HeroPageWrapper({
+	heroDataCbt,
+	heroDataCcbt,
 	heroDataLegacy,
-	heroDataNew,
+	costumesCbt,
+	costumesCcbt,
 	costumesLegacy,
-	costumesNew,
+	heroModelsCbt,
+	heroModelsCcbt,
 	heroModelsLegacy,
-	heroModelsNew,
+	voiceFilesCbt,
+	voiceFilesCcbt,
 	voiceFilesLegacy,
-	voiceFilesNew,
 	availableScenes = [],
 	enableModelsVoices = false,
 }: HeroPageWrapperProps) {
-	const { isNew, isHydrated } = useHeroDataVersion()
+	const { version, setVersion, isHydrated } = useHeroDataVersion()
 	const { setShowToggle } = useHeroToggle()
-	const router = useRouter()
 
-	// Check if hero exists in new data
-	const heroExistsInNewData = heroDataNew !== null
+	// Check which versions have data for this hero
+	const heroExistsInCbt = heroDataCbt !== null
+	const heroExistsInCcbt = heroDataCcbt !== null
+
+	// Map of hero data by version
+	const heroDataMap: Record<HeroDataVersion, HeroData | null> = useMemo(
+		() => ({
+			cbt: heroDataCbt,
+			ccbt: heroDataCcbt,
+			legacy: heroDataLegacy,
+		}),
+		[heroDataCbt, heroDataCcbt, heroDataLegacy],
+	)
+
+	const costumesMap: Record<HeroDataVersion, Costume[]> = useMemo(
+		() => ({
+			cbt: costumesCbt,
+			ccbt: costumesCcbt,
+			legacy: costumesLegacy,
+		}),
+		[costumesCbt, costumesCcbt, costumesLegacy],
+	)
+
+	const heroModelsMap: Record<HeroDataVersion, { [costume: string]: ModelFile[] }> = useMemo(
+		() => ({
+			cbt: heroModelsCbt,
+			ccbt: heroModelsCcbt,
+			legacy: heroModelsLegacy,
+		}),
+		[heroModelsCbt, heroModelsCcbt, heroModelsLegacy],
+	)
+
+	const voiceFilesMap: Record<HeroDataVersion, VoiceFiles> = useMemo(
+		() => ({
+			cbt: voiceFilesCbt,
+			ccbt: voiceFilesCcbt,
+			legacy: voiceFilesLegacy,
+		}),
+		[voiceFilesCbt, voiceFilesCcbt, voiceFilesLegacy],
+	)
+
+	// Show toggle only if hero exists in at least one non-legacy version
+	const showVersionToggle = heroExistsInCbt || heroExistsInCcbt
 
 	useEffect(() => {
-		// Show toggle only if hero exists in new data
-		setShowToggle(heroExistsInNewData)
+		setShowToggle(showVersionToggle)
 		return () => setShowToggle(false)
-	}, [heroExistsInNewData, setShowToggle])
+	}, [showVersionToggle, setShowToggle])
 
 	useEffect(() => {
-		// If user switches to new data but hero doesn't exist there, redirect to heroes list
-		if (isNew && !heroExistsInNewData) {
-			router.push("/heroes")
+		// If user selects a version that doesn't have this hero, fallback to legacy
+		if (version === "cbt" && !heroExistsInCbt) {
+			if (heroExistsInCcbt) {
+				setVersion("ccbt")
+			} else {
+				setVersion("legacy")
+			}
+		} else if (version === "ccbt" && !heroExistsInCcbt) {
+			if (heroExistsInCbt) {
+				setVersion("cbt")
+			} else {
+				setVersion("legacy")
+			}
 		}
-	}, [isNew, heroExistsInNewData, router])
+	}, [version, heroExistsInCbt, heroExistsInCcbt, setVersion])
 
-	// Show loading while hydrating or navigating away
-	if (!isHydrated || (isNew && !heroExistsInNewData)) {
+	// Show loading while hydrating
+	if (!isHydrated) {
 		return (
 			<div className="flex items-center justify-center h-96">
 				<Spinner className="h-8 w-8" />
@@ -64,10 +120,16 @@ export default function HeroPageWrapper({
 		)
 	}
 
-	const heroData = isNew && heroDataNew ? heroDataNew : heroDataLegacy!
-	const costumes = isNew && heroDataNew ? costumesNew : costumesLegacy
-	const heroModels = isNew && heroDataNew ? heroModelsNew : heroModelsLegacy
-	const voiceFiles = isNew && heroDataNew ? voiceFilesNew : voiceFilesLegacy
+	// Get the data for the current version, fallback to legacy if not available
+	const heroData = heroDataMap[version] || heroDataLegacy
+	const costumes = costumesMap[version].length > 0 ? costumesMap[version] : costumesLegacy
+	const heroModels = Object.keys(heroModelsMap[version]).length > 0 ? heroModelsMap[version] : heroModelsLegacy
+	const voiceFiles =
+		voiceFilesMap[version].en.length > 0 ||
+		voiceFilesMap[version].jp.length > 0 ||
+		voiceFilesMap[version].kr.length > 0
+			? voiceFilesMap[version]
+			: voiceFilesLegacy
 
 	return (
 		<HeroClient

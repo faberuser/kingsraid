@@ -5,19 +5,26 @@ import { Button } from "@/components/ui/button"
 import MobileMenu from "@/components/mobile-menu"
 import { SidebarInset } from "@/components/ui/sidebar"
 import { usePathname, useRouter } from "next/navigation"
-import { Switch } from "@/components/ui/switch"
-import { useHeroDataVersion } from "@/hooks/use-hero-data-version"
+import {
+	useHeroDataVersion,
+	HeroDataVersion,
+	HeroDataVersionLabels,
+	HeroDataVersionDescriptions,
+} from "@/hooks/use-hero-data-version"
 import { useHeroToggle } from "@/contexts/hero-toggle-context"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 export default function SidebarInsetClient({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
 	const pathname = usePathname()
-	const { isNew, toggleVersion } = useHeroDataVersion()
+	const { version, setVersion } = useHeroDataVersion()
 	const { showToggle } = useHeroToggle()
 	const isMobile = useIsMobile()
+
+	const versionOptions: HeroDataVersion[] = ["cbt", "ccbt", "legacy"]
 
 	return (
 		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
@@ -38,39 +45,36 @@ export default function SidebarInsetClient({ children }: { children: React.React
 						{isMobile ? (
 							<Popover>
 								<PopoverTrigger asChild>
-									<Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+									<Info className="h-4 w-4 text-muted-foreground" />
 								</PopoverTrigger>
-								<PopoverContent className="max-w-sm">
-									<p className="text-sm">
-										Latest data from Content Creator CBT.
-										<br />
-										Costumes, Models, Voices use legacy data.
-									</p>
+								<PopoverContent className="max-w-fit">
+									<p className="text-sm">{HeroDataVersionDescriptions[version]}</p>
 								</PopoverContent>
 							</Popover>
 						) : (
 							<TooltipProvider>
 								<Tooltip>
 									<TooltipTrigger asChild>
-										<Info className="h-4 w-4 text-muted-foreground cursor-help" />
+										<Info className="h-4 w-4 text-muted-foreground" />
 									</TooltipTrigger>
-									<TooltipContent className="max-w-sm">
-										<p className="text-sm">
-											Latest data from Content Creator CBT.
-											<br />
-											Costumes, Models, Voices use legacy data.
-										</p>
+									<TooltipContent className="max-w-fit">
+										<p className="text-sm">{HeroDataVersionDescriptions[version]}</p>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>
 						)}
-						<span className={`text-sm font-medium ${isNew ? "text-primary" : "text-muted-foreground"}`}>
-							Latest
-						</span>
-						<Switch checked={!isNew} onCheckedChange={toggleVersion} />
-						<span className={`text-sm font-medium ${isNew ? "text-muted-foreground" : "text-primary"}`}>
-							Legacy
-						</span>
+						<Select value={version} onValueChange={(value) => setVersion(value as HeroDataVersion)}>
+							<SelectTrigger>
+								<SelectValue placeholder="Version" />
+							</SelectTrigger>
+							<SelectContent>
+								{versionOptions.map((opt) => (
+									<SelectItem key={opt} value={opt}>
+										{HeroDataVersionLabels[opt]}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					</div>
 				)}
 				<div className="md:hidden">

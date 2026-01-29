@@ -2,34 +2,39 @@
 
 import { HeroData } from "@/model/Hero"
 import HeroesClient from "@/app/heroes/client"
-import { useHeroDataVersion } from "@/hooks/use-hero-data-version"
+import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
 import { useHeroToggle } from "@/contexts/hero-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesPageWrapperProps {
+	heroesCbt: HeroData[]
+	heroesCcbt: HeroData[]
 	heroesLegacy: HeroData[]
-	heroesNew: HeroData[]
 	heroClasses: Array<{
 		value: string
 		name: string
 		icon: string
 	}>
+	releaseOrderCbt: Record<string, string>
+	releaseOrderCcbt: Record<string, string>
 	releaseOrderLegacy: Record<string, string>
-	releaseOrderNew: Record<string, string>
 	saReverse: string[]
-	newDataHeroNames: string[]
+	cbtHeroNames: string[]
+	ccbtHeroNames: string[]
 }
 
 export default function HeroesPageWrapper({
+	heroesCbt,
+	heroesCcbt,
 	heroesLegacy,
-	heroesNew,
 	heroClasses,
+	releaseOrderCbt,
+	releaseOrderCcbt,
 	releaseOrderLegacy,
-	releaseOrderNew,
 	saReverse,
 }: HeroesPageWrapperProps) {
-	const { isNew, isHydrated } = useHeroDataVersion()
+	const { version, isHydrated } = useHeroDataVersion()
 	const { setShowToggle } = useHeroToggle()
 
 	useEffect(() => {
@@ -37,11 +42,26 @@ export default function HeroesPageWrapper({
 		return () => setShowToggle(false)
 	}, [setShowToggle])
 
-	const heroes = useMemo(() => (isNew ? heroesNew : heroesLegacy), [isNew, heroesNew, heroesLegacy])
-	const releaseOrder = useMemo(
-		() => (isNew ? releaseOrderNew : releaseOrderLegacy),
-		[isNew, releaseOrderNew, releaseOrderLegacy]
+	const heroesMap: Record<HeroDataVersion, HeroData[]> = useMemo(
+		() => ({
+			cbt: heroesCbt,
+			ccbt: heroesCcbt,
+			legacy: heroesLegacy,
+		}),
+		[heroesCbt, heroesCcbt, heroesLegacy],
 	)
+
+	const releaseOrderMap: Record<HeroDataVersion, Record<string, string>> = useMemo(
+		() => ({
+			cbt: releaseOrderCbt,
+			ccbt: releaseOrderCcbt,
+			legacy: releaseOrderLegacy,
+		}),
+		[releaseOrderCbt, releaseOrderCcbt, releaseOrderLegacy],
+	)
+
+	const heroes = heroesMap[version]
+	const releaseOrder = releaseOrderMap[version]
 
 	// Show loading spinner until hydrated
 	if (!isHydrated) {

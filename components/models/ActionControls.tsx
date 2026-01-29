@@ -104,6 +104,44 @@ export function ActionControls({
 						</TooltipContent>
 					</Tooltip>
 
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" onClick={toggleFullscreen} disabled={isLoading}>
+								{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
+								<RotateCcw className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>Reset Camera</div>
+						</TooltipContent>
+					</Tooltip>
+
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								size="sm"
+								variant="secondary"
+								onClick={downloadModels}
+								disabled={isLoading || isDownloading}
+							>
+								<Download className="h-4 w-4" />
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
+						</TooltipContent>
+					</Tooltip>
+
 					{/* Audio Controls - only show if voice files are available */}
 					{hasVoiceFiles && setIsMuted && setVoiceLanguage && (
 						<>
@@ -151,41 +189,6 @@ export function ActionControls({
 
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button size="sm" variant="secondary" onClick={toggleFullscreen} disabled={isLoading}>
-								{isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<div>{isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}</div>
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button
-								size="sm"
-								variant="secondary"
-								onClick={downloadModels}
-								disabled={isLoading || isDownloading}
-							>
-								<Download className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<div>{isDownloading ? "Downloading..." : "Download Models"}</div>
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button size="sm" variant="secondary" onClick={resetCamera} disabled={isLoading}>
-								<RotateCcw className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>
-							<div>Reset Camera</div>
-						</TooltipContent>
-					</Tooltip>
-					<Tooltip>
-						<TooltipTrigger asChild>
 							<Button size="sm" variant="secondary" onClick={captureScreenshot} disabled={isLoading}>
 								<Camera className="h-4 w-4" />
 							</Button>
@@ -194,6 +197,7 @@ export function ActionControls({
 							<div>Take Screenshot</div>
 						</TooltipContent>
 					</Tooltip>
+
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button

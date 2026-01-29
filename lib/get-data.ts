@@ -4,6 +4,7 @@ import { capitalize } from "@/lib/utils"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
 import { ArtifactData } from "@/model/Artifact"
+import { HeroDataVersion } from "@/hooks/use-hero-data-version"
 
 export interface SlugPageProps {
 	params: Promise<{
@@ -12,6 +13,19 @@ export interface SlugPageProps {
 }
 
 type DataItem = HeroData | BossData | ArtifactData
+
+// Map version to folder name
+function getHeroFolderForVersion(version: HeroDataVersion): string {
+	switch (version) {
+		case "cbt":
+			return "heroes-cbt"
+		case "ccbt":
+			return "heroes-ccbt"
+		case "legacy":
+		default:
+			return "heroes"
+	}
+}
 
 // Read and parse JSON files
 async function readJsonFile<T>(filePath: string): Promise<T | null> {
@@ -62,10 +76,11 @@ export async function getJsonDataList(jsonFile: string): Promise<string[]> {
 // Get all data from a file or directory
 export async function getData(
 	source: string,
-	options: { sortByName?: boolean; useNewData?: boolean } = { sortByName: true, useNewData: false }
+	options: { sortByName?: boolean; heroDataVersion?: HeroDataVersion } = { sortByName: true },
 ): Promise<DataItem[]> {
-	// If useNewData is true and source is "heroes", use "heroes-new" instead
-	const actualSource = options.useNewData && source === "heroes" ? "heroes-new" : source
+	// If heroDataVersion is provided and source is "heroes", use the appropriate folder
+	const actualSource =
+		options.heroDataVersion && source === "heroes" ? getHeroFolderForVersion(options.heroDataVersion) : source
 	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory
@@ -105,11 +120,12 @@ function normalizeName(str: string): string {
 export async function findData(
 	slug: string,
 	source: string,
-	options: { useNewData?: boolean } = { useNewData: false }
+	options: { heroDataVersion?: HeroDataVersion } = {},
 ): Promise<DataItem | null> {
 	const normalizedSlug = decodeURIComponent(slug).toLowerCase().replace(/-/g, " ")
-	// If useNewData is true and source is "heroes", use "heroes-new" instead
-	const actualSource = options.useNewData && source === "heroes" ? "heroes-new" : source
+	// If heroDataVersion is provided and source is "heroes", use the appropriate folder
+	const actualSource =
+		options.heroDataVersion && source === "heroes" ? getHeroFolderForVersion(options.heroDataVersion) : source
 	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory (for heroes/bosses)
@@ -142,22 +158,34 @@ export async function findData(
 	return found ?? null
 }
 
-// Check if a hero exists in the new data folder
-export async function heroExistsInNewData(heroName: string): Promise<boolean> {
+// Check if a hero exists in a specific version's data folder
+export async function heroExistsInVersion(heroName: string, version: HeroDataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(heroName).toLowerCase().replace(/-/g, " ")
 	const capitalizedName = capitalize(normalizedName)
-	const filePath = buildPath("table-data", "heroes-new", `${capitalizedName}.json`)
+	const folder = getHeroFolderForVersion(version)
+	const filePath = buildPath("table-data", folder, `${capitalizedName}.json`)
 	return fs.existsSync(filePath)
 }
 
-// Get list of heroes that exist in new data folder
-export async function getNewDataHeroNames(): Promise<string[]> {
-	const newHeroesPath = buildPath("table-data", "heroes-new")
+// Get list of heroes that exist in a specific version's data folder
+export async function getHeroNamesForVersion(version: HeroDataVersion): Promise<string[]> {
+	const folder = getHeroFolderForVersion(version)
+	const heroesPath = buildPath("table-data", folder)
 
-	if (!fs.existsSync(newHeroesPath)) {
+	if (!fs.existsSync(heroesPath)) {
 		return []
 	}
 
-	const files = fs.readdirSync(newHeroesPath).filter((file) => file.endsWith(".json"))
+	const files = fs.readdirSync(heroesPath).filter((file) => file.endsWith(".json"))
 	return files.map((file) => file.replace(".json", ""))
+}
+
+// Legacy function for backward compatibility - check if hero exists in CBT data
+export async function heroExistsInNewData(heroName: string): Promise<boolean> {
+	return heroExistsInVersion(heroName, "cbt")
+}
+
+// Legacy function for backward compatibility - get CBT hero names
+export async function getNewDataHeroNames(): Promise<string[]> {
+	return getHeroNamesForVersion("cbt")
 }
