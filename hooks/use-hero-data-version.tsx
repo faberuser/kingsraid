@@ -17,7 +17,7 @@ export const HeroDataVersionLabels: Record<HeroDataVersion, string> = {
 export const HeroDataVersionDescriptions: Record<HeroDataVersion, string> = {
 	cbt: "Data from Closed Beta Test. Media use Legacy.",
 	ccbt: "Data from Content Creator CBT. Media use Legacy.",
-	legacy: "Data before Doomsday update.",
+	legacy: "Data before Doomsday Update.",
 }
 
 interface HeroDataVersionContextType {
