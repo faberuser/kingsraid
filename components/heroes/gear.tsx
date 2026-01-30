@@ -1,9 +1,9 @@
 import { HeroData } from "@/model/Hero"
 import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import Image from "@/components/next-image"
 import { classColorMapText, classColorMapBg, parseColoredText } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+
 interface GearProps {
 	heroData: HeroData
 }
@@ -45,14 +45,13 @@ export default function Gear({ heroData }: GearProps) {
 									</div>
 									<div
 										className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-											heroData.profile.class
+											heroData.profile.class,
 										)}`}
 									>
 										{heroData.uw.name}
 									</div>
 								</div>
 
-								<Separator className="mb-3" />
 								<div className="mb-4">{parseColoredText(heroData.uw.description)}</div>
 
 								{/* UW Values */}
@@ -71,7 +70,7 @@ export default function Gear({ heroData }: GearProps) {
 																variant="secondary"
 																key={level}
 																className={`p-2 rounded text-center ${classColorMapBg(
-																	heroData.profile.class
+																	heroData.profile.class,
 																)}`}
 															>
 																★{level}: {value}
@@ -136,7 +135,7 @@ export default function Gear({ heroData }: GearProps) {
 												</div>
 												<div
 													className={`text-lg font-semibold flex justify-center items-center ${classColorMapText(
-														heroData.profile.class
+														heroData.profile.class,
 													)}`}
 												>
 													Skill {utKey}: {ut.name}
@@ -162,12 +161,12 @@ export default function Gear({ heroData }: GearProps) {
 																				variant="secondary"
 																				key={level}
 																				className={`p-2 rounded text-center ${classColorMapBg(
-																					heroData.profile.class
+																					heroData.profile.class,
 																				)}`}
 																			>
 																				★{level}: {value}
 																			</Badge>
-																		)
+																		),
 																	)}
 																</div>
 															</div>
@@ -229,7 +228,7 @@ export default function Gear({ heroData }: GearProps) {
 										</div>
 										<div
 											className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-												heroData.profile.class
+												heroData.profile.class,
 											)}`}
 										>
 											{heroData.uw.name}
@@ -251,8 +250,6 @@ export default function Gear({ heroData }: GearProps) {
 										</Badge>
 									</div>
 								</div>
-
-								<Separator className="mb-3" />
 
 								<div className="space-y-3">
 									<div>
@@ -276,12 +273,12 @@ export default function Gear({ heroData }: GearProps) {
 													<div
 														key={level}
 														className={`px-3 py-2 rounded ${classColorMapBg(
-															heroData.profile.class
+															heroData.profile.class,
 														)}`}
 													>
 														<div
 															className={`font-medium ${classColorMapText(
-																heroData.profile.class
+																heroData.profile.class,
 															)}`}
 														>
 															Stage {level}
