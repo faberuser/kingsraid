@@ -18,7 +18,7 @@ export async function generateStaticParams() {
 		return []
 	}
 
-	const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
+	const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "heroes")
 	const slugs: string[] = []
 
 	if (fs.existsSync(heroesDir)) {

@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
-import { getData, getJsonData, getJsonDataList, getHeroNamesForVersion } from "@/lib/get-data"
+import { getData, getJsonDataList, getHeroNamesForVersion, getHeroReleaseOrder } from "@/lib/get-data"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
@@ -20,9 +20,9 @@ export default async function HeroesPage() {
 	const heroesLegacy = (await getData("heroes", { heroDataVersion: "legacy" })) as HeroData[]
 
 	// Fetch release order for all three versions
-	const releaseOrderCbt = await getJsonData("table-data/hero_release_order_cbt.json")
-	const releaseOrderCcbt = await getJsonData("table-data/hero_release_order_ccbt.json")
-	const releaseOrderLegacy = await getJsonData("table-data/hero_release_order.json")
+	const releaseOrderCbt = await getHeroReleaseOrder("cbt")
+	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
+	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
 
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
 

@@ -1,10 +1,26 @@
-import ArtifactsClient from "@/app/artifacts/client"
+import ArtifactsPageWrapper from "@/app/artifacts/page-wrapper"
 import { ArtifactData } from "@/model/Artifact"
-import { getData, getJsonData } from "@/lib/get-data"
+import { getData, getArtifactReleaseOrder } from "@/lib/get-data"
 
 export default async function ArtifactsPage() {
-	const artifacts = (await getData("artifacts.json")) as ArtifactData[]
-	const releaseOrder = await getJsonData("table-data/artifact_release_order.json")
+	// Fetch artifacts data for all three versions
+	const artifactsCbt = (await getData("artifacts", { heroDataVersion: "cbt" })) as ArtifactData[]
+	const artifactsCcbt = (await getData("artifacts", { heroDataVersion: "ccbt" })) as ArtifactData[]
+	const artifactsLegacy = (await getData("artifacts", { heroDataVersion: "legacy" })) as ArtifactData[]
 
-	return <ArtifactsClient artifacts={artifacts} releaseOrder={releaseOrder} />
+	// Fetch release order for all three versions
+	const releaseOrderCbt = await getArtifactReleaseOrder("cbt")
+	const releaseOrderCcbt = await getArtifactReleaseOrder("ccbt")
+	const releaseOrderLegacy = await getArtifactReleaseOrder("legacy")
+
+	return (
+		<ArtifactsPageWrapper
+			artifactsCbt={artifactsCbt}
+			artifactsCcbt={artifactsCcbt}
+			artifactsLegacy={artifactsLegacy}
+			releaseOrderCbt={releaseOrderCbt}
+			releaseOrderCcbt={releaseOrderCcbt}
+			releaseOrderLegacy={releaseOrderLegacy}
+		/>
+	)
 }

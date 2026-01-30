@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
-import { Search, ChevronDown, ChevronUp } from "lucide-react"
-import HeroCard from "@/components/heroes/card"
+import { Search, ChevronDown, ChevronUp, Image as ImageIcon, Grid2x2 } from "lucide-react"
+import HeroCard, { ViewMode } from "@/components/heroes/card"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesClientProps {
@@ -29,6 +29,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 	const [selectedDamageType, setSelectedDamageType] = useState("all")
 	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
 	const [reverseSort, setReverseSort] = useState(true)
+	const [viewMode, setViewMode] = useState<ViewMode>("splashart")
 	const [mounted, setMounted] = useState(false)
 
 	// Load sort preferences from localStorage after hydration
@@ -37,6 +38,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		setMounted(true)
 		const storedSortType = localStorage.getItem("heroesSortType")
 		const storedReverseSort = localStorage.getItem("heroesReverseSort")
+		const storedViewMode = localStorage.getItem("heroesViewMode")
 
 		if (storedSortType === "alphabetical" || storedSortType === "release") {
 			setSortType(storedSortType)
@@ -45,6 +47,10 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		if (storedReverseSort !== null) {
 			setReverseSort(storedReverseSort === "true")
 		}
+
+		if (storedViewMode === "splashart" || storedViewMode === "icon") {
+			setViewMode(storedViewMode)
+		}
 	}, [])
 
 	// Save sort state to localStorage when changed
@@ -52,8 +58,9 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		if (mounted) {
 			localStorage.setItem("heroesSortType", sortType)
 			localStorage.setItem("heroesReverseSort", reverseSort.toString())
+			localStorage.setItem("heroesViewMode", viewMode)
 		}
-	}, [sortType, reverseSort, mounted])
+	}, [sortType, reverseSort, viewMode, mounted])
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
@@ -82,7 +89,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 		// Apply damage type filter
 		if (selectedDamageType !== "all") {
 			result = result.filter(
-				(hero) => hero.profile?.damage_type?.toLowerCase() === selectedDamageType.toLowerCase()
+				(hero) => hero.profile?.damage_type?.toLowerCase() === selectedDamageType.toLowerCase(),
 			)
 		}
 
@@ -167,23 +174,23 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 				<Separator />
 
-				<div className="flex flex-col items-center xl:flex-row gap-4">
-					{/* Search Input */}
-					<div className="w-full max-w-sm relative">
-						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-							<Search className="h-4 w-4" />
-						</span>
-						<Input
-							type="text"
-							placeholder="Search for heroes..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
-							className="w-full pl-10"
-						/>
-					</div>
+				<div className="flex flex-col items-center justify-between xl:flex-row">
+					<div className="flex flex-col items-center xl:flex-row gap-4 w-full">
+						{/* Search Input */}
+						<div className="w-full max-w-sm relative">
+							<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+								<Search className="h-4 w-4" />
+							</span>
+							<Input
+								type="text"
+								placeholder="Search for heroes..."
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
+								className="w-full pl-10"
+							/>
+						</div>
 
-					{/* Class Filter */}
-					<div>
+						{/* Class Filter */}
 						<RadioGroup
 							value={selectedClass}
 							onValueChange={setSelectedClass}
@@ -213,27 +220,53 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 								</label>
 							))}
 						</RadioGroup>
+
+						<div className="flex flex-row items-center gap-2">
+							{/* Damage Type Filter */}
+							<RadioGroup
+								value={selectedDamageType}
+								onValueChange={setSelectedDamageType}
+								className="flex flex-row space-x-1 md:space-x-2"
+							>
+								{damageTypes.map((damageType) => (
+									<label
+										key={damageType.value}
+										htmlFor={`dmg-${damageType.value}`}
+										className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
+									>
+										<RadioGroupItem value={damageType.value} id={`dmg-${damageType.value}`} />
+										<span className="text-sm">{damageType.name}</span>
+									</label>
+								))}
+							</RadioGroup>
+
+							{/* View Mode Toggle (mobile) */}
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setViewMode(viewMode === "splashart" ? "icon" : "splashart")}
+								title={viewMode === "splashart" ? "Switch to icon view" : "Switch to splashart view"}
+								className="inline-flex xl:hidden"
+							>
+								{viewMode === "splashart" ? (
+									<Grid2x2 className="h-4 w-4" />
+								) : (
+									<ImageIcon className="h-4 w-4" />
+								)}
+							</Button>
+						</div>
 					</div>
 
-					{/* Damage Type Filter */}
-					<div>
-						<RadioGroup
-							value={selectedDamageType}
-							onValueChange={setSelectedDamageType}
-							className="flex flex-row space-x-1 md:space-x-2"
-						>
-							{damageTypes.map((damageType) => (
-								<label
-									key={damageType.value}
-									htmlFor={`dmg-${damageType.value}`}
-									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
-								>
-									<RadioGroupItem value={damageType.value} id={`dmg-${damageType.value}`} />
-									<span className="text-sm">{damageType.name}</span>
-								</label>
-							))}
-						</RadioGroup>
-					</div>
+					{/* View Mode Toggle */}
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setViewMode(viewMode === "splashart" ? "icon" : "splashart")}
+						title={viewMode === "splashart" ? "Switch to icon view" : "Switch to splashart view"}
+						className="hidden xl:inline-flex"
+					>
+						{viewMode === "splashart" ? <Grid2x2 className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
+					</Button>
 				</div>
 			</div>
 
@@ -244,6 +277,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 						name={hero.profile.name}
 						splashart={hero.splashart}
 						reverseSA={saReverse.includes(hero.profile.name)}
+						viewMode={viewMode}
 					/>
 				))}
 			</div>

@@ -1,9 +1,9 @@
 import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
-import ArtifactClient from "@/app/artifacts/[...slug]/client"
+import ArtifactPageWrapper from "@/app/artifacts/[...slug]/page-wrapper"
 import { ArtifactData } from "@/model/Artifact"
-import { SlugPageProps, findData } from "@/lib/get-data"
+import { SlugPageProps, findData, artifactExistsInVersion } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 
@@ -13,7 +13,7 @@ export async function generateStaticParams() {
 		return []
 	}
 
-	const artifactsPath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "artifacts.json")
+	const artifactsPath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "artifacts.json")
 	const slugs: string[] = []
 
 	if (fs.existsSync(artifactsPath)) {
@@ -46,11 +46,31 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const artifactData = (await findData(artifactName, "artifacts.json")) as ArtifactData | null
+	// Fetch legacy data (always exists as base)
+	const artifactDataLegacy = (await findData(artifactName, "artifacts", {
+		heroDataVersion: "legacy",
+	})) as ArtifactData | null
 
-	if (!artifactData) {
+	if (!artifactDataLegacy) {
 		notFound()
 	}
 
-	return <ArtifactClient artifactData={artifactData} />
+	// Check if artifact exists in CBT and CCBT data and fetch if it does
+	const existsInCbt = await artifactExistsInVersion(artifactName, "cbt")
+	const existsInCcbt = await artifactExistsInVersion(artifactName, "ccbt")
+
+	const artifactDataCbt = existsInCbt
+		? ((await findData(artifactName, "artifacts", { heroDataVersion: "cbt" })) as ArtifactData | null)
+		: null
+	const artifactDataCcbt = existsInCcbt
+		? ((await findData(artifactName, "artifacts", { heroDataVersion: "ccbt" })) as ArtifactData | null)
+		: null
+
+	return (
+		<ArtifactPageWrapper
+			artifactDataCbt={artifactDataCbt}
+			artifactDataCcbt={artifactDataCcbt}
+			artifactDataLegacy={artifactDataLegacy}
+		/>
+	)
 }
