@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	}
 
 	// Use legacy version for metadata (contains all heroes)
-	const heroData = (await findData(slug[0], "heroes", { heroDataVersion: "legacy" })) as HeroData | null
+	const heroData = (await findData(slug[0], "heroes", { dataVersion: "legacy" })) as HeroData | null
 
 	if (!heroData) {
 		return {

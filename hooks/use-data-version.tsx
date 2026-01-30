@@ -2,38 +2,38 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 
-const STORAGE_KEY = "heroDataVersion"
+const STORAGE_KEY = "dataVersion"
 
-export type HeroDataVersion = "cbt" | "ccbt" | "legacy"
+export type DataVersion = "cbt" | "ccbt" | "legacy"
 
 // Labels for display in UI
-export const HeroDataVersionLabels: Record<HeroDataVersion, string> = {
+export const DataVersionLabels: Record<DataVersion, string> = {
 	cbt: "CBT",
 	ccbt: "CCBT",
 	legacy: "Legacy",
 }
 
 // Descriptions for tooltips
-export const HeroDataVersionDescriptions: Record<HeroDataVersion, string> = {
+export const DataVersionDescriptions: Record<DataVersion, string> = {
 	cbt: "Data from Closed Beta Test. Media use Legacy.",
 	ccbt: "Data from Content Creator CBT. Media use Legacy.",
 	legacy: "Data before Doomsday Update.",
 }
 
-interface HeroDataVersionContextType {
-	version: HeroDataVersion
+interface DataVersionContextType {
+	version: DataVersion
 	isCbt: boolean
 	isCcbt: boolean
 	isLegacy: boolean
-	setVersion: (version: HeroDataVersion) => void
+	setVersion: (version: DataVersion) => void
 	isHydrated: boolean
 }
 
-const HeroDataVersionContext = createContext<HeroDataVersionContextType | undefined>(undefined)
+const DataVersionContext = createContext<DataVersionContextType | undefined>(undefined)
 
-export function HeroDataVersionProvider({ children }: { children: ReactNode }) {
+export function DataVersionProvider({ children }: { children: ReactNode }) {
 	// Always start with "cbt" for SSR consistency (newest data as default)
-	const [version, setVersionState] = useState<HeroDataVersion>("cbt")
+	const [version, setVersionState] = useState<DataVersion>("cbt")
 	const [mounted, setMounted] = useState(false)
 
 	// Sync with localStorage after hydration
@@ -50,7 +50,7 @@ export function HeroDataVersionProvider({ children }: { children: ReactNode }) {
 		}
 	}, [])
 
-	const setVersion = (newVersion: HeroDataVersion) => {
+	const setVersion = (newVersion: DataVersion) => {
 		setVersionState(newVersion)
 		localStorage.setItem(STORAGE_KEY, newVersion)
 	}
@@ -64,13 +64,13 @@ export function HeroDataVersionProvider({ children }: { children: ReactNode }) {
 		isHydrated: mounted,
 	}
 
-	return <HeroDataVersionContext.Provider value={value}>{children}</HeroDataVersionContext.Provider>
+	return <DataVersionContext.Provider value={value}>{children}</DataVersionContext.Provider>
 }
 
-export function useHeroDataVersion() {
-	const context = useContext(HeroDataVersionContext)
+export function useDataVersion() {
+	const context = useContext(DataVersionContext)
 	if (context === undefined) {
-		throw new Error("useHeroDataVersion must be used within a HeroDataVersionProvider")
+		throw new Error("useDataVersion must be used within a DataVersionProvider")
 	}
 	return context
 }

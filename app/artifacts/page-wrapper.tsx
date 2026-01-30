@@ -2,8 +2,8 @@
 
 import { ArtifactData } from "@/model/Artifact"
 import ArtifactsClient from "@/app/artifacts/client"
-import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
-import { useHeroToggle } from "@/contexts/hero-toggle-context"
+import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
+import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -24,7 +24,7 @@ export default function ArtifactsPageWrapper({
 	releaseOrderCcbt,
 	releaseOrderLegacy,
 }: ArtifactsPageWrapperProps) {
-	const { version, isHydrated } = useHeroDataVersion()
+	const { version, isHydrated } = useDataVersion()
 	const { setShowToggle } = useHeroToggle()
 
 	useEffect(() => {
@@ -32,7 +32,7 @@ export default function ArtifactsPageWrapper({
 		return () => setShowToggle(false)
 	}, [setShowToggle])
 
-	const artifactsMap: Record<HeroDataVersion, ArtifactData[]> = useMemo(
+	const artifactsMap: Record<DataVersion, ArtifactData[]> = useMemo(
 		() => ({
 			cbt: artifactsCbt,
 			ccbt: artifactsCcbt,
@@ -41,7 +41,7 @@ export default function ArtifactsPageWrapper({
 		[artifactsCbt, artifactsCcbt, artifactsLegacy],
 	)
 
-	const releaseOrderMap: Record<HeroDataVersion, Record<string, string>> = useMemo(
+	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
 		() => ({
 			cbt: releaseOrderCbt,
 			ccbt: releaseOrderCcbt,

@@ -4,7 +4,7 @@ import { capitalize } from "@/lib/utils"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
 import { ArtifactData } from "@/model/Artifact"
-import { HeroDataVersion } from "@/hooks/use-hero-data-version"
+import { DataVersion } from "@/hooks/use-data-version"
 
 export interface SlugPageProps {
 	params: Promise<{
@@ -15,7 +15,7 @@ export interface SlugPageProps {
 type DataItem = HeroData | BossData | ArtifactData
 
 // Map version to folder path for heroes
-function getHeroFolderForVersion(version: HeroDataVersion): string {
+function getHeroFolderForVersion(version: DataVersion): string {
 	switch (version) {
 		case "cbt":
 			return "cbt/heroes"
@@ -28,7 +28,7 @@ function getHeroFolderForVersion(version: HeroDataVersion): string {
 }
 
 // Map version to file path for artifacts
-function getArtifactFileForVersion(version: HeroDataVersion): string {
+function getArtifactFileForVersion(version: DataVersion): string {
 	switch (version) {
 		case "cbt":
 			return "cbt/artifacts.json"
@@ -41,7 +41,7 @@ function getArtifactFileForVersion(version: HeroDataVersion): string {
 }
 
 // Map version to file path for hero release order
-function getHeroReleaseOrderForVersion(version: HeroDataVersion): string {
+function getHeroReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
 		case "cbt":
 			return "cbt/hero_release_order.json"
@@ -54,7 +54,7 @@ function getHeroReleaseOrderForVersion(version: HeroDataVersion): string {
 }
 
 // Map version to file path for artifact release order
-function getArtifactReleaseOrderForVersion(version: HeroDataVersion): string {
+function getArtifactReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
 		case "cbt":
 			return "cbt/artifact_release_order.json"
@@ -115,16 +115,16 @@ export async function getJsonDataList(jsonFile: string): Promise<string[]> {
 // Get all data from a file or directory
 export async function getData(
 	source: string,
-	options: { sortByName?: boolean; heroDataVersion?: HeroDataVersion } = { sortByName: true },
+	options: { sortByName?: boolean; dataVersion?: DataVersion } = { sortByName: true },
 ): Promise<DataItem[]> {
 	let actualSource = source
 
-	// If heroDataVersion is provided, use the appropriate folder/file
-	if (options.heroDataVersion) {
+	// If dataVersion is provided, use the appropriate folder/file
+	if (options.dataVersion) {
 		if (source === "heroes") {
-			actualSource = getHeroFolderForVersion(options.heroDataVersion)
+			actualSource = getHeroFolderForVersion(options.dataVersion)
 		} else if (source === "artifacts" || source === "artifacts.json") {
-			actualSource = getArtifactFileForVersion(options.heroDataVersion)
+			actualSource = getArtifactFileForVersion(options.dataVersion)
 		}
 	}
 
@@ -167,18 +167,18 @@ function normalizeName(str: string): string {
 export async function findData(
 	slug: string,
 	source: string,
-	options: { heroDataVersion?: HeroDataVersion } = {},
+	options: { dataVersion?: DataVersion } = {},
 ): Promise<DataItem | null> {
 	const normalizedSlug = decodeURIComponent(slug).toLowerCase().replace(/-/g, " ")
 
 	let actualSource = source
 
-	// If heroDataVersion is provided, use the appropriate folder/file
-	if (options.heroDataVersion) {
+	// If dataVersion is provided, use the appropriate folder/file
+	if (options.dataVersion) {
 		if (source === "heroes") {
-			actualSource = getHeroFolderForVersion(options.heroDataVersion)
+			actualSource = getHeroFolderForVersion(options.dataVersion)
 		} else if (source === "artifacts" || source === "artifacts.json") {
-			actualSource = getArtifactFileForVersion(options.heroDataVersion)
+			actualSource = getArtifactFileForVersion(options.dataVersion)
 		}
 	}
 
@@ -215,7 +215,7 @@ export async function findData(
 }
 
 // Check if a hero exists in a specific version's data folder
-export async function heroExistsInVersion(heroName: string, version: HeroDataVersion): Promise<boolean> {
+export async function heroExistsInVersion(heroName: string, version: DataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(heroName).toLowerCase().replace(/-/g, " ")
 	const capitalizedName = capitalize(normalizedName)
 	const folder = getHeroFolderForVersion(version)
@@ -224,7 +224,7 @@ export async function heroExistsInVersion(heroName: string, version: HeroDataVer
 }
 
 // Get list of heroes that exist in a specific version's data folder
-export async function getHeroNamesForVersion(version: HeroDataVersion): Promise<string[]> {
+export async function getHeroNamesForVersion(version: DataVersion): Promise<string[]> {
 	const folder = getHeroFolderForVersion(version)
 	const heroesPath = buildPath("table-data", folder)
 
@@ -237,7 +237,7 @@ export async function getHeroNamesForVersion(version: HeroDataVersion): Promise<
 }
 
 // Check if an artifact exists in a specific version's data
-export async function artifactExistsInVersion(artifactName: string, version: HeroDataVersion): Promise<boolean> {
+export async function artifactExistsInVersion(artifactName: string, version: DataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(artifactName).toLowerCase().replace(/-/g, " ")
 	const artifactFile = getArtifactFileForVersion(version)
 	const filePath = buildPath("table-data", artifactFile)
@@ -253,7 +253,7 @@ export async function artifactExistsInVersion(artifactName: string, version: Her
 }
 
 // Get list of artifact names that exist in a specific version's data
-export async function getArtifactNamesForVersion(version: HeroDataVersion): Promise<string[]> {
+export async function getArtifactNamesForVersion(version: DataVersion): Promise<string[]> {
 	const artifactFile = getArtifactFileForVersion(version)
 	const filePath = buildPath("table-data", artifactFile)
 
@@ -264,7 +264,7 @@ export async function getArtifactNamesForVersion(version: HeroDataVersion): Prom
 }
 
 // Get hero release order for a specific version
-export async function getHeroReleaseOrder(version: HeroDataVersion): Promise<Record<string, string>> {
+export async function getHeroReleaseOrder(version: DataVersion): Promise<Record<string, string>> {
 	const releaseOrderFile = getHeroReleaseOrderForVersion(version)
 	const filePath = buildPath("table-data", releaseOrderFile)
 	const data = await readJsonFile<Record<string, string>>(filePath)
@@ -272,7 +272,7 @@ export async function getHeroReleaseOrder(version: HeroDataVersion): Promise<Rec
 }
 
 // Get artifact release order for a specific version
-export async function getArtifactReleaseOrder(version: HeroDataVersion): Promise<Record<string, string>> {
+export async function getArtifactReleaseOrder(version: DataVersion): Promise<Record<string, string>> {
 	const releaseOrderFile = getArtifactReleaseOrderForVersion(version)
 	const filePath = buildPath("table-data", releaseOrderFile)
 	const data = await readJsonFile<Record<string, string>>(filePath)

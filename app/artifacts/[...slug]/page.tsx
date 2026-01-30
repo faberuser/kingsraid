@@ -48,7 +48,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	// Fetch legacy data (always exists as base)
 	const artifactDataLegacy = (await findData(artifactName, "artifacts", {
-		heroDataVersion: "legacy",
+		dataVersion: "legacy",
 	})) as ArtifactData | null
 
 	if (!artifactDataLegacy) {
@@ -60,10 +60,10 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const existsInCcbt = await artifactExistsInVersion(artifactName, "ccbt")
 
 	const artifactDataCbt = existsInCbt
-		? ((await findData(artifactName, "artifacts", { heroDataVersion: "cbt" })) as ArtifactData | null)
+		? ((await findData(artifactName, "artifacts", { dataVersion: "cbt" })) as ArtifactData | null)
 		: null
 	const artifactDataCcbt = existsInCcbt
-		? ((await findData(artifactName, "artifacts", { heroDataVersion: "ccbt" })) as ArtifactData | null)
+		? ((await findData(artifactName, "artifacts", { dataVersion: "ccbt" })) as ArtifactData | null)
 		: null
 
 	return (
