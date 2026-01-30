@@ -2,8 +2,8 @@
 
 import { HeroData } from "@/model/Hero"
 import HeroesClient from "@/app/heroes/client"
-import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
-import { useHeroToggle } from "@/contexts/hero-toggle-context"
+import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
+import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -34,7 +34,7 @@ export default function HeroesPageWrapper({
 	releaseOrderLegacy,
 	saReverse,
 }: HeroesPageWrapperProps) {
-	const { version, isHydrated } = useHeroDataVersion()
+	const { version, isHydrated } = useDataVersion()
 	const { setShowToggle } = useHeroToggle()
 
 	useEffect(() => {
@@ -42,7 +42,7 @@ export default function HeroesPageWrapper({
 		return () => setShowToggle(false)
 	}, [setShowToggle])
 
-	const heroesMap: Record<HeroDataVersion, HeroData[]> = useMemo(
+	const heroesMap: Record<DataVersion, HeroData[]> = useMemo(
 		() => ({
 			cbt: heroesCbt,
 			ccbt: heroesCcbt,
@@ -51,7 +51,7 @@ export default function HeroesPageWrapper({
 		[heroesCbt, heroesCcbt, heroesLegacy],
 	)
 
-	const releaseOrderMap: Record<HeroDataVersion, Record<string, string>> = useMemo(
+	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
 		() => ({
 			cbt: releaseOrderCbt,
 			ccbt: releaseOrderCcbt,

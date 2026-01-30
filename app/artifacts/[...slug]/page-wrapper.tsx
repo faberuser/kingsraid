@@ -2,8 +2,8 @@
 
 import ArtifactClient from "@/app/artifacts/[...slug]/client"
 import { ArtifactData } from "@/model/Artifact"
-import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
-import { useHeroToggle } from "@/contexts/hero-toggle-context"
+import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
+import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -18,7 +18,7 @@ export default function ArtifactPageWrapper({
 	artifactDataCcbt,
 	artifactDataLegacy,
 }: ArtifactPageWrapperProps) {
-	const { version, setVersion, isHydrated } = useHeroDataVersion()
+	const { version, setVersion, isHydrated } = useDataVersion()
 	const { setShowToggle } = useHeroToggle()
 
 	// Check which versions have data for this artifact
@@ -26,7 +26,7 @@ export default function ArtifactPageWrapper({
 	const artifactExistsInCcbt = artifactDataCcbt !== null
 
 	// Map of artifact data by version
-	const artifactDataMap: Record<HeroDataVersion, ArtifactData | null> = useMemo(
+	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
 		() => ({
 			cbt: artifactDataCbt,
 			ccbt: artifactDataCcbt,

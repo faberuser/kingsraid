@@ -15,9 +15,9 @@ const heroClasses = [
 
 export default async function HeroesPage() {
 	// Fetch heroes data for all three versions
-	const heroesCbt = (await getData("heroes", { heroDataVersion: "cbt" })) as HeroData[]
-	const heroesCcbt = (await getData("heroes", { heroDataVersion: "ccbt" })) as HeroData[]
-	const heroesLegacy = (await getData("heroes", { heroDataVersion: "legacy" })) as HeroData[]
+	const heroesCbt = (await getData("heroes", { dataVersion: "cbt" })) as HeroData[]
+	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
+	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
 
 	// Fetch release order for all three versions
 	const releaseOrderCbt = await getHeroReleaseOrder("cbt")

@@ -4,8 +4,8 @@ import HeroClient from "@/app/heroes/[...slug]/client"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
-import { useHeroDataVersion, HeroDataVersion } from "@/hooks/use-hero-data-version"
-import { useHeroToggle } from "@/contexts/hero-toggle-context"
+import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
+import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
@@ -42,7 +42,7 @@ export default function HeroPageWrapper({
 	availableScenes = [],
 	enableModelsVoices = false,
 }: HeroPageWrapperProps) {
-	const { version, setVersion, isHydrated } = useHeroDataVersion()
+	const { version, setVersion, isHydrated } = useDataVersion()
 	const { setShowToggle } = useHeroToggle()
 
 	// Check which versions have data for this hero
@@ -50,7 +50,7 @@ export default function HeroPageWrapper({
 	const heroExistsInCcbt = heroDataCcbt !== null
 
 	// Map of hero data by version
-	const heroDataMap: Record<HeroDataVersion, HeroData | null> = useMemo(
+	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
 		() => ({
 			cbt: heroDataCbt,
 			ccbt: heroDataCcbt,
@@ -59,7 +59,7 @@ export default function HeroPageWrapper({
 		[heroDataCbt, heroDataCcbt, heroDataLegacy],
 	)
 
-	const costumesMap: Record<HeroDataVersion, Costume[]> = useMemo(
+	const costumesMap: Record<DataVersion, Costume[]> = useMemo(
 		() => ({
 			cbt: costumesCbt,
 			ccbt: costumesCcbt,
@@ -68,7 +68,7 @@ export default function HeroPageWrapper({
 		[costumesCbt, costumesCcbt, costumesLegacy],
 	)
 
-	const heroModelsMap: Record<HeroDataVersion, { [costume: string]: ModelFile[] }> = useMemo(
+	const heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }> = useMemo(
 		() => ({
 			cbt: heroModelsCbt,
 			ccbt: heroModelsCcbt,
@@ -77,7 +77,7 @@ export default function HeroPageWrapper({
 		[heroModelsCbt, heroModelsCcbt, heroModelsLegacy],
 	)
 
-	const voiceFilesMap: Record<HeroDataVersion, VoiceFiles> = useMemo(
+	const voiceFilesMap: Record<DataVersion, VoiceFiles> = useMemo(
 		() => ({
 			cbt: voiceFilesCbt,
 			ccbt: voiceFilesCcbt,

@@ -44,7 +44,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	// Fetch legacy data (always exists as base)
-	const heroDataLegacy = (await findData(heroName, "heroes", { heroDataVersion: "legacy" })) as HeroData | null
+	const heroDataLegacy = (await findData(heroName, "heroes", { dataVersion: "legacy" })) as HeroData | null
 
 	if (!heroDataLegacy) {
 		notFound()
@@ -55,10 +55,10 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const existsInCcbt = await heroExistsInVersion(heroName, "ccbt")
 
 	const heroDataCbt = existsInCbt
-		? ((await findData(heroName, "heroes", { heroDataVersion: "cbt" })) as HeroData | null)
+		? ((await findData(heroName, "heroes", { dataVersion: "cbt" })) as HeroData | null)
 		: null
 	const heroDataCcbt = existsInCcbt
-		? ((await findData(heroName, "heroes", { heroDataVersion: "ccbt" })) as HeroData | null)
+		? ((await findData(heroName, "heroes", { dataVersion: "ccbt" })) as HeroData | null)
 		: null
 
 	// Get costume data server-side for all versions
