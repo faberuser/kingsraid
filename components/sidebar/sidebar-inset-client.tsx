@@ -43,7 +43,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 									<Info className="h-4 w-4 text-muted-foreground" />
 								</PopoverTrigger>
 								<PopoverContent className="max-w-fit">
-									<p className="text-sm">{DataVersionDescriptions[version]}</p>
+									<div className="text-sm">{DataVersionDescriptions[version]}</div>
 								</PopoverContent>
 							</Popover>
 						) : (
@@ -53,7 +53,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 										<Info className="h-4 w-4 text-muted-foreground" />
 									</TooltipTrigger>
 									<TooltipContent className="max-w-fit">
-										<p className="text-sm">{DataVersionDescriptions[version]}</p>
+										<div className="text-sm">{DataVersionDescriptions[version]}</div>
 									</TooltipContent>
 								</Tooltip>
 							</TooltipProvider>

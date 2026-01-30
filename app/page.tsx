@@ -13,7 +13,8 @@ export interface FeaturedHero {
 
 async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 	try {
-		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
+		// Use cbt data for featured heroes (has the most recent hero roster)
+		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "cbt", "heroes")
 
 		if (!fs.existsSync(heroesDir)) {
 			return []
@@ -46,7 +47,7 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 						"public",
 						"kingsraid-data",
 						"assets",
-						heroData.costumes
+						heroData.costumes,
 					)
 
 					if (fs.existsSync(costumePath)) {
@@ -61,6 +62,22 @@ async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 						if (selectedCostume) {
 							costumeImage = `/kingsraid-data/assets/${heroData.costumes}/${selectedCostume}`
 						}
+					}
+				}
+
+				// Fallback: try to find visual.png directly in the hero's assets folder
+				if (!costumeImage && heroData.profile?.name) {
+					const visualPath = path.join(
+						process.cwd(),
+						"public",
+						"kingsraid-data",
+						"assets",
+						"heroes",
+						heroData.profile.name,
+						"visual.png",
+					)
+					if (fs.existsSync(visualPath)) {
+						costumeImage = `/kingsraid-data/assets/heroes/${heroData.profile.name}/visual.png`
 					}
 				}
 
