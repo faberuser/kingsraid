@@ -17,8 +17,8 @@ async function getSearchData() {
 	}
 
 	try {
-		// Load Heroes
-		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "heroes")
+		// Load Heroes (use legacy as the base for search - includes all heroes)
+		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "heroes")
 		if (fs.existsSync(heroesDir)) {
 			const heroFiles = fs.readdirSync(heroesDir).filter((file) => file.endsWith(".json"))
 
@@ -34,8 +34,15 @@ async function getSearchData() {
 			}
 		}
 
-		// Load Artifacts
-		const artifactsFile = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "artifacts.json")
+		// Load Artifacts (use legacy as the base for search - includes all artifacts)
+		const artifactsFile = path.join(
+			process.cwd(),
+			"public",
+			"kingsraid-data",
+			"table-data",
+			"legacy",
+			"artifacts.json",
+		)
 		if (fs.existsSync(artifactsFile)) {
 			const fileContent = fs.readFileSync(artifactsFile, "utf-8")
 			const artifactsData: ArtifactData[] = JSON.parse(fileContent)

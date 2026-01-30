@@ -14,16 +14,55 @@ export interface SlugPageProps {
 
 type DataItem = HeroData | BossData | ArtifactData
 
-// Map version to folder name
+// Map version to folder path for heroes
 function getHeroFolderForVersion(version: HeroDataVersion): string {
 	switch (version) {
 		case "cbt":
-			return "heroes-cbt"
+			return "cbt/heroes"
 		case "ccbt":
-			return "heroes-ccbt"
+			return "ccbt/heroes"
 		case "legacy":
 		default:
-			return "heroes"
+			return "legacy/heroes"
+	}
+}
+
+// Map version to file path for artifacts
+function getArtifactFileForVersion(version: HeroDataVersion): string {
+	switch (version) {
+		case "cbt":
+			return "cbt/artifacts.json"
+		case "ccbt":
+			return "ccbt/artifacts.json"
+		case "legacy":
+		default:
+			return "legacy/artifacts.json"
+	}
+}
+
+// Map version to file path for hero release order
+function getHeroReleaseOrderForVersion(version: HeroDataVersion): string {
+	switch (version) {
+		case "cbt":
+			return "cbt/hero_release_order.json"
+		case "ccbt":
+			return "ccbt/hero_release_order.json"
+		case "legacy":
+		default:
+			return "legacy/hero_release_order.json"
+	}
+}
+
+// Map version to file path for artifact release order
+function getArtifactReleaseOrderForVersion(version: HeroDataVersion): string {
+	switch (version) {
+		case "cbt":
+			return "cbt/artifact_release_order.json"
+		case "ccbt":
+			return "ccbt/artifact_release_order.json"
+		case "legacy":
+		default:
+			return "legacy/artifact_release_order.json"
 	}
 }
 
@@ -78,9 +117,17 @@ export async function getData(
 	source: string,
 	options: { sortByName?: boolean; heroDataVersion?: HeroDataVersion } = { sortByName: true },
 ): Promise<DataItem[]> {
-	// If heroDataVersion is provided and source is "heroes", use the appropriate folder
-	const actualSource =
-		options.heroDataVersion && source === "heroes" ? getHeroFolderForVersion(options.heroDataVersion) : source
+	let actualSource = source
+
+	// If heroDataVersion is provided, use the appropriate folder/file
+	if (options.heroDataVersion) {
+		if (source === "heroes") {
+			actualSource = getHeroFolderForVersion(options.heroDataVersion)
+		} else if (source === "artifacts" || source === "artifacts.json") {
+			actualSource = getArtifactFileForVersion(options.heroDataVersion)
+		}
+	}
+
 	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory
@@ -123,9 +170,18 @@ export async function findData(
 	options: { heroDataVersion?: HeroDataVersion } = {},
 ): Promise<DataItem | null> {
 	const normalizedSlug = decodeURIComponent(slug).toLowerCase().replace(/-/g, " ")
-	// If heroDataVersion is provided and source is "heroes", use the appropriate folder
-	const actualSource =
-		options.heroDataVersion && source === "heroes" ? getHeroFolderForVersion(options.heroDataVersion) : source
+
+	let actualSource = source
+
+	// If heroDataVersion is provided, use the appropriate folder/file
+	if (options.heroDataVersion) {
+		if (source === "heroes") {
+			actualSource = getHeroFolderForVersion(options.heroDataVersion)
+		} else if (source === "artifacts" || source === "artifacts.json") {
+			actualSource = getArtifactFileForVersion(options.heroDataVersion)
+		}
+	}
+
 	const fullPath = buildPath("table-data", actualSource)
 
 	// Check if source is a directory (for heroes/bosses)
@@ -178,6 +234,49 @@ export async function getHeroNamesForVersion(version: HeroDataVersion): Promise<
 
 	const files = fs.readdirSync(heroesPath).filter((file) => file.endsWith(".json"))
 	return files.map((file) => file.replace(".json", ""))
+}
+
+// Check if an artifact exists in a specific version's data
+export async function artifactExistsInVersion(artifactName: string, version: HeroDataVersion): Promise<boolean> {
+	const normalizedName = decodeURIComponent(artifactName).toLowerCase().replace(/-/g, " ")
+	const artifactFile = getArtifactFileForVersion(version)
+	const filePath = buildPath("table-data", artifactFile)
+
+	const data = await readJsonFile<ArtifactData[]>(filePath)
+	if (!data) return false
+
+	return data.some((artifact) => {
+		const nameMatch = normalizeName(artifact.name) === normalizedName
+		const aliasMatch = artifact.aliases?.some((alias) => normalizeName(alias) === normalizedName) ?? false
+		return nameMatch || aliasMatch
+	})
+}
+
+// Get list of artifact names that exist in a specific version's data
+export async function getArtifactNamesForVersion(version: HeroDataVersion): Promise<string[]> {
+	const artifactFile = getArtifactFileForVersion(version)
+	const filePath = buildPath("table-data", artifactFile)
+
+	const data = await readJsonFile<ArtifactData[]>(filePath)
+	if (!data) return []
+
+	return data.map((artifact) => artifact.name)
+}
+
+// Get hero release order for a specific version
+export async function getHeroReleaseOrder(version: HeroDataVersion): Promise<Record<string, string>> {
+	const releaseOrderFile = getHeroReleaseOrderForVersion(version)
+	const filePath = buildPath("table-data", releaseOrderFile)
+	const data = await readJsonFile<Record<string, string>>(filePath)
+	return data ?? {}
+}
+
+// Get artifact release order for a specific version
+export async function getArtifactReleaseOrder(version: HeroDataVersion): Promise<Record<string, string>> {
+	const releaseOrderFile = getArtifactReleaseOrderForVersion(version)
+	const filePath = buildPath("table-data", releaseOrderFile)
+	const data = await readJsonFile<Record<string, string>>(filePath)
+	return data ?? {}
 }
 
 // Legacy function for backward compatibility - check if hero exists in CBT data

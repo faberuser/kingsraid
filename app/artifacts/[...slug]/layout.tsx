@@ -16,7 +16,8 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 		}
 	}
 
-	const artifactData = (await findData(slug[0], "artifacts.json")) as ArtifactData | null
+	// Use legacy version for metadata (contains all artifacts)
+	const artifactData = (await findData(slug[0], "artifacts", { heroDataVersion: "legacy" })) as ArtifactData | null
 
 	if (!artifactData) {
 		return {
