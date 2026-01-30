@@ -57,7 +57,7 @@ export default function HomeClient({ featuredHeroes, steamNews }: HomeClientProp
 					<div className="mb-16">
 						<div className="text-center mb-8">
 							<div className="text-3xl font-bold mb-2">Latest News</div>
-							<div className="text-muted-foreground">Stay updated with Steam announcements</div>
+							<div className="text-muted-foreground">Stay updated with announcements</div>
 						</div>
 						<SteamRSS news={steamNews} />
 					</div>
