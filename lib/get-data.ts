@@ -17,8 +17,8 @@ type DataItem = HeroData | BossData | ArtifactData
 // Map version to folder path for heroes
 function getHeroFolderForVersion(version: DataVersion): string {
 	switch (version) {
-		case "cbt":
-			return "cbt/heroes"
+		case "cbt-phase-1":
+			return "cbt-phase-1/heroes"
 		case "ccbt":
 			return "ccbt/heroes"
 		case "legacy":
@@ -30,8 +30,8 @@ function getHeroFolderForVersion(version: DataVersion): string {
 // Map version to file path for artifacts
 function getArtifactFileForVersion(version: DataVersion): string {
 	switch (version) {
-		case "cbt":
-			return "cbt/artifacts.json"
+		case "cbt-phase-1":
+			return "cbt-phase-1/artifacts.json"
 		case "ccbt":
 			return "ccbt/artifacts.json"
 		case "legacy":
@@ -43,8 +43,8 @@ function getArtifactFileForVersion(version: DataVersion): string {
 // Map version to file path for hero release order
 function getHeroReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
-		case "cbt":
-			return "cbt/hero_release_order.json"
+		case "cbt-phase-1":
+			return "cbt-phase-1/hero_release_order.json"
 		case "ccbt":
 			return "ccbt/hero_release_order.json"
 		case "legacy":
@@ -56,14 +56,21 @@ function getHeroReleaseOrderForVersion(version: DataVersion): string {
 // Map version to file path for artifact release order
 function getArtifactReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
-		case "cbt":
-			return "cbt/artifact_release_order.json"
+		case "cbt-phase-1":
+			return "cbt-phase-1/artifact_release_order.json"
 		case "ccbt":
 			return "ccbt/artifact_release_order.json"
 		case "legacy":
 		default:
 			return "legacy/artifact_release_order.json"
 	}
+}
+
+// Map version to folder path for bosses (currently only legacy)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getBossFolderForVersion(_version: DataVersion): string {
+	// Bosses only have legacy data for now
+	return "legacy/bosses"
 }
 
 // Read and parse JSON files
@@ -119,13 +126,13 @@ export async function getData(
 ): Promise<DataItem[]> {
 	let actualSource = source
 
-	// If dataVersion is provided, use the appropriate folder/file
-	if (options.dataVersion) {
-		if (source === "heroes") {
-			actualSource = getHeroFolderForVersion(options.dataVersion)
-		} else if (source === "artifacts" || source === "artifacts.json") {
-			actualSource = getArtifactFileForVersion(options.dataVersion)
-		}
+	// Apply version-specific paths for different data types
+	if (source === "heroes") {
+		actualSource = getHeroFolderForVersion(options.dataVersion ?? "legacy")
+	} else if (source === "artifacts" || source === "artifacts.json") {
+		actualSource = getArtifactFileForVersion(options.dataVersion ?? "legacy")
+	} else if (source === "bosses") {
+		actualSource = getBossFolderForVersion(options.dataVersion ?? "legacy")
 	}
 
 	const fullPath = buildPath("table-data", actualSource)
@@ -173,13 +180,13 @@ export async function findData(
 
 	let actualSource = source
 
-	// If dataVersion is provided, use the appropriate folder/file
-	if (options.dataVersion) {
-		if (source === "heroes") {
-			actualSource = getHeroFolderForVersion(options.dataVersion)
-		} else if (source === "artifacts" || source === "artifacts.json") {
-			actualSource = getArtifactFileForVersion(options.dataVersion)
-		}
+	// Apply version-specific paths for different data types
+	if (source === "heroes") {
+		actualSource = getHeroFolderForVersion(options.dataVersion ?? "legacy")
+	} else if (source === "artifacts" || source === "artifacts.json") {
+		actualSource = getArtifactFileForVersion(options.dataVersion ?? "legacy")
+	} else if (source === "bosses") {
+		actualSource = getBossFolderForVersion(options.dataVersion ?? "legacy")
 	}
 
 	const fullPath = buildPath("table-data", actualSource)
@@ -281,10 +288,10 @@ export async function getArtifactReleaseOrder(version: DataVersion): Promise<Rec
 
 // Legacy function for backward compatibility - check if hero exists in CBT data
 export async function heroExistsInNewData(heroName: string): Promise<boolean> {
-	return heroExistsInVersion(heroName, "cbt")
+	return heroExistsInVersion(heroName, "cbt-phase-1")
 }
 
 // Legacy function for backward compatibility - get CBT hero names
 export async function getNewDataHeroNames(): Promise<string[]> {
-	return getHeroNamesForVersion("cbt")
+	return getHeroNamesForVersion("cbt-phase-1")
 }

@@ -14,7 +14,7 @@ export interface FeaturedHero {
 async function getFeaturedHeroes(): Promise<FeaturedHero[]> {
 	try {
 		// Use cbt data for featured heroes (has the most recent hero roster)
-		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "cbt", "heroes")
+		const heroesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "cbt-phase-1", "heroes")
 
 		if (!fs.existsSync(heroesDir)) {
 			return []

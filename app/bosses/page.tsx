@@ -1,11 +1,11 @@
-import BossesClient from "@/app/bosses/client"
+import BossesPageWrapper from "@/app/bosses/page-wrapper"
 import { BossData } from "@/model/Boss"
 import { getData, getJsonData } from "@/lib/get-data"
 
 export default async function BossesPage() {
 	const bosses = (await getData("bosses")) as BossData[]
-	const bossTypeMap = await getJsonData("table-data/boss_type.json")
-	const releaseOrder = await getJsonData("table-data/boss_release_order.json")
+	const bossTypeMap = await getJsonData("table-data/legacy/boss_type.json")
+	const releaseOrder = await getJsonData("table-data/legacy/boss_release_order.json")
 
-	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
+	return <BossesPageWrapper bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
 }

@@ -8,46 +8,47 @@ import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactsPageWrapperProps {
-	artifactsCbt: ArtifactData[]
+	artifactsCbtPhase1: ArtifactData[]
 	artifactsCcbt: ArtifactData[]
 	artifactsLegacy: ArtifactData[]
-	releaseOrderCbt: Record<string, string>
+	releaseOrderCbtPhase1: Record<string, string>
 	releaseOrderCcbt: Record<string, string>
 	releaseOrderLegacy: Record<string, string>
 }
 
 export default function ArtifactsPageWrapper({
-	artifactsCbt,
+	artifactsCbtPhase1,
 	artifactsCcbt,
 	artifactsLegacy,
-	releaseOrderCbt,
+	releaseOrderCbtPhase1,
 	releaseOrderCcbt,
 	releaseOrderLegacy,
 }: ArtifactsPageWrapperProps) {
 	const { version, isHydrated } = useDataVersion()
-	const { setShowToggle } = useHeroToggle()
+	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 
 	useEffect(() => {
 		setShowToggle(true)
+		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
 		return () => setShowToggle(false)
-	}, [setShowToggle])
+	}, [setShowToggle, setAvailableVersions])
 
 	const artifactsMap: Record<DataVersion, ArtifactData[]> = useMemo(
 		() => ({
-			cbt: artifactsCbt,
-			ccbt: artifactsCcbt,
-			legacy: artifactsLegacy,
+			"cbt-phase-1": artifactsCbtPhase1,
+			"ccbt": artifactsCcbt,
+			"legacy": artifactsLegacy,
 		}),
-		[artifactsCbt, artifactsCcbt, artifactsLegacy],
+		[artifactsCbtPhase1, artifactsCcbt, artifactsLegacy],
 	)
 
 	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
 		() => ({
-			cbt: releaseOrderCbt,
-			ccbt: releaseOrderCcbt,
-			legacy: releaseOrderLegacy,
+			"cbt-phase-1": releaseOrderCbtPhase1,
+			"ccbt": releaseOrderCcbt,
+			"legacy": releaseOrderLegacy,
 		}),
-		[releaseOrderCbt, releaseOrderCcbt, releaseOrderLegacy],
+		[releaseOrderCbtPhase1, releaseOrderCcbt, releaseOrderLegacy],
 	)
 
 	const artifacts = artifactsMap[version]

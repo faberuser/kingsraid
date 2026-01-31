@@ -15,32 +15,32 @@ const heroClasses = [
 
 export default async function HeroesPage() {
 	// Fetch heroes data for all three versions
-	const heroesCbt = (await getData("heroes", { dataVersion: "cbt" })) as HeroData[]
+	const heroesCbtPhase1 = (await getData("heroes", { dataVersion: "cbt-phase-1" })) as HeroData[]
 	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
 	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
 
 	// Fetch release order for all three versions
-	const releaseOrderCbt = await getHeroReleaseOrder("cbt")
+	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
 	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
 	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
 
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
 
 	// Get hero names for each version
-	const cbtHeroNames = await getHeroNamesForVersion("cbt")
+	const cbtPhase1HeroNames = await getHeroNamesForVersion("cbt-phase-1")
 	const ccbtHeroNames = await getHeroNamesForVersion("ccbt")
 
 	return (
 		<HeroesPageWrapper
-			heroesCbt={heroesCbt}
+			heroesCbtPhase1={heroesCbtPhase1}
 			heroesCcbt={heroesCcbt}
 			heroesLegacy={heroesLegacy}
 			heroClasses={heroClasses}
-			releaseOrderCbt={releaseOrderCbt}
+			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
 			releaseOrderCcbt={releaseOrderCcbt}
 			releaseOrderLegacy={releaseOrderLegacy}
 			saReverse={saReverse}
-			cbtHeroNames={cbtHeroNames}
+			cbtPhase1HeroNames={cbtPhase1HeroNames}
 			ccbtHeroNames={ccbtHeroNames}
 		/>
 	)

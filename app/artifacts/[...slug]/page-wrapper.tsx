@@ -8,57 +8,67 @@ import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactPageWrapperProps {
-	artifactDataCbt: ArtifactData | null
+	artifactDataCbtPhase1: ArtifactData | null
 	artifactDataCcbt: ArtifactData | null
 	artifactDataLegacy: ArtifactData
 }
 
 export default function ArtifactPageWrapper({
-	artifactDataCbt,
+	artifactDataCbtPhase1,
 	artifactDataCcbt,
 	artifactDataLegacy,
 }: ArtifactPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
-	const { setShowToggle } = useHeroToggle()
+	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 
 	// Check which versions have data for this artifact
-	const artifactExistsInCbt = artifactDataCbt !== null
+	const artifactExistsInCbtPhase1 = artifactDataCbtPhase1 !== null
 	const artifactExistsInCcbt = artifactDataCcbt !== null
 
 	// Map of artifact data by version
 	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
 		() => ({
-			cbt: artifactDataCbt,
-			ccbt: artifactDataCcbt,
-			legacy: artifactDataLegacy,
+			"cbt-phase-1": artifactDataCbtPhase1,
+			"ccbt": artifactDataCcbt,
+			"legacy": artifactDataLegacy,
 		}),
-		[artifactDataCbt, artifactDataCcbt, artifactDataLegacy],
+		[artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
 	)
 
 	// Show toggle only if artifact exists in at least one non-legacy version
-	const showVersionToggle = artifactExistsInCbt || artifactExistsInCcbt
+	const showVersionToggle = artifactExistsInCbtPhase1 || artifactExistsInCcbt
+
+	// Determine available versions for this artifact
+	const availableVersions = useMemo(() => {
+		const versions: DataVersion[] = []
+		if (artifactExistsInCbtPhase1) versions.push("cbt-phase-1")
+		if (artifactExistsInCcbt) versions.push("ccbt")
+		versions.push("legacy")
+		return versions
+	}, [artifactExistsInCbtPhase1, artifactExistsInCcbt])
 
 	useEffect(() => {
 		setShowToggle(showVersionToggle)
+		setAvailableVersions(availableVersions)
 		return () => setShowToggle(false)
-	}, [showVersionToggle, setShowToggle])
+	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
 
 	useEffect(() => {
 		// If user selects a version that doesn't have this artifact, fallback to legacy
-		if (version === "cbt" && !artifactExistsInCbt) {
+		if (version === "cbt-phase-1" && !artifactExistsInCbtPhase1) {
 			if (artifactExistsInCcbt) {
 				setVersion("ccbt")
 			} else {
 				setVersion("legacy")
 			}
 		} else if (version === "ccbt" && !artifactExistsInCcbt) {
-			if (artifactExistsInCbt) {
-				setVersion("cbt")
+			if (artifactExistsInCbtPhase1) {
+				setVersion("cbt-phase-1")
 			} else {
 				setVersion("legacy")
 			}
 		}
-	}, [version, artifactExistsInCbt, artifactExistsInCcbt, setVersion])
+	}, [version, artifactExistsInCbtPhase1, artifactExistsInCcbt, setVersion])
 
 	// Show loading while hydrating
 	if (!isHydrated) {

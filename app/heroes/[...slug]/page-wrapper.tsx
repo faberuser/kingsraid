@@ -10,16 +10,16 @@ import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroPageWrapperProps {
-	heroDataCbt: HeroData | null
+	heroDataCbtPhase1: HeroData | null
 	heroDataCcbt: HeroData | null
 	heroDataLegacy: HeroData
-	costumesCbt: Costume[]
+	costumesCbtPhase1: Costume[]
 	costumesCcbt: Costume[]
 	costumesLegacy: Costume[]
-	heroModelsCbt: { [costume: string]: ModelFile[] }
+	heroModelsCbtPhase1: { [costume: string]: ModelFile[] }
 	heroModelsCcbt: { [costume: string]: ModelFile[] }
 	heroModelsLegacy: { [costume: string]: ModelFile[] }
-	voiceFilesCbt: VoiceFiles
+	voiceFilesCbtPhase1: VoiceFiles
 	voiceFilesCcbt: VoiceFiles
 	voiceFilesLegacy: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
@@ -27,89 +27,99 @@ interface HeroPageWrapperProps {
 }
 
 export default function HeroPageWrapper({
-	heroDataCbt,
+	heroDataCbtPhase1,
 	heroDataCcbt,
 	heroDataLegacy,
-	costumesCbt,
+	costumesCbtPhase1,
 	costumesCcbt,
 	costumesLegacy,
-	heroModelsCbt,
+	heroModelsCbtPhase1,
 	heroModelsCcbt,
 	heroModelsLegacy,
-	voiceFilesCbt,
+	voiceFilesCbtPhase1,
 	voiceFilesCcbt,
 	voiceFilesLegacy,
 	availableScenes = [],
 	enableModelsVoices = false,
 }: HeroPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
-	const { setShowToggle } = useHeroToggle()
+	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 
 	// Check which versions have data for this hero
-	const heroExistsInCbt = heroDataCbt !== null
+	const heroExistsInCbtPhase1 = heroDataCbtPhase1 !== null
 	const heroExistsInCcbt = heroDataCcbt !== null
 
 	// Map of hero data by version
 	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
 		() => ({
-			cbt: heroDataCbt,
-			ccbt: heroDataCcbt,
-			legacy: heroDataLegacy,
+			"cbt-phase-1": heroDataCbtPhase1,
+			"ccbt": heroDataCcbt,
+			"legacy": heroDataLegacy,
 		}),
-		[heroDataCbt, heroDataCcbt, heroDataLegacy],
+		[heroDataCbtPhase1, heroDataCcbt, heroDataLegacy],
 	)
 
 	const costumesMap: Record<DataVersion, Costume[]> = useMemo(
 		() => ({
-			cbt: costumesCbt,
-			ccbt: costumesCcbt,
-			legacy: costumesLegacy,
+			"cbt-phase-1": costumesCbtPhase1,
+			"ccbt": costumesCcbt,
+			"legacy": costumesLegacy,
 		}),
-		[costumesCbt, costumesCcbt, costumesLegacy],
+		[costumesCbtPhase1, costumesCcbt, costumesLegacy],
 	)
 
 	const heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }> = useMemo(
 		() => ({
-			cbt: heroModelsCbt,
-			ccbt: heroModelsCcbt,
-			legacy: heroModelsLegacy,
+			"cbt-phase-1": heroModelsCbtPhase1,
+			"ccbt": heroModelsCcbt,
+			"legacy": heroModelsLegacy,
 		}),
-		[heroModelsCbt, heroModelsCcbt, heroModelsLegacy],
+		[heroModelsCbtPhase1, heroModelsCcbt, heroModelsLegacy],
 	)
 
 	const voiceFilesMap: Record<DataVersion, VoiceFiles> = useMemo(
 		() => ({
-			cbt: voiceFilesCbt,
-			ccbt: voiceFilesCcbt,
-			legacy: voiceFilesLegacy,
+			"cbt-phase-1": voiceFilesCbtPhase1,
+			"ccbt": voiceFilesCcbt,
+			"legacy": voiceFilesLegacy,
 		}),
-		[voiceFilesCbt, voiceFilesCcbt, voiceFilesLegacy],
+		[voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
 	)
 
 	// Show toggle only if hero exists in at least one non-legacy version
-	const showVersionToggle = heroExistsInCbt || heroExistsInCcbt
+	const showVersionToggle = heroExistsInCbtPhase1 || heroExistsInCcbt
+
+	// Determine available versions for this hero
+	const availableVersions = useMemo(() => {
+		const versions: DataVersion[] = []
+		if (heroExistsInCbtPhase1) versions.push("cbt-phase-1")
+		if (heroExistsInCcbt) versions.push("ccbt")
+		versions.push("legacy")
+		return versions
+	}, [heroExistsInCbtPhase1, heroExistsInCcbt])
 
 	useEffect(() => {
 		setShowToggle(showVersionToggle)
+		setAvailableVersions(availableVersions)
 		return () => setShowToggle(false)
-	}, [showVersionToggle, setShowToggle])
+	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
 
 	useEffect(() => {
 		// If user selects a version that doesn't have this hero, fallback to legacy
-		if (version === "cbt" && !heroExistsInCbt) {
+		if (version === "cbt-phase-1" && !heroExistsInCbtPhase1) {
 			if (heroExistsInCcbt) {
 				setVersion("ccbt")
 			} else {
 				setVersion("legacy")
 			}
 		} else if (version === "ccbt" && !heroExistsInCcbt) {
-			if (heroExistsInCbt) {
-				setVersion("cbt")
+			if (heroExistsInCbtPhase1) {
+				setVersion("cbt-phase-1")
 			} else {
 				setVersion("legacy")
 			}
 		}
-	}, [version, heroExistsInCbt, heroExistsInCcbt, setVersion])
+	}, [version, heroExistsInCbtPhase1, heroExistsInCcbt, setVersion])
 
 	// Show loading while hydrating
 	if (!isHydrated) {

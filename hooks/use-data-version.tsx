@@ -5,23 +5,23 @@ import { ArrowLeft, ArrowRight } from "lucide-react"
 
 const STORAGE_KEY = "dataVersion"
 
-export type DataVersion = "cbt" | "ccbt" | "legacy"
+export type DataVersion = "cbt-phase-1" | "ccbt" | "legacy"
 
 // Order of versions for keyboard navigation (left/right arrows)
-const VERSION_ORDER: DataVersion[] = ["cbt", "ccbt", "legacy"]
+const VERSION_ORDER: DataVersion[] = ["cbt-phase-1", "ccbt", "legacy"]
 
 // Labels for display in UI
 export const DataVersionLabels: Record<DataVersion, string> = {
-	cbt: "CBT",
-	ccbt: "CCBT",
-	legacy: "Legacy",
+	"cbt-phase-1": "CBT Phase 1",
+	"ccbt": "CCBT",
+	"legacy": "Legacy",
 }
 
 // Descriptions for tooltips
 export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
-	cbt: (
+	"cbt-phase-1": (
 		<>
-			Data from Closed Beta Test.
+			Data from Closed Beta Test Phase 1.
 			<br />
 			Costumes, Models, Voices use Legacy.
 			<br />
@@ -32,7 +32,7 @@ export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
 			</span>
 		</>
 	),
-	ccbt: (
+	"ccbt": (
 		<>
 			Data from Content Creator CBT.
 			<br />
@@ -45,7 +45,7 @@ export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
 			</span>
 		</>
 	),
-	legacy: (
+	"legacy": (
 		<>
 			Data before Doomsday Patch.
 			<br />
@@ -60,7 +60,7 @@ export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
 
 interface DataVersionContextType {
 	version: DataVersion
-	isCbt: boolean
+	isCbtPhase1: boolean
 	isCcbt: boolean
 	isLegacy: boolean
 	setVersion: (version: DataVersion) => void
@@ -70,8 +70,8 @@ interface DataVersionContextType {
 const DataVersionContext = createContext<DataVersionContextType | undefined>(undefined)
 
 export function DataVersionProvider({ children }: { children: ReactNode }) {
-	// Always start with "cbt" for SSR consistency (newest data as default)
-	const [version, setVersionState] = useState<DataVersion>("cbt")
+	// Always start with "cbt-phase-1" for SSR consistency (newest data as default)
+	const [version, setVersionState] = useState<DataVersion>("cbt-phase-1")
 	const [mounted, setMounted] = useState(false)
 
 	// Sync with localStorage after hydration
@@ -79,12 +79,12 @@ export function DataVersionProvider({ children }: { children: ReactNode }) {
 		// eslint-disable-next-line
 		setMounted(true)
 		const stored = localStorage.getItem(STORAGE_KEY)
-		if (stored === "cbt" || stored === "ccbt" || stored === "legacy") {
+		if (stored === "cbt-phase-1" || stored === "ccbt" || stored === "legacy") {
 			setVersionState(stored)
-		} else if (stored === "new") {
-			// Migrate old "new" value to "ccbt"
-			setVersionState("ccbt")
-			localStorage.setItem(STORAGE_KEY, "ccbt")
+		} else if (stored === "new" || stored === "cbt") {
+			// Migrate old "new" or "cbt" value to "cbt-phase-1"
+			setVersionState("cbt-phase-1")
+			localStorage.setItem(STORAGE_KEY, "cbt-phase-1")
 		}
 	}, [])
 
@@ -136,8 +136,8 @@ export function DataVersionProvider({ children }: { children: ReactNode }) {
 	}, [mounted])
 
 	const value = {
-		version: mounted ? version : "cbt",
-		isCbt: mounted ? version === "cbt" : true,
+		version: mounted ? version : "cbt-phase-1",
+		isCbtPhase1: mounted ? version === "cbt-phase-1" : true,
 		isCcbt: mounted ? version === "ccbt" : false,
 		isLegacy: mounted ? version === "legacy" : false,
 		setVersion,

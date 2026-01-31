@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import SoftcapClient from "@/app/softcap/client"
+import SoftcapPageWrapper from "@/app/softcap/page-wrapper"
 
 interface SoftcapData {
 	[statName: string]: {
@@ -22,7 +22,7 @@ interface SoftcapData {
 }
 
 async function getSoftcapData(): Promise<SoftcapData> {
-	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "softcap.json")
+	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "softcap.json")
 	if (!fs.existsSync(filePath)) {
 		return {}
 	}
@@ -33,5 +33,5 @@ async function getSoftcapData(): Promise<SoftcapData> {
 export default async function SoftcapPage() {
 	const softcapData = await getSoftcapData()
 
-	return <SoftcapClient softcapData={softcapData} />
+	return <SoftcapPageWrapper softcapData={softcapData} />
 }
