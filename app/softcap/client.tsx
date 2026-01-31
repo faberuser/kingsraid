@@ -80,6 +80,9 @@ const statMappings = [
 export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 	const [inputValue, setInputValue] = useState<number>(0)
 
+	// Check if we have data
+	const hasData = Object.keys(softcapData).length > 0
+
 	return (
 		<div>
 			<div className="space-y-4 mb-4 mt-1">
@@ -90,58 +93,67 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 				<Separator />
 			</div>
 
-			{/* Input Section */}
-			<Card className="mb-6">
-				<CardHeader>
-					<CardTitle>Raw Stat Value</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<div className="flex gap-4 items-center">
-						<Input
-							type="number"
-							value={inputValue}
-							onChange={(e) => setInputValue(Number(e.target.value))}
-							onFocus={(e) => e.target.select()}
-							placeholder="Enter stat value"
-							className="max-w-xs"
-						/>
-					</div>
-				</CardContent>
-			</Card>
+			{!hasData ? (
+				<div className="text-center py-12 text-muted-foreground">
+					<p className="text-lg">No softcap data available for this data version.</p>
+					<p className="text-sm mt-2">Try switching to Legacy version.</p>
+				</div>
+			) : (
+				<>
+					{/* Input Section */}
+					<Card className="mb-6">
+						<CardHeader>
+							<CardTitle>Raw Stat Value</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="flex gap-4 items-center">
+								<Input
+									type="number"
+									value={inputValue}
+									onChange={(e) => setInputValue(Number(e.target.value))}
+									onFocus={(e) => e.target.select()}
+									placeholder="Enter stat value"
+									className="max-w-xs"
+								/>
+							</div>
+						</CardContent>
+					</Card>
 
-			{/* Softcap Table */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Softcap Table</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead className="text-left">Stat</TableHead>
-								<TableHead className="text-left">Softcap</TableHead>
-								<TableHead className="text-left">Value</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{statMappings.map((stat) => {
-								const statData = softcapData[stat.key]
-								if (!statData) return null
-
-								const actualValue = calculateActualStat(statData, inputValue)
-
-								return (
-									<TableRow key={stat.name}>
-										<TableCell className="font-medium">{stat.name}</TableCell>
-										<TableCell className="text-left">{statData.X2}</TableCell>
-										<TableCell className="text-left">{actualValue}</TableCell>
+					{/* Softcap Table */}
+					<Card>
+						<CardHeader>
+							<CardTitle>Softcap Table</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead className="text-left">Stat</TableHead>
+										<TableHead className="text-left">Softcap</TableHead>
+										<TableHead className="text-left">Value</TableHead>
 									</TableRow>
-								)
-							})}
-						</TableBody>
-					</Table>
-				</CardContent>
-			</Card>
+								</TableHeader>
+								<TableBody>
+									{statMappings.map((stat) => {
+										const statData = softcapData[stat.key]
+										if (!statData) return null
+
+										const actualValue = calculateActualStat(statData, inputValue)
+
+										return (
+											<TableRow key={stat.name}>
+												<TableCell className="font-medium">{stat.name}</TableCell>
+												<TableCell className="text-left">{statData.X2}</TableCell>
+												<TableCell className="text-left">{actualValue}</TableCell>
+											</TableRow>
+										)
+									})}
+								</TableBody>
+							</Table>
+						</CardContent>
+					</Card>
+				</>
+			)}
 		</div>
 	)
 }

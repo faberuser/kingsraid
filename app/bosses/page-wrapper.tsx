@@ -4,56 +4,44 @@ import { BossData } from "@/model/Boss"
 import BossesClient from "@/app/bosses/client"
 import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useDataVersion } from "@/hooks/use-data-version"
-import { useEffect } from "react"
-import { usePathname } from "next/navigation"
-
-const PREVIOUS_VERSION_KEY = "kr-previous-data-version"
+import { useEffect, useMemo } from "react"
 
 interface BossesPageWrapperProps {
-	bosses: BossData[]
+	bossesLegacy: BossData[]
+	bossesCcbt: BossData[]
+	bossesCbtPhase1: BossData[]
 	bossTypeMap: Record<string, string>
 	releaseOrder: Record<string, string>
 }
 
-export default function BossesPageWrapper({ bosses, bossTypeMap, releaseOrder }: BossesPageWrapperProps) {
+export default function BossesPageWrapper({
+	bossesLegacy,
+	bossesCcbt,
+	bossesCbtPhase1,
+	bossTypeMap,
+	releaseOrder,
+}: BossesPageWrapperProps) {
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-	const { version, setVersion } = useDataVersion()
-	const pathname = usePathname()
+	const { version: dataVersion } = useDataVersion()
 
-	// Set available versions on every navigation to this page
+	// Enable version toggle on mount - all versions available
 	useEffect(() => {
-		setAvailableVersions(["legacy"])
+		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
 		setShowToggle(true)
-	}, [setAvailableVersions, setShowToggle, pathname])
+		return () => setShowToggle(false)
+	}, [setAvailableVersions, setShowToggle])
 
-	// Save previous version and force to legacy
-	useEffect(() => {
-		if (version !== "legacy") {
-			// Save current version before switching to legacy
-			sessionStorage.setItem(PREVIOUS_VERSION_KEY, version)
-			setVersion("legacy")
+	// Select bosses data based on version
+	const bosses = useMemo(() => {
+		switch (dataVersion) {
+			case "cbt-phase-1":
+				return bossesCbtPhase1
+			case "ccbt":
+				return bossesCcbt
+			default:
+				return bossesLegacy
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []) // Only run on mount
-
-	// Restore previous version when leaving to a non-legacy-only page
-	useEffect(() => {
-		return () => {
-			const savedVersion = sessionStorage.getItem(PREVIOUS_VERSION_KEY)
-			if (savedVersion && savedVersion !== "legacy") {
-				// Use setTimeout to ensure this runs after the new page's effects
-				setTimeout(() => {
-					// Only restore if we're not on a legacy-only page anymore
-					const currentPath = window.location.pathname
-					if (!currentPath.startsWith("/bosses") && !currentPath.startsWith("/softcap")) {
-						setVersion(savedVersion as "cbt-phase-1" | "ccbt" | "legacy")
-						sessionStorage.removeItem(PREVIOUS_VERSION_KEY)
-					}
-				}, 0)
-			}
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [])
+	}, [dataVersion, bossesLegacy, bossesCcbt, bossesCbtPhase1])
 
 	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
 }

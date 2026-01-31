@@ -114,6 +114,26 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 		)
 	}
 
+	// Show message when no bosses data available
+	if (bosses.length === 0) {
+		return (
+			<div>
+				<div className="space-y-4 mb-4 mt-1">
+					<div className="flex flex-row justify-between items-center">
+						<div className="flex flex-row gap-2 items-baseline">
+							<div className="text-xl font-bold">Bosses</div>
+						</div>
+					</div>
+					<Separator />
+				</div>
+				<div className="text-center py-12 text-muted-foreground">
+					<p className="text-lg">No boss data available for this data version.</p>
+					<p className="text-sm mt-2">Try switching to Legacy version.</p>
+				</div>
+			</div>
+		)
+	}
+
 	return (
 		<div>
 			<div className="space-y-4 mb-4">
@@ -248,8 +268,8 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 												boss.profile.damage_type === "Physical"
 													? "bg-red-300"
 													: boss.profile.damage_type === "Magical"
-													? "bg-blue-300"
-													: "bg-yellow-400"
+														? "bg-blue-300"
+														: "bg-yellow-400"
 											}
 										>
 											{boss.profile.damage_type}

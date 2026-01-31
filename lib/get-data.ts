@@ -66,11 +66,17 @@ function getArtifactReleaseOrderForVersion(version: DataVersion): string {
 	}
 }
 
-// Map version to folder path for bosses (currently only legacy)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getBossFolderForVersion(_version: DataVersion): string {
-	// Bosses only have legacy data for now
-	return "legacy/bosses"
+// Map version to folder path for bosses
+function getBossFolderForVersion(version: DataVersion): string {
+	switch (version) {
+		case "cbt-phase-1":
+			return "cbt-phase-1/bosses"
+		case "ccbt":
+			return "ccbt/bosses"
+		case "legacy":
+		default:
+			return "legacy/bosses"
+	}
 }
 
 // Read and parse JSON files
