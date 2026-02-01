@@ -33,7 +33,7 @@ export default function HeroCard({
 		<Link
 			key={name}
 			className={`border rounded flex flex-col relative cursor-pointer overflow-hidden ${
-				isIconView ? "w-20 h-24 sm:w-24 sm:h-28" : "w-40 h-56 sm:w-48 sm:h-64"
+				isIconView ? "w-24 h-24 sm:w-28 sm:h-28" : "w-40 h-56 sm:w-48 sm:h-64"
 			}`}
 			href={`/heroes/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`}
 			onClick={handleClick}
@@ -43,7 +43,7 @@ export default function HeroCard({
 				alt={name}
 				width="0"
 				height="0"
-				sizes={isIconView ? "20vw md:10vw" : "40vw md:20vw"}
+				sizes="40vw md:20vw"
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-transform duration-300`}
