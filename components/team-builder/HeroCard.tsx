@@ -1,11 +1,12 @@
 "use client"
 
 import Image from "@/components/next-image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
+import { X, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/app/team-builder/types"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
@@ -111,9 +112,31 @@ export function HeroCard({
 						</div>
 					</div>
 
-					<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemove(index)}>
-						<X className="h-4 w-4" />
-					</Button>
+					<div className="flex gap-1">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6"
+									asChild
+									onClick={(e) => e.stopPropagation()}
+								>
+									<Link
+										href={`/heroes/${encodeURIComponent(member.hero.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<ExternalLink className="h-4 w-4" />
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>View Hero Details</TooltipContent>
+						</Tooltip>
+						<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemove(index)}>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
 			</CardHeader>
 

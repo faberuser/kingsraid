@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { HeroData } from "@/model/Hero"
@@ -35,6 +36,33 @@ export default function HeroClient({
 	enableModelsVoices = false,
 	classPerks,
 }: HeroClientProps) {
+	// Helper function to get tab from hash
+	const getTabFromHash = () => {
+		if (typeof window === "undefined") return "skills"
+		const hash = window.location.hash.slice(1) // Remove the '#'
+		const validTabs = ["skills", "perks", "gear", "profile", "costumes", "models", "voices"]
+		return validTabs.includes(hash) ? hash : "skills"
+	}
+
+	// State to track active tab - initialize from URL hash
+	const [activeTab, setActiveTab] = useState<string>(getTabFromHash)
+
+	// Listen for hash changes (e.g., browser back/forward)
+	useEffect(() => {
+		const handleHashChange = () => {
+			setActiveTab(getTabFromHash())
+		}
+
+		window.addEventListener("hashchange", handleHashChange)
+		return () => window.removeEventListener("hashchange", handleHashChange)
+	}, [])
+
+	// Update URL hash when tab changes
+	const handleTabChange = (value: string) => {
+		setActiveTab(value)
+		window.history.pushState(null, "", `#${value}`)
+	}
+
 	return (
 		<div>
 			{/* Compact Hero Header */}
@@ -84,7 +112,7 @@ export default function HeroClient({
 				</div>
 			</div>
 
-			<Tabs defaultValue="skills" className="w-full mt-2">
+			<Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-2">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
 					<TabsTrigger value="skills">Skills</TabsTrigger>
 					<TabsTrigger value="perks">Perks</TabsTrigger>
