@@ -7,17 +7,14 @@ import { SidebarInset } from "@/components/ui/sidebar"
 import { usePathname, useRouter } from "next/navigation"
 import { useDataVersion, DataVersion, DataVersionLabels, DataVersionDescriptions } from "@/hooks/use-data-version"
 import { useHeroToggle } from "@/contexts/version-toggle-context"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { MobileTooltip } from "@/components/mobile-tooltip"
 
 export default function SidebarInsetClient({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const { version, setVersion } = useDataVersion()
 	const { showToggle, availableVersions } = useHeroToggle()
-	const isMobile = useIsMobile()
 
 	return (
 		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
@@ -35,27 +32,9 @@ export default function SidebarInsetClient({ children }: { children: React.React
 				)}
 				{showToggle && availableVersions.length > 0 && (
 					<div className="flex items-center gap-2">
-						{isMobile ? (
-							<Popover>
-								<PopoverTrigger asChild>
-									<Info className="h-4 w-4 text-muted-foreground" />
-								</PopoverTrigger>
-								<PopoverContent className="max-w-fit">
-									<div className="text-sm">{DataVersionDescriptions[version]}</div>
-								</PopoverContent>
-							</Popover>
-						) : (
-							<TooltipProvider>
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<Info className="h-4 w-4 text-muted-foreground" />
-									</TooltipTrigger>
-									<TooltipContent className="max-w-fit">
-										<div className="text-sm">{DataVersionDescriptions[version]}</div>
-									</TooltipContent>
-								</Tooltip>
-							</TooltipProvider>
-						)}
+						<MobileTooltip content={<div className="text-sm">{DataVersionDescriptions[version]}</div>}>
+							<Info className="h-4 w-4 text-muted-foreground" />
+						</MobileTooltip>
 						<Select
 							key={availableVersions.join(",")}
 							value={version}

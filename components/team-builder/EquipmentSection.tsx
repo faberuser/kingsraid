@@ -3,7 +3,7 @@
 import Image from "@/components/next-image"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/app/team-builder/types"
-import { MobileTooltip } from "./MobileTooltip"
+import { MobileTooltip } from "@/components/mobile-tooltip"
 
 interface EquipmentSectionProps {
 	member: TeamMember
