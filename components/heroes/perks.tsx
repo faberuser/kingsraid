@@ -52,7 +52,7 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 										/>
 										<div className="font-medium">{perkName}</div>
 									</div>
-									<div className="text-sm text-muted-foreground">{effect}</div>
+									<div className="text-sm">{effect}</div>
 								</CardContent>
 							</Card>
 						))}
@@ -84,7 +84,7 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 										/>
 										<div className="font-medium">{perkName}</div>
 									</div>
-									<div className="text-sm text-muted-foreground">{effect}</div>
+									<div className="text-sm">{effect}</div>
 								</CardContent>
 							</Card>
 						))}

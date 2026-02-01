@@ -170,7 +170,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				sizes="40vw md:20vw"
 				className="w-full flex-1 hover:scale-110 transition-transform duration-300 object-contain"
 			/>
-			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-black/70 to-transparent text-white py-2 flex items-center justify-center">
+			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-white/100 dark:from-black/70 to-transparent dark:text-white py-2 flex items-center justify-center">
 				{costume.displayName.replace("%", "?")}
 			</div>
 		</div>
