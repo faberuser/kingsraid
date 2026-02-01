@@ -7,6 +7,7 @@ import SidebarWrapper from "@/components/sidebar/sidebar-wrapper"
 import SidebarInsetClient from "@/components/sidebar/sidebar-inset-client"
 import { HeroToggleProvider } from "@/contexts/version-toggle-context"
 import { DataVersionProvider } from "@/hooks/use-data-version"
+import { CompareModeProvider } from "@/hooks/use-compare-mode"
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -42,12 +43,14 @@ export default function RootLayout({
 				<body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 						<DataVersionProvider>
-							<HeroToggleProvider>
-								<SidebarProviderWithStorage>
-									<SidebarWrapper />
-									<SidebarInsetClient>{children}</SidebarInsetClient>
-								</SidebarProviderWithStorage>
-							</HeroToggleProvider>
+							<CompareModeProvider>
+								<HeroToggleProvider>
+									<SidebarProviderWithStorage>
+										<SidebarWrapper />
+										<SidebarInsetClient>{children}</SidebarInsetClient>
+									</SidebarProviderWithStorage>
+								</HeroToggleProvider>
+							</CompareModeProvider>
 						</DataVersionProvider>
 					</ThemeProvider>
 				</body>

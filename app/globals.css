@@ -136,6 +136,13 @@
 		background-color: var(--muted-foreground);
 	}
 
+	/* Compare mode - reduce image sizes for skills and gear sections only */
+	.compare-panel .skills-section img,
+	.compare-panel .gear-section img {
+		max-width: 60px !important;
+		height: auto !important;
+	}
+
 	/* Improve readability of colored text in skill descriptions */
 	.skill-colored-text {
 		font-weight: 600;

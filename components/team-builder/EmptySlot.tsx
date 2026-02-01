@@ -213,7 +213,7 @@ export function EmptySlot({
 
 						{/* Hero Grid */}
 						<div className="flex-1 overflow-y-auto custom-scrollbar mt-3">
-							<div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-3 px-2 py-1">
+							<div className="flex flex-wrap justify-center gap-3 px-2 py-1">
 								{filteredHeroes.map((hero) => {
 									const alreadyInTeam = team.some((m) => m.hero?.profile.name === hero.profile.name)
 									return (
@@ -222,7 +222,7 @@ export function EmptySlot({
 											onClick={() => !alreadyInTeam && onSelectHero(hero)}
 											disabled={alreadyInTeam}
 											className={cn(
-												"relative rounded border overflow-hidden transition-all aspect-square",
+												"relative rounded border overflow-hidden transition-all aspect-square w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)]",
 												alreadyInTeam
 													? "opacity-40 cursor-not-allowed"
 													: "hover:ring-2 hover:ring-primary",
@@ -231,8 +231,9 @@ export function EmptySlot({
 											<Image
 												src={`/kingsraid-data/assets/${hero.profile.thumbnail}`}
 												alt={hero.profile.name}
-												width={1000}
-												height={1000}
+												width="0"
+												height="0"
+												sizes="40vw md:20vw"
 												className="w-full h-full object-cover"
 											/>
 											<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">

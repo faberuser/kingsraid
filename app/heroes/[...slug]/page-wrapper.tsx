@@ -1,6 +1,6 @@
 "use client"
 
-import HeroClient from "@/app/heroes/[...slug]/client"
+import HeroCompareWrapper from "@/components/compare/hero-compare-wrapper"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
@@ -159,14 +159,30 @@ export default function HeroPageWrapper({
 	const classPerks = classPerksMap[version] || classPerksLegacy
 
 	return (
-		<HeroClient
-			heroData={heroData}
-			costumes={costumes}
-			heroModels={heroModels}
-			voiceFiles={voiceFiles}
+		<HeroCompareWrapper
+			heroDataCbtPhase1={heroDataCbtPhase1}
+			heroDataCcbt={heroDataCcbt}
+			heroDataLegacy={heroDataLegacy}
+			costumesCbtPhase1={costumesCbtPhase1}
+			costumesCcbt={costumesCcbt}
+			costumesLegacy={costumesLegacy}
+			heroModelsCbtPhase1={heroModelsCbtPhase1}
+			heroModelsCcbt={heroModelsCcbt}
+			heroModelsLegacy={heroModelsLegacy}
+			voiceFilesCbtPhase1={voiceFilesCbtPhase1}
+			voiceFilesCcbt={voiceFilesCcbt}
+			voiceFilesLegacy={voiceFilesLegacy}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
-			classPerks={classPerks}
+			classPerksLegacy={classPerksLegacy}
+			classPerksCbtPhase1={classPerksCbtPhase1}
+			classPerksCcbt={classPerksCcbt}
+			availableVersions={availableVersions}
+			currentHeroData={heroData}
+			currentCostumes={costumes}
+			currentHeroModels={heroModels}
+			currentVoiceFiles={voiceFiles}
+			currentClassPerks={classPerks}
 		/>
 	)
 }
