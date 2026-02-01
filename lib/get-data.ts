@@ -265,6 +265,15 @@ export async function artifactExistsInVersion(artifactName: string, version: Dat
 	})
 }
 
+// Check if a boss exists in a specific version's data folder
+export async function bossExistsInVersion(bossName: string, version: DataVersion): Promise<boolean> {
+	const normalizedName = decodeURIComponent(bossName).toLowerCase().replace(/-/g, " ")
+	const capitalizedName = capitalize(normalizedName)
+	const folder = getBossFolderForVersion(version)
+	const filePath = buildPath("table-data", folder, `${capitalizedName}.json`)
+	return fs.existsSync(filePath)
+}
+
 // Get list of artifact names that exist in a specific version's data
 export async function getArtifactNamesForVersion(version: DataVersion): Promise<string[]> {
 	const artifactFile = getArtifactFileForVersion(version)

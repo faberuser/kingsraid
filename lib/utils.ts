@@ -52,6 +52,27 @@ export function classColorMapBg(className: string) {
 	}
 }
 
+export function classColorMapBadge(className: string) {
+	switch (className.toLowerCase()) {
+		case "knight":
+			return "bg-blue-500"
+		case "warrior":
+			return "bg-yellow-700"
+		case "archer":
+			return "bg-green-500"
+		case "mechanic":
+			return "bg-blue-700"
+		case "wizard":
+			return "bg-red-500"
+		case "assassin":
+			return "bg-purple-500"
+		case "priest":
+			return "bg-blue-300"
+		default:
+			return "bg-gray-500"
+	}
+}
+
 /**
  * Parses text with color codes like [ffc800]text[-] and newlines, returns JSX with colored spans and line breaks
  * @param text - Text containing color codes in format [HEX_COLOR]text[-] and \n for newlines

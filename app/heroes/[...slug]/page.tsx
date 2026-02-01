@@ -8,9 +8,43 @@ import { getCostumeData } from "@/app/heroes/[...slug]/models/getCostumes"
 import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
 import { getVoiceFiles } from "@/app/heroes/[...slug]/models/getVoices"
 import { getAvailableScenes } from "@/app/heroes/[...slug]/models/getScenes"
+import { ClassPerksData } from "@/components/heroes/perks"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 const enableModelsVoices = process.env.NEXT_PUBLIC_ENABLE_MODELS_VOICES === "true"
+
+async function getClassPerks(dataVersion: string = "legacy"): Promise<ClassPerksData> {
+	const classesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", dataVersion, "classes")
+	const result: ClassPerksData = {
+		t1Perks: {},
+		t2Perks: {},
+	}
+
+	try {
+		// Read General.json for T1 perks
+		const generalPath = path.join(classesDir, "General.json")
+		if (fs.existsSync(generalPath)) {
+			const content = fs.readFileSync(generalPath, "utf-8")
+			const data = JSON.parse(content)
+			result.t1Perks = data.perks?.t1 || {}
+		}
+
+		// Read class-specific files for T2 perks
+		const classNames = ["Knight", "Warrior", "Archer", "Mechanic", "Wizard", "Assassin", "Priest"]
+		for (const className of classNames) {
+			const classPath = path.join(classesDir, `${className}.json`)
+			if (fs.existsSync(classPath)) {
+				const content = fs.readFileSync(classPath, "utf-8")
+				const data = JSON.parse(content)
+				result.t2Perks[className.toLowerCase()] = data.perks?.t2 || {}
+			}
+		}
+	} catch (error) {
+		console.error("Error loading class perks:", error)
+	}
+
+	return result
+}
 
 export async function generateStaticParams() {
 	// Only generate static params when building for static export (GitHub Pages)
@@ -86,6 +120,11 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get available scenes server-side (only if enabled)
 	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
 
+	// Get class perks for all versions
+	const classPerksLegacy = await getClassPerks("legacy")
+	const classPerksCbtPhase1 = existsInCbtPhase1 ? await getClassPerks("cbt-phase-1") : classPerksLegacy
+	const classPerksCcbt = existsInCcbt ? await getClassPerks("ccbt") : classPerksLegacy
+
 	return (
 		<HeroPageWrapper
 			heroDataCbtPhase1={heroDataCbtPhase1}
@@ -102,6 +141,9 @@ export default async function SlugPage({ params }: SlugPageProps) {
 			voiceFilesLegacy={voiceFilesLegacy}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
+			classPerksLegacy={classPerksLegacy}
+			classPerksCbtPhase1={classPerksCbtPhase1}
+			classPerksCcbt={classPerksCcbt}
 		/>
 	)
 }

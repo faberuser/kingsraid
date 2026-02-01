@@ -8,6 +8,7 @@ import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
 import { useHeroToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
+import { ClassPerksData } from "@/components/heroes/perks"
 
 interface HeroPageWrapperProps {
 	heroDataCbtPhase1: HeroData | null
@@ -24,6 +25,9 @@ interface HeroPageWrapperProps {
 	voiceFilesLegacy: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
+	classPerksLegacy: ClassPerksData
+	classPerksCbtPhase1: ClassPerksData
+	classPerksCcbt: ClassPerksData
 }
 
 export default function HeroPageWrapper({
@@ -41,6 +45,9 @@ export default function HeroPageWrapper({
 	voiceFilesLegacy,
 	availableScenes = [],
 	enableModelsVoices = false,
+	classPerksLegacy,
+	classPerksCbtPhase1,
+	classPerksCcbt,
 }: HeroPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
@@ -84,6 +91,15 @@ export default function HeroPageWrapper({
 			"legacy": voiceFilesLegacy,
 		}),
 		[voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
+	)
+
+	const classPerksMap: Record<DataVersion, ClassPerksData> = useMemo(
+		() => ({
+			"cbt-phase-1": classPerksCbtPhase1,
+			"ccbt": classPerksCcbt,
+			"legacy": classPerksLegacy,
+		}),
+		[classPerksCbtPhase1, classPerksCcbt, classPerksLegacy],
 	)
 
 	// Show toggle only if hero exists in at least one non-legacy version
@@ -140,6 +156,7 @@ export default function HeroPageWrapper({
 		voiceFilesMap[version].kr.length > 0
 			? voiceFilesMap[version]
 			: voiceFilesLegacy
+	const classPerks = classPerksMap[version] || classPerksLegacy
 
 	return (
 		<HeroClient
@@ -149,6 +166,7 @@ export default function HeroPageWrapper({
 			voiceFiles={voiceFiles}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
+			classPerks={classPerks}
 		/>
 	)
 }

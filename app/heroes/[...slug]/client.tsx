@@ -1,6 +1,7 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import { HeroData } from "@/model/Hero"
 import Profile from "@/components/heroes/profile"
 import Skills from "@/components/heroes/skills"
@@ -9,11 +10,11 @@ import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
 import Models from "@/components/heroes/models"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
-import { capitalize, classColorMapText } from "@/lib/utils"
+import { capitalize, classColorMapBadge } from "@/lib/utils"
 import Image from "@/components/next-image"
-import { Separator } from "@/components/ui/separator"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
+import { ClassPerksData } from "@/components/heroes/perks"
 
 interface HeroClientProps {
 	heroData: HeroData
@@ -22,6 +23,7 @@ interface HeroClientProps {
 	voiceFiles: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
+	classPerks: ClassPerksData
 }
 
 export default function HeroClient({
@@ -31,71 +33,63 @@ export default function HeroClient({
 	voiceFiles,
 	availableScenes = [],
 	enableModelsVoices = false,
+	classPerks,
 }: HeroClientProps) {
 	return (
 		<div>
-			{/* Hero Basic Info */}
-			<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start pb-2">
-				{/* Hero Image */}
-				<div className="flex items-center justify-center self-stretch">
-					<div className="w-32 h-32 md:w-40 md:h-40">
+			{/* Compact Hero Header */}
+			<div className="flex flex-row gap-4 items-center pb-2">
+				{/* Hero Image - Smaller */}
+				<div className="shrink-0 relative">
+					<div className="w-16 h-16 md:w-20 md:h-20">
 						<Image
 							src={`/kingsraid-data/assets/${heroData.profile.thumbnail}`}
 							alt={heroData.profile.name}
 							width="0"
 							height="0"
-							sizes="30vw md:10vw"
+							sizes="20vw md:5vw"
 							className="w-full h-auto rounded"
+						/>
+					</div>
+					{/* Class Icon Badge */}
+					<div className="absolute -bottom-1 -right-1 w-6 h-6 md:w-7 md:h-7 rounded-full bg-background border-2 overflow-hidden shadow-sm">
+						<Image
+							src={`/kingsraid-data/assets/classes/${heroData.profile.class.toLowerCase()}.png`}
+							alt={heroData.profile.class}
+							width={28}
+							height={28}
+							className="w-full h-full object-cover"
 						/>
 					</div>
 				</div>
 
-				{/* Hero Basic Info */}
-				<div className="flex-grow">
-					<div className="mb-2 text-center sm:text-start">
-						<div className="text-3xl font-bold">{capitalize(heroData.profile.name)}</div>
-						<div className={`text-lg font-semibold ${classColorMapText(heroData.profile.class)}`}>
-							{heroData.profile.title}
-						</div>
+				{/* Hero Name & Key Stats */}
+				<div className="flex-grow min-w-0">
+					<div className="flex flex-col">
+						<h1 className="text-2xl md:text-3xl font-bold truncate">{capitalize(heroData.profile.name)}</h1>
+						<span className="text-sm md:text-base text-muted-foreground">{heroData.profile.title}</span>
 					</div>
-
-					<Separator className="mb-4" />
-
-					<div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-3 text-sm">
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Class</div>
-							<div className="font-medium">{heroData.profile.class}</div>
-						</div>
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Position</div>
-							<div className="font-medium">{heroData.profile.position}</div>
-						</div>
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Damage Type</div>
-							<div className="font-medium">{heroData.profile.damage_type}</div>
-						</div>
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Attack Range</div>
-							<div className="font-medium">{heroData.profile.attack_range}</div>
-						</div>
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Gender</div>
-							<div className="font-medium">{heroData.profile.gender}</div>
-						</div>
-						<div className="flex flex-col space-y-1 text-center md:text-left">
-							<div className="text-xs text-gray-500 uppercase tracking-wide">Race</div>
-							<div className="font-medium">{heroData.profile.race}</div>
-						</div>
+					<div className="flex flex-wrap gap-2 mt-2">
+						<Badge variant="default" className={classColorMapBadge(heroData.profile.class)}>
+							{heroData.profile.class}
+						</Badge>
+						<Badge variant="secondary">{heroData.profile.position}</Badge>
+						<Badge
+							variant="default"
+							className={heroData.profile.damage_type === "Physical" ? "bg-red-300" : "bg-blue-300"}
+						>
+							{heroData.profile.damage_type}
+						</Badge>
 					</div>
 				</div>
 			</div>
 
-			<Tabs defaultValue="profile" className="w-full mt-4">
+			<Tabs defaultValue="skills" className="w-full mt-2">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
-					<TabsTrigger value="profile">Profile</TabsTrigger>
 					<TabsTrigger value="skills">Skills</TabsTrigger>
 					<TabsTrigger value="perks">Perks</TabsTrigger>
 					<TabsTrigger value="gear">Gear</TabsTrigger>
+					<TabsTrigger value="profile">Profile</TabsTrigger>
 					<TabsTrigger value="costumes">Costumes</TabsTrigger>
 					{enableModelsVoices && (
 						<>
@@ -112,7 +106,7 @@ export default function HeroClient({
 					<Skills heroData={heroData} />
 				</TabsContent>
 				<TabsContent value="perks" className="mt-4">
-					<Perks heroData={heroData} />
+					<Perks heroData={heroData} classPerks={classPerks} />
 				</TabsContent>
 				<TabsContent value="gear" className="mt-4">
 					<Gear heroData={heroData} />

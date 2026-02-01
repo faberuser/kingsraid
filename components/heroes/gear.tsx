@@ -14,8 +14,8 @@ export default function Gear({ heroData }: GearProps) {
 			{/* Unique Weapon */}
 			{heroData.uw && (
 				<div>
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-2xl font-bold">Unique Weapon</div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Unique Weapon</div>
 					</div>
 
 					<Card>
@@ -64,7 +64,11 @@ export default function Gear({ heroData }: GearProps) {
 											<div className="flex gap-4 text-xs">
 												{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
 													<div key={statKey} className="space-y-1">
-														<div className="font-medium">Stat ({statKey})</div>
+														<div className="font-medium">
+															Stat {"{"}
+															{statKey}
+															{"}"}
+														</div>
 														<div className="flex flex-wrap gap-1">
 															{Object.entries(statValues).map(([level, value]) => (
 																<Badge
@@ -103,8 +107,8 @@ export default function Gear({ heroData }: GearProps) {
 			{/* Unique Treasures */}
 			{heroData.uts && (
 				<>
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-2xl font-bold">Unique Treasures</div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Unique Treasures</div>
 					</div>
 
 					<div className="grid gap-4">
@@ -155,7 +159,11 @@ export default function Gear({ heroData }: GearProps) {
 													<div className="flex gap-4 text-xs">
 														{Object.entries(ut.value).map(([statKey, statValues]) => (
 															<div key={statKey} className="space-y-1">
-																<div className="font-medium">Stat ({statKey})</div>
+																<div className="font-medium">
+																	Stat {"{"}
+																	{statKey}
+																	{"}"}
+																</div>
 																<div className="flex flex-wrap gap-1">
 																	{Object.entries(statValues).map(
 																		([level, value]) => (
@@ -198,8 +206,8 @@ export default function Gear({ heroData }: GearProps) {
 			{/* Soul Weapon */}
 			{heroData.sw && (
 				<div>
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-2xl font-bold">Soul Weapon</div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Soul Weapon</div>
 					</div>
 
 					<Card>
