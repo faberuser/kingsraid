@@ -40,9 +40,7 @@ export default function HomeClient({ steamNews }: HomeClientProps) {
 			<div className="container mx-auto my-auto">
 				{/* Hero Section */}
 				<div className="text-center mb-10 mt-0 md:mt-24 p-2 md:p-0">
-					<div className="text-3xl font-bold mb-4 bg-clip-text leading-[normal]">
-						Welcome to King&apos;s Raid Info
-					</div>
+					<div className="text-3xl font-bold mb-4 bg-clip-text leading-[normal]">King&apos;s Raid Info</div>
 					<div className="text-lg text-muted-foreground max-w-2xl mx-auto">
 						King&apos;s Raid was originally released in 2016 by Vespa Inc (changed to Anic Inc). Then End of
 						Service in 2025 and is undergoing a relaunch by Masangsoft in 2026.
