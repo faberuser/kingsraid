@@ -37,7 +37,10 @@ export function EquipmentSection({ member, index, toggleUW, selectUT }: Equipmen
 									alt="UW"
 									width={40}
 									height={40}
-									className="w-full h-full object-cover"
+									className={cn(
+										"w-full h-full object-cover transition-all",
+										!member.uw && "grayscale",
+									)}
 								/>
 							)}
 						</button>
@@ -66,7 +69,10 @@ export function EquipmentSection({ member, index, toggleUW, selectUT }: Equipmen
 									alt={`UT${utKey}`}
 									width={40}
 									height={40}
-									className="w-full h-full object-cover"
+									className={cn(
+										"w-full h-full object-cover transition-all",
+										member.ut !== utKey && "grayscale",
+									)}
 								/>
 							</button>
 						</TooltipTrigger>
