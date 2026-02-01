@@ -39,8 +39,8 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 				<CollapsibleContent className="space-y-4">
 					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{Object.entries(t1Perks).map(([perkName, effect]) => (
-							<Card key={perkName}>
-								<CardContent>
+							<Card key={perkName} className="p-4">
+								<CardContent className="px-0">
 									<div className="flex items-center gap-3 mb-2">
 										<Image
 											src={`/kingsraid-data/assets/perks/t1/${perkName}.png`}
@@ -71,8 +71,8 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 				<CollapsibleContent className="space-y-4">
 					<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 						{Object.entries(t2Perks).map(([perkName, effect]) => (
-							<Card key={perkName}>
-								<CardContent>
+							<Card key={perkName} className="p-4">
+								<CardContent className="px-0">
 									<div className="flex items-center gap-3 mb-2">
 										<Image
 											src={`/kingsraid-data/assets/perks/t2/${heroClass}/${perkName}.png`}
