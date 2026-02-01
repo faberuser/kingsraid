@@ -53,11 +53,11 @@ export default function Gear({ heroData }: GearProps) {
 										</div>
 									</div>
 
-									<div className="mb-4">{parseColoredText(heroData.uw.description)}</div>
+									<div className="mb-2">{parseColoredText(heroData.uw.description)}</div>
 
 									{/* UW Values */}
 									{heroData.uw.value && (
-										<div className="mb-4">
+										<div className="mb-3">
 											<div className="font-medium text-sm text-muted-foreground mb-2">
 												Enhancement Values
 											</div>
@@ -148,7 +148,7 @@ export default function Gear({ heroData }: GearProps) {
 												</div>
 											</div>
 
-											<div className="mb-3">{parseColoredText(ut.description)}</div>
+											<div className="mb-2">{parseColoredText(ut.description)}</div>
 
 											{/* UT Values */}
 											{ut.value && (

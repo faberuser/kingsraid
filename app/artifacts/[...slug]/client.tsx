@@ -29,7 +29,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 						/>
 					</div>
 					<div className="flex flex-col justify-center flex-1">
-						<div className="text-2xl md:text-3xl font-bold mb-4">{artifactData.name}</div>
+						<div className="text-2xl md:text-3xl font-bold">{artifactData.name}</div>
 					</div>
 				</div>
 			</div>

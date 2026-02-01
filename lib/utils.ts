@@ -94,10 +94,20 @@ export function parseColoredText(text: string): React.ReactNode[] {
 			keyCounter += plainText.split("\n").length
 		}
 
-		// Add colored text
-		const color = `#${match[1]}`
+		// Add colored text with theme-aware styling
+		const originalColor = `#${match[1]}`
 		const coloredText = match[2]
-		parts.push(React.createElement("span", { key: `color-${keyCounter++}`, style: { color } }, coloredText))
+		parts.push(
+			React.createElement(
+				"span",
+				{
+					key: `color-${keyCounter++}`,
+					style: { color: originalColor },
+					className: "skill-colored-text",
+				},
+				coloredText,
+			),
+		)
 
 		lastIndex = match.index + match[0].length
 	}

@@ -4,13 +4,10 @@ import Link from "next/link"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
-import { FeaturedHero } from "@/app/page"
 import { NewsItem } from "@/lib/steam-rss"
-import Autoplay from "embla-carousel-autoplay"
 import { useState } from "react"
 import { getImage, getContent, NewsDetailDialog } from "@/app/news/client"
 import { Badge } from "@/components/ui/badge"
-import { Spinner } from "@/components/ui/spinner"
 
 const communities = [
 	{
@@ -34,120 +31,47 @@ const communities = [
 ]
 
 interface HomeClientProps {
-	featuredHeroes: FeaturedHero[]
 	steamNews: NewsItem[]
 }
 
-export default function HomeClient({ featuredHeroes, steamNews }: HomeClientProps) {
+export default function HomeClient({ steamNews }: HomeClientProps) {
 	return (
-		<div className="min-h-screen pb-12">
-			<div className="container mx-auto">
+		<div className="min-h-screen">
+			<div className="container mx-auto my-auto">
 				{/* Hero Section */}
-				<div className="text-center mb-12 mt-0 md:mt-24">
-					<div className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-[normal]">
-						King&apos;s Raid Info
+				<div className="text-center mb-10 mt-0 md:mt-24 p-2 md:p-0">
+					<div className="text-3xl font-bold mb-4 bg-clip-text leading-[normal]">
+						Welcome to King&apos;s Raid Info
 					</div>
-					<div className="text-xl text-muted-foreground max-w-2xl mx-auto">
-						Comprehensive resource for King&apos;s Raid.
+					<div className="text-lg text-muted-foreground max-w-2xl mx-auto">
+						King&apos;s Raid was originally released in 2016 by Vespa Inc (changed to Anic Inc). Then End of
+						Service in 2025 and is undergoing a relaunch by Masangsoft in 2026.
+						<br />
+						This site aims to provide the latest resources for the game and its community.
 					</div>
 				</div>
 
 				{/* News Section */}
 				{steamNews.length > 0 && (
-					<div className="mb-16">
+					<div className="mb-10">
 						<div className="text-center mb-8">
-							<div className="text-3xl font-bold mb-2">Latest News</div>
-							<div className="text-muted-foreground">Stay updated with announcements</div>
+							<div className="text-2xl font-bold mb-2">Latest News</div>
+							<div className="text-muted-foreground">Steam Announcements</div>
 						</div>
 						<SteamRSS news={steamNews} />
-					</div>
-				)}
-
-				{/* Heroes Showcase Carousel */}
-				{featuredHeroes.length > 0 && (
-					<div className="mb-16">
-						<div className="text-center mb-8">
-							<div className="text-3xl font-bold mb-2">Heroes</div>
-							<div className="text-muted-foreground">Explore collection of heroes</div>
-						</div>
-						<FeaturedHeroes heroes={featuredHeroes} />
 					</div>
 				)}
 
 				{/* Resources Grid */}
 				<div>
 					<div className="text-center mb-8">
-						<div className="text-3xl font-bold mb-2">Resources</div>
+						<div className="text-2xl font-bold mb-2">Resources</div>
 						<div className="text-muted-foreground">King&apos;s Raid Communities</div>
 					</div>
 					<Communities />
 				</div>
 			</div>
 		</div>
-	)
-}
-
-function FeaturedHeroes({ heroes }: { heroes: FeaturedHero[] }) {
-	return (
-		<Carousel
-			opts={{
-				align: "start",
-				loop: true,
-			}}
-			plugins={[
-				Autoplay({
-					delay: 2000,
-				}),
-			]}
-		>
-			<CarouselContent>
-				{heroes.map((hero) => (
-					<CarouselItem key={hero.name} className="basis-1/1 md:basis-1/2 xl:basis-1/3">
-						<FeaturedHeroCard hero={hero} />
-					</CarouselItem>
-				))}
-			</CarouselContent>
-			<CarouselPrevious className="hidden md:flex" />
-			<CarouselNext className="hidden md:flex" />
-		</Carousel>
-	)
-}
-
-function FeaturedHeroCard({ hero }: { hero: FeaturedHero }) {
-	const [isLoading, setIsLoading] = useState(false)
-
-	const handleClick = () => {
-		if (isLoading) return // Prevent multiple clicks
-		setIsLoading(true)
-	}
-
-	return (
-		<Link
-			href={`/heroes/${encodeURIComponent(hero.name.toLowerCase().replace(/\s+/g, "-"))}`}
-			onClick={handleClick}
-		>
-			<div className="relative aspect-square overflow-hidden">
-				<Image
-					src={hero.image}
-					alt={hero.name}
-					width="0"
-					height="0"
-					sizes="80vw md:40vw"
-					className="w-auto h-full object-cover"
-				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-white/40 via-white/10 to-transparent dark:from-black/80 dark:via-black/20" />
-				<div className="absolute bottom-0 left-0 right-0 p-6">
-					<div className="text-2xl font-bold mb-1 capitalize">{hero.name}</div>
-					<div className="text-sm">{hero.title}</div>
-					<div className="text-xs mt-1 text-muted-foreground">{hero.class}</div>
-				</div>
-				{isLoading && (
-					<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-						<Spinner className="size-8" />
-					</div>
-				)}
-			</div>
-		</Link>
 	)
 }
 
