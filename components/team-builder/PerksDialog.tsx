@@ -7,7 +7,7 @@ import { ChevronDown, ChevronUp } from "lucide-react"
 import { cn, parseColoredText } from "@/lib/utils"
 import { TeamMember, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/app/team-builder/types"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
-import { MobileTooltip } from "./MobileTooltip"
+import { MobileTooltip } from "@/components/mobile-tooltip"
 
 interface PerksDialogProps {
 	member: TeamMember
