@@ -97,7 +97,12 @@ export function EmptySlot({
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
 						<DialogHeader>
-							<DialogTitle>Select Hero</DialogTitle>
+							<DialogTitle className="flex items-center justify-between">
+								<span>Select Heroes</span>
+								<span className="text-sm font-normal text-muted-foreground">
+									{8 - team.filter((m) => m.hero !== null).length} slots available
+								</span>
+							</DialogTitle>
 						</DialogHeader>
 
 						{/* Filters and Search */}
@@ -216,16 +221,19 @@ export function EmptySlot({
 							<div className="flex flex-wrap justify-center gap-3 px-2 py-1">
 								{filteredHeroes.map((hero) => {
 									const alreadyInTeam = team.some((m) => m.hero?.profile.name === hero.profile.name)
+									const allSlotsFilled = team.every((m) => m.hero !== null)
 									return (
 										<button
 											key={hero.profile.name}
-											onClick={() => !alreadyInTeam && onSelectHero(hero)}
-											disabled={alreadyInTeam}
+											onClick={() => !alreadyInTeam && !allSlotsFilled && onSelectHero(hero)}
+											disabled={alreadyInTeam || allSlotsFilled}
 											className={cn(
 												"relative rounded border overflow-hidden transition-all aspect-square w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)]",
 												alreadyInTeam
 													? "opacity-40 cursor-not-allowed"
-													: "hover:ring-2 hover:ring-primary",
+													: allSlotsFilled
+														? "opacity-40 cursor-not-allowed"
+														: "hover:ring-2 hover:ring-primary active:scale-95",
 											)}
 										>
 											<Image

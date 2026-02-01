@@ -1,4 +1,5 @@
 export { EquipmentSection } from "./EquipmentSection"
 export { PerksDialog } from "./PerksDialog"
 export { HeroCard } from "./HeroCard"
-export { EmptySlot } from "./EmptySlot"
+export { EmptySlot } from "./EmptySlotSimple"
+export { HeroSelectDialog } from "./HeroSelectDialog"

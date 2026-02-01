@@ -14,7 +14,7 @@ import { Suspense } from "react"
 
 import { TeamMember, TeamBuilderClientProps, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "./types"
 import { createEmptyMember, calculateUsedPoints, encodeTeam, decodeTeam, extractVersionFromEncoded } from "./utils"
-import { HeroCard, EmptySlot } from "@/components/team-builder"
+import { HeroCard, EmptySlot, HeroSelectDialog } from "@/components/team-builder"
 
 function TeamBuilderContent({
 	heroesLegacy,
@@ -339,18 +339,34 @@ function TeamBuilderContent({
 		[router, heroes, dataVersion],
 	)
 
-	// Select hero for slot
+	// Select hero for slot (supports multi-select by finding next empty slot)
 	const selectHero = (hero: HeroData) => {
-		if (selectedSlot === null) return
 		const newTeam = [...team]
-		newTeam[selectedSlot] = {
+
+		// Find the first empty slot
+		const emptySlotIndex = newTeam.findIndex((m) => m.hero === null)
+		if (emptySlotIndex === -1) {
+			// No empty slots available, close dialog
+			setHeroDialogOpen(false)
+			setHeroSearchQuery("")
+			return
+		}
+
+		newTeam[emptySlotIndex] = {
 			...createEmptyMember(),
 			hero,
 		}
 		setTeam(newTeam)
 		updateURL(newTeam)
-		setHeroDialogOpen(false)
-		setHeroSearchQuery("")
+
+		// Check if all slots are now filled
+		const nextEmptySlot = newTeam.findIndex((m) => m.hero === null)
+		if (nextEmptySlot === -1) {
+			// All slots filled, close dialog
+			setHeroDialogOpen(false)
+			setHeroSearchQuery("")
+		}
+		// Otherwise keep dialog open for more selections
 	}
 
 	// Remove hero from slot
@@ -516,10 +532,9 @@ function TeamBuilderContent({
 	}
 
 	// Handle hero dialog state
-	const handleHeroDialogChange = (open: boolean, slot: number) => {
-		setHeroDialogOpen(open)
-		if (open) setSelectedSlot(slot)
-		else setHeroSearchQuery("")
+	const handleOpenHeroDialog = (slot: number) => {
+		setSelectedSlot(slot)
+		setHeroDialogOpen(true)
 	}
 
 	// Handle perks dialog state
@@ -583,22 +598,7 @@ function TeamBuilderContent({
 							<EmptySlot
 								key={index}
 								index={index}
-								isOpen={heroDialogOpen && selectedSlot === index}
-								onOpenChange={handleHeroDialogChange}
-								heroSearchQuery={heroSearchQuery}
-								onSearchChange={setHeroSearchQuery}
-								filteredHeroes={filteredHeroes}
-								team={team}
-								onSelectHero={selectHero}
-								heroClasses={heroClasses}
-								selectedClass={selectedClass}
-								onClassChange={setSelectedClass}
-								selectedDamageType={selectedDamageType}
-								onDamageTypeChange={setSelectedDamageType}
-								sortType={sortType}
-								onSortTypeChange={setSortType}
-								reverseSort={reverseSort}
-								onReverseSortChange={setReverseSort}
+								onOpenDialog={handleOpenHeroDialog}
 								isDragOver={dragOverIndex === index}
 								onDragOver={handleDragOver}
 								onDragLeave={handleDragLeave}
@@ -607,6 +607,29 @@ function TeamBuilderContent({
 						),
 					)}
 				</div>
+
+				{/* Hero Select Dialog - rendered at parent level to persist across slot changes */}
+				<HeroSelectDialog
+					isOpen={heroDialogOpen}
+					onOpenChange={(open) => {
+						setHeroDialogOpen(open)
+						if (!open) setHeroSearchQuery("")
+					}}
+					heroSearchQuery={heroSearchQuery}
+					onSearchChange={setHeroSearchQuery}
+					filteredHeroes={filteredHeroes}
+					team={team}
+					onSelectHero={selectHero}
+					heroClasses={heroClasses}
+					selectedClass={selectedClass}
+					onClassChange={setSelectedClass}
+					selectedDamageType={selectedDamageType}
+					onDamageTypeChange={setSelectedDamageType}
+					sortType={sortType}
+					onSortTypeChange={setSortType}
+					reverseSort={reverseSort}
+					onReverseSortChange={setReverseSort}
+				/>
 			</div>
 		</TooltipProvider>
 	)
