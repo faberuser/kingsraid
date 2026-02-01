@@ -86,26 +86,23 @@ export function HeroCard({
 								height={60}
 								className="rounded border"
 							/>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border overflow-hidden">
-										<Image
-											src={`/kingsraid-data/assets/classes/${member.hero.profile.class.toLowerCase()}.png`}
-											alt={member.hero.profile.class}
-											width={20}
-											height={20}
-											className="w-full h-full object-cover"
-										/>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>{member.hero.profile.class}</TooltipContent>
-							</Tooltip>
+							<div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border overflow-hidden">
+								<Image
+									src={`/kingsraid-data/assets/classes/${member.hero.profile.class.toLowerCase()}.png`}
+									alt={member.hero.profile.class}
+									width={20}
+									height={20}
+									className="w-full h-full object-cover"
+								/>
+							</div>
 						</div>
 						<div className="flex-1 min-w-0">
 							<CardTitle className="text-base truncate">{member.hero.profile.name}</CardTitle>
 							<Badge
-								variant={member.hero.profile.damage_type === "Physical" ? "default" : "secondary"}
-								className="mt-1 text-[10px]"
+								variant="default"
+								className={
+									member.hero.profile.damage_type === "Physical" ? "bg-red-300" : "bg-blue-300"
+								}
 							>
 								{member.hero.profile.damage_type}
 							</Badge>
