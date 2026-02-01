@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -26,6 +27,33 @@ export default function BossClient({
 	enableModelsVoices = false,
 }: BossClientProps) {
 	const { profile, skills } = bossData
+
+	// Helper function to get tab from hash
+	const getTabFromHash = () => {
+		if (typeof window === "undefined") return "profile_skills"
+		const hash = window.location.hash.slice(1) // Remove the '#'
+		const validTabs = ["profile_skills", "models"]
+		return validTabs.includes(hash) ? hash : "profile_skills"
+	}
+
+	// State to track active tab - initialize from URL hash
+	const [activeTab, setActiveTab] = useState<string>(getTabFromHash)
+
+	// Listen for hash changes (e.g., browser back/forward)
+	useEffect(() => {
+		const handleHashChange = () => {
+			setActiveTab(getTabFromHash())
+		}
+
+		window.addEventListener("hashchange", handleHashChange)
+		return () => window.removeEventListener("hashchange", handleHashChange)
+	}, [])
+
+	// Update URL hash when tab changes
+	const handleTabChange = (value: string) => {
+		setActiveTab(value)
+		window.history.pushState(null, "", `#${value}`)
+	}
 
 	return (
 		<div>
@@ -74,7 +102,7 @@ export default function BossClient({
 			</div>
 
 			{/* Tabs Section */}
-			<Tabs defaultValue="profile_skills" className="w-full mt-2">
+			<Tabs value={activeTab} onValueChange={handleTabChange} className="w-full mt-2">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
 					<TabsTrigger value="profile_skills">Profile & Skills</TabsTrigger>
 					{enableModelsVoices && bossModels && Object.keys(bossModels).length > 0 && (

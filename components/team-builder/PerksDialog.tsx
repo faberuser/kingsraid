@@ -3,11 +3,11 @@
 import Image from "@/components/next-image"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { cn, parseColoredText } from "@/lib/utils"
 import { TeamMember, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/app/team-builder/types"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
+import { MobileTooltip } from "./MobileTooltip"
 
 interface PerksDialogProps {
 	member: TeamMember
@@ -85,30 +85,33 @@ export function PerksDialog({
 								isSelected || calculateUsedPoints(member.perks) + PERK_COSTS.t1 <= member.maxPoints
 
 							return (
-								<Tooltip key={perkName}>
-									<TooltipTrigger asChild>
-										<button
-											onClick={() => onPerkToggle(index, "t1", perkName)}
-											disabled={!canSelect && !isSelected}
-											className={cn(
-												"p-1 rounded text-center transition-all flex items-center justify-center",
-												isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
-											)}
-										>
-											<Image
-												src={`/kingsraid-data/assets/perks/t1/${perkName}.png`}
-												alt={perkName}
-												width={50}
-												height={50}
-												className={cn("rounded", !isSelected && "grayscale")}
-											/>
-										</button>
-									</TooltipTrigger>
-									<TooltipContent side="top" className="max-w-xs">
-										<div className="font-medium">{perkName}</div>
-										<div className="text-xs mt-1">{effect}</div>
-									</TooltipContent>
-								</Tooltip>
+								<MobileTooltip
+									key={perkName}
+									disabled={!canSelect && !isSelected}
+									content={
+										<>
+											<div className="font-bold">{perkName}</div>
+											<div className="text-xs mt-1">{effect}</div>
+										</>
+									}
+								>
+									<button
+										onClick={() => onPerkToggle(index, "t1", perkName)}
+										disabled={!canSelect && !isSelected}
+										className={cn(
+											"p-1 rounded text-center transition-all flex items-center justify-center",
+											isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
+										)}
+									>
+										<Image
+											src={`/kingsraid-data/assets/perks/t1/${perkName}.png`}
+											alt={perkName}
+											width={50}
+											height={50}
+											className={cn("rounded", !isSelected && "grayscale")}
+										/>
+									</button>
+								</MobileTooltip>
 							)
 						})}
 					</div>
@@ -125,30 +128,33 @@ export function PerksDialog({
 							const heroClass = member.hero!.profile.class.toLowerCase()
 
 							return (
-								<Tooltip key={perkName}>
-									<TooltipTrigger asChild>
-										<button
-											onClick={() => onPerkToggle(index, "t2", perkName)}
-											disabled={!canSelect && !isSelected}
-											className={cn(
-												"p-1 rounded text-center transition-all flex items-center justify-center",
-												isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
-											)}
-										>
-											<Image
-												src={`/kingsraid-data/assets/perks/t2/${heroClass}/${perkName}.png`}
-												alt={perkName}
-												width={50}
-												height={50}
-												className={cn("rounded", !isSelected && "grayscale")}
-											/>
-										</button>
-									</TooltipTrigger>
-									<TooltipContent side="top" className="max-w-xs">
-										<div className="font-medium">{perkName}</div>
-										<div className="text-xs mt-1">{effect}</div>
-									</TooltipContent>
-								</Tooltip>
+								<MobileTooltip
+									key={perkName}
+									disabled={!canSelect && !isSelected}
+									content={
+										<>
+											<div className="font-bold">{perkName}</div>
+											<div className="text-xs mt-1">{effect}</div>
+										</>
+									}
+								>
+									<button
+										onClick={() => onPerkToggle(index, "t2", perkName)}
+										disabled={!canSelect && !isSelected}
+										className={cn(
+											"p-1 rounded text-center transition-all flex items-center justify-center",
+											isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
+										)}
+									>
+										<Image
+											src={`/kingsraid-data/assets/perks/t2/${heroClass}/${perkName}.png`}
+											alt={perkName}
+											width={50}
+											height={50}
+											className={cn("rounded", !isSelected && "grayscale")}
+										/>
+									</button>
+								</MobileTooltip>
 							)
 						})}
 					</div>
@@ -168,93 +174,107 @@ export function PerksDialog({
 										<div key={skillNum} className="contents">
 											{/* Light */}
 											{skillPerks.light && (
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<button
-															onClick={() => onPerkToggle(index, "t3", skillNum, "light")}
-															disabled={
+												<MobileTooltip
+													disabled={
+														!member.perks.t3.find(
+															(p) => p.skill === skillNum && p.type === "light",
+														) &&
+														calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+															member.maxPoints
+													}
+													content={
+														<>
+															<div className="font-bold">Skill {skillNum} - Light</div>
+															<div className="text-xs mt-1">
+																{parseColoredText(skillPerks.light.effect)}
+															</div>
+														</>
+													}
+												>
+													<button
+														onClick={() => onPerkToggle(index, "t3", skillNum, "light")}
+														disabled={
+															!member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "light",
+															) &&
+															calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+																member.maxPoints
+														}
+														className={cn(
+															"p-1 rounded transition-all flex items-center justify-center",
+															member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "light",
+															)
+																? "ring-2 ring-yellow-500"
+																: "hover:bg-muted",
+														)}
+													>
+														<Image
+															src={`/kingsraid-data/assets/${skillPerks.light.thumbnail}`}
+															alt={`S${skillNum} Light`}
+															width={50}
+															height={50}
+															className={cn(
+																"rounded",
 																!member.perks.t3.find(
 																	(p) => p.skill === skillNum && p.type === "light",
-																) &&
-																calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
-																	member.maxPoints
-															}
-															className={cn(
-																"p-1 rounded transition-all flex items-center justify-center",
-																member.perks.t3.find(
-																	(p) => p.skill === skillNum && p.type === "light",
-																)
-																	? "ring-2 ring-yellow-500"
-																	: "hover:bg-muted",
+																) && "grayscale",
 															)}
-														>
-															<Image
-																src={`/kingsraid-data/assets/${skillPerks.light.thumbnail}`}
-																alt={`S${skillNum} Light`}
-																width={50}
-																height={50}
-																className={cn(
-																	"rounded",
-																	!member.perks.t3.find(
-																		(p) =>
-																			p.skill === skillNum && p.type === "light",
-																	) && "grayscale",
-																)}
-															/>
-														</button>
-													</TooltipTrigger>
-													<TooltipContent side="top" className="max-w-xs">
-														<div className="font-medium">Skill {skillNum} - Light</div>
-														<div className="text-xs mt-1">
-															{parseColoredText(skillPerks.light.effect)}
-														</div>
-													</TooltipContent>
-												</Tooltip>
+														/>
+													</button>
+												</MobileTooltip>
 											)}
 											{/* Dark */}
 											{skillPerks.dark && (
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<button
-															onClick={() => onPerkToggle(index, "t3", skillNum, "dark")}
-															disabled={
+												<MobileTooltip
+													disabled={
+														!member.perks.t3.find(
+															(p) => p.skill === skillNum && p.type === "dark",
+														) &&
+														calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+															member.maxPoints
+													}
+													content={
+														<>
+															<div className="font-bold">Skill {skillNum} - Dark</div>
+															<div className="text-xs mt-1">
+																{parseColoredText(skillPerks.dark.effect)}
+															</div>
+														</>
+													}
+												>
+													<button
+														onClick={() => onPerkToggle(index, "t3", skillNum, "dark")}
+														disabled={
+															!member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "dark",
+															) &&
+															calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+																member.maxPoints
+														}
+														className={cn(
+															"p-1 rounded transition-all flex items-center justify-center",
+															member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "dark",
+															)
+																? "ring-2 ring-yellow-500"
+																: "hover:bg-muted",
+														)}
+													>
+														<Image
+															src={`/kingsraid-data/assets/${skillPerks.dark.thumbnail}`}
+															alt={`S${skillNum} Dark`}
+															width={50}
+															height={50}
+															className={cn(
+																"rounded",
 																!member.perks.t3.find(
 																	(p) => p.skill === skillNum && p.type === "dark",
-																) &&
-																calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
-																	member.maxPoints
-															}
-															className={cn(
-																"p-1 rounded transition-all flex items-center justify-center",
-																member.perks.t3.find(
-																	(p) => p.skill === skillNum && p.type === "dark",
-																)
-																	? "ring-2 ring-yellow-500"
-																	: "hover:bg-muted",
+																) && "grayscale",
 															)}
-														>
-															<Image
-																src={`/kingsraid-data/assets/${skillPerks.dark.thumbnail}`}
-																alt={`S${skillNum} Dark`}
-																width={50}
-																height={50}
-																className={cn(
-																	"rounded",
-																	!member.perks.t3.find(
-																		(p) =>
-																			p.skill === skillNum && p.type === "dark",
-																	) && "grayscale",
-																)}
-															/>
-														</button>
-													</TooltipTrigger>
-													<TooltipContent side="top" className="max-w-xs">
-														<div className="font-medium">Skill {skillNum} - Dark</div>
-														<div className="text-xs mt-1">
-															{parseColoredText(skillPerks.dark.effect)}
-														</div>
-													</TooltipContent>
-												</Tooltip>
+														/>
+													</button>
+												</MobileTooltip>
 											)}
 										</div>
 									)
@@ -269,93 +289,107 @@ export function PerksDialog({
 										<div key={skillNum} className="contents">
 											{/* Light */}
 											{skillPerks.light && (
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<button
-															onClick={() => onPerkToggle(index, "t3", skillNum, "light")}
-															disabled={
+												<MobileTooltip
+													disabled={
+														!member.perks.t3.find(
+															(p) => p.skill === skillNum && p.type === "light",
+														) &&
+														calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+															member.maxPoints
+													}
+													content={
+														<>
+															<div className="font-bold">Skill {skillNum} - Light</div>
+															<div className="text-xs mt-1">
+																{parseColoredText(skillPerks.light.effect)}
+															</div>
+														</>
+													}
+												>
+													<button
+														onClick={() => onPerkToggle(index, "t3", skillNum, "light")}
+														disabled={
+															!member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "light",
+															) &&
+															calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+																member.maxPoints
+														}
+														className={cn(
+															"p-1 rounded transition-all flex items-center justify-center",
+															member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "light",
+															)
+																? "ring-2 ring-yellow-500"
+																: "hover:bg-muted",
+														)}
+													>
+														<Image
+															src={`/kingsraid-data/assets/${skillPerks.light.thumbnail}`}
+															alt={`S${skillNum} Light`}
+															width={50}
+															height={50}
+															className={cn(
+																"rounded",
 																!member.perks.t3.find(
 																	(p) => p.skill === skillNum && p.type === "light",
-																) &&
-																calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
-																	member.maxPoints
-															}
-															className={cn(
-																"p-1 rounded transition-all flex items-center justify-center",
-																member.perks.t3.find(
-																	(p) => p.skill === skillNum && p.type === "light",
-																)
-																	? "ring-2 ring-yellow-500"
-																	: "hover:bg-muted",
+																) && "grayscale",
 															)}
-														>
-															<Image
-																src={`/kingsraid-data/assets/${skillPerks.light.thumbnail}`}
-																alt={`S${skillNum} Light`}
-																width={50}
-																height={50}
-																className={cn(
-																	"rounded",
-																	!member.perks.t3.find(
-																		(p) =>
-																			p.skill === skillNum && p.type === "light",
-																	) && "grayscale",
-																)}
-															/>
-														</button>
-													</TooltipTrigger>
-													<TooltipContent side="top" className="max-w-xs">
-														<div className="font-medium">Skill {skillNum} - Light</div>
-														<div className="text-xs mt-1">
-															{parseColoredText(skillPerks.light.effect)}
-														</div>
-													</TooltipContent>
-												</Tooltip>
+														/>
+													</button>
+												</MobileTooltip>
 											)}
 											{/* Dark */}
 											{skillPerks.dark && (
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<button
-															onClick={() => onPerkToggle(index, "t3", skillNum, "dark")}
-															disabled={
+												<MobileTooltip
+													disabled={
+														!member.perks.t3.find(
+															(p) => p.skill === skillNum && p.type === "dark",
+														) &&
+														calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+															member.maxPoints
+													}
+													content={
+														<>
+															<div className="font-bold">Skill {skillNum} - Dark</div>
+															<div className="text-xs mt-1">
+																{parseColoredText(skillPerks.dark.effect)}
+															</div>
+														</>
+													}
+												>
+													<button
+														onClick={() => onPerkToggle(index, "t3", skillNum, "dark")}
+														disabled={
+															!member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "dark",
+															) &&
+															calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
+																member.maxPoints
+														}
+														className={cn(
+															"p-1 rounded transition-all flex items-center justify-center",
+															member.perks.t3.find(
+																(p) => p.skill === skillNum && p.type === "dark",
+															)
+																? "ring-2 ring-yellow-500"
+																: "hover:bg-muted",
+														)}
+													>
+														<Image
+															src={`/kingsraid-data/assets/${skillPerks.dark.thumbnail}`}
+															alt={`S${skillNum} Dark`}
+															width={50}
+															height={50}
+															className={cn(
+																"rounded",
 																!member.perks.t3.find(
 																	(p) => p.skill === skillNum && p.type === "dark",
-																) &&
-																calculateUsedPoints(member.perks) + PERK_COSTS.t3 >
-																	member.maxPoints
-															}
-															className={cn(
-																"p-1 rounded transition-all flex items-center justify-center",
-																member.perks.t3.find(
-																	(p) => p.skill === skillNum && p.type === "dark",
-																)
-																	? "ring-2 ring-yellow-500"
-																	: "hover:bg-muted",
+																) && "grayscale",
 															)}
-														>
-															<Image
-																src={`/kingsraid-data/assets/${skillPerks.dark.thumbnail}`}
-																alt={`S${skillNum} Dark`}
-																width={50}
-																height={50}
-																className={cn(
-																	"rounded",
-																	!member.perks.t3.find(
-																		(p) =>
-																			p.skill === skillNum && p.type === "dark",
-																	) && "grayscale",
-																)}
-															/>
-														</button>
-													</TooltipTrigger>
-													<TooltipContent side="top" className="max-w-xs">
-														<div className="font-medium">Skill {skillNum} - Dark</div>
-														<div className="text-xs mt-1">
-															{parseColoredText(skillPerks.dark.effect)}
-														</div>
-													</TooltipContent>
-												</Tooltip>
+														/>
+													</button>
+												</MobileTooltip>
 											)}
 										</div>
 									)
@@ -372,78 +406,82 @@ export function PerksDialog({
 						<div className="flex gap-2">
 							{/* Light */}
 							{member.hero.perks.t5.light && (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<button
-											onClick={() => onPerkToggle(index, "t5", "", "light")}
-											disabled={
-												!member.perks.t5.includes("light") &&
-												calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
-											}
-											className={cn(
-												"p-1 rounded transition-all flex items-center justify-center",
-												member.perks.t5.includes("light")
-													? "ring-2 ring-yellow-500"
-													: "hover:bg-muted",
-											)}
-										>
-											<Image
-												src={`/kingsraid-data/assets/${member.hero.perks.t5.light.thumbnail}`}
-												alt="T5 Light"
-												width={50}
-												height={50}
-												className={cn(
-													"rounded",
-													!member.perks.t5.includes("light") && "grayscale",
-												)}
-											/>
-										</button>
-									</TooltipTrigger>
-									<TooltipContent side="top" className="max-w-xs">
-										<div className="font-medium">Light</div>
-										<div className="text-xs mt-1">
-											{parseColoredText(member.hero.perks.t5.light.effect)}
-										</div>
-									</TooltipContent>
-								</Tooltip>
+								<MobileTooltip
+									disabled={
+										!member.perks.t5.includes("light") &&
+										calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
+									}
+									content={
+										<>
+											<div className="font-bold">Light</div>
+											<div className="text-xs mt-1">
+												{parseColoredText(member.hero.perks.t5.light.effect)}
+											</div>
+										</>
+									}
+								>
+									<button
+										onClick={() => onPerkToggle(index, "t5", "", "light")}
+										disabled={
+											!member.perks.t5.includes("light") &&
+											calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
+										}
+										className={cn(
+											"p-1 rounded transition-all flex items-center justify-center",
+											member.perks.t5.includes("light")
+												? "ring-2 ring-yellow-500"
+												: "hover:bg-muted",
+										)}
+									>
+										<Image
+											src={`/kingsraid-data/assets/${member.hero.perks.t5.light.thumbnail}`}
+											alt="T5 Light"
+											width={50}
+											height={50}
+											className={cn("rounded", !member.perks.t5.includes("light") && "grayscale")}
+										/>
+									</button>
+								</MobileTooltip>
 							)}
 
 							{/* Dark */}
 							{member.hero.perks.t5.dark && (
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<button
-											onClick={() => onPerkToggle(index, "t5", "", "dark")}
-											disabled={
-												!member.perks.t5.includes("dark") &&
-												calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
-											}
-											className={cn(
-												"p-1 rounded transition-all flex items-center justify-center",
-												member.perks.t5.includes("dark")
-													? "ring-2 ring-yellow-500"
-													: "hover:bg-muted",
-											)}
-										>
-											<Image
-												src={`/kingsraid-data/assets/${member.hero.perks.t5.dark.thumbnail}`}
-												alt="T5 Dark"
-												width={50}
-												height={50}
-												className={cn(
-													"rounded",
-													!member.perks.t5.includes("dark") && "grayscale",
-												)}
-											/>
-										</button>
-									</TooltipTrigger>
-									<TooltipContent side="top" className="max-w-xs">
-										<div className="font-medium">Dark</div>
-										<div className="text-xs mt-1">
-											{parseColoredText(member.hero.perks.t5.dark.effect)}
-										</div>
-									</TooltipContent>
-								</Tooltip>
+								<MobileTooltip
+									disabled={
+										!member.perks.t5.includes("dark") &&
+										calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
+									}
+									content={
+										<>
+											<div className="font-bold">Dark</div>
+											<div className="text-xs mt-1">
+												{parseColoredText(member.hero.perks.t5.dark.effect)}
+											</div>
+										</>
+									}
+								>
+									<button
+										onClick={() => onPerkToggle(index, "t5", "", "dark")}
+										disabled={
+											!member.perks.t5.includes("dark") &&
+											calculateUsedPoints(member.perks) + PERK_COSTS.t5 > member.maxPoints
+										}
+										className={cn(
+											"p-1 rounded transition-all flex items-center justify-center",
+											member.perks.t5.includes("dark")
+												? "ring-2 ring-yellow-500"
+												: "hover:bg-muted",
+										)}
+									>
+										<Image
+											src={`/kingsraid-data/assets/${member.hero.perks.t5.dark.thumbnail}`}
+											alt="T5 Dark"
+											width={50}
+											height={50}
+											className={cn("rounded", !member.perks.t5.includes("dark") && "grayscale")}
+										/>
+									</button>
+								</MobileTooltip>
 							)}
 						</div>
 					</div>

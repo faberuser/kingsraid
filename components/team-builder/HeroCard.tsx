@@ -1,11 +1,12 @@
 "use client"
 
 import Image from "@/components/next-image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { X } from "lucide-react"
+import { X, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/app/team-builder/types"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
@@ -85,35 +86,54 @@ export function HeroCard({
 								height={60}
 								className="rounded border"
 							/>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border overflow-hidden">
-										<Image
-											src={`/kingsraid-data/assets/classes/${member.hero.profile.class.toLowerCase()}.png`}
-											alt={member.hero.profile.class}
-											width={20}
-											height={20}
-											className="w-full h-full object-cover"
-										/>
-									</div>
-								</TooltipTrigger>
-								<TooltipContent>{member.hero.profile.class}</TooltipContent>
-							</Tooltip>
+							<div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-background border overflow-hidden">
+								<Image
+									src={`/kingsraid-data/assets/classes/${member.hero.profile.class.toLowerCase()}.png`}
+									alt={member.hero.profile.class}
+									width={20}
+									height={20}
+									className="w-full h-full object-cover"
+								/>
+							</div>
 						</div>
 						<div className="flex-1 min-w-0">
 							<CardTitle className="text-base truncate">{member.hero.profile.name}</CardTitle>
 							<Badge
-								variant={member.hero.profile.damage_type === "Physical" ? "default" : "secondary"}
-								className="mt-1 text-[10px]"
+								variant="default"
+								className={
+									member.hero.profile.damage_type === "Physical" ? "bg-red-300" : "bg-blue-300"
+								}
 							>
 								{member.hero.profile.damage_type}
 							</Badge>
 						</div>
 					</div>
 
-					<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemove(index)}>
-						<X className="h-4 w-4" />
-					</Button>
+					<div className="flex gap-1">
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6"
+									asChild
+									onClick={(e) => e.stopPropagation()}
+								>
+									<Link
+										href={`/heroes/${encodeURIComponent(member.hero.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										<ExternalLink className="h-4 w-4" />
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>View Hero Details</TooltipContent>
+						</Tooltip>
+						<Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRemove(index)}>
+							<X className="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
 			</CardHeader>
 
