@@ -10,7 +10,7 @@ interface GearProps {
 
 export default function Gear({ heroData }: GearProps) {
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 gear-section">
 			{/* Unique Weapon */}
 			{heroData.uw && (
 				<div>

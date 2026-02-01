@@ -97,7 +97,12 @@ export function EmptySlot({
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
 						<DialogHeader>
-							<DialogTitle>Select Hero</DialogTitle>
+							<DialogTitle className="flex items-center justify-between">
+								<span>Select Heroes</span>
+								<span className="text-sm font-normal text-muted-foreground">
+									{8 - team.filter((m) => m.hero !== null).length} slots available
+								</span>
+							</DialogTitle>
 						</DialogHeader>
 
 						{/* Filters and Search */}
@@ -213,26 +218,30 @@ export function EmptySlot({
 
 						{/* Hero Grid */}
 						<div className="flex-1 overflow-y-auto custom-scrollbar mt-3">
-							<div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-3 px-2 py-1">
+							<div className="flex flex-wrap justify-center gap-3 px-2 py-1">
 								{filteredHeroes.map((hero) => {
 									const alreadyInTeam = team.some((m) => m.hero?.profile.name === hero.profile.name)
+									const allSlotsFilled = team.every((m) => m.hero !== null)
 									return (
 										<button
 											key={hero.profile.name}
-											onClick={() => !alreadyInTeam && onSelectHero(hero)}
-											disabled={alreadyInTeam}
+											onClick={() => !alreadyInTeam && !allSlotsFilled && onSelectHero(hero)}
+											disabled={alreadyInTeam || allSlotsFilled}
 											className={cn(
-												"relative rounded border overflow-hidden transition-all aspect-square",
+												"relative rounded border overflow-hidden transition-all aspect-square w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)]",
 												alreadyInTeam
 													? "opacity-40 cursor-not-allowed"
-													: "hover:ring-2 hover:ring-primary",
+													: allSlotsFilled
+														? "opacity-40 cursor-not-allowed"
+														: "hover:ring-2 hover:ring-primary active:scale-95",
 											)}
 										>
 											<Image
 												src={`/kingsraid-data/assets/${hero.profile.thumbnail}`}
 												alt={hero.profile.name}
-												width={1000}
-												height={1000}
+												width="0"
+												height="0"
+												sizes="40vw md:20vw"
 												className="w-full h-full object-cover"
 											/>
 											<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">

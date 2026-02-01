@@ -1,6 +1,6 @@
 "use client"
 
-import ArtifactClient from "@/app/artifacts/[...slug]/client"
+import ArtifactCompareWrapper from "@/components/compare/artifact-compare-wrapper"
 import { ArtifactData } from "@/model/Artifact"
 import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
 import { useHeroToggle } from "@/contexts/version-toggle-context"
@@ -82,5 +82,13 @@ export default function ArtifactPageWrapper({
 	// Get the data for the current version, fallback to legacy if not available
 	const artifactData = artifactDataMap[version] || artifactDataLegacy
 
-	return <ArtifactClient artifactData={artifactData} />
+	return (
+		<ArtifactCompareWrapper
+			artifactDataCbtPhase1={artifactDataCbtPhase1}
+			artifactDataCcbt={artifactDataCcbt}
+			artifactDataLegacy={artifactDataLegacy}
+			availableVersions={availableVersions}
+			currentArtifactData={artifactData}
+		/>
+	)
 }

@@ -38,7 +38,7 @@ export default function Skills({ heroData }: SkillsProps) {
 		: []
 
 	return (
-		<div className="space-y-4">
+		<div className="space-y-4 skills-section">
 			{skillsArr.length > 0 ? (
 				skillsArr.map(({ key, skill, baseNum }) => (
 					<Card key={key}>
