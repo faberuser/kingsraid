@@ -21,68 +21,119 @@ export default function Profile({ heroData }: ProfileProps) {
 
 	return (
 		<div className="space-y-6">
+			{/* Hero Info - Consolidated */}
+			<Card>
+				<CardContent>
+					<div className="text-xl font-semibold pb-2">Hero Information</div>
+					<Separator className="mb-6" />
+
+					{/* Combat Stats Group */}
+					<div className="mb-6">
+						<h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+							Combat Attributes
+						</h3>
+						<div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Class</div>
+									<div className="font-semibold">{profile.class}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Position</div>
+									<div className="font-semibold">{profile.position}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Damage Type</div>
+									<div className="font-semibold">{profile.damage_type}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Attack Range</div>
+									<div className="font-semibold">{profile.attack_range}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Character Details Group */}
+					<div>
+						<h3 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">
+							Character Details
+						</h3>
+						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Gender</div>
+									<div className="font-semibold">{profile.gender}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Race</div>
+									<div className="font-semibold">{profile.race}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Age</div>
+									<div className="font-semibold">{profile.age}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Height</div>
+									<div className="font-semibold">{profile.height} cm</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Birthday</div>
+									<div className="font-semibold">{profile.birth_of_month}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Constellation</div>
+									<div className="font-semibold">{profile.constellation}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Likes</div>
+									<div className="font-semibold">{profile.like}</div>
+								</div>
+							</div>
+							<div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+								<div className="flex-1">
+									<div className="text-xs text-muted-foreground mb-0.5">Dislikes</div>
+									<div className="font-semibold">{profile.dislike}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
+
 			{/* Personal Details */}
-			<div className="grid lg:grid-cols-2 gap-6">
-				<Card>
-					<CardContent>
-						<div className="text-xl font-semibold pb-2">Personal Details</div>
-						<Separator className="mb-4" />
-						<div className="space-y-3">
-							<div className="flex justify-between py-2">
-								<div className="font-medium ">Age</div>
-								<div>{profile.age}</div>
-							</div>
-							<Separator />
-							<div className="flex justify-between py-2">
-								<div className="font-medium ">Height</div>
-								<div>{profile.height} cm</div>
-							</div>
-							<Separator />
-							<div className="flex justify-between py-2">
-								<div className="font-medium ">Birthday</div>
-								<div>{profile.birth_of_month}</div>
-							</div>
-							<Separator />
-							<div className="flex justify-between py-2">
-								<div className="font-medium ">Constellation</div>
-								<div>{profile.constellation}</div>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardContent>
-						<div className="text-xl font-semibold pb-2">Preferences</div>
-						<Separator className="mb-4" />
-						<div className="space-y-4">
-							<div>
-								<div className="font-medium text-green-600 text-sm">LIKES</div>
-								<div className="mt-1 p-3 rounded border-l-4 border-green-400">{profile.like}</div>
-							</div>
-							<div>
-								<div className="font-medium text-red-600 text-sm">DISLIKES</div>
-								<div className="mt-1 p-3 rounded border-l-4 border-red-400">{profile.dislike}</div>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-
 			<div className="grid lg:grid-cols-3 gap-6">
 				{/* Story Section */}
-				<Card className="col-span-3 lg:col-span-1">
+				<Card className="lg:col-span-1">
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Background Story</div>
 						<Separator className="mb-4" />
 						<div className="prose max-w-none">
-							<div className="text-justify">{parseColoredText(profile.story)}</div>
+							<div>{parseColoredText(profile.story)}</div>
 						</div>
 					</CardContent>
 				</Card>
 
 				{/* Splash Art */}
-				<Card className="col-span-3 lg:col-span-2">
+				<Card className="lg:col-span-2">
 					<CardContent>
 						<div className="text-xl font-semibold pb-2">Splashart</div>
 						<Separator className="mb-4" />

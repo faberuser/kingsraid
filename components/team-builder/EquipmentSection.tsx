@@ -1,0 +1,90 @@
+"use client"
+
+import Image from "@/components/next-image"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
+import { TeamMember } from "@/app/team-builder/types"
+
+interface EquipmentSectionProps {
+	member: TeamMember
+	index: number
+	toggleUW: (slot: number) => void
+	selectUT: (slot: number, ut: string | null) => void
+}
+
+export function EquipmentSection({ member, index, toggleUW, selectUT }: EquipmentSectionProps) {
+	if (!member.hero) return null
+
+	return (
+		<div>
+			<div className="text-xs font-medium mb-2 text-muted-foreground">Equipment</div>
+			<div className="flex gap-2">
+				{/* UW */}
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<button
+							onClick={() => toggleUW(index)}
+							className={cn(
+								"w-10 h-10 rounded border-2 overflow-hidden transition-all",
+								member.uw
+									? "border-yellow-500 ring-2 ring-yellow-500/30"
+									: "border-muted opacity-50 hover:opacity-100",
+							)}
+						>
+							{member.hero.uw?.thumbnail && (
+								<Image
+									src={`/kingsraid-data/assets/${member.hero.uw.thumbnail}`}
+									alt="UW"
+									width={40}
+									height={40}
+									className={cn(
+										"w-full h-full object-cover transition-all",
+										!member.uw && "grayscale",
+									)}
+								/>
+							)}
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="top" className="max-w-xs">
+						<div className="font-medium">{member.hero.uw?.name}</div>
+						<div className="text-xs mt-1">{member.hero.uw?.description}</div>
+					</TooltipContent>
+				</Tooltip>
+
+				{/* UTs */}
+				{Object.entries(member.hero.uts || {}).map(([utKey, ut]) => (
+					<Tooltip key={utKey}>
+						<TooltipTrigger asChild>
+							<button
+								onClick={() => selectUT(index, utKey)}
+								className={cn(
+									"w-10 h-10 rounded border-2 overflow-hidden transition-all",
+									member.ut === utKey
+										? "border-purple-500 ring-2 ring-purple-500/30"
+										: "border-muted opacity-50 hover:opacity-100",
+								)}
+							>
+								<Image
+									src={`/kingsraid-data/assets/${ut.thumbnail}`}
+									alt={`UT${utKey}`}
+									width={40}
+									height={40}
+									className={cn(
+										"w-full h-full object-cover transition-all",
+										member.ut !== utKey && "grayscale",
+									)}
+								/>
+							</button>
+						</TooltipTrigger>
+						<TooltipContent side="top" className="max-w-xs">
+							<div className="font-medium">
+								Skill {utKey}: {ut.name}
+							</div>
+							<div className="text-xs mt-1">{ut.description}</div>
+						</TooltipContent>
+					</Tooltip>
+				))}
+			</div>
+		</div>
+	)
+}

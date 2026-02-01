@@ -30,49 +30,51 @@ export default function BossClient({
 	return (
 		<div>
 			{/* Boss Header */}
-			<div className="mb-8">
-				<div className="flex items-start gap-6 mb-6">
-					<div className="flex items-center justify-center self-stretch">
-						<div className="w-30 h-30">
-							<Image
-								src={`/kingsraid-data/assets/${profile.thumbnail}`}
-								alt={profile.name}
-								width="0"
-								height="0"
-								sizes="10vw"
-								className="w-full h-auto rounded"
-							/>
-						</div>
+			<div className="flex flex-row gap-4 items-center pb-2">
+				{/* Boss Image */}
+				<div className="shrink-0 relative">
+					<div className="w-16 h-16 md:w-20 md:h-20">
+						<Image
+							src={`/kingsraid-data/assets/${profile.thumbnail}`}
+							alt={profile.name}
+							width="0"
+							height="0"
+							sizes="20vw md:5vw"
+							className="w-full h-auto rounded"
+						/>
 					</div>
-					<div className="flex-1">
-						<div className="text-3xl font-bold mb-2">{profile.name}</div>
-						<div className="text-xl text-muted-foreground mb-4">{profile.title}</div>
-						<div className="flex flex-wrap gap-2 mb-4">
-							{bossData.profile.type.map((type) => (
-								<Badge key={type} variant="default">
-									{type}
-								</Badge>
-							))}
-							<Badge variant="secondary">{profile.race}</Badge>
-							<Badge
-								variant="default"
-								className={
-									profile.damage_type === "Physical"
-										? "bg-red-300"
-										: profile.damage_type === "Magical"
-										? "bg-blue-300"
-										: "bg-yellow-400"
-								}
-							>
-								{profile.damage_type}
+				</div>
+				{/* Boss Name & Info */}
+				<div className="flex-grow min-w-0">
+					<div className="flex flex-col">
+						<h1 className="text-2xl md:text-3xl font-bold truncate">{profile.name}</h1>
+						<span className="text-sm md:text-base text-muted-foreground">{profile.title}</span>
+					</div>
+					<div className="flex flex-wrap gap-2 mt-2">
+						{bossData.profile.type.map((type) => (
+							<Badge key={type} variant="default">
+								{type}
 							</Badge>
-						</div>
+						))}
+						<Badge variant="secondary">{profile.race}</Badge>
+						<Badge
+							variant="default"
+							className={
+								profile.damage_type === "Physical"
+									? "bg-red-300"
+									: profile.damage_type === "Magical"
+										? "bg-blue-300"
+										: "bg-yellow-300"
+							}
+						>
+							{profile.damage_type}
+						</Badge>
 					</div>
 				</div>
 			</div>
 
 			{/* Tabs Section */}
-			<Tabs defaultValue="profile_skills" className="w-full mt-4">
+			<Tabs defaultValue="profile_skills" className="w-full mt-2">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
 					<TabsTrigger value="profile_skills">Profile & Skills</TabsTrigger>
 					{enableModelsVoices && bossModels && Object.keys(bossModels).length > 0 && (
@@ -112,8 +114,8 @@ export default function BossClient({
 													profile.damage_type === "Physical"
 														? "text-red-300"
 														: profile.damage_type === "Magical"
-														? "text-blue-300"
-														: "text-yellow-400"
+															? "text-blue-300"
+															: "text-yellow-400"
 												}`}
 											>
 												{skill.name}

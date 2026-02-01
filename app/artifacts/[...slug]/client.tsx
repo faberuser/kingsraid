@@ -15,7 +15,7 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 			{/* Artifact Header */}
 			<div className="mb-8">
 				<div className="flex items-center gap-6 mb-6">
-					<div className="w-24 h-24">
+					<div className="w-16 h-16 md:w-20 md:h-20">
 						<Image
 							src={`/kingsraid-data/assets/${artifactData.thumbnail
 								.split("/")
@@ -24,12 +24,12 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 							alt={artifactData.name}
 							width="0"
 							height="0"
-							sizes="10vw"
+							sizes="20vw md:5vw"
 							className="w-full h-auto rounded"
 						/>
 					</div>
 					<div className="flex flex-col justify-center flex-1">
-						<div className="text-3xl font-bold mb-4">{artifactData.name}</div>
+						<div className="text-2xl md:text-3xl font-bold mb-4">{artifactData.name}</div>
 					</div>
 				</div>
 			</div>
@@ -48,12 +48,16 @@ export default function ArtifactClient({ artifactData }: ArtifactClientProps) {
 
 			{/* Values */}
 			<div className="mb-8">
-				<div className="text-2xl font-bold mb-6">Enhancement Values</div>
+				<div className="text-lg font-bold mb-6">Enhancement Values</div>
 				<div className="grid gap-4">
 					{Object.entries(artifactData.value).map(([key, values]) => (
 						<Card key={key} className="gap-2">
 							<CardHeader>
-								<CardTitle className="flex items-center justify-between">Stat ({key})</CardTitle>
+								<CardTitle className="flex items-center justify-between">
+									Stat {"{"}
+									{key}
+									{"}"}
+								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="grid grid-cols-3 md:grid-cols-6 gap-2">

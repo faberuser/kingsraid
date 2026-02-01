@@ -16,10 +16,8 @@ export default function SidebarInsetClient({ children }: { children: React.React
 	const router = useRouter()
 	const pathname = usePathname()
 	const { version, setVersion } = useDataVersion()
-	const { showToggle } = useHeroToggle()
+	const { showToggle, availableVersions } = useHeroToggle()
 	const isMobile = useIsMobile()
-
-	const versionOptions: DataVersion[] = ["cbt", "ccbt", "legacy"]
 
 	return (
 		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
@@ -35,7 +33,7 @@ export default function SidebarInsetClient({ children }: { children: React.React
 						Back
 					</Button>
 				)}
-				{showToggle && (
+				{showToggle && availableVersions.length > 0 && (
 					<div className="flex items-center gap-2">
 						{isMobile ? (
 							<Popover>
@@ -58,12 +56,16 @@ export default function SidebarInsetClient({ children }: { children: React.React
 								</Tooltip>
 							</TooltipProvider>
 						)}
-						<Select value={version} onValueChange={(value) => setVersion(value as DataVersion)}>
+						<Select
+							key={availableVersions.join(",")}
+							value={version}
+							onValueChange={(value) => setVersion(value as DataVersion)}
+						>
 							<SelectTrigger>
 								<SelectValue placeholder="Version" />
 							</SelectTrigger>
 							<SelectContent>
-								{versionOptions.map((opt) => (
+								{availableVersions.map((opt) => (
 									<SelectItem key={opt} value={opt}>
 										{DataVersionLabels[opt]}
 									</SelectItem>

@@ -13,96 +13,102 @@ export default function Gear({ heroData }: GearProps) {
 		<div className="space-y-6">
 			{/* Unique Weapon */}
 			{heroData.uw && (
-				<Card>
-					<CardContent>
-						<div className="flex items-center gap-2 mb-4">
-							<div className="text-2xl font-bold">Unique Weapon</div>
-						</div>
+				<div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Unique Weapon</div>
+					</div>
 
-						<div className="flex flex-col md:flex-row gap-6">
-							<div className="flex-shrink-0 hidden md:block">
-								<Image
-									src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
-									alt={heroData.uw.name}
-									width="0"
-									height="0"
-									sizes="10vw"
-									className="w-full h-auto rounded mt-2"
-								/>
-							</div>
-
-							<div className="flex-grow">
-								<div className="flex flex-row md:items-center gap-2 mb-2">
-									<div className="flex-shrink-0 flex md:hidden justify-center items-center">
-										<Image
-											src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
-											alt={heroData.uw.name}
-											width="0"
-											height="0"
-											sizes="10vw"
-											className="w-10 h-10 rounded"
-										/>
-									</div>
-									<div
-										className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-											heroData.profile.class,
-										)}`}
-									>
-										{heroData.uw.name}
-									</div>
+					<Card>
+						<CardContent>
+							<div className="flex flex-col md:flex-row gap-6">
+								<div className="flex-shrink-0 hidden md:block">
+									<Image
+										src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
+										alt={heroData.uw.name}
+										width="0"
+										height="0"
+										sizes="10vw"
+										className="w-full h-auto rounded mt-2"
+									/>
 								</div>
 
-								<div className="mb-4">{parseColoredText(heroData.uw.description)}</div>
-
-								{/* UW Values */}
-								{heroData.uw.value && (
-									<div className="mb-4">
-										<div className="font-medium text-sm text-muted-foreground mb-2">
-											Enhancement Values
+								<div className="flex-grow">
+									<div className="flex flex-row md:items-center gap-2 mb-2">
+										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+											<Image
+												src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
+												alt={heroData.uw.name}
+												width="0"
+												height="0"
+												sizes="10vw"
+												className="w-10 h-10 rounded"
+											/>
 										</div>
-										<div className="flex gap-4 text-xs">
-											{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
-												<div key={statKey} className="space-y-1">
-													<div className="font-medium">Stat ({statKey})</div>
-													<div className="flex flex-wrap gap-1">
-														{Object.entries(statValues).map(([level, value]) => (
-															<Badge
-																variant="secondary"
-																key={level}
-																className={`p-2 rounded text-center ${classColorMapBg(
-																	heroData.profile.class,
-																)}`}
-															>
-																★{level}: {value}
-															</Badge>
-														))}
+										<div
+											className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
+												heroData.profile.class,
+											)}`}
+										>
+											{heroData.uw.name}
+										</div>
+									</div>
+
+									<div className="mb-4">{parseColoredText(heroData.uw.description)}</div>
+
+									{/* UW Values */}
+									{heroData.uw.value && (
+										<div className="mb-4">
+											<div className="font-medium text-sm text-muted-foreground mb-2">
+												Enhancement Values
+											</div>
+											<div className="flex gap-4 text-xs">
+												{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
+													<div key={statKey} className="space-y-1">
+														<div className="font-medium">
+															Stat {"{"}
+															{statKey}
+															{"}"}
+														</div>
+														<div className="flex flex-wrap gap-1">
+															{Object.entries(statValues).map(([level, value]) => (
+																<Badge
+																	variant="secondary"
+																	key={level}
+																	className={`p-2 rounded text-center ${classColorMapBg(
+																		heroData.profile.class,
+																	)}`}
+																>
+																	★{level}: {value}
+																</Badge>
+															))}
+														</div>
 													</div>
-												</div>
-											))}
+												))}
+											</div>
 										</div>
-									</div>
-								)}
+									)}
 
-								{/* UW Story */}
-								<details className="cursor-pointer">
-									<summary className="font-medium text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-gray-200">
-										Weapon Story
-									</summary>
-									<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
-										{parseColoredText(heroData.uw.story)}
-									</div>
-								</details>
+									{/* UW Story */}
+									<details className="cursor-pointer">
+										<summary className="font-medium text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-gray-200">
+											Weapon Story
+										</summary>
+										<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
+											{parseColoredText(heroData.uw.story)}
+										</div>
+									</details>
+								</div>
 							</div>
-						</div>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
+				</div>
 			)}
 
 			{/* Unique Treasures */}
 			{heroData.uts && (
 				<>
-					<div className="flex items-center gap-2 mb-4">
-						<div className="text-2xl font-bold">Unique Treasures</div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Unique Treasures</div>
 					</div>
 
 					<div className="grid gap-4">
@@ -153,7 +159,11 @@ export default function Gear({ heroData }: GearProps) {
 													<div className="flex gap-4 text-xs">
 														{Object.entries(ut.value).map(([statKey, statValues]) => (
 															<div key={statKey} className="space-y-1">
-																<div className="font-medium">Stat ({statKey})</div>
+																<div className="font-medium">
+																	Stat {"{"}
+																	{statKey}
+																	{"}"}
+																</div>
 																<div className="flex flex-wrap gap-1">
 																	{Object.entries(statValues).map(
 																		([level, value]) => (
@@ -195,115 +205,117 @@ export default function Gear({ heroData }: GearProps) {
 
 			{/* Soul Weapon */}
 			{heroData.sw && (
-				<Card>
-					<CardContent>
-						<div className="flex items-center gap-2 mb-4">
-							<div className="text-2xl font-bold">Soul Weapon</div>
-						</div>
+				<div>
+					<div className="flex items-center gap-2 mb-2">
+						<div className="text-lg font-bold">Soul Weapon</div>
+					</div>
 
-						<div className="flex flex-col md:flex-row gap-6">
-							<div className="flex-shrink-0 hidden md:block">
-								<Image
-									src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
-									alt="Soul Weapon"
-									width="0"
-									height="0"
-									sizes="10vw"
-									className="w-full h-auto rounded mt-2"
-								/>
-							</div>
-
-							<div className="flex-grow">
-								<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
-									<div className="flex flex-row md:items-center gap-2 mb-2">
-										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
-											<Image
-												src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
-												alt="Soul Weapon"
-												width="0"
-												height="0"
-												sizes="10vw"
-												className="w-10 h-10 rounded"
-											/>
-										</div>
-										<div
-											className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
-												heroData.profile.class,
-											)}`}
-										>
-											{heroData.uw.name}
-										</div>
-									</div>
-
-									<div className="flex gap-2 text-sm">
-										<Badge
-											variant="default"
-											className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
-										>
-											Uses: {heroData.sw.uses}
-										</Badge>
-										<Badge
-											variant="default"
-											className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
-										>
-											Cooldown: {heroData.sw.cooldown}s
-										</Badge>
-									</div>
+					<Card>
+						<CardContent>
+							<div className="flex flex-col md:flex-row gap-6">
+								<div className="flex-shrink-0 hidden md:block">
+									<Image
+										src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
+										alt="Soul Weapon"
+										width="0"
+										height="0"
+										sizes="10vw"
+										className="w-full h-auto rounded mt-2"
+									/>
 								</div>
 
-								<div className="space-y-3">
-									<div>
-										<div className="font-medium">Requirement</div>
-										<div>{heroData.sw.requirement}</div>
-									</div>
-
-									<div>
-										<div className="font-medium ">Effect</div>
-										<div>{parseColoredText(heroData.sw.description)}</div>
-									</div>
-
-									{/* SW Advancement */}
-									{heroData.sw.advancement && (
-										<div>
-											<div className="font-medium text-sm text-muted-foreground mb-2">
-												Advancements
+								<div className="flex-grow">
+									<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
+										<div className="flex flex-row md:items-center gap-2 mb-2">
+											<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+												<Image
+													src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
+													alt="Soul Weapon"
+													width="0"
+													height="0"
+													sizes="10vw"
+													className="w-10 h-10 rounded"
+												/>
 											</div>
-											<div className="space-y-2">
-												{Object.entries(heroData.sw.advancement).map(([level, effect]) => (
-													<div
-														key={level}
-														className={`px-3 py-2 rounded ${classColorMapBg(
-															heroData.profile.class,
-														)}`}
-													>
+											<div
+												className={`text-xl font-semibold flex justify-center items-center ${classColorMapText(
+													heroData.profile.class,
+												)}`}
+											>
+												{heroData.uw.name}
+											</div>
+										</div>
+
+										<div className="flex gap-2 text-sm">
+											<Badge
+												variant="default"
+												className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
+											>
+												Uses: {heroData.sw.uses}
+											</Badge>
+											<Badge
+												variant="default"
+												className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900"
+											>
+												Cooldown: {heroData.sw.cooldown}s
+											</Badge>
+										</div>
+									</div>
+
+									<div className="space-y-3">
+										<div>
+											<div className="font-medium">Requirement</div>
+											<div>{heroData.sw.requirement}</div>
+										</div>
+
+										<div>
+											<div className="font-medium ">Effect</div>
+											<div>{parseColoredText(heroData.sw.description)}</div>
+										</div>
+
+										{/* SW Advancement */}
+										{heroData.sw.advancement && (
+											<div>
+												<div className="font-medium text-sm text-muted-foreground mb-2">
+													Advancements
+												</div>
+												<div className="space-y-2">
+													{Object.entries(heroData.sw.advancement).map(([level, effect]) => (
 														<div
-															className={`font-medium ${classColorMapText(
+															key={level}
+															className={`px-3 py-2 rounded ${classColorMapBg(
 																heroData.profile.class,
 															)}`}
 														>
-															Stage {level}
+															<div
+																className={`font-medium ${classColorMapText(
+																	heroData.profile.class,
+																)}`}
+															>
+																Stage {level}
+															</div>
+															<div>{parseColoredText(effect)}</div>
 														</div>
-														<div>{parseColoredText(effect)}</div>
-													</div>
-												))}
+													))}
+												</div>
 											</div>
-										</div>
-									)}
+										)}
 
-									{/* SW Story */}
-									<details className="cursor-pointer">
-										<summary className="font-medium text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-gray-200">
-											Soul Weapon Story
-										</summary>
-										<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
-											{parseColoredText(heroData.sw.story)}
-										</div>
-									</details>
+										{/* SW Story */}
+										<details className="cursor-pointer">
+											<summary className="font-medium text-sm text-muted-foreground hover:text-gray-800 dark:hover:text-gray-200">
+												Soul Weapon Story
+											</summary>
+											<div className="mt-2 p-3 bg-gray-50 rounded text-sm dark:bg-gray-900/10">
+												{parseColoredText(heroData.sw.story)}
+											</div>
+										</details>
+									</div>
 								</div>
 							</div>
-						</div>
-					</CardContent>
-				</Card>
+						</CardContent>
+					</Card>
+				</div>
 			)}
 
 			{!heroData.uw && !heroData.uts && !heroData.sw && (

@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import SoftcapClient from "@/app/softcap/client"
+import SoftcapPageWrapper from "@/app/softcap/page-wrapper"
 
 interface SoftcapData {
 	[statName: string]: {
@@ -21,8 +21,8 @@ interface SoftcapData {
 	}
 }
 
-async function getSoftcapData(): Promise<SoftcapData> {
-	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "softcap.json")
+async function getSoftcapData(version: string): Promise<SoftcapData> {
+	const filePath = path.join(process.cwd(), "public", "kingsraid-data", "table-data", version, "softcap.json")
 	if (!fs.existsSync(filePath)) {
 		return {}
 	}
@@ -31,7 +31,17 @@ async function getSoftcapData(): Promise<SoftcapData> {
 }
 
 export default async function SoftcapPage() {
-	const softcapData = await getSoftcapData()
+	const [softcapLegacy, softcapCcbt, softcapCbtPhase1] = await Promise.all([
+		getSoftcapData("legacy"),
+		getSoftcapData("ccbt"),
+		getSoftcapData("cbt-phase-1"),
+	])
 
-	return <SoftcapClient softcapData={softcapData} />
+	return (
+		<SoftcapPageWrapper
+			softcapLegacy={softcapLegacy}
+			softcapCcbt={softcapCcbt}
+			softcapCbtPhase1={softcapCbtPhase1}
+		/>
+	)
 }

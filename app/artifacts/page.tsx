@@ -4,21 +4,21 @@ import { getData, getArtifactReleaseOrder } from "@/lib/get-data"
 
 export default async function ArtifactsPage() {
 	// Fetch artifacts data for all three versions
-	const artifactsCbt = (await getData("artifacts", { dataVersion: "cbt" })) as ArtifactData[]
+	const artifactsCbtPhase1 = (await getData("artifacts", { dataVersion: "cbt-phase-1" })) as ArtifactData[]
 	const artifactsCcbt = (await getData("artifacts", { dataVersion: "ccbt" })) as ArtifactData[]
 	const artifactsLegacy = (await getData("artifacts", { dataVersion: "legacy" })) as ArtifactData[]
 
 	// Fetch release order for all three versions
-	const releaseOrderCbt = await getArtifactReleaseOrder("cbt")
+	const releaseOrderCbtPhase1 = await getArtifactReleaseOrder("cbt-phase-1")
 	const releaseOrderCcbt = await getArtifactReleaseOrder("ccbt")
 	const releaseOrderLegacy = await getArtifactReleaseOrder("legacy")
 
 	return (
 		<ArtifactsPageWrapper
-			artifactsCbt={artifactsCbt}
+			artifactsCbtPhase1={artifactsCbtPhase1}
 			artifactsCcbt={artifactsCcbt}
 			artifactsLegacy={artifactsLegacy}
-			releaseOrderCbt={releaseOrderCbt}
+			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
 			releaseOrderCcbt={releaseOrderCcbt}
 			releaseOrderLegacy={releaseOrderLegacy}
 		/>

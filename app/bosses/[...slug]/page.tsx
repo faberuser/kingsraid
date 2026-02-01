@@ -1,9 +1,9 @@
 import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
-import BossClient from "@/app/bosses/[...slug]/client"
+import BossPageWrapper from "@/app/bosses/[...slug]/page-wrapper"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, findData } from "@/lib/get-data"
+import { SlugPageProps, findData, bossExistsInVersion } from "@/lib/get-data"
 import { getBossModels } from "@/app/bosses/[...slug]/models/getBossModels"
 import { getBossScenes } from "@/app/bosses/[...slug]/models/getBossScenes"
 
@@ -16,7 +16,7 @@ export async function generateStaticParams() {
 		return []
 	}
 
-	const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "bosses")
+	const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "bosses")
 	const slugs: string[] = []
 
 	if (fs.existsSync(bossesDir)) {
@@ -47,6 +47,10 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
+	// Check if boss exists in CBT Phase 1 and CCBT data
+	const existsInCbtPhase1 = await bossExistsInVersion(bossName, "cbt-phase-1")
+	const existsInCcbt = await bossExistsInVersion(bossName, "ccbt")
+
 	// Get boss model data server-side (only if enabled)
 	const bossModels = enableModelsVoices ? await getBossModels(bossData.profile.name) : {}
 
@@ -54,11 +58,13 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const bossScenes = enableModelsVoices ? await getBossScenes(bossData.profile.name) : []
 
 	return (
-		<BossClient
+		<BossPageWrapper
 			bossData={bossData}
 			bossModels={bossModels}
 			bossScenes={bossScenes}
 			enableModelsVoices={enableModelsVoices}
+			existsInCbtPhase1={existsInCbtPhase1}
+			existsInCcbt={existsInCcbt}
 		/>
 	)
 }

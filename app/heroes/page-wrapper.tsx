@@ -8,7 +8,7 @@ import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesPageWrapperProps {
-	heroesCbt: HeroData[]
+	heroesCbtPhase1: HeroData[]
 	heroesCcbt: HeroData[]
 	heroesLegacy: HeroData[]
 	heroClasses: Array<{
@@ -16,48 +16,49 @@ interface HeroesPageWrapperProps {
 		name: string
 		icon: string
 	}>
-	releaseOrderCbt: Record<string, string>
+	releaseOrderCbtPhase1: Record<string, string>
 	releaseOrderCcbt: Record<string, string>
 	releaseOrderLegacy: Record<string, string>
 	saReverse: string[]
-	cbtHeroNames: string[]
+	cbtPhase1HeroNames: string[]
 	ccbtHeroNames: string[]
 }
 
 export default function HeroesPageWrapper({
-	heroesCbt,
+	heroesCbtPhase1,
 	heroesCcbt,
 	heroesLegacy,
 	heroClasses,
-	releaseOrderCbt,
+	releaseOrderCbtPhase1,
 	releaseOrderCcbt,
 	releaseOrderLegacy,
 	saReverse,
 }: HeroesPageWrapperProps) {
 	const { version, isHydrated } = useDataVersion()
-	const { setShowToggle } = useHeroToggle()
+	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 
 	useEffect(() => {
 		setShowToggle(true)
+		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
 		return () => setShowToggle(false)
-	}, [setShowToggle])
+	}, [setShowToggle, setAvailableVersions])
 
 	const heroesMap: Record<DataVersion, HeroData[]> = useMemo(
 		() => ({
-			cbt: heroesCbt,
-			ccbt: heroesCcbt,
-			legacy: heroesLegacy,
+			"cbt-phase-1": heroesCbtPhase1,
+			"ccbt": heroesCcbt,
+			"legacy": heroesLegacy,
 		}),
-		[heroesCbt, heroesCcbt, heroesLegacy],
+		[heroesCbtPhase1, heroesCcbt, heroesLegacy],
 	)
 
 	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
 		() => ({
-			cbt: releaseOrderCbt,
-			ccbt: releaseOrderCcbt,
-			legacy: releaseOrderLegacy,
+			"cbt-phase-1": releaseOrderCbtPhase1,
+			"ccbt": releaseOrderCcbt,
+			"legacy": releaseOrderLegacy,
 		}),
-		[releaseOrderCbt, releaseOrderCcbt, releaseOrderLegacy],
+		[releaseOrderCbtPhase1, releaseOrderCcbt, releaseOrderLegacy],
 	)
 
 	const heroes = heroesMap[version]
