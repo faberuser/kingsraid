@@ -95,7 +95,10 @@ export function ArtifactSelectDialog({
 									)}
 								>
 									<Image
-										src={`/kingsraid-data/assets/${selectedArtifact.thumbnail}`}
+										src={`/kingsraid-data/assets/${selectedArtifact.thumbnail
+											.split("/")
+											.map(encodeURIComponent)
+											.join("/")}`}
 										alt={selectedArtifact.name}
 										width={40}
 										height={40}
@@ -192,40 +195,48 @@ export function ArtifactSelectDialog({
 
 				{/* Artifacts Grid */}
 				<div className="flex-1 overflow-y-auto custom-scrollbar mt-3">
-					<div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 gap-3 px-2 py-1">
+					<div className="flex flex-wrap justify-center gap-3 px-2 py-1">
 						{filteredArtifacts.map((artifact) => (
-							<MobileTooltip
+							<div
 								key={artifact.name}
-								content={
-									<>
-										<div className="font-bold">{artifact.name}</div>
-										<div className="text-xs mt-1 max-w-[200px]">{artifact.description}</div>
-									</>
-								}
+								className="relative w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)] aspect-square"
 							>
-								<button
-									onClick={() => handleSelect(artifact)}
-									className={cn(
-										"relative rounded border overflow-hidden transition-all aspect-square w-full",
-										selectedArtifact?.name === artifact.name
-											? "ring-2 ring-orange-500"
-											: "hover:ring-2 hover:ring-primary active:scale-95",
-									)}
+								<MobileTooltip
+									content={
+										<>
+											<div className="font-bold">{artifact.name}</div>
+											<div className="text-xs mt-1 max-w-[200px]">{artifact.description}</div>
+										</>
+									}
 								>
-									<Image
-										src={`/kingsraid-data/assets/${artifact.thumbnail}`}
-										alt={artifact.name}
-										width={80}
-										height={80}
-										className="w-full h-full object-cover"
-									/>
-									<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
-										<div className="text-xs text-white truncate text-center font-medium">
-											{artifact.name}
+									<button
+										onClick={() => handleSelect(artifact)}
+										className={cn(
+											"absolute inset-0 rounded border overflow-hidden transition-all",
+											selectedArtifact?.name === artifact.name
+												? "ring-2 ring-orange-500"
+												: "hover:ring-2 hover:ring-primary active:scale-95",
+										)}
+									>
+										<Image
+											src={`/kingsraid-data/assets/${artifact.thumbnail
+												.split("/")
+												.map(encodeURIComponent)
+												.join("/")}`}
+											alt={artifact.name}
+											width="0"
+											height="0"
+											sizes="40vw md:20vw"
+											className="w-full h-full object-cover"
+										/>
+										<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 z-10">
+											<div className="text-xs text-white truncate text-center font-medium">
+												{artifact.name}
+											</div>
 										</div>
-									</div>
-								</button>
-							</MobileTooltip>
+									</button>
+								</MobileTooltip>
+							</div>
 						))}
 					</div>
 					{filteredArtifacts.length === 0 && (
