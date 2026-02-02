@@ -15,17 +15,20 @@ import { Suspense } from "react"
 import { TeamMember, TeamBuilderClientProps, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "./types"
 import { createEmptyMember, calculateUsedPoints, encodeTeam, decodeTeam, extractVersionFromEncoded } from "./utils"
 import { HeroCard, EmptySlot, HeroSelectDialog } from "@/components/team-builder"
+import { ArtifactData } from "@/model/Artifact"
 
 function TeamBuilderContent({
 	heroesLegacy,
 	heroesCcbt,
 	heroesCbtPhase1,
+	artifacts,
+	artifactReleaseOrder,
 	classPerks,
 	heroClasses,
 	releaseOrderLegacy,
 	releaseOrderCcbt,
 	releaseOrderCbtPhase1,
-}: Omit<TeamBuilderClientProps, "artifacts" | "saReverse">) {
+}: Omit<TeamBuilderClientProps, "saReverse">) {
 	const { version: dataVersion, setVersionDirect } = useDataVersion()
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 	const searchParams = useSearchParams()
@@ -172,15 +175,28 @@ function TeamBuilderContent({
 		if (saved) {
 			try {
 				const parsed = JSON.parse(saved)
-				// Rehydrate hero references from hero names
+				// Rehydrate hero and artifact references from their names
 				// Try all hero lists to find matches
 				const allHeroes = [...heroesLegacy, ...heroesCcbt, ...heroesCbtPhase1]
-				const rehydrated = parsed.map((member: TeamMember & { heroName?: string }) => {
+				const rehydrated = parsed.map((member: TeamMember & { heroName?: string; artifactName?: string }) => {
+					let hero = null
+					let artifact = null
+
 					if (member.heroName) {
-						const hero = allHeroes.find((h) => h.profile.name === member.heroName)
-						return { ...member, hero: hero || null, heroName: undefined }
+						hero = allHeroes.find((h) => h.profile.name === member.heroName) || null
 					}
-					return { ...member, hero: null }
+
+					if (member.artifactName) {
+						artifact = artifacts.find((a) => a.name === member.artifactName) || null
+					}
+
+					return {
+						...member,
+						hero,
+						artifact,
+						heroName: undefined,
+						artifactName: undefined,
+					}
 				})
 				while (rehydrated.length < 8) {
 					rehydrated.push(createEmptyMember())
@@ -242,11 +258,13 @@ function TeamBuilderContent({
 		if (typeof window !== "undefined") {
 			const hasContent = team.some((m) => m.hero !== null)
 			if (hasContent) {
-				// Store hero names instead of full hero objects to avoid serialization issues
+				// Store hero names and artifact names instead of full objects to avoid serialization issues
 				const toSave = team.map((member) => ({
 					...member,
 					hero: null,
 					heroName: member.hero?.profile.name || null,
+					artifact: null,
+					artifactName: member.artifact?.name || null,
 				}))
 				localStorage.setItem("team-builder-team", JSON.stringify(toSave))
 				setUserCleared(false)
@@ -394,6 +412,17 @@ function TeamBuilderContent({
 		newTeam[slot] = {
 			...newTeam[slot],
 			ut: newTeam[slot].ut === ut ? null : ut,
+		}
+		setTeam(newTeam)
+		updateURL(newTeam)
+	}
+
+	// Select Artifact
+	const selectArtifact = (slot: number, artifact: ArtifactData | null) => {
+		const newTeam = [...team]
+		newTeam[slot] = {
+			...newTeam[slot],
+			artifact,
 		}
 		setTeam(newTeam)
 		updateURL(newTeam)
@@ -578,9 +607,12 @@ function TeamBuilderContent({
 								index={index}
 								perksDialogOpen={perksDialogOpen}
 								selectedSlot={selectedSlot}
+								artifacts={artifacts}
+								artifactReleaseOrder={artifactReleaseOrder}
 								onRemove={removeHero}
 								onToggleUW={toggleUW}
 								onSelectUT={selectUT}
+								onSelectArtifact={selectArtifact}
 								onPerksDialogChange={handlePerksDialogChange}
 								onPerkToggle={togglePerk}
 								onMaxPointsUpdate={updateMaxPoints}

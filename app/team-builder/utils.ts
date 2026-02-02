@@ -82,6 +82,7 @@ export function createEmptyMember(): TeamMember {
 		hero: null,
 		uw: false,
 		ut: null,
+		artifact: null,
 		perks: {
 			t1: [],
 			t2: [],
@@ -273,6 +274,7 @@ export function decodeTeam(encoded: string, heroes: HeroData[]): DecodeResult | 
 				hero,
 				uw,
 				ut,
+				artifact: null, // Artifact is selected separately, not encoded in URL
 				perks: { t1, t2, t3, t5 },
 				maxPoints,
 			})

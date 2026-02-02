@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import { ArtifactData } from "@/model/Artifact"
-import { getData, getJsonDataList, getHeroReleaseOrder } from "@/lib/get-data"
+import { getData, getJsonDataList, getHeroReleaseOrder, getArtifactReleaseOrder } from "@/lib/get-data"
 import fs from "fs"
 import path from "path"
 import TeamBuilderClient from "./client"
@@ -75,6 +75,9 @@ export default async function TeamBuilderPage() {
 	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
 	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
 
+	// Fetch artifact release order (artifacts only exist in legacy)
+	const artifactReleaseOrder = await getArtifactReleaseOrder("legacy")
+
 	const classPerks = await getClassPerks()
 
 	return (
@@ -83,6 +86,7 @@ export default async function TeamBuilderPage() {
 			heroesCcbt={heroesCcbt}
 			heroesCbtPhase1={heroesCbtPhase1}
 			artifacts={artifactsLegacy}
+			artifactReleaseOrder={artifactReleaseOrder}
 			saReverse={saReverse}
 			classPerks={classPerks}
 			heroClasses={heroClasses}

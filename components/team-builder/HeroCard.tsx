@@ -9,18 +9,23 @@ import { Badge } from "@/components/ui/badge"
 import { X, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/app/team-builder/types"
+import { ArtifactData } from "@/model/Artifact"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
 import { EquipmentSection } from "./EquipmentSection"
 import { PerksDialog } from "./PerksDialog"
+import { PerksCompactSummary } from "./PerksSummary"
 
 interface HeroCardProps {
 	member: TeamMember
 	index: number
 	perksDialogOpen: boolean
 	selectedSlot: number | null
+	artifacts: ArtifactData[]
+	artifactReleaseOrder: Record<string, string>
 	onRemove: (slot: number) => void
 	onToggleUW: (slot: number) => void
 	onSelectUT: (slot: number, ut: string | null) => void
+	onSelectArtifact: (slot: number, artifact: ArtifactData | null) => void
 	onPerksDialogChange: (open: boolean, slot: number) => void
 	onPerkToggle: (slot: number, tier: "t1" | "t2" | "t3" | "t5", perkId: string, subType?: "light" | "dark") => void
 	onMaxPointsUpdate: (slot: number, points: number) => void
@@ -41,9 +46,12 @@ export function HeroCard({
 	index,
 	perksDialogOpen,
 	selectedSlot,
+	artifacts,
+	artifactReleaseOrder,
 	onRemove,
 	onToggleUW,
 	onSelectUT,
+	onSelectArtifact,
 	onPerksDialogChange,
 	onPerkToggle,
 	onMaxPointsUpdate,
@@ -139,10 +147,18 @@ export function HeroCard({
 
 			<CardContent className="space-y-2">
 				{/* Equipment Section */}
-				<EquipmentSection member={member} index={index} toggleUW={onToggleUW} selectUT={onSelectUT} />
+				<EquipmentSection
+					member={member}
+					index={index}
+					artifacts={artifacts}
+					artifactReleaseOrder={artifactReleaseOrder}
+					toggleUW={onToggleUW}
+					selectUT={onSelectUT}
+					selectArtifact={onSelectArtifact}
+				/>
 
 				{/* Perks Section */}
-				<div className="space-y-2 mb-4">
+				<div className="space-y-2">
 					<div className="flex justify-between items-center">
 						<div className="text-xs font-medium text-muted-foreground">Perks</div>
 						<div className="text-xs">
@@ -176,6 +192,9 @@ export function HeroCard({
 							}}
 						/>
 					</div>
+
+					{/* Compact Perks Summary */}
+					<PerksCompactSummary member={member} t1Perks={t1Perks} getT2Perks={getT2Perks} />
 				</div>
 
 				{/* Edit Perks Dialog */}

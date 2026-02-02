@@ -3,22 +3,35 @@
 import Image from "@/components/next-image"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/app/team-builder/types"
+import { ArtifactData } from "@/model/Artifact"
 import { MobileTooltip } from "@/components/mobile-tooltip"
+import { ArtifactSelectDialog } from "./ArtifactSelectDialog"
 
 interface EquipmentSectionProps {
 	member: TeamMember
 	index: number
+	artifacts: ArtifactData[]
+	artifactReleaseOrder: Record<string, string>
 	toggleUW: (slot: number) => void
 	selectUT: (slot: number, ut: string | null) => void
+	selectArtifact: (slot: number, artifact: ArtifactData | null) => void
 }
 
-export function EquipmentSection({ member, index, toggleUW, selectUT }: EquipmentSectionProps) {
+export function EquipmentSection({
+	member,
+	index,
+	artifacts,
+	artifactReleaseOrder,
+	toggleUW,
+	selectUT,
+	selectArtifact,
+}: EquipmentSectionProps) {
 	if (!member.hero) return null
 
 	return (
 		<div>
 			<div className="text-xs font-medium mb-2 text-muted-foreground">Equipment</div>
-			<div className="flex gap-2">
+			<div className="flex gap-2 flex-wrap">
 				{/* UW */}
 				<MobileTooltip
 					content={
@@ -84,6 +97,14 @@ export function EquipmentSection({ member, index, toggleUW, selectUT }: Equipmen
 						</button>
 					</MobileTooltip>
 				))}
+
+				{/* Artifact */}
+				<ArtifactSelectDialog
+					artifacts={artifacts}
+					artifactReleaseOrder={artifactReleaseOrder}
+					selectedArtifact={member.artifact}
+					onSelect={(artifact) => selectArtifact(index, artifact)}
+				/>
 			</div>
 		</div>
 	)
