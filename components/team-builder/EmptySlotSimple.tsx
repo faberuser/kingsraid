@@ -26,7 +26,7 @@ export function EmptySlot({ index, onOpenDialog, isDragOver, onDragOver, onDragL
 			onDragLeave={onDragLeave}
 			onDrop={() => onDrop?.(index)}
 		>
-			<CardContent className="flex flex-col items-center justify-center h-48 p-6">
+			<CardContent className="flex flex-col items-center justify-center h-86 p-6">
 				<Button
 					variant="outline"
 					className="h-24 w-24 rounded-full border-dashed border-2"

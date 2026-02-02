@@ -73,7 +73,7 @@ export function HeroSelectDialog({
 		>
 			<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
 				<DialogHeader>
-					<DialogTitle className="flex items-center justify-between">
+					<DialogTitle className="flex items-baseline gap-4">
 						<span>Select Heroes</span>
 						<span className="text-sm font-normal text-muted-foreground">
 							{availableSlots} {availableSlots === 1 ? "slot" : "slots"} available
@@ -182,7 +182,7 @@ export function HeroSelectDialog({
 						</RadioGroup>
 
 						{/* Results count */}
-						<div className="hidden md:block text-xs text-muted-foreground ml-auto">
+						<div className="hidden md:block text-sm text-muted-foreground ml-auto">
 							{filteredHeroes.length} heroes
 						</div>
 					</div>

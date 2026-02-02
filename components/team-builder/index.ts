@@ -1,5 +1,7 @@
 export { EquipmentSection } from "./EquipmentSection"
 export { PerksDialog } from "./PerksDialog"
+export { PerksSummary, PerksCompactSummary } from "./PerksSummary"
 export { HeroCard } from "./HeroCard"
 export { EmptySlot } from "./EmptySlotSimple"
 export { HeroSelectDialog } from "./HeroSelectDialog"
+export { ArtifactSelectDialog } from "./ArtifactSelectDialog"

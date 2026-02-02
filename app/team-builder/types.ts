@@ -9,7 +9,7 @@ export const PERK_COSTS = {
 	t5: 15,
 } as const
 
-export const DEFAULT_MAX_POINTS = 80
+export const DEFAULT_MAX_POINTS = 95
 export const MIN_POINTS = 80
 export const MAX_POINTS = 95
 
@@ -31,6 +31,7 @@ export interface TeamMember {
 	hero: HeroData | null
 	uw: boolean
 	ut: string | null // "1", "2", "3", or "4"
+	artifact: ArtifactData | null
 	perks: SelectedPerks
 	maxPoints: number
 }
@@ -40,6 +41,7 @@ export interface TeamBuilderClientProps {
 	heroesCcbt: HeroData[]
 	heroesCbtPhase1: HeroData[]
 	artifacts: ArtifactData[]
+	artifactReleaseOrder: Record<string, string>
 	saReverse: string[]
 	classPerks: {
 		general: ClassPerksData
