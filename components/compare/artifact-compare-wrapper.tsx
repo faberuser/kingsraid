@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import ArtifactClient from "@/app/artifacts/[...slug]/client"
 import { ArtifactData } from "@/model/Artifact"
 import { DataVersion } from "@/hooks/use-data-version"
@@ -22,7 +22,7 @@ export default function ArtifactCompareWrapper({
 	availableVersions,
 	currentArtifactData,
 }: ArtifactCompareWrapperProps) {
-	const { leftVersion, rightVersion, isCompareMode, isHydrated } = useCompareMode()
+	const { isCompareMode, isHydrated } = useCompareMode()
 
 	// Map of data by version
 	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
@@ -34,19 +34,24 @@ export default function ArtifactCompareWrapper({
 		[artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
 	)
 
+	// Render content for a specific version
+	const renderVersionContent = useCallback(
+		(version: DataVersion) => {
+			const data = artifactDataMap[version]
+			if (!data) {
+				return null
+			}
+			return <ArtifactClient artifactData={data} />
+		},
+		[artifactDataMap],
+	)
+
 	if (!isHydrated || !isCompareMode) {
 		return <ArtifactClient artifactData={currentArtifactData} />
 	}
 
-	const leftData = artifactDataMap[leftVersion] || artifactDataLegacy
-	const rightData = artifactDataMap[rightVersion] || artifactDataLegacy
-
 	return (
-		<CompareLayout
-			availableVersions={availableVersions}
-			leftContent={artifactDataMap[leftVersion] ? <ArtifactClient artifactData={leftData} /> : null}
-			rightContent={artifactDataMap[rightVersion] ? <ArtifactClient artifactData={rightData} /> : null}
-		>
+		<CompareLayout availableVersions={availableVersions} renderContent={renderVersionContent}>
 			<ArtifactClient artifactData={currentArtifactData} />
 		</CompareLayout>
 	)

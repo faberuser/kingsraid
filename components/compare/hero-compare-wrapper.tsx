@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import HeroClient from "@/app/heroes/[...slug]/client"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
@@ -62,7 +62,7 @@ export default function HeroCompareWrapper({
 	currentVoiceFiles,
 	currentClassPerks,
 }: HeroCompareWrapperProps) {
-	const { leftVersion, rightVersion, isCompareMode, isHydrated } = useCompareMode()
+	const { isCompareMode, isHydrated } = useCompareMode()
 
 	// Map of data by version
 	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
@@ -111,20 +111,57 @@ export default function HeroCompareWrapper({
 	)
 
 	// Get data for comparison versions with fallbacks
-	const getVersionData = (version: DataVersion) => {
-		const heroData = heroDataMap[version] || heroDataLegacy
-		const costumes = costumesMap[version].length > 0 ? costumesMap[version] : costumesLegacy
-		const heroModels = Object.keys(heroModelsMap[version]).length > 0 ? heroModelsMap[version] : heroModelsLegacy
-		const voiceFiles =
-			voiceFilesMap[version].en.length > 0 ||
-			voiceFilesMap[version].jp.length > 0 ||
-			voiceFilesMap[version].kr.length > 0
-				? voiceFilesMap[version]
-				: voiceFilesLegacy
-		const classPerks = classPerksMap[version] || classPerksLegacy
+	const getVersionData = useCallback(
+		(version: DataVersion) => {
+			const heroData = heroDataMap[version] || heroDataLegacy
+			const costumes = costumesMap[version].length > 0 ? costumesMap[version] : costumesLegacy
+			const heroModels =
+				Object.keys(heroModelsMap[version]).length > 0 ? heroModelsMap[version] : heroModelsLegacy
+			const voiceFiles =
+				voiceFilesMap[version].en.length > 0 ||
+				voiceFilesMap[version].jp.length > 0 ||
+				voiceFilesMap[version].kr.length > 0
+					? voiceFilesMap[version]
+					: voiceFilesLegacy
+			const classPerks = classPerksMap[version] || classPerksLegacy
 
-		return { heroData, costumes, heroModels, voiceFiles, classPerks }
-	}
+			return { heroData, costumes, heroModels, voiceFiles, classPerks }
+		},
+		[
+			heroDataMap,
+			heroDataLegacy,
+			costumesMap,
+			costumesLegacy,
+			heroModelsMap,
+			heroModelsLegacy,
+			voiceFilesMap,
+			voiceFilesLegacy,
+			classPerksMap,
+			classPerksLegacy,
+		],
+	)
+
+	// Render content for a specific version
+	const renderVersionContent = useCallback(
+		(version: DataVersion) => {
+			if (!heroDataMap[version]) {
+				return null
+			}
+			const versionData = getVersionData(version)
+			return (
+				<HeroClient
+					heroData={versionData.heroData}
+					costumes={versionData.costumes}
+					heroModels={versionData.heroModels}
+					voiceFiles={versionData.voiceFiles}
+					availableScenes={availableScenes}
+					enableModelsVoices={enableModelsVoices}
+					classPerks={versionData.classPerks}
+				/>
+			)
+		},
+		[heroDataMap, getVersionData, availableScenes, enableModelsVoices],
+	)
 
 	if (!isHydrated || !isCompareMode) {
 		return (
@@ -140,39 +177,8 @@ export default function HeroCompareWrapper({
 		)
 	}
 
-	const leftData = getVersionData(leftVersion)
-	const rightData = getVersionData(rightVersion)
-
 	return (
-		<CompareLayout
-			availableVersions={availableVersions}
-			leftContent={
-				heroDataMap[leftVersion] ? (
-					<HeroClient
-						heroData={leftData.heroData}
-						costumes={leftData.costumes}
-						heroModels={leftData.heroModels}
-						voiceFiles={leftData.voiceFiles}
-						availableScenes={availableScenes}
-						enableModelsVoices={enableModelsVoices}
-						classPerks={leftData.classPerks}
-					/>
-				) : null
-			}
-			rightContent={
-				heroDataMap[rightVersion] ? (
-					<HeroClient
-						heroData={rightData.heroData}
-						costumes={rightData.costumes}
-						heroModels={rightData.heroModels}
-						voiceFiles={rightData.voiceFiles}
-						availableScenes={availableScenes}
-						enableModelsVoices={enableModelsVoices}
-						classPerks={rightData.classPerks}
-					/>
-				) : null
-			}
-		>
+		<CompareLayout availableVersions={availableVersions} renderContent={renderVersionContent}>
 			<HeroClient
 				heroData={currentHeroData}
 				costumes={currentCostumes}
