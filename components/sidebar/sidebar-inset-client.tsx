@@ -19,8 +19,11 @@ export default function SidebarInsetClient({ children }: { children: React.React
 	const { showToggle, availableVersions } = useHeroToggle()
 	const { isCompareMode } = useCompareMode()
 
+	// Use full width when in compare mode, otherwise use container
+	const containerClass = isCompareMode ? "p-4 pt-2 sm:p-6 sm:pt-4" : "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"
+
 	return (
-		<SidebarInset className={`${pathname !== "/" && "container mx-auto p-4 pt-2 sm:p-8 sm:pt-4"}`}>
+		<SidebarInset className={`${pathname !== "/" && containerClass}`}>
 			{/* Back Button */}
 			<div
 				className={`mb-2 flex flex-row items-center gap-2 flex-wrap ${
