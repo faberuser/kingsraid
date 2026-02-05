@@ -96,20 +96,18 @@ export default function CompareToggle({ availableVersions }: CompareToggleProps)
 					))}
 
 					{canAdd && (
-						<MobileTooltip content={<div className="text-sm">Add another version to compare</div>}>
-							<Select value="" onValueChange={(value) => addVersion(value as DataVersion)}>
-								<SelectTrigger>
-									<Plus className="h-4 w-4" />
-								</SelectTrigger>
-								<SelectContent>
-									{versionsToAdd.map((opt) => (
-										<SelectItem key={opt} value={opt}>
-											{DataVersionLabels[opt]}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</MobileTooltip>
+						<Select value="" onValueChange={(value) => addVersion(value as DataVersion)}>
+							<SelectTrigger>
+								<Plus className="h-4 w-4" />
+							</SelectTrigger>
+							<SelectContent>
+								{versionsToAdd.map((opt) => (
+									<SelectItem key={opt} value={opt}>
+										{DataVersionLabels[opt]}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
 					)}
 				</div>
 			)}
