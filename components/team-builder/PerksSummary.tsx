@@ -3,7 +3,7 @@
 import Image from "@/components/next-image"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn, parseColoredText } from "@/lib/utils"
-import { TeamMember } from "@/app/team-builder/types"
+import { TeamMember } from "@/model/Team_Builder"
 import { MobileTooltip } from "@/components/mobile-tooltip"
 
 interface PerksSummaryProps {

@@ -2,10 +2,10 @@
 
 import Image from "@/components/next-image"
 import { cn } from "@/lib/utils"
-import { TeamMember } from "@/app/team-builder/types"
+import { TeamMember } from "@/model/Team_Builder"
 import { ArtifactData } from "@/model/Artifact"
 import { MobileTooltip } from "@/components/mobile-tooltip"
-import { ArtifactSelectDialog } from "./ArtifactSelectDialog"
+import { ArtifactSelectDialog } from "@/components/team-builder/ArtifactSelectDialog"
 
 interface EquipmentSectionProps {
 	member: TeamMember

@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Check, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { TeamMember } from "@/app/team-builder/types"
+import { TeamMember } from "@/model/Team_Builder"
 
 interface HeroClass {
 	value: string

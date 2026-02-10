@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { cn, parseColoredText } from "@/lib/utils"
-import { TeamMember, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/app/team-builder/types"
+import { TeamMember, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/model/Team_Builder"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
 import { MobileTooltip } from "@/components/mobile-tooltip"
 
