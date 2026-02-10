@@ -1,5 +1,5 @@
 import { HeroData } from "@/model/Hero"
-import { TeamMember, SelectedPerks, PERK_COSTS, DEFAULT_MAX_POINTS } from "./types"
+import { TeamMember, SelectedPerks, PERK_COSTS, DEFAULT_MAX_POINTS } from "@/model/Team_Builder"
 
 // Base64 URL-safe characters for maximum compression
 const BASE64URL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"

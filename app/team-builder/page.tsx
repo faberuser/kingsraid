@@ -1,9 +1,9 @@
+import fs from "fs"
+import path from "path"
 import { HeroData } from "@/model/Hero"
 import { ArtifactData } from "@/model/Artifact"
 import { getData, getJsonDataList, getHeroReleaseOrder, getArtifactReleaseOrder } from "@/lib/get-data"
-import fs from "fs"
-import path from "path"
-import TeamBuilderClient from "./client"
+import TeamBuilderClient from "@/app/team-builder/client"
 
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },

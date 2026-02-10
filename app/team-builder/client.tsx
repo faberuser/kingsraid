@@ -12,8 +12,14 @@ import Fuse from "fuse.js"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Suspense } from "react"
 
-import { TeamMember, TeamBuilderClientProps, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "./types"
-import { createEmptyMember, calculateUsedPoints, encodeTeam, decodeTeam, extractVersionFromEncoded } from "./utils"
+import { TeamMember, TeamBuilderClientProps, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/model/Team_Builder"
+import {
+	createEmptyMember,
+	calculateUsedPoints,
+	encodeTeam,
+	decodeTeam,
+	extractVersionFromEncoded,
+} from "@/app/team-builder/utils"
 import { HeroCard, EmptySlot, HeroSelectDialog } from "@/components/team-builder"
 import { ArtifactData } from "@/model/Artifact"
 

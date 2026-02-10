@@ -8,12 +8,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge"
 import { X, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { TeamMember } from "@/app/team-builder/types"
+import { TeamMember } from "@/model/Team_Builder"
 import { ArtifactData } from "@/model/Artifact"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
-import { EquipmentSection } from "./EquipmentSection"
-import { PerksDialog } from "./PerksDialog"
-import { PerksCompactSummary } from "./PerksSummary"
+import { EquipmentSection } from "@/components/team-builder/EquipmentSection"
+import { PerksDialog } from "@/components/team-builder/PerksDialog"
+import { PerksCompactSummary } from "@/components/team-builder/PerksSummary"
 
 interface HeroCardProps {
 	member: TeamMember
