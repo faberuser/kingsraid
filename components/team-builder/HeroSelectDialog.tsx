@@ -201,7 +201,7 @@ export function HeroSelectDialog({
 									className={cn(
 										"relative rounded border overflow-hidden transition-all aspect-square w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)]",
 										alreadyInTeam
-											? "ring-2 ring-primary hover:ring-destructive hover:opacity-80 cursor-pointer"
+											? "ring-2 ring-primary hover:ring-destructive opacity-40 hover:opacity-80 cursor-pointer"
 											: allSlotsFilled
 												? "opacity-40 cursor-not-allowed"
 												: "hover:ring-2 hover:ring-primary active:scale-95",
@@ -222,10 +222,8 @@ export function HeroSelectDialog({
 										</div>
 									</div>
 									{alreadyInTeam && (
-										<div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-											<div className="bg-primary rounded-full p-1">
-												<Check className="h-6 w-6 text-primary-foreground" />
-											</div>
+										<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+											<Check className="h-8 w-8 text-white" />
 										</div>
 									)}
 								</button>
