@@ -196,16 +196,17 @@ export function HeroSelectDialog({
 							return (
 								<button
 									key={hero.profile.name}
-									onClick={() => !alreadyInTeam && !allSlotsFilled && onSelectHero(hero)}
-									disabled={alreadyInTeam || allSlotsFilled}
+									onClick={() => onSelectHero(hero)}
+									disabled={!alreadyInTeam && allSlotsFilled}
 									className={cn(
 										"relative rounded border overflow-hidden transition-all aspect-square w-[calc((100%-1.5rem)/3)] sm:w-[calc((100%-3rem)/5)] md:w-[calc((100%-4.5rem)/7)] lg:w-[calc((100%-6rem)/9)]",
 										alreadyInTeam
-											? "opacity-40 cursor-not-allowed"
+											? "ring-2 ring-primary hover:ring-destructive opacity-40 hover:opacity-80 cursor-pointer"
 											: allSlotsFilled
 												? "opacity-40 cursor-not-allowed"
 												: "hover:ring-2 hover:ring-primary active:scale-95",
 									)}
+									title={alreadyInTeam ? "Click to remove from team" : "Click to add to team"}
 								>
 									<Image
 										src={`/kingsraid-data/assets/${hero.profile.thumbnail}`}

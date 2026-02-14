@@ -367,6 +367,16 @@ function TeamBuilderContent({
 	const selectHero = (hero: HeroData) => {
 		const newTeam = [...team]
 
+		// Check if hero is already in team
+		const existingSlotIndex = newTeam.findIndex((m) => m.hero?.profile.name === hero.profile.name)
+		if (existingSlotIndex !== -1) {
+			// Hero already in team, remove it (unselect)
+			newTeam[existingSlotIndex] = createEmptyMember()
+			setTeam(newTeam)
+			updateURL(newTeam)
+			return
+		}
+
 		// Find the first empty slot
 		const emptySlotIndex = newTeam.findIndex((m) => m.hero === null)
 		if (emptySlotIndex === -1) {
