@@ -5,8 +5,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
 import { capitalize, parseColoredText } from "@/lib/utils"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ChevronDown, LayoutGrid, LayoutList } from "lucide-react"
-import { useState } from "react"
+import { ChevronDown, LayoutGrid, LayoutList, Share2, Check } from "lucide-react"
+import { useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import PerksBuilder from "./perks-builder"
 
@@ -21,17 +22,33 @@ interface PerksProps {
 }
 
 export default function Perks({ heroData, classPerks }: PerksProps) {
+	const searchParams = useSearchParams()
+	const hasPerksParam = searchParams.has("p")
+
 	const [t1Open, setT1Open] = useState(false)
 	const [t2Open, setT2Open] = useState(false)
-	const [viewMode, setViewMode] = useState<"list" | "builder">("list")
+	const [viewMode, setViewMode] = useState<"list" | "builder">(hasPerksParam ? "builder" : "list")
+	const [copied, setCopied] = useState(false)
 
 	const heroClass = heroData.profile.class.toLowerCase()
 	const t1PerksData = classPerks.t1Perks || {}
 	const t2PerksData = classPerks.t2Perks[heroClass] || {}
 
+	const handleShare = () => {
+		navigator.clipboard.writeText(window.location.href)
+		setCopied(true)
+		setTimeout(() => setCopied(false), 2000)
+	}
+
 	return (
 		<div className="space-y-4">
-			<div className="flex justify-end mb-4">
+			<div className="flex justify-end gap-2 mb-4">
+				{viewMode === "builder" && (
+					<Button variant="outline" size="sm" onClick={handleShare} className="flex items-center gap-2">
+						{copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+						{copied ? "Copied!" : "Share"}
+					</Button>
+				)}
 				<Button
 					variant="outline"
 					size="sm"
@@ -53,12 +70,14 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 			</div>
 
 			{viewMode === "builder" ? (
-				<PerksBuilder
-					heroData={heroData}
-					heroClass={heroClass}
-					t1PerksData={t1PerksData}
-					t2PerksData={t2PerksData}
-				/>
+				<Suspense fallback={<div>Loading Perks Builder...</div>}>
+					<PerksBuilder
+						heroData={heroData}
+						heroClass={heroClass}
+						t1PerksData={t1PerksData}
+						t2PerksData={t2PerksData}
+					/>
+				</Suspense>
 			) : (
 				<>
 					{/* T1 Perks */}

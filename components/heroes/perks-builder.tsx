@@ -4,12 +4,13 @@ import { HeroData } from "@/model/Hero"
 import Image from "@/components/next-image"
 import { parseColoredText } from "@/lib/utils"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MobileTooltip } from "@/components/mobile-tooltip"
 import { SelectedPerks, PERK_COSTS, MIN_POINTS, MAX_POINTS, DEFAULT_MAX_POINTS } from "@/model/Team_Builder"
-import { calculateUsedPoints } from "@/app/team-builder/utils"
+import { calculateUsedPoints, encodePerks, decodePerks } from "@/app/team-builder/utils"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 interface PerksBuilderProps {
 	heroData: HeroData
@@ -19,13 +20,56 @@ interface PerksBuilderProps {
 }
 
 export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2PerksData }: PerksBuilderProps) {
-	const [maxPoints, setMaxPoints] = useState<number>(DEFAULT_MAX_POINTS)
-	const [selectedPerks, setSelectedPerks] = useState<SelectedPerks>({
-		t1: [],
-		t2: [],
-		t3: [],
-		t5: [],
+	const router = useRouter()
+	const pathname = usePathname()
+	const searchParams = useSearchParams()
+
+	const [maxPoints, setMaxPoints] = useState<number>(() => {
+		const encoded = searchParams.get("p")
+		if (encoded) {
+			const decoded = decodePerks(encoded, heroClass)
+			if (decoded) return decoded.maxPoints
+		}
+		return DEFAULT_MAX_POINTS
 	})
+
+	const [selectedPerks, setSelectedPerks] = useState<SelectedPerks>(() => {
+		const encoded = searchParams.get("p")
+		if (encoded) {
+			const decoded = decodePerks(encoded, heroClass)
+			if (decoded) return decoded.perks
+		}
+		return {
+			t1: [],
+			t2: [],
+			t3: [],
+			t5: [],
+		}
+	})
+
+	const isInitialRender = useRef(true)
+
+	useEffect(() => {
+		if (isInitialRender.current) {
+			isInitialRender.current = false
+			return
+		}
+
+		const hasContent = Object.values(selectedPerks).some((arr) => arr.length > 0)
+		// We only need the read-only values to clone into a new URL search params
+		const params = new URLSearchParams(Array.from(searchParams.entries()))
+
+		if (hasContent || maxPoints !== DEFAULT_MAX_POINTS) {
+			const encoded = encodePerks(selectedPerks, heroClass, maxPoints)
+			params.set("p", encoded)
+		} else {
+			params.delete("p")
+		}
+
+		const newUrl = pathname + (params.toString() ? `?${params.toString()}` : "")
+		router.replace(newUrl, { scroll: false })
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectedPerks, maxPoints, heroClass, pathname, router])
 
 	const handlePerkToggle = (tier: keyof SelectedPerks, perkId: string, subType?: "light" | "dark") => {
 		setSelectedPerks((prev) => {
@@ -77,7 +121,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 max-w-2xl mx-auto">
 			{/* Points Display & Adjustment */}
 			<div className="flex items-center justify-between p-3 bg-muted rounded">
 				<div className="flex items-center gap-4">
@@ -114,11 +158,11 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 						</Button>
 					</div>
 				</div>
-				<div className="text-xs text-muted-foreground hidden sm:block">T1: 10 | T2/T3/T5: 15</div>
+				<div className="text-xs text-muted-foreground">T1: 10 | T2/T3/T5: 15</div>
 			</div>
 
 			{/* T1 Perks */}
-			<div className="flex flex-col sm:flex-row gap-4">
+			<div className="flex flex-row gap-4">
 				<h4 className="font-medium flex items-center gap-2 sm:w-12">T1</h4>
 				<div className="flex flex-wrap gap-2">
 					{Object.entries(t1PerksData).map(([perkName, effect]) => {
@@ -159,7 +203,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 			</div>
 
 			{/* T2 Perks */}
-			<div className="flex flex-col sm:flex-row gap-4">
+			<div className="flex flex-row gap-4">
 				<h4 className="font-medium flex items-center gap-2 sm:w-12">T2</h4>
 				<div className="flex flex-wrap gap-2">
 					{Object.entries(t2PerksData).map(([perkName, effect]) => {
@@ -201,7 +245,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 
 			{/* T3 Perks */}
 			{heroData.perks?.t3 && (
-				<div className="flex flex-col sm:flex-row gap-4">
+				<div className="flex flex-row gap-4">
 					<h4 className="font-medium flex items-center gap-2 sm:w-12">T3</h4>
 					<div className="flex flex-col gap-2">
 						{/* Row 1: S1 Light, S1 Dark, S2 Light, S2 Dark */}
@@ -432,7 +476,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 
 			{/* T5 Perks */}
 			{heroData.perks?.t5 && (
-				<div className="flex flex-col sm:flex-row gap-4">
+				<div className="flex flex-row gap-4">
 					<h4 className="font-medium flex items-center gap-2 sm:w-12">T5</h4>
 					<div className="flex flex-wrap gap-2">
 						{/* Light */}
