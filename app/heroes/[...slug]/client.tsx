@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { HeroData } from "@/model/Hero"
@@ -40,8 +40,11 @@ export default function HeroClient({
 	const getTabFromHash = () => {
 		if (typeof window === "undefined") return "skills"
 		const hash = window.location.hash.slice(1) // Remove the '#'
+		const searchParams = new URLSearchParams(window.location.search)
 		const validTabs = ["skills", "perks", "gear", "profile", "costumes", "models", "voices"]
-		return validTabs.includes(hash) ? hash : "skills"
+		if (validTabs.includes(hash)) return hash
+		if (searchParams.has("p")) return "perks"
+		return "skills"
 	}
 
 	// State to track active tab - initialize from URL hash
@@ -134,7 +137,9 @@ export default function HeroClient({
 					<Skills heroData={heroData} />
 				</TabsContent>
 				<TabsContent value="perks" className="mt-4">
-					<Perks heroData={heroData} classPerks={classPerks} />
+					<Suspense fallback={<div>Loading Perks...</div>}>
+						<Perks heroData={heroData} classPerks={classPerks} />
+					</Suspense>
 				</TabsContent>
 				<TabsContent value="gear" className="mt-4">
 					<Gear heroData={heroData} />

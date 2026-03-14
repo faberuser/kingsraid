@@ -290,3 +290,93 @@ export function decodeTeam(encoded: string, heroes: HeroData[]): DecodeResult | 
 		return null
 	}
 }
+
+// Encode perks to URL-safe string (bit-packed format)
+export function encodePerks(perks: SelectedPerks, heroClass: string, maxPoints: number): string {
+	const writer = new BitWriter()
+
+	// MaxPoints offset: 2 bits (0=80, 1=85, 2=90, 3=95)
+	writer.write(Math.floor((maxPoints - 80) / 5), 2)
+
+	// T1 perks: 5 bits
+	let t1Bits = 0
+	perks.t1.forEach((perk) => {
+		const i = T1_PERKS.indexOf(perk)
+		if (i !== -1) t1Bits |= 1 << i
+	})
+	writer.write(t1Bits, 5)
+
+	// T2 perks: 5 bits
+	let t2Bits = 0
+	const classT2 = T2_PERKS[heroClass.toLowerCase()] || []
+	perks.t2.forEach((perk) => {
+		const i = classT2.indexOf(perk)
+		if (i !== -1) t2Bits |= 1 << i
+	})
+	writer.write(t2Bits, 5)
+
+	// T3 perks: 8 bits (2 bits per skill: 00=none, 01=light, 10=dark)
+	let t3Bits = 0
+	for (const p of perks.t3) {
+		const skillIdx = parseInt(p.skill) - 1
+		const typeVal = p.type === "light" ? 1 : 2
+		t3Bits |= typeVal << (skillIdx * 2)
+	}
+	writer.write(t3Bits, 8)
+
+	// T5 perks: 2 bits
+	let t5Bits = 0
+	if (perks.t5.includes("light")) t5Bits |= 1
+	if (perks.t5.includes("dark")) t5Bits |= 2
+	writer.write(t5Bits, 2)
+
+	return writer.toBase64URL()
+}
+
+// Decode perks from URL-safe string (bit-packed format)
+export function decodePerks(encoded: string, heroClass: string): { perks: SelectedPerks; maxPoints: number } | null {
+	try {
+		const reader = new BitReader(encoded)
+
+		// MaxPoints: 2 bits
+		const maxPtsOffset = reader.read(2)
+		const maxPoints = 80 + maxPtsOffset * 5
+
+		// T1: 5 bits
+		const t1Bits = reader.read(5)
+		const t1: string[] = []
+		T1_PERKS.forEach((perk, idx) => {
+			if (t1Bits & (1 << idx)) t1.push(perk)
+		})
+
+		// T2: 5 bits
+		const t2Bits = reader.read(5)
+		const t2: string[] = []
+		const classT2 = T2_PERKS[heroClass.toLowerCase()] || []
+		classT2.forEach((perk, idx) => {
+			if (t2Bits & (1 << idx)) t2.push(perk)
+		})
+
+		// T3: 8 bits
+		const t3Bits = reader.read(8)
+		const t3: { skill: string; type: "light" | "dark" }[] = []
+		for (let skill = 0; skill < 4; skill++) {
+			const typeVal = (t3Bits >> (skill * 2)) & 0x3
+			if (typeVal === 1) t3.push({ skill: String(skill + 1), type: "light" })
+			else if (typeVal === 2) t3.push({ skill: String(skill + 1), type: "dark" })
+		}
+
+		// T5: 2 bits
+		const t5Bits = reader.read(2)
+		const t5: ("light" | "dark")[] = []
+		if (t5Bits & 1) t5.push("light")
+		if (t5Bits & 2) t5.push("dark")
+
+		return {
+			perks: { t1, t2, t3, t5 },
+			maxPoints,
+		}
+	} catch {
+		return null
+	}
+}
