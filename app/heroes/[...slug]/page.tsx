@@ -9,6 +9,7 @@ import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
 import { getVoiceFiles } from "@/app/heroes/[...slug]/models/getVoices"
 import { getAvailableScenes } from "@/app/heroes/[...slug]/models/getScenes"
 import { ClassPerksData } from "@/components/heroes/perks"
+import { getHeroNamesForVersion } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 const enableModelsVoices = process.env.NEXT_PUBLIC_ENABLE_MODELS_VOICES === "true"
@@ -125,6 +126,12 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const classPerksCbtPhase1 = existsInCbtPhase1 ? await getClassPerks("cbt-phase-1") : classPerksLegacy
 	const classPerksCcbt = existsInCcbt ? await getClassPerks("ccbt") : classPerksLegacy
 
+	// Get ordered list of all hero slugs for navigation
+	const allLegacyHeroes = await getHeroNamesForVersion("legacy")
+	const sortedHeroSlugs = allLegacyHeroes
+		.sort((a, b) => a.localeCompare(b))
+		.map((name) => name.toLowerCase().replace(/\s+/g, "-"))
+
 	return (
 		<HeroPageWrapper
 			heroDataCbtPhase1={heroDataCbtPhase1}
@@ -144,6 +151,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 			classPerksLegacy={classPerksLegacy}
 			classPerksCbtPhase1={classPerksCbtPhase1}
 			classPerksCcbt={classPerksCcbt}
+			sortedHeroSlugs={sortedHeroSlugs}
 		/>
 	)
 }

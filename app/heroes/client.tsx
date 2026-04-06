@@ -109,6 +109,12 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 			result = result.reverse()
 		}
 
+		// Save the sorted/filtered list of hero slugs to sessionStorage for next/prev navigation
+		if (typeof window !== "undefined") {
+			const slugs = result.map((h) => h.profile.name.toLowerCase().replace(/\s+/g, "-"))
+			sessionStorage.setItem("currentHeroList", JSON.stringify(slugs))
+		}
+
 		return result
 	}, [heroes, searchQuery, fuse, selectedClass, selectedDamageType, sortType, reverseSort, releaseOrder])
 

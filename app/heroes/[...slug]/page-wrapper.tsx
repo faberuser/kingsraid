@@ -28,6 +28,7 @@ interface HeroPageWrapperProps {
 	classPerksLegacy: ClassPerksData
 	classPerksCbtPhase1: ClassPerksData
 	classPerksCcbt: ClassPerksData
+	sortedHeroSlugs: string[]
 }
 
 export default function HeroPageWrapper({
@@ -48,6 +49,7 @@ export default function HeroPageWrapper({
 	classPerksLegacy,
 	classPerksCbtPhase1,
 	classPerksCcbt,
+	sortedHeroSlugs,
 }: HeroPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
@@ -183,6 +185,7 @@ export default function HeroPageWrapper({
 			currentHeroModels={heroModels}
 			currentVoiceFiles={voiceFiles}
 			currentClassPerks={classPerks}
+			sortedHeroSlugs={sortedHeroSlugs}
 		/>
 	)
 }

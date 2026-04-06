@@ -44,11 +44,6 @@ export default function SidebarInsetClient({ children }: { children: React.React
 						{/* Version Selector - hide when in compare mode */}
 						{!isCompareMode && (
 							<>
-								<MobileTooltip
-									content={<div className="text-sm">{DataVersionDescriptions[version]}</div>}
-								>
-									<Info className="h-4 w-4 text-muted-foreground" />
-								</MobileTooltip>
 								<Select
 									key={availableVersions.join(",")}
 									value={version}
@@ -65,6 +60,11 @@ export default function SidebarInsetClient({ children }: { children: React.React
 										))}
 									</SelectContent>
 								</Select>
+								<MobileTooltip
+									content={<div className="text-sm">{DataVersionDescriptions[version]}</div>}
+								>
+									<Info className="h-4 w-4 text-muted-foreground" />
+								</MobileTooltip>
 							</>
 						)}
 					</div>

@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react"
-import { ArrowLeft, ArrowRight } from "lucide-react"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -18,9 +17,6 @@ const TEAM_STORAGE_KEY = "team-builder-team"
 
 export type DataVersion = "cbt-phase-1" | "ccbt" | "legacy"
 
-// Order of versions for keyboard navigation (left/right arrows)
-const VERSION_ORDER: DataVersion[] = ["cbt-phase-1", "ccbt", "legacy"]
-
 // Labels for display in UI
 export const DataVersionLabels: Record<DataVersion, string> = {
 	"cbt-phase-1": "CBT Phase 1",
@@ -35,12 +31,6 @@ export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
 			Data from Closed Beta Test Phase 1.
 			<br />
 			Costumes, Models, Voices use Legacy.
-			<br />
-			<span className="hidden md:flex items-center gap-1 text-xs text-muted-foreground mt-1">
-				<ArrowLeft className="h-3 w-3" />
-				<ArrowRight className="h-3 w-3" />
-				to switch versions
-			</span>
 		</>
 	),
 	"ccbt": (
@@ -48,25 +38,9 @@ export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
 			Data from Content Creator CBT.
 			<br />
 			Costumes, Models, Voices use Legacy.
-			<br />
-			<span className="hidden md:flex items-center gap-1 text-xs text-muted-foreground mt-1">
-				<ArrowLeft className="h-3 w-3" />
-				<ArrowRight className="h-3 w-3" />
-				to switch versions
-			</span>
 		</>
 	),
-	"legacy": (
-		<>
-			Data before Doomsday Patch.
-			<br />
-			<span className="hidden md:flex items-center gap-1 text-xs text-muted-foreground mt-1">
-				<ArrowLeft className="h-3 w-3" />
-				<ArrowRight className="h-3 w-3" />
-				to switch versions
-			</span>
-		</>
-	),
+	"legacy": <>Data before Doomsday Patch.</>,
 }
 
 interface DataVersionContextType {
@@ -174,45 +148,6 @@ export function DataVersionProvider({ children }: { children: ReactNode }) {
 		setDialogOpen(false)
 		setPendingVersion(null)
 	}, [])
-
-	// Keyboard shortcuts: Left/Right arrows to switch versions
-	useEffect(() => {
-		if (!mounted) return
-
-		const handleKeyDown = (e: KeyboardEvent) => {
-			// Don't trigger if user is typing in an input/textarea or has modifier keys
-			const target = e.target as HTMLElement
-			if (
-				target.tagName === "INPUT" ||
-				target.tagName === "TEXTAREA" ||
-				target.isContentEditable ||
-				e.ctrlKey ||
-				e.metaKey ||
-				e.altKey
-			) {
-				return
-			}
-
-			if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-				const currentIndex = VERSION_ORDER.indexOf(version)
-				let newIndex: number
-
-				if (e.key === "ArrowLeft") {
-					// Go to previous version (wraps around)
-					newIndex = currentIndex <= 0 ? VERSION_ORDER.length - 1 : currentIndex - 1
-				} else {
-					// Go to next version (wraps around)
-					newIndex = currentIndex >= VERSION_ORDER.length - 1 ? 0 : currentIndex + 1
-				}
-
-				const newVersion = VERSION_ORDER[newIndex]
-				setVersion(newVersion)
-			}
-		}
-
-		window.addEventListener("keydown", handleKeyDown)
-		return () => window.removeEventListener("keydown", handleKeyDown)
-	}, [mounted, version, setVersion])
 
 	const value = {
 		version: mounted ? version : "cbt-phase-1",

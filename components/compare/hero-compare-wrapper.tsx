@@ -35,6 +35,7 @@ interface HeroCompareWrapperProps {
 	currentHeroModels: { [costume: string]: ModelFile[] }
 	currentVoiceFiles: VoiceFiles
 	currentClassPerks: ClassPerksData
+	sortedHeroSlugs: string[]
 }
 
 export default function HeroCompareWrapper({
@@ -61,6 +62,7 @@ export default function HeroCompareWrapper({
 	currentHeroModels,
 	currentVoiceFiles,
 	currentClassPerks,
+	sortedHeroSlugs,
 }: HeroCompareWrapperProps) {
 	const { isCompareMode, isHydrated } = useCompareMode()
 
@@ -157,10 +159,11 @@ export default function HeroCompareWrapper({
 					availableScenes={availableScenes}
 					enableModelsVoices={enableModelsVoices}
 					classPerks={versionData.classPerks}
+					sortedHeroSlugs={sortedHeroSlugs}
 				/>
 			)
 		},
-		[heroDataMap, getVersionData, availableScenes, enableModelsVoices],
+		[heroDataMap, getVersionData, availableScenes, enableModelsVoices, sortedHeroSlugs],
 	)
 
 	if (!isHydrated || !isCompareMode) {
@@ -173,6 +176,7 @@ export default function HeroCompareWrapper({
 				availableScenes={availableScenes}
 				enableModelsVoices={enableModelsVoices}
 				classPerks={currentClassPerks}
+				sortedHeroSlugs={sortedHeroSlugs}
 			/>
 		)
 	}
@@ -187,6 +191,7 @@ export default function HeroCompareWrapper({
 				availableScenes={availableScenes}
 				enableModelsVoices={enableModelsVoices}
 				classPerks={currentClassPerks}
+				sortedHeroSlugs={sortedHeroSlugs}
 			/>
 		</CompareLayout>
 	)

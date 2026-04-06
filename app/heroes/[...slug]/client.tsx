@@ -1,6 +1,9 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState, Suspense, useCallback } from "react"
+import { useRouter } from "next/navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { HeroData } from "@/model/Hero"
@@ -25,6 +28,7 @@ interface HeroClientProps {
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
 	classPerks: ClassPerksData
+	sortedHeroSlugs: string[]
 }
 
 export default function HeroClient({
@@ -35,7 +39,9 @@ export default function HeroClient({
 	availableScenes = [],
 	enableModelsVoices = false,
 	classPerks,
+	sortedHeroSlugs,
 }: HeroClientProps) {
+	const router = useRouter()
 	// Helper function to get tab from hash
 	const getTabFromHash = () => {
 		if (typeof window === "undefined") return "skills"
@@ -66,10 +72,80 @@ export default function HeroClient({
 		window.history.pushState(null, "", `#${value}`)
 	}
 
+	const handleNavigate = useCallback(
+		(direction: "prev" | "next") => {
+			let slugs = sortedHeroSlugs
+			// Attempt to load the dynamically sorted list from the Heroes list page
+			if (typeof window !== "undefined") {
+				const storedSlugs = sessionStorage.getItem("currentHeroList")
+				if (storedSlugs) {
+					try {
+						const parsedSlugs = JSON.parse(storedSlugs)
+						if (Array.isArray(parsedSlugs) && parsedSlugs.length > 0) {
+							slugs = parsedSlugs
+						}
+					} catch {
+						// Fallback to initial alphabetical order
+					}
+				}
+			}
+
+			if (!slugs || slugs.length === 0) return
+			const currentSlug = heroData.profile.name.toLowerCase().replace(/\s+/g, "-")
+			const currentIndex = slugs.indexOf(currentSlug)
+			if (currentIndex === -1) return
+
+			let targetIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1
+			if (targetIndex < 0) targetIndex = slugs.length - 1
+			if (targetIndex >= slugs.length) targetIndex = 0
+
+			const targetSlug = slugs[targetIndex]
+			router.push(`/heroes/${targetSlug}`)
+		},
+		[sortedHeroSlugs, heroData.profile.name, router],
+	)
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Don't trigger if user is typing in an input
+			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+			if (e.key === "ArrowLeft") handleNavigate("prev")
+			if (e.key === "ArrowRight") handleNavigate("next")
+		}
+
+		window.addEventListener("keydown", handleKeyDown)
+		return () => window.removeEventListener("keydown", handleKeyDown)
+	}, [handleNavigate])
+
 	return (
 		<div>
 			{/* Compact Hero Header */}
-			<div className="flex flex-row gap-4 items-center pb-2">
+			<div className="flex flex-row gap-4 items-center pb-2 relative">
+				{/* Navigation Buttons */}
+				{sortedHeroSlugs && sortedHeroSlugs.length > 0 && (
+					<div className="absolute top-0 right-0 hidden sm:flex gap-1 z-10">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleNavigate("prev")}
+							title="Previous Hero"
+							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+						>
+							<ChevronLeft className="h-5 w-5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleNavigate("next")}
+							title="Next Hero"
+							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+						>
+							<ChevronRight className="h-5 w-5" />
+						</Button>
+					</div>
+				)}
+
 				{/* Hero Image - Smaller */}
 				<div className="shrink-0 relative">
 					<div className="w-16 h-16 md:w-20 md:h-20">
