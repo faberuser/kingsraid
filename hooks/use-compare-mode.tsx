@@ -7,11 +7,11 @@ const STORAGE_KEY = "compareMode"
 const VERSIONS_KEY = "compareVersions"
 
 // All available versions
-export const ALL_VERSIONS: DataVersion[] = ["cbt-phase-1", "ccbt", "legacy"]
+export const ALL_VERSIONS: DataVersion[] = ["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"]
 
 // Validate if a string is a valid DataVersion
 function isValidVersion(version: string): version is DataVersion {
-	return version === "cbt-phase-1" || version === "ccbt" || version === "legacy"
+	return version === "cbt-phase-2" || version === "cbt-phase-1" || version === "ccbt" || version === "legacy"
 }
 
 interface CompareModeContextType {
@@ -44,7 +44,7 @@ const CompareModeContext = createContext<CompareModeContextType | undefined>(und
 
 export function CompareModeProvider({ children }: { children: ReactNode }) {
 	const [isCompareMode, setIsCompareMode] = useState(false)
-	const [compareVersions, setCompareVersions] = useState<DataVersion[]>(["cbt-phase-1", "legacy"])
+	const [compareVersions, setCompareVersions] = useState<DataVersion[]>(["cbt-phase-2", "legacy"])
 	const [mounted, setMounted] = useState(false)
 
 	// Sync with localStorage after hydration
@@ -162,7 +162,7 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 	)
 
 	// Legacy support - first two versions for backward compatibility
-	const leftVersion = compareVersions[0] || "cbt-phase-1"
+	const leftVersion = compareVersions[0] || "cbt-phase-2"
 	const rightVersion = compareVersions[1] || "legacy"
 
 	const setLeftVersion = useCallback(
@@ -183,7 +183,7 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		isCompareMode: mounted ? isCompareMode : false,
 		setCompareMode,
 		toggleCompareMode,
-		compareVersions: mounted ? compareVersions : (["cbt-phase-1", "legacy"] as DataVersion[]),
+		compareVersions: mounted ? compareVersions : (["cbt-phase-2", "legacy"] as DataVersion[]),
 		addVersion,
 		removeVersion,
 		setVersionAtIndex,
@@ -192,7 +192,7 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		canAddMore,
 		isHydrated: mounted,
 		// Legacy support
-		leftVersion: mounted ? leftVersion : "cbt-phase-1",
+		leftVersion: mounted ? leftVersion : "cbt-phase-2",
 		rightVersion: mounted ? rightVersion : "legacy",
 		setLeftVersion,
 		setRightVersion,

@@ -56,9 +56,13 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	// Check if artifact exists in CBT Phase 1 and CCBT data and fetch if it does
+	const existsInCbtPhase2 = await artifactExistsInVersion(artifactName, "cbt-phase-2")
 	const existsInCbtPhase1 = await artifactExistsInVersion(artifactName, "cbt-phase-1")
 	const existsInCcbt = await artifactExistsInVersion(artifactName, "ccbt")
 
+	const artifactDataCbtPhase2 = existsInCbtPhase2
+		? ((await findData(artifactName, "artifacts", { dataVersion: "cbt-phase-2" })) as ArtifactData | null)
+		: null
 	const artifactDataCbtPhase1 = existsInCbtPhase1
 		? ((await findData(artifactName, "artifacts", { dataVersion: "cbt-phase-1" })) as ArtifactData | null)
 		: null
@@ -68,6 +72,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	return (
 		<ArtifactPageWrapper
+			artifactDataCbtPhase2={artifactDataCbtPhase2}
 			artifactDataCbtPhase1={artifactDataCbtPhase1}
 			artifactDataCcbt={artifactDataCcbt}
 			artifactDataLegacy={artifactDataLegacy}

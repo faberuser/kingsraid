@@ -40,7 +40,7 @@ export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
 					.replace(/&amp;/g, "&")
 			}
 
-			const title = extractCDATA("title", itemContent)
+			const title = decodeHtmlEntities(extractCDATA("title", itemContent))
 			const url = extractCDATA("link", itemContent)
 			const date = extractCDATA("pubDate", itemContent)
 			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))

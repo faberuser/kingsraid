@@ -31,9 +31,10 @@ async function getSoftcapData(version: string): Promise<SoftcapData> {
 }
 
 export default async function SoftcapPage() {
-	const [softcapLegacy, softcapCcbt, softcapCbtPhase1] = await Promise.all([
+	const [softcapLegacy, softcapCcbt, softcapCbtPhase2, softcapCbtPhase1] = await Promise.all([
 		getSoftcapData("legacy"),
 		getSoftcapData("ccbt"),
+		getSoftcapData("cbt-phase-2"),
 		getSoftcapData("cbt-phase-1"),
 	])
 
@@ -41,6 +42,7 @@ export default async function SoftcapPage() {
 		<SoftcapPageWrapper
 			softcapLegacy={softcapLegacy}
 			softcapCcbt={softcapCcbt}
+			softcapCbtPhase2={softcapCbtPhase2}
 			softcapCbtPhase1={softcapCbtPhase1}
 		/>
 	)

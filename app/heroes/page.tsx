@@ -15,11 +15,13 @@ const heroClasses = [
 
 export default async function HeroesPage() {
 	// Fetch heroes data for all three versions
+	const heroesCbtPhase2 = (await getData("heroes", { dataVersion: "cbt-phase-2" })) as HeroData[]
 	const heroesCbtPhase1 = (await getData("heroes", { dataVersion: "cbt-phase-1" })) as HeroData[]
 	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
 	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
 
 	// Fetch release order for all three versions
+	const releaseOrderCbtPhase2 = await getHeroReleaseOrder("cbt-phase-2")
 	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
 	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
 	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
@@ -32,10 +34,12 @@ export default async function HeroesPage() {
 
 	return (
 		<HeroesPageWrapper
+			heroesCbtPhase2={heroesCbtPhase2}
 			heroesCbtPhase1={heroesCbtPhase1}
 			heroesCcbt={heroesCcbt}
 			heroesLegacy={heroesLegacy}
 			heroClasses={heroClasses}
+			releaseOrderCbtPhase2={releaseOrderCbtPhase2}
 			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
 			releaseOrderCcbt={releaseOrderCcbt}
 			releaseOrderLegacy={releaseOrderLegacy}

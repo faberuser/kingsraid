@@ -8,6 +8,7 @@ import { useCompareMode } from "@/hooks/use-compare-mode"
 import { CompareLayout } from "@/components/compare"
 
 interface ArtifactCompareWrapperProps {
+	artifactDataCbtPhase2: ArtifactData | null
 	artifactDataCbtPhase1: ArtifactData | null
 	artifactDataCcbt: ArtifactData | null
 	artifactDataLegacy: ArtifactData
@@ -16,6 +17,7 @@ interface ArtifactCompareWrapperProps {
 }
 
 export default function ArtifactCompareWrapper({
+	artifactDataCbtPhase2,
 	artifactDataCbtPhase1,
 	artifactDataCcbt,
 	artifactDataLegacy,
@@ -27,15 +29,15 @@ export default function ArtifactCompareWrapper({
 	// Map of data by version
 	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
 		() => ({
+			"cbt-phase-2": artifactDataCbtPhase2,
 			"cbt-phase-1": artifactDataCbtPhase1,
 			"ccbt": artifactDataCcbt,
 			"legacy": artifactDataLegacy,
 		}),
-		[artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
+		[artifactDataCbtPhase2, artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
 	)
 
-	// Render content for a specific version
-	const renderVersionContent = useCallback(
+	const getCompareData = useCallback(
 		(version: DataVersion) => {
 			const data = artifactDataMap[version]
 			if (!data) {
@@ -51,7 +53,7 @@ export default function ArtifactCompareWrapper({
 	}
 
 	return (
-		<CompareLayout availableVersions={availableVersions} renderContent={renderVersionContent}>
+		<CompareLayout availableVersions={availableVersions} renderContent={getCompareData}>
 			<ArtifactClient artifactData={currentArtifactData} />
 		</CompareLayout>
 	)

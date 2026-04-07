@@ -64,6 +64,7 @@ export default async function TeamBuilderPage() {
 	// Fetch all data versions
 	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
 	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
+	const heroesCbtPhase2 = (await getData("heroes", { dataVersion: "cbt-phase-2" })) as HeroData[]
 	const heroesCbtPhase1 = (await getData("heroes", { dataVersion: "cbt-phase-1" })) as HeroData[]
 
 	const artifactsLegacy = (await getData("artifacts", { dataVersion: "legacy" })) as ArtifactData[]
@@ -73,6 +74,7 @@ export default async function TeamBuilderPage() {
 	// Fetch release orders
 	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
 	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
+	const releaseOrderCbtPhase2 = await getHeroReleaseOrder("cbt-phase-2")
 	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
 
 	// Fetch artifact release order (artifacts only exist in legacy)
@@ -84,6 +86,7 @@ export default async function TeamBuilderPage() {
 		<TeamBuilderClient
 			heroesLegacy={heroesLegacy}
 			heroesCcbt={heroesCcbt}
+			heroesCbtPhase2={heroesCbtPhase2}
 			heroesCbtPhase1={heroesCbtPhase1}
 			artifacts={artifactsLegacy}
 			artifactReleaseOrder={artifactReleaseOrder}
@@ -92,6 +95,7 @@ export default async function TeamBuilderPage() {
 			heroClasses={heroClasses}
 			releaseOrderLegacy={releaseOrderLegacy}
 			releaseOrderCcbt={releaseOrderCcbt}
+			releaseOrderCbtPhase2={releaseOrderCbtPhase2}
 			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
 		/>
 	)
