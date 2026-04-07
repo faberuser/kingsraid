@@ -86,9 +86,13 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	// Check if hero exists in CBT Phase 1 and CCBT data and fetch if it does
+	const existsInCbtPhase2 = await heroExistsInVersion(heroName, "cbt-phase-2")
 	const existsInCbtPhase1 = await heroExistsInVersion(heroName, "cbt-phase-1")
 	const existsInCcbt = await heroExistsInVersion(heroName, "ccbt")
 
+	const heroDataCbtPhase2 = existsInCbtPhase2
+		? ((await findData(heroName, "heroes", { dataVersion: "cbt-phase-2" })) as HeroData | null)
+		: null
 	const heroDataCbtPhase1 = existsInCbtPhase1
 		? ((await findData(heroName, "heroes", { dataVersion: "cbt-phase-1" })) as HeroData | null)
 		: null
@@ -98,11 +102,14 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	// Get costume data server-side for all versions
 	const costumesLegacy = await getCostumeData(heroDataLegacy.costumes)
+	const costumesCbtPhase2 = heroDataCbtPhase2 ? await getCostumeData(heroDataCbtPhase2.costumes) : []
 	const costumesCbtPhase1 = heroDataCbtPhase1 ? await getCostumeData(heroDataCbtPhase1.costumes) : []
 	const costumesCcbt = heroDataCcbt ? await getCostumeData(heroDataCcbt.costumes) : []
 
 	// Get model data server-side (only if enabled)
 	const heroModelsLegacy = enableModelsVoices ? await getHeroModels(heroDataLegacy.profile.name) : {}
+	const heroModelsCbtPhase2 =
+		enableModelsVoices && heroDataCbtPhase2 ? await getHeroModels(heroDataCbtPhase2.profile.name) : {}
 	const heroModelsCbtPhase1 =
 		enableModelsVoices && heroDataCbtPhase1 ? await getHeroModels(heroDataCbtPhase1.profile.name) : {}
 	const heroModelsCcbt = enableModelsVoices && heroDataCcbt ? await getHeroModels(heroDataCcbt.profile.name) : {}
@@ -111,6 +118,10 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	const voiceFilesLegacy = enableModelsVoices
 		? await getVoiceFiles(heroDataLegacy.profile.name)
 		: { en: [], jp: [], kr: [] }
+	const voiceFilesCbtPhase2 =
+		enableModelsVoices && heroDataCbtPhase2
+			? await getVoiceFiles(heroDataCbtPhase2.profile.name)
+			: { en: [], jp: [], kr: [] }
 	const voiceFilesCbtPhase1 =
 		enableModelsVoices && heroDataCbtPhase1
 			? await getVoiceFiles(heroDataCbtPhase1.profile.name)
@@ -123,6 +134,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	// Get class perks for all versions
 	const classPerksLegacy = await getClassPerks("legacy")
+	const classPerksCbtPhase2 = existsInCbtPhase2 ? await getClassPerks("cbt-phase-2") : classPerksLegacy
 	const classPerksCbtPhase1 = existsInCbtPhase1 ? await getClassPerks("cbt-phase-1") : classPerksLegacy
 	const classPerksCcbt = existsInCcbt ? await getClassPerks("ccbt") : classPerksLegacy
 
@@ -134,21 +146,26 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	return (
 		<HeroPageWrapper
+			heroDataCbtPhase2={heroDataCbtPhase2}
 			heroDataCbtPhase1={heroDataCbtPhase1}
 			heroDataCcbt={heroDataCcbt}
 			heroDataLegacy={heroDataLegacy}
+			costumesCbtPhase2={costumesCbtPhase2}
 			costumesCbtPhase1={costumesCbtPhase1}
 			costumesCcbt={costumesCcbt}
 			costumesLegacy={costumesLegacy}
+			heroModelsCbtPhase2={heroModelsCbtPhase2}
 			heroModelsCbtPhase1={heroModelsCbtPhase1}
 			heroModelsCcbt={heroModelsCcbt}
 			heroModelsLegacy={heroModelsLegacy}
+			voiceFilesCbtPhase2={voiceFilesCbtPhase2}
 			voiceFilesCbtPhase1={voiceFilesCbtPhase1}
 			voiceFilesCcbt={voiceFilesCcbt}
 			voiceFilesLegacy={voiceFilesLegacy}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
 			classPerksLegacy={classPerksLegacy}
+			classPerksCbtPhase2={classPerksCbtPhase2}
 			classPerksCbtPhase1={classPerksCbtPhase1}
 			classPerksCcbt={classPerksCcbt}
 			sortedHeroSlugs={sortedHeroSlugs}

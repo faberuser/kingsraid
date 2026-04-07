@@ -39,6 +39,7 @@ export interface TeamMember {
 export interface TeamBuilderClientProps {
 	heroesLegacy: HeroData[]
 	heroesCcbt: HeroData[]
+	heroesCbtPhase2: HeroData[]
 	heroesCbtPhase1: HeroData[]
 	artifacts: ArtifactData[]
 	artifactReleaseOrder: Record<string, string>
@@ -54,5 +55,6 @@ export interface TeamBuilderClientProps {
 	}>
 	releaseOrderLegacy: Record<string, string>
 	releaseOrderCcbt: Record<string, string>
+	releaseOrderCbtPhase2: Record<string, string>
 	releaseOrderCbtPhase1: Record<string, string>
 }

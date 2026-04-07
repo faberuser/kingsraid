@@ -8,12 +8,14 @@ import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactPageWrapperProps {
+	artifactDataCbtPhase2: ArtifactData | null
 	artifactDataCbtPhase1: ArtifactData | null
 	artifactDataCcbt: ArtifactData | null
 	artifactDataLegacy: ArtifactData
 }
 
 export default function ArtifactPageWrapper({
+	artifactDataCbtPhase2,
 	artifactDataCbtPhase1,
 	artifactDataCcbt,
 	artifactDataLegacy,
@@ -22,17 +24,19 @@ export default function ArtifactPageWrapper({
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 
 	// Check which versions have data for this artifact
+	const artifactExistsInCbtPhase2 = artifactDataCbtPhase2 !== null
 	const artifactExistsInCbtPhase1 = artifactDataCbtPhase1 !== null
 	const artifactExistsInCcbt = artifactDataCcbt !== null
 
 	// Map of artifact data by version
 	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
 		() => ({
+			"cbt-phase-2": artifactDataCbtPhase2,
 			"cbt-phase-1": artifactDataCbtPhase1,
 			"ccbt": artifactDataCcbt,
 			"legacy": artifactDataLegacy,
 		}),
-		[artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
+		[artifactDataCbtPhase2, artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
 	)
 
 	// Show toggle only if artifact exists in at least one non-legacy version
@@ -41,11 +45,12 @@ export default function ArtifactPageWrapper({
 	// Determine available versions for this artifact
 	const availableVersions = useMemo(() => {
 		const versions: DataVersion[] = []
+		if (artifactExistsInCbtPhase2) versions.push("cbt-phase-2")
 		if (artifactExistsInCbtPhase1) versions.push("cbt-phase-1")
 		if (artifactExistsInCcbt) versions.push("ccbt")
 		versions.push("legacy")
 		return versions
-	}, [artifactExistsInCbtPhase1, artifactExistsInCcbt])
+	}, [artifactExistsInCbtPhase2, artifactExistsInCbtPhase1, artifactExistsInCcbt])
 
 	useEffect(() => {
 		setShowToggle(showVersionToggle)
@@ -68,7 +73,7 @@ export default function ArtifactPageWrapper({
 				setVersion("legacy")
 			}
 		}
-	}, [version, artifactExistsInCbtPhase1, artifactExistsInCcbt, setVersion])
+	}, [version, artifactExistsInCbtPhase2, artifactExistsInCbtPhase1, artifactExistsInCcbt, setVersion])
 
 	// Show loading while hydrating
 	if (!isHydrated) {
@@ -84,6 +89,7 @@ export default function ArtifactPageWrapper({
 
 	return (
 		<ArtifactCompareWrapper
+			artifactDataCbtPhase2={artifactDataCbtPhase2}
 			artifactDataCbtPhase1={artifactDataCbtPhase1}
 			artifactDataCcbt={artifactDataCcbt}
 			artifactDataLegacy={artifactDataLegacy}

@@ -27,16 +27,22 @@ interface SoftcapData {
 interface SoftcapPageWrapperProps {
 	softcapLegacy: SoftcapData
 	softcapCcbt: SoftcapData
+	softcapCbtPhase2: SoftcapData
 	softcapCbtPhase1: SoftcapData
 }
 
-export default function SoftcapPageWrapper({ softcapLegacy, softcapCcbt, softcapCbtPhase1 }: SoftcapPageWrapperProps) {
+export default function SoftcapPageWrapper({
+	softcapLegacy,
+	softcapCcbt,
+	softcapCbtPhase2,
+	softcapCbtPhase1,
+}: SoftcapPageWrapperProps) {
 	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 	const { version: dataVersion } = useDataVersion()
 
 	// Enable version toggle on mount - all versions available
 	useEffect(() => {
-		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
+		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
 		setShowToggle(true)
 		return () => setShowToggle(false)
 	}, [setAvailableVersions, setShowToggle])
@@ -44,6 +50,8 @@ export default function SoftcapPageWrapper({ softcapLegacy, softcapCcbt, softcap
 	// Select softcap data based on version
 	const softcapData = useMemo(() => {
 		switch (dataVersion) {
+			case "cbt-phase-2":
+				return softcapCbtPhase2
 			case "cbt-phase-1":
 				return softcapCbtPhase1
 			case "ccbt":
@@ -51,7 +59,7 @@ export default function SoftcapPageWrapper({ softcapLegacy, softcapCcbt, softcap
 			default:
 				return softcapLegacy
 		}
-	}, [dataVersion, softcapLegacy, softcapCcbt, softcapCbtPhase1])
+	}, [dataVersion, softcapLegacy, softcapCcbt, softcapCbtPhase2, softcapCbtPhase1])
 
 	return <SoftcapClient softcapData={softcapData} />
 }

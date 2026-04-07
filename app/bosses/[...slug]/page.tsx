@@ -48,6 +48,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	}
 
 	// Check if boss exists in CBT Phase 1 and CCBT data
+	const existsInCbtPhase2 = await bossExistsInVersion(bossName, "cbt-phase-2")
 	const existsInCbtPhase1 = await bossExistsInVersion(bossName, "cbt-phase-1")
 	const existsInCcbt = await bossExistsInVersion(bossName, "ccbt")
 
@@ -63,6 +64,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 			bossModels={bossModels}
 			bossScenes={bossScenes}
 			enableModelsVoices={enableModelsVoices}
+			existsInCbtPhase2={existsInCbtPhase2}
 			existsInCbtPhase1={existsInCbtPhase1}
 			existsInCcbt={existsInCcbt}
 		/>

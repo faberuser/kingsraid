@@ -106,6 +106,7 @@ export function calculateUsedPoints(perks: SelectedPerks): number {
 const VERSION_MAP: Record<string, number> = {
 	"legacy": 0,
 	"ccbt": 1,
+	"cbt-phase-2": 2,
 	"cbt-phase-1": 2,
 }
 const VERSION_REVERSE: Record<number, string> = {

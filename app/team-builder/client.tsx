@@ -26,6 +26,7 @@ import { ArtifactData } from "@/model/Artifact"
 function TeamBuilderContent({
 	heroesLegacy,
 	heroesCcbt,
+	heroesCbtPhase2,
 	heroesCbtPhase1,
 	artifacts,
 	artifactReleaseOrder,
@@ -33,6 +34,7 @@ function TeamBuilderContent({
 	heroClasses,
 	releaseOrderLegacy,
 	releaseOrderCcbt,
+	releaseOrderCbtPhase2,
 	releaseOrderCbtPhase1,
 }: Omit<TeamBuilderClientProps, "saReverse">) {
 	const { version: dataVersion, setVersionDirect } = useDataVersion()
@@ -43,13 +45,15 @@ function TeamBuilderContent({
 	// Enable version toggle on mount
 	useEffect(() => {
 		setShowToggle(true)
-		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
+		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
 		return () => setShowToggle(false)
 	}, [setShowToggle, setAvailableVersions])
 
 	// Get heroes and release order based on data version
 	const heroes = useMemo(() => {
 		switch (dataVersion) {
+			case "cbt-phase-2":
+				return heroesCbtPhase2
 			case "cbt-phase-1":
 				return heroesCbtPhase1
 			case "ccbt":
@@ -57,10 +61,12 @@ function TeamBuilderContent({
 			default:
 				return heroesLegacy
 		}
-	}, [dataVersion, heroesLegacy, heroesCcbt, heroesCbtPhase1])
+	}, [dataVersion, heroesLegacy, heroesCcbt, heroesCbtPhase2, heroesCbtPhase1])
 
 	const releaseOrder = useMemo(() => {
 		switch (dataVersion) {
+			case "cbt-phase-2":
+				return releaseOrderCbtPhase2
 			case "cbt-phase-1":
 				return releaseOrderCbtPhase1
 			case "ccbt":
@@ -68,12 +74,14 @@ function TeamBuilderContent({
 			default:
 				return releaseOrderLegacy
 		}
-	}, [dataVersion, releaseOrderLegacy, releaseOrderCcbt, releaseOrderCbtPhase1])
+	}, [dataVersion, releaseOrderLegacy, releaseOrderCcbt, releaseOrderCbtPhase2, releaseOrderCbtPhase1])
 
 	// Helper function to get heroes by version
 	const getHeroesByVersion = useCallback(
 		(version: string) => {
 			switch (version) {
+				case "cbt-phase-2":
+					return heroesCbtPhase2
 				case "cbt-phase-1":
 					return heroesCbtPhase1
 				case "ccbt":
@@ -82,7 +90,7 @@ function TeamBuilderContent({
 					return heroesLegacy
 			}
 		},
-		[heroesLegacy, heroesCcbt, heroesCbtPhase1],
+		[heroesLegacy, heroesCcbt, heroesCbtPhase2, heroesCbtPhase1],
 	)
 
 	// Initialize team from URL or empty (localStorage loaded in effect below)
@@ -93,7 +101,13 @@ function TeamBuilderContent({
 			// Extract version from URL to use correct hero list
 			const urlVersion = extractVersionFromEncoded(encoded) ?? "legacy"
 			const heroesForVersion =
-				urlVersion === "cbt-phase-1" ? heroesCbtPhase1 : urlVersion === "ccbt" ? heroesCcbt : heroesLegacy
+				urlVersion === "cbt-phase-2"
+					? heroesCbtPhase2
+					: urlVersion === "cbt-phase-1"
+						? heroesCbtPhase1
+						: urlVersion === "ccbt"
+							? heroesCcbt
+							: heroesLegacy
 			const result = decodeTeam(encoded, heroesForVersion)
 			if (result) {
 				const decodedTeam = result.team
@@ -183,7 +197,7 @@ function TeamBuilderContent({
 				const parsed = JSON.parse(saved)
 				// Rehydrate hero and artifact references from their names
 				// Try all hero lists to find matches
-				const allHeroes = [...heroesLegacy, ...heroesCcbt, ...heroesCbtPhase1]
+				const allHeroes = [...heroesLegacy, ...heroesCcbt, ...heroesCbtPhase2, ...heroesCbtPhase1]
 				const rehydrated = parsed.map((member: TeamMember & { heroName?: string; artifactName?: string }) => {
 					let hero = null
 					let artifact = null
@@ -683,10 +697,36 @@ function TeamBuilderContent({
 	)
 }
 
-export default function TeamBuilderClient(props: TeamBuilderClientProps) {
+export default function TeamBuilderClient({
+	heroesLegacy,
+	heroesCcbt,
+	heroesCbtPhase2,
+	heroesCbtPhase1,
+	artifacts,
+	artifactReleaseOrder,
+	classPerks,
+	heroClasses,
+	releaseOrderLegacy,
+	releaseOrderCcbt,
+	releaseOrderCbtPhase2,
+	releaseOrderCbtPhase1,
+}: TeamBuilderClientProps) {
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<TeamBuilderContent {...props} />
+		<Suspense>
+			<TeamBuilderContent
+				heroesLegacy={heroesLegacy}
+				heroesCcbt={heroesCcbt}
+				heroesCbtPhase2={heroesCbtPhase2}
+				heroesCbtPhase1={heroesCbtPhase1}
+				artifacts={artifacts}
+				artifactReleaseOrder={artifactReleaseOrder}
+				classPerks={classPerks}
+				heroClasses={heroClasses}
+				releaseOrderLegacy={releaseOrderLegacy}
+				releaseOrderCcbt={releaseOrderCcbt}
+				releaseOrderCbtPhase2={releaseOrderCbtPhase2}
+				releaseOrderCbtPhase1={releaseOrderCbtPhase1}
+			/>
 		</Suspense>
 	)
 }

@@ -11,21 +11,26 @@ import { CompareLayout } from "@/components/compare"
 import { ClassPerksData } from "@/components/heroes/perks"
 
 interface HeroCompareWrapperProps {
+	heroDataCbtPhase2: HeroData | null
 	heroDataCbtPhase1: HeroData | null
 	heroDataCcbt: HeroData | null
 	heroDataLegacy: HeroData
+	costumesCbtPhase2: Costume[]
 	costumesCbtPhase1: Costume[]
 	costumesCcbt: Costume[]
 	costumesLegacy: Costume[]
+	heroModelsCbtPhase2: { [costume: string]: ModelFile[] }
 	heroModelsCbtPhase1: { [costume: string]: ModelFile[] }
 	heroModelsCcbt: { [costume: string]: ModelFile[] }
 	heroModelsLegacy: { [costume: string]: ModelFile[] }
+	voiceFilesCbtPhase2: VoiceFiles
 	voiceFilesCbtPhase1: VoiceFiles
 	voiceFilesCcbt: VoiceFiles
 	voiceFilesLegacy: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
 	classPerksLegacy: ClassPerksData
+	classPerksCbtPhase2: ClassPerksData
 	classPerksCbtPhase1: ClassPerksData
 	classPerksCcbt: ClassPerksData
 	availableVersions: DataVersion[]
@@ -39,21 +44,26 @@ interface HeroCompareWrapperProps {
 }
 
 export default function HeroCompareWrapper({
+	heroDataCbtPhase2,
 	heroDataCbtPhase1,
 	heroDataCcbt,
 	heroDataLegacy,
+	costumesCbtPhase2,
 	costumesCbtPhase1,
 	costumesCcbt,
 	costumesLegacy,
+	heroModelsCbtPhase2,
 	heroModelsCbtPhase1,
 	heroModelsCcbt,
 	heroModelsLegacy,
+	voiceFilesCbtPhase2,
 	voiceFilesCbtPhase1,
 	voiceFilesCcbt,
 	voiceFilesLegacy,
 	availableScenes = [],
 	enableModelsVoices = false,
 	classPerksLegacy,
+	classPerksCbtPhase2,
 	classPerksCbtPhase1,
 	classPerksCcbt,
 	availableVersions,
@@ -69,47 +79,52 @@ export default function HeroCompareWrapper({
 	// Map of data by version
 	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
 		() => ({
+			"cbt-phase-2": heroDataCbtPhase2,
 			"cbt-phase-1": heroDataCbtPhase1,
 			"ccbt": heroDataCcbt,
 			"legacy": heroDataLegacy,
 		}),
-		[heroDataCbtPhase1, heroDataCcbt, heroDataLegacy],
+		[heroDataCbtPhase2, heroDataCbtPhase1, heroDataCcbt, heroDataLegacy],
 	)
 
 	const costumesMap: Record<DataVersion, Costume[]> = useMemo(
 		() => ({
+			"cbt-phase-2": costumesCbtPhase2,
 			"cbt-phase-1": costumesCbtPhase1,
 			"ccbt": costumesCcbt,
 			"legacy": costumesLegacy,
 		}),
-		[costumesCbtPhase1, costumesCcbt, costumesLegacy],
+		[costumesCbtPhase2, costumesCbtPhase1, costumesCcbt, costumesLegacy],
 	)
 
 	const heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }> = useMemo(
 		() => ({
+			"cbt-phase-2": heroModelsCbtPhase2,
 			"cbt-phase-1": heroModelsCbtPhase1,
 			"ccbt": heroModelsCcbt,
 			"legacy": heroModelsLegacy,
 		}),
-		[heroModelsCbtPhase1, heroModelsCcbt, heroModelsLegacy],
+		[heroModelsCbtPhase2, heroModelsCbtPhase1, heroModelsCcbt, heroModelsLegacy],
 	)
 
 	const voiceFilesMap: Record<DataVersion, VoiceFiles> = useMemo(
 		() => ({
+			"cbt-phase-2": voiceFilesCbtPhase2,
 			"cbt-phase-1": voiceFilesCbtPhase1,
 			"ccbt": voiceFilesCcbt,
 			"legacy": voiceFilesLegacy,
 		}),
-		[voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
+		[voiceFilesCbtPhase2, voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
 	)
 
 	const classPerksMap: Record<DataVersion, ClassPerksData> = useMemo(
 		() => ({
+			"cbt-phase-2": classPerksCbtPhase2,
 			"cbt-phase-1": classPerksCbtPhase1,
 			"ccbt": classPerksCcbt,
 			"legacy": classPerksLegacy,
 		}),
-		[classPerksCbtPhase1, classPerksCcbt, classPerksLegacy],
+		[classPerksCbtPhase2, classPerksCbtPhase1, classPerksCcbt, classPerksLegacy],
 	)
 
 	// Get data for comparison versions with fallbacks

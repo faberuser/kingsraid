@@ -14,7 +14,7 @@ const HeroToggleContext = createContext<HeroToggleContextType | undefined>(undef
 
 export function HeroToggleProvider({ children }: { children: ReactNode }) {
 	const [showToggle, setShowToggle] = useState(false)
-	const [availableVersions, setAvailableVersions] = useState<DataVersion[]>(["cbt-phase-1", "ccbt", "legacy"])
+	const [availableVersions, setAvailableVersions] = useState<DataVersion[]>(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
 
 	return (
 		<HeroToggleContext.Provider value={{ showToggle, setShowToggle, availableVersions, setAvailableVersions }}>

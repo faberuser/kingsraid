@@ -17,6 +17,12 @@ type DataItem = HeroData | BossData | ArtifactData
 // Map version to folder path for heroes
 function getHeroFolderForVersion(version: DataVersion): string {
 	switch (version) {
+		case "cbt-phase-2":
+			return "cbt-phase-2/heroes"
+		case "cbt-phase-2":
+			return "cbt-phase-2/heroes"
+		case "cbt-phase-2":
+			return "cbt-phase-2/heroes"
 		case "cbt-phase-1":
 			return "cbt-phase-1/heroes"
 		case "ccbt":
@@ -30,6 +36,12 @@ function getHeroFolderForVersion(version: DataVersion): string {
 // Map version to file path for artifacts
 function getArtifactFileForVersion(version: DataVersion): string {
 	switch (version) {
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifacts.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifacts.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifacts.json"
 		case "cbt-phase-1":
 			return "cbt-phase-1/artifacts.json"
 		case "ccbt":
@@ -43,6 +55,12 @@ function getArtifactFileForVersion(version: DataVersion): string {
 // Map version to file path for hero release order
 function getHeroReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
+		case "cbt-phase-2":
+			return "cbt-phase-2/hero_release_order.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/hero_release_order.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/hero_release_order.json"
 		case "cbt-phase-1":
 			return "cbt-phase-1/hero_release_order.json"
 		case "ccbt":
@@ -56,6 +74,12 @@ function getHeroReleaseOrderForVersion(version: DataVersion): string {
 // Map version to file path for artifact release order
 function getArtifactReleaseOrderForVersion(version: DataVersion): string {
 	switch (version) {
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifact_release_order.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifact_release_order.json"
+		case "cbt-phase-2":
+			return "cbt-phase-2/artifact_release_order.json"
 		case "cbt-phase-1":
 			return "cbt-phase-1/artifact_release_order.json"
 		case "ccbt":
@@ -69,6 +93,12 @@ function getArtifactReleaseOrderForVersion(version: DataVersion): string {
 // Map version to folder path for bosses
 function getBossFolderForVersion(version: DataVersion): string {
 	switch (version) {
+		case "cbt-phase-2":
+			return "cbt-phase-2/bosses"
+		case "cbt-phase-2":
+			return "cbt-phase-2/bosses"
+		case "cbt-phase-2":
+			return "cbt-phase-2/bosses"
 		case "cbt-phase-1":
 			return "cbt-phase-1/bosses"
 		case "ccbt":
@@ -303,10 +333,10 @@ export async function getArtifactReleaseOrder(version: DataVersion): Promise<Rec
 
 // Legacy function for backward compatibility - check if hero exists in CBT data
 export async function heroExistsInNewData(heroName: string): Promise<boolean> {
-	return heroExistsInVersion(heroName, "cbt-phase-1")
+	return heroExistsInVersion(heroName, "cbt-phase-2")
 }
 
 // Legacy function for backward compatibility - get CBT hero names
 export async function getNewDataHeroNames(): Promise<string[]> {
-	return getHeroNamesForVersion("cbt-phase-1")
+	return getHeroNamesForVersion("cbt-phase-2")
 }

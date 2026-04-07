@@ -9,6 +9,7 @@ import { useEffect, useMemo } from "react"
 interface BossesPageWrapperProps {
 	bossesLegacy: BossData[]
 	bossesCcbt: BossData[]
+	bossesCbtPhase2: BossData[]
 	bossesCbtPhase1: BossData[]
 	bossTypeMap: Record<string, string>
 	releaseOrder: Record<string, string>
@@ -17,6 +18,7 @@ interface BossesPageWrapperProps {
 export default function BossesPageWrapper({
 	bossesLegacy,
 	bossesCcbt,
+	bossesCbtPhase2,
 	bossesCbtPhase1,
 	bossTypeMap,
 	releaseOrder,
@@ -26,7 +28,7 @@ export default function BossesPageWrapper({
 
 	// Enable version toggle on mount - all versions available
 	useEffect(() => {
-		setAvailableVersions(["cbt-phase-1", "ccbt", "legacy"])
+		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
 		setShowToggle(true)
 		return () => setShowToggle(false)
 	}, [setAvailableVersions, setShowToggle])
@@ -34,6 +36,8 @@ export default function BossesPageWrapper({
 	// Select bosses data based on version
 	const bosses = useMemo(() => {
 		switch (dataVersion) {
+			case "cbt-phase-2":
+				return bossesCbtPhase2
 			case "cbt-phase-1":
 				return bossesCbtPhase1
 			case "ccbt":
@@ -41,7 +45,7 @@ export default function BossesPageWrapper({
 			default:
 				return bossesLegacy
 		}
-	}, [dataVersion, bossesLegacy, bossesCcbt, bossesCbtPhase1])
+	}, [dataVersion, bossesLegacy, bossesCcbt, bossesCbtPhase2, bossesCbtPhase1])
 
 	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
 }
