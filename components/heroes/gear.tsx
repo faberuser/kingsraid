@@ -246,7 +246,7 @@ export default function Gear({ heroData }: GearProps) {
 											</div>
 										</div>
 
-										<div className="flex gap-2 text-sm">
+										<div className="flex gap-2 text-sm mb-1">
 											<Badge
 												variant="default"
 												className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900"
