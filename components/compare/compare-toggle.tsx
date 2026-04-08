@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowLeftRight, Plus, X } from "lucide-react"
+import { ArrowLeftRight, Plus, X, Link, Unlink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DataVersion, DataVersionLabels } from "@/hooks/use-data-version"
@@ -23,6 +23,8 @@ export default function CompareToggle({ availableVersions }: CompareToggleProps)
 		getAvailableVersionsToAdd,
 		canAddMore,
 		isHydrated,
+		syncScroll,
+		toggleSyncScroll,
 	} = useCompareMode()
 
 	if (!isHydrated) {
@@ -35,6 +37,25 @@ export default function CompareToggle({ availableVersions }: CompareToggleProps)
 
 	return (
 		<div className="hidden lg:flex items-center gap-2">
+			{isCompareMode && (
+				<MobileTooltip
+					content={
+						<div className="text-sm">
+							{syncScroll ? "Disable synchronized scrolling" : "Enable synchronized scrolling"}
+						</div>
+					}
+				>
+					<Button
+						variant={syncScroll ? "default" : "outline"}
+						size="icon"
+						onClick={toggleSyncScroll}
+						className="w-10 h-10 px-0"
+					>
+						{syncScroll ? <Link className="h-4 w-4" /> : <Unlink className="h-4 w-4" />}
+					</Button>
+				</MobileTooltip>
+			)}
+
 			<MobileTooltip
 				content={
 					<div className="text-sm">

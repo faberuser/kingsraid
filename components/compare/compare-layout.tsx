@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useRef } from "react"
 import { DataVersion, DataVersionLabels } from "@/hooks/use-data-version"
 import { useCompareMode } from "@/hooks/use-compare-mode"
 import { Badge } from "@/components/ui/badge"
@@ -29,7 +29,46 @@ export default function CompareLayout({
 	availableVersions,
 	className,
 }: CompareLayoutProps) {
-	const { isCompareMode, compareVersions, leftVersion, rightVersion, isHydrated } = useCompareMode()
+	const { isCompareMode, compareVersions, leftVersion, rightVersion, isHydrated, syncScroll } = useCompareMode()
+
+	const panelsRef = useRef<(HTMLDivElement | null)[]>([])
+	const isScrolling = useRef(false)
+
+	useEffect(() => {
+		if (!syncScroll || !isCompareMode) return
+
+		const handleScroll = (e: Event) => {
+			if (isScrolling.current) return
+			isScrolling.current = true
+
+			const source = e.target as HTMLDivElement
+			panelsRef.current.forEach((panel) => {
+				if (panel && panel !== source) {
+					panel.scrollTop = source.scrollTop
+				}
+			})
+
+			requestAnimationFrame(() => {
+				isScrolling.current = false
+			})
+		}
+
+		// Keep a local copy of the elements we attached listeners to
+		const attachedPanels: HTMLDivElement[] = []
+
+		panelsRef.current.forEach((panel) => {
+			if (panel) {
+				panel.addEventListener("scroll", handleScroll, { passive: true })
+				attachedPanels.push(panel)
+			}
+		})
+
+		return () => {
+			attachedPanels.forEach((panel) => {
+				panel.removeEventListener("scroll", handleScroll)
+			})
+		}
+	}, [syncScroll, isCompareMode, compareVersions.length])
 
 	if (!isHydrated) {
 		return <>{children}</>
@@ -54,7 +93,14 @@ export default function CompareLayout({
 						</Badge>
 					</div>
 					{leftAvailable ? (
-						<div className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel">{leftContent}</div>
+						<div
+							className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel"
+							ref={(el) => {
+								panelsRef.current[0] = el
+							}}
+						>
+							{leftContent}
+						</div>
 					) : (
 						<div className="flex items-center justify-center h-48 text-muted-foreground border rounded-lg bg-muted/50">
 							Not available in {DataVersionLabels[leftVersion]}
@@ -70,7 +116,14 @@ export default function CompareLayout({
 						</Badge>
 					</div>
 					{rightAvailable ? (
-						<div className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel">{rightContent}</div>
+						<div
+							className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel"
+							ref={(el) => {
+								panelsRef.current[1] = el
+							}}
+						>
+							{rightContent}
+						</div>
 					) : (
 						<div className="flex items-center justify-center h-48 text-muted-foreground border rounded-lg bg-muted/50">
 							Not available in {DataVersionLabels[rightVersion]}
@@ -84,7 +137,7 @@ export default function CompareLayout({
 	// New multi-version layout
 	return (
 		<div className={cn("hidden lg:flex lg:flex-row gap-3 lg:h-[calc(100vh-140px)] w-full", className)}>
-			{compareVersions.map((version) => {
+			{compareVersions.map((version, index) => {
 				const isAvailable = availableVersions.includes(version)
 
 				return (
@@ -95,7 +148,12 @@ export default function CompareLayout({
 							</Badge>
 						</div>
 						{isAvailable ? (
-							<div className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel">
+							<div
+								className="flex-1 overflow-y-auto pr-2 custom-scrollbar compare-panel"
+								ref={(el) => {
+									panelsRef.current[index] = el
+								}}
+							>
 								{renderContent(version)}
 							</div>
 						) : (
