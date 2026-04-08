@@ -121,7 +121,7 @@ export default function HeroPageWrapper({
 	)
 
 	// Show toggle only if hero exists in at least one non-legacy version
-	const showVersionToggle = heroExistsInCbtPhase1 || heroExistsInCcbt
+	const showVersionToggle = heroExistsInCbtPhase2 || heroExistsInCbtPhase1 || heroExistsInCcbt
 
 	// Determine available versions for this hero
 	const availableVersions = useMemo(() => {
@@ -140,19 +140,19 @@ export default function HeroPageWrapper({
 	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
 
 	useEffect(() => {
-		// If user selects a version that doesn't have this hero, fallback to legacy
-		if (version === "cbt-phase-1" && !heroExistsInCbtPhase1) {
-			if (heroExistsInCcbt) {
-				setVersion("ccbt")
-			} else {
-				setVersion("legacy")
-			}
+		// If user selects a version that doesn't have this hero, fallback to another version
+		if (version === "cbt-phase-2" && !heroExistsInCbtPhase2) {
+			if (heroExistsInCbtPhase1) setVersion("cbt-phase-1")
+			else if (heroExistsInCcbt) setVersion("ccbt")
+			else setVersion("legacy")
+		} else if (version === "cbt-phase-1" && !heroExistsInCbtPhase1) {
+			if (heroExistsInCbtPhase2) setVersion("cbt-phase-2")
+			else if (heroExistsInCcbt) setVersion("ccbt")
+			else setVersion("legacy")
 		} else if (version === "ccbt" && !heroExistsInCcbt) {
-			if (heroExistsInCbtPhase1) {
-				setVersion("cbt-phase-1")
-			} else {
-				setVersion("legacy")
-			}
+			if (heroExistsInCbtPhase2) setVersion("cbt-phase-2")
+			else if (heroExistsInCbtPhase1) setVersion("cbt-phase-1")
+			else setVersion("legacy")
 		}
 	}, [version, heroExistsInCbtPhase2, heroExistsInCbtPhase1, heroExistsInCcbt, setVersion])
 
