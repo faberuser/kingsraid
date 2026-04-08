@@ -69,22 +69,21 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production && \
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-# public/ is intentionally excluded from this build stage.
+# public/ is intentionally included here.
 #
-# All code paths that read from public/kingsraid-data at build time
-# (e.g. generateStaticParams in app/artifacts, app/bosses, etc.) are
-# guarded by `if (!isStaticExport) { return [] }`. Because the Docker
-# workflow never sets NEXT_STATIC_EXPORT=true, those branches are never
-# executed during a server-side Next.js build — public/ is not needed here.
+# The list pages (app/heroes, app/artifacts, app/bosses, etc.) are Next.js
+# App Router async server components that call lib/get-data.ts unconditionally
+# at build time — no isStaticExport guard. Next.js renders and caches them
+# statically during `bun run build`, so public/kingsraid-data must be present
+# or the lists are generated empty.
 #
-# Other public/ reads (API routes, server components) are request-time only
-# and are also not called during `bun run build`.
+# This is safe: git-stage already strips kingsraid-models and kingsraid-audio,
+# so public/ here contains only kingsraid-data (a few MB of JSON) — no 35 GB.
 #
-# The original Dockerfile used --exclude=/usr/src/app/{public,out} which
-# used absolute paths — BuildKit matches --exclude patterns relative to the
-# source directory, so that pattern was a silent no-op and public/ was always
-# included. This corrected form actually takes effect.
-COPY --exclude=public --exclude=out --from=git-stage /usr/src/app .
+# The original Dockerfile used --exclude=/usr/src/app/{public,out} which used
+# absolute paths that BuildKit never matched (it uses source-relative patterns),
+# making the exclusion a silent no-op. Restoring that behaviour intentionally.
+COPY --exclude=out --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build
