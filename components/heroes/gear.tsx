@@ -265,7 +265,7 @@ export default function Gear({ heroData }: GearProps) {
 									<div className="space-y-3">
 										<div>
 											<div className="font-medium">Requirement</div>
-											<div>{heroData.sw.requirement}</div>
+											<div>{parseColoredText(heroData.sw.requirement)}</div>
 										</div>
 
 										<div>
