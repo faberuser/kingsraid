@@ -9,11 +9,11 @@ jobs:
     name: Build Docker Image (Models and Voices)
     runs-on: self-hosted
     steps:
+      # remove old images, keeping only the latest
       - name: Clean up Docker Resources
         run: |
           docker system prune -af --volumes || true
           docker builder prune -af || true
-          # Remove old images, keeping only the latest
           docker images ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid --format "{{.ID}} {{.CreatedAt}}" | tail -n +2 | awk '{print $1}' | xargs -r docker rmi -f || true
 
       - name: Checkout
@@ -46,14 +46,21 @@ jobs:
           tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:latest
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-          cache-from: type=registry,ref=${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:buildcache
-          cache-to: type=registry,ref=${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:buildcache,mode=max
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           load: false
           provenance: false
           sbom: false
 
       - name: Update Portainer Stack
         run: curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
+
+      # prevents cache from growing infinitely
+      - name: Move cache
+        run: |
+          mkdir -p /tmp/.buildx-cache-new
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Clean up after build
         if: always()

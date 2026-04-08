@@ -38,12 +38,17 @@ interface CompareModeContextType {
 	rightVersion: DataVersion
 	setLeftVersion: (version: DataVersion) => void
 	setRightVersion: (version: DataVersion) => void
+
+	/** Flag to indicate if synchronized scrolling is enabled */
+	syncScroll: boolean
+	toggleSyncScroll: () => void
 }
 
 const CompareModeContext = createContext<CompareModeContextType | undefined>(undefined)
 
 export function CompareModeProvider({ children }: { children: ReactNode }) {
 	const [isCompareMode, setIsCompareMode] = useState(false)
+	const [syncScroll, setSyncScroll] = useState(true)
 	const [compareVersions, setCompareVersions] = useState<DataVersion[]>(["cbt-phase-2", "legacy"])
 	const [mounted, setMounted] = useState(false)
 
@@ -53,9 +58,14 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		setMounted(true)
 		const storedCompareMode = localStorage.getItem(STORAGE_KEY)
 		const storedVersions = localStorage.getItem(VERSIONS_KEY)
+		const storedSyncScroll = localStorage.getItem("compareSyncScroll")
 
 		if (storedCompareMode === "true") {
 			setIsCompareMode(true)
+		}
+
+		if (storedSyncScroll === "false") {
+			setSyncScroll(false)
 		}
 
 		if (storedVersions) {
@@ -79,6 +89,14 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		setIsCompareMode((prev) => {
 			const newValue = !prev
 			localStorage.setItem(STORAGE_KEY, String(newValue))
+			return newValue
+		})
+	}, [])
+
+	const toggleSyncScroll = useCallback(() => {
+		setSyncScroll((prev) => {
+			const newValue = !prev
+			localStorage.setItem("compareSyncScroll", String(newValue))
 			return newValue
 		})
 	}, [])
@@ -196,6 +214,8 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		rightVersion: mounted ? rightVersion : "legacy",
 		setLeftVersion,
 		setRightVersion,
+		syncScroll,
+		toggleSyncScroll,
 	}
 
 	return <CompareModeContext.Provider value={value}>{children}</CompareModeContext.Provider>
