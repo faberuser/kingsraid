@@ -3,12 +3,7 @@
 FROM alpine/git AS git-stage
 ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
 WORKDIR /usr/src/app
-
-# Only copy data necessary for submodules so app changes don't bust the git cache
-COPY public ./public
-# Copy .git and .gitmodules conditionally
-COPY .g[i]t/ ./.git/
-COPY .[g]itmodules ./
+COPY . .
 
 # remove models and audio submodules if they were copied and env is not enabled
 RUN \
@@ -81,7 +76,7 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production && \
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY . .
+COPY --exclude=/usr/src/app/{public,out} --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build

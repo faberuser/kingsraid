@@ -47,7 +47,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max,compression=zstd,compression-level=3
           load: false
           provenance: false
           sbom: false
