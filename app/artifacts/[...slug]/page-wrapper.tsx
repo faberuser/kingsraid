@@ -40,7 +40,7 @@ export default function ArtifactPageWrapper({
 	)
 
 	// Show toggle only if artifact exists in at least one non-legacy version
-	const showVersionToggle = artifactExistsInCbtPhase1 || artifactExistsInCcbt
+	const showVersionToggle = artifactExistsInCbtPhase2 || artifactExistsInCbtPhase1 || artifactExistsInCcbt
 
 	// Determine available versions for this artifact
 	const availableVersions = useMemo(() => {
@@ -59,19 +59,19 @@ export default function ArtifactPageWrapper({
 	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
 
 	useEffect(() => {
-		// If user selects a version that doesn't have this artifact, fallback to legacy
-		if (version === "cbt-phase-1" && !artifactExistsInCbtPhase1) {
-			if (artifactExistsInCcbt) {
-				setVersion("ccbt")
-			} else {
-				setVersion("legacy")
-			}
+		// If user selects a version that doesn't have this artifact, fallback to another version
+		if (version === "cbt-phase-2" && !artifactExistsInCbtPhase2) {
+			if (artifactExistsInCbtPhase1) setVersion("cbt-phase-1")
+			else if (artifactExistsInCcbt) setVersion("ccbt")
+			else setVersion("legacy")
+		} else if (version === "cbt-phase-1" && !artifactExistsInCbtPhase1) {
+			if (artifactExistsInCbtPhase2) setVersion("cbt-phase-2")
+			else if (artifactExistsInCcbt) setVersion("ccbt")
+			else setVersion("legacy")
 		} else if (version === "ccbt" && !artifactExistsInCcbt) {
-			if (artifactExistsInCbtPhase1) {
-				setVersion("cbt-phase-1")
-			} else {
-				setVersion("legacy")
-			}
+			if (artifactExistsInCbtPhase2) setVersion("cbt-phase-2")
+			else if (artifactExistsInCbtPhase1) setVersion("cbt-phase-1")
+			else setVersion("legacy")
 		}
 	}, [version, artifactExistsInCbtPhase2, artifactExistsInCbtPhase1, artifactExistsInCcbt, setVersion])
 
