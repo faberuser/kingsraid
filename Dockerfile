@@ -1,53 +1,46 @@
 # syntax=docker.io/docker/dockerfile:1.19-labs
 
-FROM alpine/git AS git-stage
+# ---------------------------------------------------------------------------
+# data-stage: clone the large model/audio repos (~35 GB combined).
+#
+# This stage has NO dependency on source files (no COPY . .) so its cache key
+# depends only on NEXT_PUBLIC_ENABLE_MODELS_VOICES and ASSETS_CACHE_VERSION.
+# Repeated code pushes will NOT re-download the data as long as those two
+# build-args remain unchanged.
+#
+# To force a fresh clone after upstream repo updates, bump ASSETS_CACHE_VERSION
+# at build time:
+#   docker build --build-arg ASSETS_CACHE_VERSION=2 ...
+# ---------------------------------------------------------------------------
+FROM alpine/git AS data-stage
 ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
+ARG ASSETS_CACHE_VERSION=1
+
+RUN \
+  if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" = "true" ]; then \
+    echo "Cloning kingsraid-models and kingsraid-audio (NEXT_PUBLIC_ENABLE_MODELS_VOICES=true)..."; \
+    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git /tmp/kingsraid-models && \
+    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git /tmp/kingsraid-audio && \
+    find /tmp/kingsraid-models /tmp/kingsraid-audio -type d -name .git -prune -exec rm -rf {} +; \
+  else \
+    echo "Skipping models and audio clones (NEXT_PUBLIC_ENABLE_MODELS_VOICES not set to true)"; \
+    mkdir -p /tmp/kingsraid-models /tmp/kingsraid-audio; \
+  fi
+
+# ---------------------------------------------------------------------------
+# git-stage: copy source files and populate only kingsraid-data.
+# Models and audio are handled entirely by data-stage above.
+# ---------------------------------------------------------------------------
+FROM alpine/git AS git-stage
 WORKDIR /usr/src/app
 COPY . .
 
-# remove models and audio submodules if they were copied and env is not enabled
+# Always wipe any previously-copied submodule directories before re-cloning,
+# so this layer is deterministic regardless of what was in the build context.
 RUN \
-  if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" != "true" ]; then \
-    echo "Removing models and audio submodules (if present) since NEXT_PUBLIC_ENABLE_MODELS_VOICES is not true..."; \
-    rm -rf public/kingsraid-models public/kingsraid-audio; \
-  fi
-
-# populate git submodules or clone manually if .git is missing
-RUN \
-  if [ ! -d ".git" ]; then \
-    echo ".git not found, cloning submodules shallowly..."; \
-    rm -rf public/kingsraid-data && \
-    git clone --depth=1 https://github.com/faberuser/kingsraid-data.git public/kingsraid-data; \
-    if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" = "true" ]; then \
-      echo "Cloning models and audio submodules..."; \
-      rm -rf public/kingsraid-models && \
-      git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git public/kingsraid-models && \
-      rm -rf public/kingsraid-audio && \
-      git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git public/kingsraid-audio; \
-    else \
-      echo "Skipping models and audio submodules (NEXT_PUBLIC_ENABLE_MODELS_VOICES not set to true)"; \
-    fi; \
-  else \
-    echo ".git found, checking submodules..."; \
-    if [ -z "$(ls -A public/kingsraid-data 2>/dev/null)" ]; then \
-      echo "Populating kingsraid-data submodule..."; \
-      git submodule update --init --depth=1 public/kingsraid-data; \
-    else \
-      echo "kingsraid-data already populated."; \
-    fi; \
-    if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" = "true" ]; then \
-      if [ -z "$(ls -A public/kingsraid-models 2>/dev/null)" ] || \
-         [ -z "$(ls -A public/kingsraid-audio 2>/dev/null)" ]; then \
-        echo "Populating models and audio submodules..."; \
-        git submodule update --init --depth=1 public/kingsraid-models public/kingsraid-audio; \
-      else \
-        echo "Models and audio submodules already populated."; \
-      fi; \
-    else \
-      echo "Skipping models and audio submodules (NEXT_PUBLIC_ENABLE_MODELS_VOICES not set to true)"; \
-    fi; \
-  fi && \
-  # always remove .git folders from submodules
+  rm -rf public/kingsraid-data public/kingsraid-models public/kingsraid-audio && \
+  git clone --depth=1 https://github.com/faberuser/kingsraid-data.git public/kingsraid-data && \
+  # remove .git folders from submodules so they don't bloat the image
   find public/ -type d -name .git -prune -exec rm -rf {} +
 
 FROM oven/bun:alpine AS base
@@ -76,30 +69,43 @@ RUN cd /temp/prod && bun install --frozen-lockfile --production && \
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
 COPY --from=install-dev /temp/dev/node_modules node_modules
-COPY --exclude=/usr/src/app/{public,out} --from=git-stage /usr/src/app .
+# public/ is intentionally excluded from this build stage.
+#
+# All code paths that read from public/kingsraid-data at build time
+# (e.g. generateStaticParams in app/artifacts, app/bosses, etc.) are
+# guarded by `if (!isStaticExport) { return [] }`. Because the Docker
+# workflow never sets NEXT_STATIC_EXPORT=true, those branches are never
+# executed during a server-side Next.js build — public/ is not needed here.
+#
+# Other public/ reads (API routes, server components) are request-time only
+# and are also not called during `bun run build`.
+#
+# The original Dockerfile used --exclude=/usr/src/app/{public,out} which
+# used absolute paths — BuildKit matches --exclude patterns relative to the
+# source directory, so that pattern was a silent no-op and public/ was always
+# included. This corrected form actually takes effect.
+COPY --exclude=public --exclude=out --from=git-stage /usr/src/app .
 
 # build the application
 RUN bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
-ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
-ENV NEXT_PUBLIC_ENABLE_MODELS_VOICES=$NEXT_PUBLIC_ENABLE_MODELS_VOICES
 
 COPY --from=install-prod /temp/prod/node_modules ./node_modules
 COPY --from=prerelease /usr/src/app/.next ./.next
 COPY --from=prerelease /usr/src/app/package.json ./package.json
 COPY --from=prerelease /usr/src/app/next.config.ts ./next.config.ts
 
-# selectively copy public folder based on NEXT_PUBLIC_ENABLE_MODELS_VOICES
+# kingsraid-data and all other static public assets.
+# git-stage already cleaned out models/audio, so this COPY never includes them.
 COPY --from=git-stage /usr/src/app/public ./public
-RUN \
-  if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" != "true" ]; then \
-    echo "Removing models and audio from final image (NEXT_PUBLIC_ENABLE_MODELS_VOICES not set to true)..."; \
-    rm -rf ./public/kingsraid-models ./public/kingsraid-audio; \
-  else \
-    echo "Keeping models and audio in final image (NEXT_PUBLIC_ENABLE_MODELS_VOICES=true)"; \
-  fi
+# Models and audio come from data-stage. Because data-stage has no dependency
+# on source files, its layer content hashes are stable across code pushes when
+# the upstream repos haven't changed — repeated builds skip the ~35 GB cache
+# writes and registry uploads for these two layers entirely.
+COPY --from=data-stage /tmp/kingsraid-models ./public/kingsraid-models
+COPY --from=data-stage /tmp/kingsraid-audio ./public/kingsraid-audio
 
 # expose the port
 EXPOSE 3000
