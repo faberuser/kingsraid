@@ -3,14 +3,6 @@ on:
     push:
         branches: ["main"]
     workflow_dispatch:
-        inputs:
-            assets_cache_version:
-                description: >
-                    Bump this number to force a fresh clone of kingsraid-models and
-                    kingsraid-audio (e.g. after upstream data repos are updated).
-                    Leave at 1 for a normal code-only build.
-                required: false
-                default: "1"
 
 jobs:
     build:
@@ -40,6 +32,23 @@ jobs:
               with:
                   fetch-depth: 1
 
+            # Fetch the current HEAD commit hash of each assets repo.
+            # This value is passed to data-stage as ASSETS_CACHE_VERSION so that
+            # BuildKit's layer cache is automatically busted when either repo
+            # changes — without any manual intervention.
+            # If a repo is unreachable the step still succeeds and falls back to
+            # "unknown", which keeps the cache stable rather than breaking the build.
+            - name: Resolve assets cache version
+              id: assets-version
+              run: |
+                  MODELS_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD \
+                    2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
+                  AUDIO_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD \
+                    2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
+                  VERSION="${MODELS_HASH}-${AUDIO_HASH}"
+                  echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+                  echo "Assets cache version: ${VERSION}"
+
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
               with:
@@ -65,7 +74,7 @@ jobs:
                   tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:latest
                   build-args: |
                       NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-                      ASSETS_CACHE_VERSION=${{ github.event.inputs.assets_cache_version || '1' }}
+                      ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
                   # mode=min exports only the final-image layers, not every intermediate
                   # stage. This cuts the cache export from ~3× the 35 GB payload (one copy
                   # per stage under mode=max) down to a single copy.
