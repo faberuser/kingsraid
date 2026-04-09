@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
-import { getData, getJsonDataList, getHeroNamesForVersion, getHeroReleaseOrder } from "@/lib/get-data"
+import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions } from "@/lib/get-data"
 
 // Available hero classes
 const heroClasses = [
@@ -15,38 +15,28 @@ const heroClasses = [
 ]
 
 export default async function HeroesPage() {
-	// Fetch heroes data for all three versions
-	const heroesCbtPhase2 = (await getData("heroes", { dataVersion: "cbt-phase-2" })) as HeroData[]
-	const heroesCbtPhase1 = (await getData("heroes", { dataVersion: "cbt-phase-1" })) as HeroData[]
-	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
-	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
+	// Fetch heroes data for all versions
+	const heroesMap = await fetchAllVersions<HeroData[]>(
+		async (version) => (await getData("heroes", { dataVersion: version })) as HeroData[],
+	)
 
-	// Fetch release order for all three versions
-	const releaseOrderCbtPhase2 = await getHeroReleaseOrder("cbt-phase-2")
-	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
-	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
-	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
+	// Fetch release order for all versions
+	const releaseOrderMap = await fetchAllVersions<Record<string, string>>(
+		async (version) => await getHeroReleaseOrder(version),
+	)
 
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
 
 	// Get hero names for each version
-	const cbtPhase1HeroNames = await getHeroNamesForVersion("cbt-phase-1")
-	const ccbtHeroNames = await getHeroNamesForVersion("ccbt")
+	// const heroNamesMap = await fetchAllVersions<string[]>(async (version) => await getHeroNamesForVersion(version))
 
 	return (
 		<HeroesPageWrapper
-			heroesCbtPhase2={heroesCbtPhase2}
-			heroesCbtPhase1={heroesCbtPhase1}
-			heroesCcbt={heroesCcbt}
-			heroesLegacy={heroesLegacy}
+			heroesMap={heroesMap}
 			heroClasses={heroClasses}
-			releaseOrderCbtPhase2={releaseOrderCbtPhase2}
-			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
-			releaseOrderCcbt={releaseOrderCcbt}
-			releaseOrderLegacy={releaseOrderLegacy}
+			releaseOrderMap={releaseOrderMap}
 			saReverse={saReverse}
-			cbtPhase1HeroNames={cbtPhase1HeroNames}
-			ccbtHeroNames={ccbtHeroNames}
+			// heroNamesMap={heroNamesMap}
 		/>
 	)
 }

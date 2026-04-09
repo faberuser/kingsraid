@@ -102,21 +102,18 @@ export function calculateUsedPoints(perks: SelectedPerks): number {
 	return t1Points + t2Points + t3Points + t5Points
 }
 
-// Version mapping for URL encoding (2 bits = 0-3)
-const VERSION_MAP: Record<string, number> = {
-	"legacy": 0,
-	"ccbt": 1,
-	"cbt-phase-2": 2,
-	"cbt-phase-1": 2,
-}
-const VERSION_REVERSE: Record<number, string> = {
-	0: "legacy",
-	1: "ccbt",
-	2: "cbt-phase-1",
-}
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+
+// Version mapping for URL encoding (3 bits = 0-7)
+
+const reversedVersions = [...DATA_VERSIONS].reverse()
+const VERSION_MAP: Record<string, number> = Object.fromEntries(reversedVersions.map((v, i) => [v, i]))
+const VERSION_REVERSE: Record<number, DataVersion> = Object.fromEntries(
+	reversedVersions.map((v, i) => [i, v as DataVersion]),
+)
 
 // Encode team to URL-safe string (bit-packed format)
-// Header: version(2) + heroCount(4) = 6 bits
+// Header: version(3) + heroCount(4) = 7 bits
 // Per hero: heroIdx(7) + uw(1) + ut(3) + maxPts(2) + t1(5) + t2(5) + t3(8) + t5(2) = 33 bits
 export function encodeTeam(team: TeamMember[], allHeroes: HeroData[] = [], version: string = "legacy"): string {
 	const heroIndex = new Map<string, number>()
@@ -124,8 +121,8 @@ export function encodeTeam(team: TeamMember[], allHeroes: HeroData[] = [], versi
 
 	const writer = new BitWriter()
 
-	// Write version first (2 bits = 0-3)
-	writer.write(VERSION_MAP[version] ?? 0, 2)
+	// Write version first (3 bits = 0-7)
+	writer.write(VERSION_MAP[version] ?? 0, 3)
 
 	// Write number of heroes (4 bits = 0-15, supports up to 15 heroes)
 	const heroCount = team.filter((m) => m.hero !== null).length
@@ -208,8 +205,8 @@ export function decodeTeam(encoded: string, heroes: HeroData[]): DecodeResult | 
 		const reader = new BitReader(encoded)
 		const team: TeamMember[] = []
 
-		// Read version (2 bits)
-		const versionNum = reader.read(2)
+		// Read version (3 bits)
+		const versionNum = reader.read(3)
 		const version = VERSION_REVERSE[versionNum] ?? "legacy"
 
 		// Read hero count (4 bits)

@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import ArtifactPageWrapper from "@/app/artifacts/[...slug]/page-wrapper"
 import { ArtifactData } from "@/model/Artifact"
-import { SlugPageProps, findData, artifactExistsInVersion } from "@/lib/get-data"
+import { SlugPageProps, findData, fetchAllVersions } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 
@@ -55,27 +55,14 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	// Check if artifact exists in CBT Phase 1 and CCBT data and fetch if it does
-	const existsInCbtPhase2 = await artifactExistsInVersion(artifactName, "cbt-phase-2")
-	const existsInCbtPhase1 = await artifactExistsInVersion(artifactName, "cbt-phase-1")
-	const existsInCcbt = await artifactExistsInVersion(artifactName, "ccbt")
+	// Fetch data for all versions
+	const artifactsMap = await fetchAllVersions<ArtifactData | null>(async (version) => {
+		// Optimization: legacy is already fetched
+		if (version === "legacy") return artifactDataLegacy
 
-	const artifactDataCbtPhase2 = existsInCbtPhase2
-		? ((await findData(artifactName, "artifacts", { dataVersion: "cbt-phase-2" })) as ArtifactData | null)
-		: null
-	const artifactDataCbtPhase1 = existsInCbtPhase1
-		? ((await findData(artifactName, "artifacts", { dataVersion: "cbt-phase-1" })) as ArtifactData | null)
-		: null
-	const artifactDataCcbt = existsInCcbt
-		? ((await findData(artifactName, "artifacts", { dataVersion: "ccbt" })) as ArtifactData | null)
-		: null
+		// findData handles gracefully returning null if not found
+		return (await findData(artifactName, "artifacts", { dataVersion: version })) as ArtifactData | null
+	})
 
-	return (
-		<ArtifactPageWrapper
-			artifactDataCbtPhase2={artifactDataCbtPhase2}
-			artifactDataCbtPhase1={artifactDataCbtPhase1}
-			artifactDataCcbt={artifactDataCcbt}
-			artifactDataLegacy={artifactDataLegacy}
-		/>
-	)
+	return <ArtifactPageWrapper artifactsMap={artifactsMap} />
 }

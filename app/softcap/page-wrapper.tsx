@@ -1,9 +1,9 @@
 "use client"
 
 import SoftcapClient from "@/app/softcap/client"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { useDataVersion } from "@/hooks/use-data-version"
-import { useEffect, useMemo } from "react"
+import { DataVersion } from "@/lib/constants"
 
 interface SoftcapData {
 	[statName: string]: {
@@ -25,41 +25,17 @@ interface SoftcapData {
 }
 
 interface SoftcapPageWrapperProps {
-	softcapLegacy: SoftcapData
-	softcapCcbt: SoftcapData
-	softcapCbtPhase2: SoftcapData
-	softcapCbtPhase1: SoftcapData
+	softcapMap: Record<DataVersion, SoftcapData>
 }
 
-export default function SoftcapPageWrapper({
-	softcapLegacy,
-	softcapCcbt,
-	softcapCbtPhase2,
-	softcapCbtPhase1,
-}: SoftcapPageWrapperProps) {
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
+export default function SoftcapPageWrapper({ softcapMap }: SoftcapPageWrapperProps) {
 	const { version: dataVersion } = useDataVersion()
 
 	// Enable version toggle on mount - all versions available
-	useEffect(() => {
-		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
-		setShowToggle(true)
-		return () => setShowToggle(false)
-	}, [setAvailableVersions, setShowToggle])
+	useEnableVersionToggle()
 
 	// Select softcap data based on version
-	const softcapData = useMemo(() => {
-		switch (dataVersion) {
-			case "cbt-phase-2":
-				return softcapCbtPhase2
-			case "cbt-phase-1":
-				return softcapCbtPhase1
-			case "ccbt":
-				return softcapCcbt
-			default:
-				return softcapLegacy
-		}
-	}, [dataVersion, softcapLegacy, softcapCcbt, softcapCbtPhase2, softcapCbtPhase1])
+	const softcapData = softcapMap[dataVersion]
 
 	return <SoftcapClient softcapData={softcapData} />
 }

@@ -12,5 +12,6 @@ export default function Image({ src, ...props }: ImageProps) {
 		src = `${basePath}${src.startsWith("/") ? src : "/" + src}`
 	}
 
+	/* eslint-disable */
 	return <img src={src} {...props} />
 }

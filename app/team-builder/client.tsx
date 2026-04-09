@@ -7,7 +7,8 @@ import { Separator } from "@/components/ui/separator"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Share2, Check, Trash2 } from "lucide-react"
 import { useDataVersion } from "@/hooks/use-data-version"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import Fuse from "fuse.js"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Suspense } from "react"
@@ -24,74 +25,34 @@ import { HeroCard, EmptySlot, HeroSelectDialog } from "@/components/team-builder
 import { ArtifactData } from "@/model/Artifact"
 
 function TeamBuilderContent({
-	heroesLegacy,
-	heroesCcbt,
-	heroesCbtPhase2,
-	heroesCbtPhase1,
+	heroesMap,
 	artifacts,
 	artifactReleaseOrder,
 	classPerks,
 	heroClasses,
-	releaseOrderLegacy,
-	releaseOrderCcbt,
-	releaseOrderCbtPhase2,
-	releaseOrderCbtPhase1,
+	releaseOrderMap,
 }: Omit<TeamBuilderClientProps, "saReverse">) {
 	const { version: dataVersion, setVersionDirect } = useDataVersion()
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
 	const searchParams = useSearchParams()
 	const router = useRouter()
 
 	// Enable version toggle on mount
-	useEffect(() => {
-		setShowToggle(true)
-		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
-		return () => setShowToggle(false)
-	}, [setShowToggle, setAvailableVersions])
+	useEnableVersionToggle()
+
+	// Helper to get heroes by version
+	const getHeroesByVersion = useCallback(
+		(version: DataVersion | string) => {
+			return heroesMap[version as DataVersion] || heroesMap.legacy
+		},
+		[heroesMap],
+	)
 
 	// Get heroes and release order based on data version
-	const heroes = useMemo(() => {
-		switch (dataVersion) {
-			case "cbt-phase-2":
-				return heroesCbtPhase2
-			case "cbt-phase-1":
-				return heroesCbtPhase1
-			case "ccbt":
-				return heroesCcbt
-			default:
-				return heroesLegacy
-		}
-	}, [dataVersion, heroesLegacy, heroesCcbt, heroesCbtPhase2, heroesCbtPhase1])
+	const heroes = useMemo(() => getHeroesByVersion(dataVersion), [dataVersion, getHeroesByVersion])
 
 	const releaseOrder = useMemo(() => {
-		switch (dataVersion) {
-			case "cbt-phase-2":
-				return releaseOrderCbtPhase2
-			case "cbt-phase-1":
-				return releaseOrderCbtPhase1
-			case "ccbt":
-				return releaseOrderCcbt
-			default:
-				return releaseOrderLegacy
-		}
-	}, [dataVersion, releaseOrderLegacy, releaseOrderCcbt, releaseOrderCbtPhase2, releaseOrderCbtPhase1])
-
-	// Helper function to get heroes by version
-	const getHeroesByVersion = useCallback(
-		(version: string) => {
-			switch (version) {
-				case "cbt-phase-2":
-					return heroesCbtPhase2
-				case "cbt-phase-1":
-					return heroesCbtPhase1
-				case "ccbt":
-					return heroesCcbt
-				default:
-					return heroesLegacy
-			}
-		},
-		[heroesLegacy, heroesCcbt, heroesCbtPhase2, heroesCbtPhase1],
-	)
+		return releaseOrderMap[dataVersion] || releaseOrderMap.legacy
+	}, [dataVersion, releaseOrderMap])
 
 	// Initialize team from URL or empty (localStorage loaded in effect below)
 	const [team, setTeam] = useState<TeamMember[]>(() => {
@@ -100,14 +61,7 @@ function TeamBuilderContent({
 		if (encoded) {
 			// Extract version from URL to use correct hero list
 			const urlVersion = extractVersionFromEncoded(encoded) ?? "legacy"
-			const heroesForVersion =
-				urlVersion === "cbt-phase-2"
-					? heroesCbtPhase2
-					: urlVersion === "cbt-phase-1"
-						? heroesCbtPhase1
-						: urlVersion === "ccbt"
-							? heroesCcbt
-							: heroesLegacy
+			const heroesForVersion = getHeroesByVersion(urlVersion)
 			const result = decodeTeam(encoded, heroesForVersion)
 			if (result) {
 				const decodedTeam = result.team
@@ -164,7 +118,7 @@ function TeamBuilderContent({
 			urlHandledRef.current = true
 
 			// Always set version from URL (direct, bypass team check)
-			setVersionDirect(urlVersion as "cbt-phase-1" | "ccbt" | "legacy")
+			setVersionDirect(urlVersion as DataVersion)
 
 			// Re-decode team with correct heroes list to ensure consistency
 			const heroesForVersion = getHeroesByVersion(urlVersion)
@@ -197,7 +151,7 @@ function TeamBuilderContent({
 				const parsed = JSON.parse(saved)
 				// Rehydrate hero and artifact references from their names
 				// Try all hero lists to find matches
-				const allHeroes = [...heroesLegacy, ...heroesCcbt, ...heroesCbtPhase2, ...heroesCbtPhase1]
+				const allHeroes = DATA_VERSIONS.flatMap((v) => heroesMap[v] || [])
 				const rehydrated = parsed.map((member: TeamMember & { heroName?: string; artifactName?: string }) => {
 					let hero = null
 					let artifact = null
@@ -698,34 +652,22 @@ function TeamBuilderContent({
 }
 
 export default function TeamBuilderClient({
-	heroesLegacy,
-	heroesCcbt,
-	heroesCbtPhase2,
-	heroesCbtPhase1,
+	heroesMap,
 	artifacts,
 	artifactReleaseOrder,
 	classPerks,
 	heroClasses,
-	releaseOrderLegacy,
-	releaseOrderCcbt,
-	releaseOrderCbtPhase2,
-	releaseOrderCbtPhase1,
+	releaseOrderMap,
 }: TeamBuilderClientProps) {
 	return (
 		<Suspense>
 			<TeamBuilderContent
-				heroesLegacy={heroesLegacy}
-				heroesCcbt={heroesCcbt}
-				heroesCbtPhase2={heroesCbtPhase2}
-				heroesCbtPhase1={heroesCbtPhase1}
+				heroesMap={heroesMap}
 				artifacts={artifacts}
 				artifactReleaseOrder={artifactReleaseOrder}
 				classPerks={classPerks}
 				heroClasses={heroClasses}
-				releaseOrderLegacy={releaseOrderLegacy}
-				releaseOrderCcbt={releaseOrderCcbt}
-				releaseOrderCbtPhase2={releaseOrderCbtPhase2}
-				releaseOrderCbtPhase1={releaseOrderCbtPhase1}
+				releaseOrderMap={releaseOrderMap}
 			/>
 		</Suspense>
 	)
