@@ -5,14 +5,18 @@ import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 export function InterceptedDialog({ children, href }: { children: React.ReactNode; href: string }) {
 	const router = useRouter()
 	const [open, setOpen] = React.useState(true)
+	const isMobile = useIsMobile()
 
 	React.useEffect(() => {
-		console.log("Modal opened for:", href)
-	}, [href])
+		if (isMobile) {
+			window.location.href = href
+		}
+	}, [isMobile, href])
 
 	const onOpenChange = React.useCallback(
 		(open: boolean) => {
@@ -23,6 +27,10 @@ export function InterceptedDialog({ children, href }: { children: React.ReactNod
 		},
 		[router],
 	)
+
+	if (isMobile) {
+		return null
+	}
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
