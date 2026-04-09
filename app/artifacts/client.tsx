@@ -19,7 +19,7 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [loadingCard, setLoadingCard] = useState<string | null>(null)
+
 	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
 	const [reverseSort, setReverseSort] = useState(true)
 	const [mounted, setMounted] = useState(false)
@@ -164,7 +164,6 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
-						onClick={() => setLoadingCard(artifact.name)}
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2 relative">
 							<CardHeader>
@@ -198,11 +197,6 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 									)}
 								</div>
 							</CardContent>
-							{loadingCard === artifact.name && (
-								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-									<Spinner className="size-8" />
-								</div>
-							)}
 						</Card>
 					</Link>
 				))}

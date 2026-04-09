@@ -69,7 +69,7 @@ export default function HeroClient({
 	// Update URL hash when tab changes
 	const handleTabChange = (value: string) => {
 		setActiveTab(value)
-		window.history.pushState(null, "", `#${value}`)
+		window.history.replaceState(null, "", `#${value}`)
 	}
 
 	const handleNavigate = useCallback(
@@ -100,7 +100,7 @@ export default function HeroClient({
 			if (targetIndex >= slugs.length) targetIndex = 0
 
 			const targetSlug = slugs[targetIndex]
-			router.push(`/heroes/${targetSlug}`)
+			router.replace(`/heroes/${targetSlug}${window.location.hash}`)
 		},
 		[sortedHeroSlugs, heroData.profile.name, router],
 	)
@@ -155,6 +155,7 @@ export default function HeroClient({
 							width="0"
 							height="0"
 							sizes="20vw md:5vw"
+							priority={true}
 							className="w-full h-auto rounded"
 						/>
 					</div>

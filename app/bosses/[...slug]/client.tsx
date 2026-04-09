@@ -52,7 +52,7 @@ export default function BossClient({
 	// Update URL hash when tab changes
 	const handleTabChange = (value: string) => {
 		setActiveTab(value)
-		window.history.pushState(null, "", `#${value}`)
+		window.history.replaceState(null, "", `#${value}`)
 	}
 
 	return (
@@ -68,6 +68,7 @@ export default function BossClient({
 							width="0"
 							height="0"
 							sizes="20vw md:5vw"
+							priority={true}
 							className="w-full h-auto rounded"
 						/>
 					</div>

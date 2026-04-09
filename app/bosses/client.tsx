@@ -23,7 +23,7 @@ interface BossesClientProps {
 export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
-	const [loadingCard, setLoadingCard] = useState<string | null>(null)
+
 	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
 	const [reverseSort, setReverseSort] = useState(true)
 	const [mounted, setMounted] = useState(false)
@@ -232,7 +232,6 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 						key={boss.profile.name}
 						href={`/bosses/${encodeURIComponent(boss.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
 						className="hover:scale-105 transition-transform duration-300"
-						onClick={() => setLoadingCard(boss.profile.name)}
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
 							<CardHeader>
@@ -280,11 +279,6 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 									</div>
 								</div>
 							</CardContent>
-							{loadingCard === boss.profile.name && (
-								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-									<Spinner className="size-8" />
-								</div>
-							)}
 						</Card>
 					</Link>
 				))}

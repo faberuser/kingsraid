@@ -9,6 +9,11 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function HeroesLayout({ children }: { children: React.ReactNode }) {
-	return <>{children}</>
+export default function HeroesLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
+	return (
+		<>
+			{children}
+			{modal}
+		</>
+	)
 }

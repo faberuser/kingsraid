@@ -76,7 +76,7 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 									alt="King's Raid Logo"
 									width={160}
 									height={40}
-									className="h-auto w-full max-w-[160px]"
+									style={{ width: "100%", height: "auto" }}
 								/>
 							)}
 						</Link>
