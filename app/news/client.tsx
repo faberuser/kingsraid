@@ -157,9 +157,9 @@ export function NewsDetailDialog({
 				<div className="space-y-2" dangerouslySetInnerHTML={{ __html: content ?? "" }} />
 
 				<Button asChild>
-					<Link href={news.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+					<Link href={news.url} target="_blank" rel="noopener noreferrer">
+						<ExternalLink className="w-4 h-4 mr-1" />
 						View on Steam
-						<ExternalLink className="w-4 h-4" />
 					</Link>
 				</Button>
 			</DialogContent>

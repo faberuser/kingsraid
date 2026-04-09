@@ -68,7 +68,7 @@ export function InterceptedDialog({ children }: { children: React.ReactNode }) {
 				<DialogDescription className="sr-only">Item Details</DialogDescription>
 				<div className="absolute left-4 top-4 z-50">
 					<Button variant="outline" size="sm" onClick={handleSetFullPage}>
-						<ExternalLink className="mr-2 h-4 w-4" />
+						<ExternalLink className="mr-1 h-4 w-4" />
 						Open Full Page
 					</Button>
 				</div>
