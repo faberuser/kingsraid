@@ -2,6 +2,7 @@ import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
 import { getData, getJsonDataList, getHeroNamesForVersion, getHeroReleaseOrder } from "@/lib/get-data"
 
+// Available hero classes
 const heroClasses = [
 	{ value: "all", name: "All", icon: "All" },
 	{ value: "knight", name: "Knight", icon: "/kingsraid-data/assets/classes/knight.png" },
