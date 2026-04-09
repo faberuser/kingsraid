@@ -1,17 +1,31 @@
 "use client"
 
-import { useState } from "react"
-import { Menu, X, Github } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Menu, X } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { items } from "@/components/sidebar/client-sidebar"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ModeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
+import Image from "@/components/next-image"
+import { useTheme } from "next-themes"
 
 export default function MobileMenu() {
 	const pathname = usePathname()
+	const { resolvedTheme } = useTheme()
 	const [open, setOpen] = useState(false)
+	const [mounted, setMounted] = useState(false)
+
+	useEffect(() => {
+		const timer = setTimeout(() => setMounted(true), 0)
+		return () => clearTimeout(timer)
+	}, [])
+
+	const githubSrc =
+		mounted && resolvedTheme === "dark"
+			? "/images/GitHub_Invertocat_White.svg"
+			: "/images/GitHub_Invertocat_Black.svg"
 
 	return (
 		<DropdownMenu open={open} onOpenChange={setOpen}>
@@ -67,7 +81,15 @@ export default function MobileMenu() {
 					<DropdownMenuItem asChild>
 						<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
 							<Button variant="outline" size="icon" className="bg-background">
-								<Github className="h-[1.2rem] w-[1.2rem]" />
+								{mounted && (
+									<Image
+										src={githubSrc}
+										alt="GitHub Logo"
+										width={20}
+										height={20}
+										className="h-[1.2rem] w-[1.2rem]"
+									/>
+								)}
 								<div className="sr-only">GitHub</div>
 							</Button>
 						</Link>
