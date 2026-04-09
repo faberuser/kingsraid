@@ -246,6 +246,7 @@ export default function Gear({ heroData }: GearProps) {
 											</div>
 										</div>
 
+										{/* SW Uses & Cooldown */}
 										<div className="flex gap-2 text-sm mb-1">
 											<Badge
 												variant="default"
