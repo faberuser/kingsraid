@@ -1,99 +1,86 @@
 name: Build and Push Docker Image (Models and Voices)
 on:
-    push:
-        branches: ["main"]
-    workflow_dispatch:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
-    build:
-        name: Build Docker Image (Models and Voices)
-        runs-on: self-hosted
-        steps:
-            # Only remove dangling (untagged) images so that Docker and BuildKit
-            # keep their layer caches intact between runs.
-            #
-            # DO NOT run `docker builder prune` or `docker system prune -a` here.
-            # Those commands wipe BuildKit's entire content-addressable blob store,
-            # which forces a full ~35 GB re-import from the local cache file on the
-            # very next build — that single re-import is responsible for the majority
-            # of the 2500 s+ "exporting layers / exporting to cache" times.
-            - name: Clean up Docker Resources
-              run: |
-                  docker image prune -f || true
-                  docker images ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid \
-                    --format "{{.ID}} {{.CreatedAt}}" \
-                    | sort -k2 -r \
-                    | tail -n +2 \
-                    | awk '{print $1}' \
-                    | xargs -r docker rmi -f || true
+  build:
+    name: Build Docker Image (Models and Voices)
+    runs-on: self-hosted
+    steps:
+      # Only remove dangling (untagged) images so that Docker and BuildKit
+      # keep their layer caches intact between runs.
+      - name: Clean up Docker Resources
+        run: |
+          docker image prune -f || true
+          docker images ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid \
+            --format "{{.ID}} {{.CreatedAt}}" \
+            | sort -k2 -r \
+            | tail -n +2 \
+            | awk '{print $1}' \
+            | xargs -r docker rmi -f || true
 
-            - name: Checkout
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 1
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-            # Fetch the current HEAD commit hash of each assets repo.
-            # This value is passed to data-stage as ASSETS_CACHE_VERSION so that
-            # BuildKit's layer cache is automatically busted when either repo
-            # changes — without any manual intervention.
-            # If a repo is unreachable the step still succeeds and falls back to
-            # "unknown", which keeps the cache stable rather than breaking the build.
-            - name: Resolve assets cache version
-              id: assets-version
-              run: |
-                  MODELS_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD \
-                    2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
-                  AUDIO_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD \
-                    2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
-                  VERSION="${MODELS_HASH}-${AUDIO_HASH}"
-                  echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-                  echo "Assets cache version: ${VERSION}"
+      # Fetch the current HEAD commit hash of each assets repo.
+      # This value is passed to data-stage as ASSETS_CACHE_VERSION so that
+      # BuildKit's layer cache is automatically busted when either repo
+      # changes — without any manual intervention.
+      # If a repo is unreachable the step still succeeds and falls back to
+      # "unknown", which keeps the cache stable rather than breaking the build.
+      - name: Resolve assets cache version
+        id: assets-version
+        run: |
+          MODELS_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD \
+            2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
+          AUDIO_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD \
+            2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown")
+          VERSION="${MODELS_HASH}-${AUDIO_HASH}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Assets cache version: ${VERSION}"
 
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
-              with:
-                  driver-opts: image=moby/buildkit:latest
-                  buildkitd-flags: --allow-insecure-entitlement security.insecure
-                  buildkitd-config-inline: |
-                      [registry."${{ secrets.REGISTRY }}"]
-                        http = true
-                        insecure = true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: image=moby/buildkit:latest
+          buildkitd-flags: --allow-insecure-entitlement security.insecure
+          buildkitd-config-inline: |
+            [registry."${{ secrets.REGISTRY }}"]
+              http = true
+              insecure = true
 
-            - name: Login to Registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ secrets.REGISTRY }}
-                  username: ${{ secrets.USERNAME }}
-                  password: ${{ secrets.TOKEN }}
+      - name: Login to Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.TOKEN }}
 
-            - name: Build and Push
-              uses: docker/build-push-action@v6
-              with:
-                  context: .
-                  push: true
-                  tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:latest
-                  build-args: |
-                      NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-                      ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
-                  # mode=min exports only the final-image layers, not every intermediate
-                  # stage. This cuts the cache export from ~3× the 35 GB payload (one copy
-                  # per stage under mode=max) down to a single copy.
-                  # Because the local cache uses content-addressed blobs, unchanged layers
-                  # (i.e. the 35 GB models/audio when the data repos haven't changed) are
-                  # skipped on write — the export step only serialises truly new blobs.
-                  cache-from: type=local,src=/tmp/.buildx-cache
-                  cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=min,compression=zstd,compression-level=3
-                  load: false
-                  provenance: false
-                  sbom: false
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:latest
+          build-args: |
+            NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
+            ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max,compression=zstd,compression-level=3
+          load: false
+          provenance: false
+          sbom: false
 
-            - name: Update Portainer Stack
-              run: curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
+      - name: Update Portainer Stack
+        run: curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
 
-            # Atomically replace the old cache directory with the new one so that
-            # stale blobs from previous builds do not accumulate on the NVMe.
-            - name: Move cache
-              run: |
-                  mkdir -p /tmp/.buildx-cache-new
-                  rm -rf /tmp/.buildx-cache
-                  mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+      # Atomically replace the old cache directory with the new one so that
+      # stale blobs from previous builds do not accumulate.
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
