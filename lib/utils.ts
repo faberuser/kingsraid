@@ -14,63 +14,46 @@ export function capitalize(s: string) {
 		.join(" ")
 }
 
+const CLASS_COLOR_TEXT: Record<string, string> = {
+	knight: "text-blue-500",
+	warrior: "text-yellow-900",
+	archer: "text-green-500",
+	mechanic: "text-blue-900",
+	wizard: "text-red-500",
+	assassin: "text-purple-500",
+	priest: "text-blue-200",
+}
+
 export function classColorMapText(className: string) {
-	switch (className.toLowerCase()) {
-		case "knight":
-			return "text-blue-500"
-		case "warrior":
-			return "text-yellow-900"
-		case "archer":
-			return "text-green-500"
-		case "mechanic":
-			return "text-blue-900"
-		case "wizard":
-			return "text-red-500"
-		case "assassin":
-			return "text-purple-500"
-		case "priest":
-			return "text-blue-200"
-	}
+	return CLASS_COLOR_TEXT[className.toLowerCase()]
+}
+
+const CLASS_COLOR_BG: Record<string, string> = {
+	knight: "bg-blue-500/10",
+	warrior: "bg-yellow-900/10",
+	archer: "bg-green-500/10",
+	mechanic: "bg-blue-900/10",
+	wizard: "bg-red-500/10",
+	assassin: "bg-purple-500/10",
+	priest: "bg-blue-200/10",
 }
 
 export function classColorMapBg(className: string) {
-	switch (className.toLowerCase()) {
-		case "knight":
-			return "bg-blue-500/10"
-		case "warrior":
-			return "bg-yellow-900/10"
-		case "archer":
-			return "bg-green-500/10"
-		case "mechanic":
-			return "bg-blue-900/10"
-		case "wizard":
-			return "bg-red-500/10"
-		case "assassin":
-			return "bg-purple-500/10"
-		case "priest":
-			return "bg-blue-200/10"
-	}
+	return CLASS_COLOR_BG[className.toLowerCase()]
+}
+
+const CLASS_COLOR_BADGE: Record<string, string> = {
+	knight: "bg-blue-500",
+	warrior: "bg-yellow-700",
+	archer: "bg-green-500",
+	mechanic: "bg-blue-700",
+	wizard: "bg-red-500",
+	assassin: "bg-purple-500",
+	priest: "bg-blue-300",
 }
 
 export function classColorMapBadge(className: string) {
-	switch (className.toLowerCase()) {
-		case "knight":
-			return "bg-blue-500"
-		case "warrior":
-			return "bg-yellow-700"
-		case "archer":
-			return "bg-green-500"
-		case "mechanic":
-			return "bg-blue-700"
-		case "wizard":
-			return "bg-red-500"
-		case "assassin":
-			return "bg-purple-500"
-		case "priest":
-			return "bg-blue-300"
-		default:
-			return "bg-gray-500"
-	}
+	return CLASS_COLOR_BADGE[className.toLowerCase()] || "bg-gray-500"
 }
 
 /**

@@ -1,5 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import { ArtifactData } from "@/model/Artifact"
+import { DataVersion } from "@/lib/constants"
 
 // Perk costs
 export const PERK_COSTS = {
@@ -37,10 +38,7 @@ export interface TeamMember {
 }
 
 export interface TeamBuilderClientProps {
-	heroesLegacy: HeroData[]
-	heroesCcbt: HeroData[]
-	heroesCbtPhase2: HeroData[]
-	heroesCbtPhase1: HeroData[]
+	heroesMap: Record<DataVersion, HeroData[]>
 	artifacts: ArtifactData[]
 	artifactReleaseOrder: Record<string, string>
 	saReverse: string[]
@@ -53,8 +51,5 @@ export interface TeamBuilderClientProps {
 		name: string
 		icon: string
 	}>
-	releaseOrderLegacy: Record<string, string>
-	releaseOrderCcbt: Record<string, string>
-	releaseOrderCbtPhase2: Record<string, string>
-	releaseOrderCbtPhase1: Record<string, string>
+	releaseOrderMap: Record<DataVersion, Record<string, string>>
 }

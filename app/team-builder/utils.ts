@@ -102,18 +102,15 @@ export function calculateUsedPoints(perks: SelectedPerks): number {
 	return t1Points + t2Points + t3Points + t5Points
 }
 
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+
 // Version mapping for URL encoding (2 bits = 0-3)
-const VERSION_MAP: Record<string, number> = {
-	"legacy": 0,
-	"ccbt": 1,
-	"cbt-phase-2": 2,
-	"cbt-phase-1": 2,
-}
-const VERSION_REVERSE: Record<number, string> = {
-	0: "legacy",
-	1: "ccbt",
-	2: "cbt-phase-1",
-}
+
+const reversedVersions = [...DATA_VERSIONS].reverse()
+const VERSION_MAP: Record<string, number> = Object.fromEntries(reversedVersions.map((v, i) => [v, i]))
+const VERSION_REVERSE: Record<number, DataVersion> = Object.fromEntries(
+	reversedVersions.map((v, i) => [i, v as DataVersion]),
+)
 
 // Encode team to URL-safe string (bit-packed format)
 // Header: version(2) + heroCount(4) = 6 bits

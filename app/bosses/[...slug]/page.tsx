@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import BossPageWrapper from "@/app/bosses/[...slug]/page-wrapper"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, findData, bossExistsInVersion } from "@/lib/get-data"
+import { SlugPageProps, findData, fetchAllVersions } from "@/lib/get-data"
 import { getBossModels } from "@/app/bosses/[...slug]/models/getBossModels"
 import { getBossScenes } from "@/app/bosses/[...slug]/models/getBossScenes"
 
@@ -41,32 +41,30 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	const bossData = (await findData(bossName, "bosses")) as BossData | null
+	const bossDataLegacy = (await findData(bossName, "bosses", { dataVersion: "legacy" })) as BossData | null
 
-	if (!bossData) {
+	if (!bossDataLegacy) {
 		notFound()
 	}
 
-	// Check if boss exists in CBT Phase 1 and CCBT data
-	const existsInCbtPhase2 = await bossExistsInVersion(bossName, "cbt-phase-2")
-	const existsInCbtPhase1 = await bossExistsInVersion(bossName, "cbt-phase-1")
-	const existsInCcbt = await bossExistsInVersion(bossName, "ccbt")
+	// Fetch data for all versions
+	const bossDataMap = await fetchAllVersions<BossData | null>(async (version) => {
+		if (version === "legacy") return bossDataLegacy
+		return (await findData(bossName, "bosses", { dataVersion: version })) as BossData | null
+	})
 
 	// Get boss model data server-side (only if enabled)
-	const bossModels = enableModelsVoices ? await getBossModels(bossData.profile.name) : {}
+	const bossModels = enableModelsVoices ? await getBossModels(bossDataLegacy.profile.name) : {}
 
 	// Get boss scenes server-side (only if enabled)
-	const bossScenes = enableModelsVoices ? await getBossScenes(bossData.profile.name) : []
+	const bossScenes = enableModelsVoices ? await getBossScenes(bossDataLegacy.profile.name) : []
 
 	return (
 		<BossPageWrapper
-			bossData={bossData}
+			bossDataMap={bossDataMap}
 			bossModels={bossModels}
 			bossScenes={bossScenes}
 			enableModelsVoices={enableModelsVoices}
-			existsInCbtPhase2={existsInCbtPhase2}
-			existsInCbtPhase1={existsInCbtPhase1}
-			existsInCcbt={existsInCcbt}
 		/>
 	)
 }

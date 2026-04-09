@@ -1,162 +1,41 @@
 "use client"
 
-import { useMemo, useCallback } from "react"
+import { useCallback } from "react"
 import HeroClient from "@/app/heroes/[...slug]/client"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
-import { DataVersion } from "@/hooks/use-data-version"
+import { DataVersion } from "@/lib/constants"
 import { useCompareMode } from "@/hooks/use-compare-mode"
 import { CompareLayout } from "@/components/compare"
 import { ClassPerksData } from "@/components/heroes/perks"
 
 interface HeroCompareWrapperProps {
-	heroDataCbtPhase2: HeroData | null
-	heroDataCbtPhase1: HeroData | null
-	heroDataCcbt: HeroData | null
-	heroDataLegacy: HeroData
-	costumesCbtPhase2: Costume[]
-	costumesCbtPhase1: Costume[]
-	costumesCcbt: Costume[]
-	costumesLegacy: Costume[]
-	heroModelsCbtPhase2: { [costume: string]: ModelFile[] }
-	heroModelsCbtPhase1: { [costume: string]: ModelFile[] }
-	heroModelsCcbt: { [costume: string]: ModelFile[] }
-	heroModelsLegacy: { [costume: string]: ModelFile[] }
-	voiceFilesCbtPhase2: VoiceFiles
-	voiceFilesCbtPhase1: VoiceFiles
-	voiceFilesCcbt: VoiceFiles
-	voiceFilesLegacy: VoiceFiles
+	heroDataMap: Record<DataVersion, HeroData | null>
+	availableVersions: DataVersion[]
+	currentHeroData: HeroData
+	costumes: Costume[]
+	models: { [costume: string]: ModelFile[] }
+	voiceFiles: VoiceFiles
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
-	classPerksLegacy: ClassPerksData
-	classPerksCbtPhase2: ClassPerksData
-	classPerksCbtPhase1: ClassPerksData
-	classPerksCcbt: ClassPerksData
-	availableVersions: DataVersion[]
-	// Current version data for single view
-	currentHeroData: HeroData
-	currentCostumes: Costume[]
-	currentHeroModels: { [costume: string]: ModelFile[] }
-	currentVoiceFiles: VoiceFiles
-	currentClassPerks: ClassPerksData
+	classPerks: ClassPerksData
 	sortedHeroSlugs: string[]
 }
 
 export default function HeroCompareWrapper({
-	heroDataCbtPhase2,
-	heroDataCbtPhase1,
-	heroDataCcbt,
-	heroDataLegacy,
-	costumesCbtPhase2,
-	costumesCbtPhase1,
-	costumesCcbt,
-	costumesLegacy,
-	heroModelsCbtPhase2,
-	heroModelsCbtPhase1,
-	heroModelsCcbt,
-	heroModelsLegacy,
-	voiceFilesCbtPhase2,
-	voiceFilesCbtPhase1,
-	voiceFilesCcbt,
-	voiceFilesLegacy,
-	availableScenes = [],
-	enableModelsVoices = false,
-	classPerksLegacy,
-	classPerksCbtPhase2,
-	classPerksCbtPhase1,
-	classPerksCcbt,
+	heroDataMap,
 	availableVersions,
 	currentHeroData,
-	currentCostumes,
-	currentHeroModels,
-	currentVoiceFiles,
-	currentClassPerks,
+	costumes,
+	models,
+	voiceFiles,
+	availableScenes = [],
+	enableModelsVoices = false,
+	classPerks,
 	sortedHeroSlugs,
 }: HeroCompareWrapperProps) {
 	const { isCompareMode, isHydrated } = useCompareMode()
-
-	// Map of data by version
-	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
-		() => ({
-			"cbt-phase-2": heroDataCbtPhase2,
-			"cbt-phase-1": heroDataCbtPhase1,
-			"ccbt": heroDataCcbt,
-			"legacy": heroDataLegacy,
-		}),
-		[heroDataCbtPhase2, heroDataCbtPhase1, heroDataCcbt, heroDataLegacy],
-	)
-
-	const costumesMap: Record<DataVersion, Costume[]> = useMemo(
-		() => ({
-			"cbt-phase-2": costumesCbtPhase2,
-			"cbt-phase-1": costumesCbtPhase1,
-			"ccbt": costumesCcbt,
-			"legacy": costumesLegacy,
-		}),
-		[costumesCbtPhase2, costumesCbtPhase1, costumesCcbt, costumesLegacy],
-	)
-
-	const heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }> = useMemo(
-		() => ({
-			"cbt-phase-2": heroModelsCbtPhase2,
-			"cbt-phase-1": heroModelsCbtPhase1,
-			"ccbt": heroModelsCcbt,
-			"legacy": heroModelsLegacy,
-		}),
-		[heroModelsCbtPhase2, heroModelsCbtPhase1, heroModelsCcbt, heroModelsLegacy],
-	)
-
-	const voiceFilesMap: Record<DataVersion, VoiceFiles> = useMemo(
-		() => ({
-			"cbt-phase-2": voiceFilesCbtPhase2,
-			"cbt-phase-1": voiceFilesCbtPhase1,
-			"ccbt": voiceFilesCcbt,
-			"legacy": voiceFilesLegacy,
-		}),
-		[voiceFilesCbtPhase2, voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
-	)
-
-	const classPerksMap: Record<DataVersion, ClassPerksData> = useMemo(
-		() => ({
-			"cbt-phase-2": classPerksCbtPhase2,
-			"cbt-phase-1": classPerksCbtPhase1,
-			"ccbt": classPerksCcbt,
-			"legacy": classPerksLegacy,
-		}),
-		[classPerksCbtPhase2, classPerksCbtPhase1, classPerksCcbt, classPerksLegacy],
-	)
-
-	// Get data for comparison versions with fallbacks
-	const getVersionData = useCallback(
-		(version: DataVersion) => {
-			const heroData = heroDataMap[version] || heroDataLegacy
-			const costumes = costumesMap[version].length > 0 ? costumesMap[version] : costumesLegacy
-			const heroModels =
-				Object.keys(heroModelsMap[version]).length > 0 ? heroModelsMap[version] : heroModelsLegacy
-			const voiceFiles =
-				voiceFilesMap[version].en.length > 0 ||
-				voiceFilesMap[version].jp.length > 0 ||
-				voiceFilesMap[version].kr.length > 0
-					? voiceFilesMap[version]
-					: voiceFilesLegacy
-			const classPerks = classPerksMap[version] || classPerksLegacy
-
-			return { heroData, costumes, heroModels, voiceFiles, classPerks }
-		},
-		[
-			heroDataMap,
-			heroDataLegacy,
-			costumesMap,
-			costumesLegacy,
-			heroModelsMap,
-			heroModelsLegacy,
-			voiceFilesMap,
-			voiceFilesLegacy,
-			classPerksMap,
-			classPerksLegacy,
-		],
-	)
 
 	// Render content for a specific version
 	const renderVersionContent = useCallback(
@@ -164,33 +43,32 @@ export default function HeroCompareWrapper({
 			if (!heroDataMap[version]) {
 				return null
 			}
-			const versionData = getVersionData(version)
 			return (
 				<HeroClient
-					heroData={versionData.heroData}
-					costumes={versionData.costumes}
-					heroModels={versionData.heroModels}
-					voiceFiles={versionData.voiceFiles}
+					heroData={heroDataMap[version]!}
+					costumes={costumes}
+					heroModels={models}
+					voiceFiles={voiceFiles}
 					availableScenes={availableScenes}
 					enableModelsVoices={enableModelsVoices}
-					classPerks={versionData.classPerks}
+					classPerks={classPerks}
 					sortedHeroSlugs={sortedHeroSlugs}
 				/>
 			)
 		},
-		[heroDataMap, getVersionData, availableScenes, enableModelsVoices, sortedHeroSlugs],
+		[heroDataMap, availableScenes, enableModelsVoices, sortedHeroSlugs, costumes, models, voiceFiles, classPerks],
 	)
 
 	if (!isHydrated || !isCompareMode) {
 		return (
 			<HeroClient
 				heroData={currentHeroData}
-				costumes={currentCostumes}
-				heroModels={currentHeroModels}
-				voiceFiles={currentVoiceFiles}
+				costumes={costumes}
+				heroModels={models}
+				voiceFiles={voiceFiles}
 				availableScenes={availableScenes}
 				enableModelsVoices={enableModelsVoices}
-				classPerks={currentClassPerks}
+				classPerks={classPerks}
 				sortedHeroSlugs={sortedHeroSlugs}
 			/>
 		)
@@ -200,12 +78,12 @@ export default function HeroCompareWrapper({
 		<CompareLayout availableVersions={availableVersions} renderContent={renderVersionContent}>
 			<HeroClient
 				heroData={currentHeroData}
-				costumes={currentCostumes}
-				heroModels={currentHeroModels}
-				voiceFiles={currentVoiceFiles}
+				costumes={costumes}
+				heroModels={models}
+				voiceFiles={voiceFiles}
 				availableScenes={availableScenes}
 				enableModelsVoices={enableModelsVoices}
-				classPerks={currentClassPerks}
+				classPerks={classPerks}
 				sortedHeroSlugs={sortedHeroSlugs}
 			/>
 		</CompareLayout>

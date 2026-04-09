@@ -2,60 +2,19 @@
 
 import { ArtifactData } from "@/model/Artifact"
 import ArtifactsClient from "@/app/artifacts/client"
-import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
-import { useEffect, useMemo } from "react"
+import { useDataVersion } from "@/hooks/use-data-version"
+import { DataVersion } from "@/lib/constants"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactsPageWrapperProps {
-	artifactsCbtPhase2: ArtifactData[]
-	artifactsCbtPhase1: ArtifactData[]
-	artifactsCcbt: ArtifactData[]
-	artifactsLegacy: ArtifactData[]
-	releaseOrderCbtPhase2: Record<string, string>
-	releaseOrderCbtPhase1: Record<string, string>
-	releaseOrderCcbt: Record<string, string>
-	releaseOrderLegacy: Record<string, string>
+	artifactsMap: Record<DataVersion, ArtifactData[]>
+	releaseOrderMap: Record<DataVersion, Record<string, string>>
 }
 
-export default function ArtifactsPageWrapper({
-	artifactsCbtPhase2,
-	artifactsCbtPhase1,
-	artifactsCcbt,
-	artifactsLegacy,
-	releaseOrderCbtPhase2,
-	releaseOrderCbtPhase1,
-	releaseOrderCcbt,
-	releaseOrderLegacy,
-}: ArtifactsPageWrapperProps) {
+export default function ArtifactsPageWrapper({ artifactsMap, releaseOrderMap }: ArtifactsPageWrapperProps) {
 	const { version, isHydrated } = useDataVersion()
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-
-	useEffect(() => {
-		setShowToggle(true)
-		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
-		return () => setShowToggle(false)
-	}, [setShowToggle, setAvailableVersions])
-
-	const artifactsMap: Record<DataVersion, ArtifactData[]> = useMemo(
-		() => ({
-			"cbt-phase-2": artifactsCbtPhase2,
-			"cbt-phase-1": artifactsCbtPhase1,
-			"ccbt": artifactsCcbt,
-			"legacy": artifactsLegacy,
-		}),
-		[artifactsCbtPhase2, artifactsCbtPhase1, artifactsCcbt, artifactsLegacy],
-	)
-
-	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
-		() => ({
-			"cbt-phase-2": releaseOrderCbtPhase2,
-			"cbt-phase-1": releaseOrderCbtPhase1,
-			"ccbt": releaseOrderCcbt,
-			"legacy": releaseOrderLegacy,
-		}),
-		[releaseOrderCbtPhase2, releaseOrderCbtPhase1, releaseOrderCcbt, releaseOrderLegacy],
-	)
+	useEnableVersionToggle()
 
 	const artifacts = artifactsMap[version]
 	const releaseOrder = releaseOrderMap[version]

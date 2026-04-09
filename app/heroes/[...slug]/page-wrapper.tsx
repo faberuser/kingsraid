@@ -4,157 +4,51 @@ import HeroCompareWrapper from "@/components/compare/hero-compare-wrapper"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import { VoiceFiles } from "@/components/heroes/voices"
-import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
+import { useDataVersion } from "@/hooks/use-data-version"
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { ClassPerksData } from "@/components/heroes/perks"
 
 interface HeroPageWrapperProps {
-	heroDataCbtPhase2: HeroData | null
-	heroDataCbtPhase1: HeroData | null
-	heroDataCcbt: HeroData | null
-	heroDataLegacy: HeroData
-	costumesCbtPhase2: Costume[]
-	costumesCbtPhase1: Costume[]
-	costumesCcbt: Costume[]
-	costumesLegacy: Costume[]
-	heroModelsCbtPhase2: { [costume: string]: ModelFile[] }
-	heroModelsCbtPhase1: { [costume: string]: ModelFile[] }
-	heroModelsCcbt: { [costume: string]: ModelFile[] }
-	heroModelsLegacy: { [costume: string]: ModelFile[] }
-	voiceFilesCbtPhase2: VoiceFiles
-	voiceFilesCbtPhase1: VoiceFiles
-	voiceFilesCcbt: VoiceFiles
-	voiceFilesLegacy: VoiceFiles
+	heroDataMap: Record<DataVersion, HeroData | null>
+	costumesMap: Record<DataVersion, Costume[]>
+	heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }>
+	voiceFilesMap: Record<DataVersion, VoiceFiles>
 	availableScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
-	classPerksLegacy: ClassPerksData
-	classPerksCbtPhase2: ClassPerksData
-	classPerksCbtPhase1: ClassPerksData
-	classPerksCcbt: ClassPerksData
+	classPerksMap: Record<DataVersion, ClassPerksData>
 	sortedHeroSlugs: string[]
 }
 
 export default function HeroPageWrapper({
-	heroDataCbtPhase2,
-	heroDataCbtPhase1,
-	heroDataCcbt,
-	heroDataLegacy,
-	costumesCbtPhase2,
-	costumesCbtPhase1,
-	costumesCcbt,
-	costumesLegacy,
-	heroModelsCbtPhase2,
-	heroModelsCbtPhase1,
-	heroModelsCcbt,
-	heroModelsLegacy,
-	voiceFilesCbtPhase2,
-	voiceFilesCbtPhase1,
-	voiceFilesCcbt,
-	voiceFilesLegacy,
+	heroDataMap,
+	costumesMap,
+	heroModelsMap,
+	voiceFilesMap,
 	availableScenes = [],
 	enableModelsVoices = false,
-	classPerksLegacy,
-	classPerksCbtPhase2,
-	classPerksCbtPhase1,
-	classPerksCcbt,
+	classPerksMap,
 	sortedHeroSlugs,
 }: HeroPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-
-	// Check which versions have data for this hero
-	const heroExistsInCbtPhase2 = heroDataCbtPhase2 !== null
-	const heroExistsInCbtPhase1 = heroDataCbtPhase1 !== null
-	const heroExistsInCcbt = heroDataCcbt !== null
-
-	// Map of hero data by version
-	const heroDataMap: Record<DataVersion, HeroData | null> = useMemo(
-		() => ({
-			"cbt-phase-2": heroDataCbtPhase2,
-			"cbt-phase-1": heroDataCbtPhase1,
-			"ccbt": heroDataCcbt,
-			"legacy": heroDataLegacy,
-		}),
-		[heroDataCbtPhase2, heroDataCbtPhase1, heroDataCcbt, heroDataLegacy],
-	)
-
-	const costumesMap: Record<DataVersion, Costume[]> = useMemo(
-		() => ({
-			"cbt-phase-2": costumesCbtPhase2,
-			"cbt-phase-1": costumesCbtPhase1,
-			"ccbt": costumesCcbt,
-			"legacy": costumesLegacy,
-		}),
-		[costumesCbtPhase2, costumesCbtPhase1, costumesCcbt, costumesLegacy],
-	)
-
-	const heroModelsMap: Record<DataVersion, { [costume: string]: ModelFile[] }> = useMemo(
-		() => ({
-			"cbt-phase-2": heroModelsCbtPhase2,
-			"cbt-phase-1": heroModelsCbtPhase1,
-			"ccbt": heroModelsCcbt,
-			"legacy": heroModelsLegacy,
-		}),
-		[heroModelsCbtPhase2, heroModelsCbtPhase1, heroModelsCcbt, heroModelsLegacy],
-	)
-
-	const voiceFilesMap: Record<DataVersion, VoiceFiles> = useMemo(
-		() => ({
-			"cbt-phase-2": voiceFilesCbtPhase2,
-			"cbt-phase-1": voiceFilesCbtPhase1,
-			"ccbt": voiceFilesCcbt,
-			"legacy": voiceFilesLegacy,
-		}),
-		[voiceFilesCbtPhase2, voiceFilesCbtPhase1, voiceFilesCcbt, voiceFilesLegacy],
-	)
-
-	const classPerksMap: Record<DataVersion, ClassPerksData> = useMemo(
-		() => ({
-			"cbt-phase-2": classPerksCbtPhase2,
-			"cbt-phase-1": classPerksCbtPhase1,
-			"ccbt": classPerksCcbt,
-			"legacy": classPerksLegacy,
-		}),
-		[classPerksCbtPhase2, classPerksCbtPhase1, classPerksCcbt, classPerksLegacy],
-	)
-
-	// Show toggle only if hero exists in at least one non-legacy version
-	const showVersionToggle = heroExistsInCbtPhase2 || heroExistsInCbtPhase1 || heroExistsInCcbt
 
 	// Determine available versions for this hero
 	const availableVersions = useMemo(() => {
-		const versions: DataVersion[] = []
-		if (heroExistsInCbtPhase2) versions.push("cbt-phase-2")
-		if (heroExistsInCbtPhase1) versions.push("cbt-phase-1")
-		if (heroExistsInCcbt) versions.push("ccbt")
-		versions.push("legacy")
-		return versions
-	}, [heroExistsInCbtPhase2, heroExistsInCbtPhase1, heroExistsInCcbt])
+		return DATA_VERSIONS.filter((v) => heroDataMap[v] !== null)
+	}, [heroDataMap])
 
-	useEffect(() => {
-		setShowToggle(showVersionToggle)
-		setAvailableVersions(availableVersions)
-		return () => setShowToggle(false)
-	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
+	const showVersionToggle = availableVersions.length > 1
+
+	useEnableVersionToggle(availableVersions, showVersionToggle)
 
 	useEffect(() => {
 		// If user selects a version that doesn't have this hero, fallback to another version
-		if (version === "cbt-phase-2" && !heroExistsInCbtPhase2) {
-			if (heroExistsInCbtPhase1) setVersion("cbt-phase-1")
-			else if (heroExistsInCcbt) setVersion("ccbt")
-			else setVersion("legacy")
-		} else if (version === "cbt-phase-1" && !heroExistsInCbtPhase1) {
-			if (heroExistsInCbtPhase2) setVersion("cbt-phase-2")
-			else if (heroExistsInCcbt) setVersion("ccbt")
-			else setVersion("legacy")
-		} else if (version === "ccbt" && !heroExistsInCcbt) {
-			if (heroExistsInCbtPhase2) setVersion("cbt-phase-2")
-			else if (heroExistsInCbtPhase1) setVersion("cbt-phase-1")
-			else setVersion("legacy")
+		if (!heroDataMap[version] && availableVersions.length > 0) {
+			setVersion(availableVersions[0])
 		}
-	}, [version, heroExistsInCbtPhase2, heroExistsInCbtPhase1, heroExistsInCcbt, setVersion])
+	}, [version, heroDataMap, availableVersions, setVersion])
 
 	// Show loading while hydrating
 	if (!isHydrated) {
@@ -166,47 +60,25 @@ export default function HeroPageWrapper({
 	}
 
 	// Get the data for the current version, fallback to legacy if not available
-	const heroData = heroDataMap[version] || heroDataLegacy
-	const costumes = costumesMap[version].length > 0 ? costumesMap[version] : costumesLegacy
-	const heroModels = Object.keys(heroModelsMap[version]).length > 0 ? heroModelsMap[version] : heroModelsLegacy
-	const voiceFiles =
-		voiceFilesMap[version].en.length > 0 ||
-		voiceFilesMap[version].jp.length > 0 ||
-		voiceFilesMap[version].kr.length > 0
-			? voiceFilesMap[version]
-			: voiceFilesLegacy
-	const classPerks = classPerksMap[version] || classPerksLegacy
+	const heroData = heroDataMap[version] || heroDataMap.legacy || heroDataMap[availableVersions[0]]
+	const costumes = costumesMap[version]
+	const heroModels = heroModelsMap[version]
+	const voiceFiles = voiceFilesMap[version]
+	const classPerks = classPerksMap[version]
+
+	if (!heroData) return null
 
 	return (
 		<HeroCompareWrapper
-			heroDataCbtPhase2={heroDataCbtPhase2}
-			heroDataCbtPhase1={heroDataCbtPhase1}
-			heroDataCcbt={heroDataCcbt}
-			heroDataLegacy={heroDataLegacy}
-			costumesCbtPhase2={costumesCbtPhase2}
-			costumesCbtPhase1={costumesCbtPhase1}
-			costumesCcbt={costumesCcbt}
-			costumesLegacy={costumesLegacy}
-			heroModelsCbtPhase2={heroModelsCbtPhase2}
-			heroModelsCbtPhase1={heroModelsCbtPhase1}
-			heroModelsCcbt={heroModelsCcbt}
-			heroModelsLegacy={heroModelsLegacy}
-			voiceFilesCbtPhase2={voiceFilesCbtPhase2}
-			voiceFilesCbtPhase1={voiceFilesCbtPhase1}
-			voiceFilesCcbt={voiceFilesCcbt}
-			voiceFilesLegacy={voiceFilesLegacy}
-			availableScenes={availableScenes}
-			enableModelsVoices={enableModelsVoices}
-			classPerksLegacy={classPerksLegacy}
-			classPerksCbtPhase2={classPerksCbtPhase2}
-			classPerksCbtPhase1={classPerksCbtPhase1}
-			classPerksCcbt={classPerksCcbt}
+			heroDataMap={heroDataMap}
 			availableVersions={availableVersions}
 			currentHeroData={heroData}
-			currentCostumes={costumes}
-			currentHeroModels={heroModels}
-			currentVoiceFiles={voiceFiles}
-			currentClassPerks={classPerks}
+			costumes={costumes}
+			models={heroModels}
+			voiceFiles={voiceFiles}
+			availableScenes={availableScenes}
+			enableModelsVoices={enableModelsVoices}
+			classPerks={classPerks}
 			sortedHeroSlugs={sortedHeroSlugs}
 		/>
 	)
