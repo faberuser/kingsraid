@@ -1,5 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog"
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogClose,
+	DialogDescription,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ZoomIn, ZoomOut, RotateCcw, X, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "@/components/image"
@@ -63,7 +70,7 @@ export default function ImageZoomModal({
 			setPanPosition({ x: 0, y: 0 })
 			onNavigate?.(direction)
 		},
-		[onNavigate]
+		[onNavigate],
 	)
 
 	// Keyboard navigation
@@ -77,7 +84,7 @@ export default function ImageZoomModal({
 				handleNavigate("next")
 			}
 		},
-		[isOpen, showNavigation, onNavigate, canNavigatePrev, canNavigateNext, handleNavigate]
+		[isOpen, showNavigation, onNavigate, canNavigatePrev, canNavigateNext, handleNavigate],
 	)
 
 	// Add keyboard event listener
@@ -121,7 +128,7 @@ export default function ImageZoomModal({
 				return newZoom
 			})
 		},
-		[maxZoomIn, maxZoomOut]
+		[maxZoomIn, maxZoomOut],
 	)
 
 	const handleMouseDown = useCallback(
@@ -132,7 +139,7 @@ export default function ImageZoomModal({
 				setLastPanPosition(panPosition)
 			}
 		},
-		[zoomLevel, panPosition]
+		[zoomLevel, panPosition],
 	)
 
 	const handleMouseMove = useCallback(
@@ -147,7 +154,7 @@ export default function ImageZoomModal({
 				})
 			}
 		},
-		[isDragging, dragStart, lastPanPosition, zoomLevel]
+		[isDragging, dragStart, lastPanPosition, zoomLevel],
 	)
 
 	const handleMouseUp = useCallback(() => {
@@ -163,7 +170,7 @@ export default function ImageZoomModal({
 				setLastPanPosition(panPosition)
 			}
 		},
-		[zoomLevel, panPosition]
+		[zoomLevel, panPosition],
 	)
 
 	const handleTouchMove = useCallback(
@@ -178,7 +185,7 @@ export default function ImageZoomModal({
 				})
 			}
 		},
-		[isDragging, dragStart, lastPanPosition, zoomLevel]
+		[isDragging, dragStart, lastPanPosition, zoomLevel],
 	)
 
 	const handleTouchEnd = useCallback(() => {
@@ -259,7 +266,9 @@ export default function ImageZoomModal({
 						</div>
 					</div>
 				</DialogHeader>
-				<div className="overflow-hidden p-4 pt-2 h-full w-full" ref={imageContainerRef}>
+				<DialogDescription className="sr-only">Image</DialogDescription>
+
+				<div className="overflow-hidden p-4 pt-0 h-full w-full" ref={imageContainerRef}>
 					<div
 						className="flex justify-center items-center h-full w-full"
 						onMouseDown={handleMouseDown}

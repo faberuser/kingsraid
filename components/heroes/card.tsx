@@ -8,13 +8,11 @@ export default function HeroCard({
 	splashart,
 	reverseSA = false,
 	viewMode = "splashart",
-	priority = false, // Add priority prop
 }: {
 	name: string
 	splashart: string
 	reverseSA: boolean
 	viewMode?: ViewMode
-	priority?: boolean
 }) {
 	// Derive icon path from splashart path (replace sa.png with ico.png)
 	const iconPath = splashart.replace(/sa\.png$/, "ico.png")
@@ -36,7 +34,6 @@ export default function HeroCard({
 				width="0"
 				height="0"
 				sizes="40vw md:20vw"
-				priority={priority}
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-transform duration-300`}

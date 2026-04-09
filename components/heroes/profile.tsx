@@ -147,7 +147,6 @@ export default function Profile({ heroData }: ProfileProps) {
 								width="0"
 								height="0"
 								sizes="80vw md:40vw"
-								priority={true}
 								className="w-auto h-full rounded"
 							/>
 							<div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/20 rounded-lg">

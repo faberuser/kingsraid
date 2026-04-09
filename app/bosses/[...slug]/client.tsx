@@ -68,7 +68,6 @@ export default function BossClient({
 							width="0"
 							height="0"
 							sizes="20vw md:5vw"
-							priority={true}
 							className="w-full h-auto rounded"
 						/>
 					</div>

@@ -277,14 +277,13 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 			</div>
 
 			<div className="flex flex-row gap-2 sm:gap-4 flex-wrap w-full justify-center mt-4">
-				{filteredHeroes.map((hero, index) => (
+				{filteredHeroes.map((hero) => (
 					<HeroCard
 						key={hero.profile.name}
 						name={hero.profile.name}
 						splashart={hero.splashart}
 						reverseSA={saReverse.includes(hero.profile.name)}
 						viewMode={viewMode}
-						priority={index < 8} // Load the first 8 images above the fold immediately.
 					/>
 				))}
 			</div>
