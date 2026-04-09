@@ -7,16 +7,25 @@ import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
-export function InterceptedDialog({ children, href }: { children: React.ReactNode; href: string }) {
+export function InterceptedDialog({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
 	const [open, setOpen] = React.useState(true)
+	const [isFullPage, setIsFullPage] = React.useState(false)
 	const isMobile = useIsMobile()
 
+	const shouldRenderFull = isMobile || isFullPage
+
 	React.useEffect(() => {
-		if (isMobile) {
-			window.location.href = href
+		if (shouldRenderFull) {
+			document.body.classList.add("intercepted-mobile-open")
+		} else {
+			document.body.classList.remove("intercepted-mobile-open")
 		}
-	}, [isMobile, href])
+
+		return () => {
+			document.body.classList.remove("intercepted-mobile-open")
+		}
+	}, [shouldRenderFull])
 
 	const onOpenChange = React.useCallback(
 		(open: boolean) => {
@@ -28,8 +37,8 @@ export function InterceptedDialog({ children, href }: { children: React.ReactNod
 		[router],
 	)
 
-	if (isMobile) {
-		return null
+	if (shouldRenderFull) {
+		return <div className="w-full h-full pb-8">{children}</div>
 	}
 
 	return (
@@ -42,8 +51,7 @@ export function InterceptedDialog({ children, href }: { children: React.ReactNod
 						variant="outline"
 						size="sm"
 						onClick={() => {
-							// Using location.href forces a hard reload, bypassing the intercept
-							window.location.href = href
+							setIsFullPage(true)
 						}}
 					>
 						<ExternalLink className="mr-2 h-4 w-4" />
