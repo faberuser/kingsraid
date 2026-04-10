@@ -14,7 +14,7 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Github, Calculator, Users } from "lucide-react"
+import { Home, Newspaper, UserRound, Amphora, ShieldHalf, Calculator, Users } from "lucide-react"
 import Link from "next/link"
 import { ModeToggle } from "@/components/theme-toggle"
 import { usePathname } from "next/navigation"
@@ -59,6 +59,10 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	}, [])
 
 	const logoSrc = mounted && resolvedTheme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
+	const githubSrc =
+		mounted && resolvedTheme === "dark"
+			? "/images/GitHub_Invertocat_White.svg"
+			: "/images/GitHub_Invertocat_Black.svg"
 
 	return (
 		<Sidebar collapsible="icon">
@@ -72,7 +76,7 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 									alt="King's Raid Logo"
 									width={160}
 									height={40}
-									className="h-auto w-full max-w-[160px]"
+									style={{ width: "100%", height: "auto" }}
 								/>
 							)}
 						</Link>
@@ -141,7 +145,15 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 				<ModeToggle />
 				<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
 					<Button variant="outline" size="icon" className="bg-background">
-						<Github className="h-[1.2rem] w-[1.2rem]" />
+						{mounted && (
+							<Image
+								src={githubSrc}
+								alt="GitHub Logo"
+								width={20}
+								height={20}
+								className="h-[1.2rem] w-[1.2rem]"
+							/>
+						)}
 						<div className="sr-only">GitHub</div>
 					</Button>
 				</Link>

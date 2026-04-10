@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef } from "react"
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode, useRef, Fragment } from "react"
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -15,48 +15,34 @@ import {
 const STORAGE_KEY = "dataVersion"
 const TEAM_STORAGE_KEY = "team-builder-team"
 
-export type DataVersion = "cbt-phase-2" | "cbt-phase-1" | "ccbt" | "legacy"
+import { DATA_VERSIONS, DataVersion } from "@/lib/constants"
+import descriptionData from "@/public/kingsraid-data/table-data/description.json"
 
 // Labels for display in UI
-export const DataVersionLabels: Record<DataVersion, string> = {
-	"cbt-phase-2": "CBT Phase 2",
-	"cbt-phase-1": "CBT Phase 1",
-	"ccbt": "CCBT",
-	"legacy": "Legacy",
-}
+export const DataVersionLabels: Record<DataVersion, string> = Object.fromEntries(
+	DATA_VERSIONS.map((v) => [v, descriptionData.data_versions[v].label as string]),
+) as Record<DataVersion, string>
 
 // Descriptions for tooltips
-export const DataVersionDescriptions: Record<DataVersion, ReactNode> = {
-	"cbt-phase-2": (
-		<>
-			Data from Closed Beta Test Phase 2.
-			<br />
-			Costumes, Models, Voices use Legacy.
-		</>
-	),
-	"cbt-phase-1": (
-		<>
-			Data from Closed Beta Test Phase 1.
-			<br />
-			Costumes, Models, Voices use Legacy.
-		</>
-	),
-	"ccbt": (
-		<>
-			Data from Content Creator CBT.
-			<br />
-			Costumes, Models, Voices use Legacy.
-		</>
-	),
-	"legacy": <>Data before Doomsday Patch.</>,
-}
+export const DataVersionDescriptions: Record<DataVersion, ReactNode> = Object.fromEntries(
+	DATA_VERSIONS.map((v) => {
+		const desc = descriptionData.data_versions[v].description as string
+		return [
+			v,
+			<>
+				{desc.split("\n").map((line, i, arr) => (
+					<Fragment key={i}>
+						{line}
+						{i < arr.length - 1 && <br />}
+					</Fragment>
+				))}
+			</>,
+		]
+	}),
+) as Record<DataVersion, ReactNode>
 
 interface DataVersionContextType {
 	version: DataVersion
-	isCbtPhase2: boolean
-	isCbtPhase1: boolean
-	isCcbt: boolean
-	isLegacy: boolean
 	setVersion: (version: DataVersion) => void
 	setVersionDirect: (version: DataVersion) => void // Bypass team check (for URL loading)
 	isHydrated: boolean
@@ -83,8 +69,8 @@ function clearTeamStorage(): void {
 }
 
 export function DataVersionProvider({ children }: { children: ReactNode }) {
-	// Always start with "cbt-phase-2" for SSR consistency (newest data as default)
-	const [version, setVersionState] = useState<DataVersion>("cbt-phase-2")
+	// Always start with the newest data version for SSR consistency
+	const [version, setVersionState] = useState<DataVersion>(DATA_VERSIONS[0])
 	const [mounted, setMounted] = useState(false)
 
 	// Dialog state for team clearing confirmation
@@ -96,13 +82,13 @@ export function DataVersionProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		// eslint-disable-next-line
 		setMounted(true)
-		const stored = localStorage.getItem(STORAGE_KEY)
-		if (stored === "cbt-phase-2" || stored === "cbt-phase-1" || stored === "ccbt" || stored === "legacy") {
-			setVersionState(stored)
+		const stored = localStorage.getItem(STORAGE_KEY) as DataVersion | "new" | "cbt"
+		if (DATA_VERSIONS.includes(stored as DataVersion)) {
+			setVersionState(stored as DataVersion)
 		} else if (stored === "new" || stored === "cbt") {
-			// Migrate old "new" or "cbt" value to "cbt-phase-2"
-			setVersionState("cbt-phase-2")
-			localStorage.setItem(STORAGE_KEY, "cbt-phase-2")
+			// Migrate old "new" or "cbt" value to the newest data version
+			setVersionState(DATA_VERSIONS[0])
+			localStorage.setItem(STORAGE_KEY, DATA_VERSIONS[0])
 		}
 	}, [])
 
@@ -158,11 +144,7 @@ export function DataVersionProvider({ children }: { children: ReactNode }) {
 	}, [])
 
 	const value = {
-		version: mounted ? version : "cbt-phase-2",
-		isCbtPhase2: mounted ? version === "cbt-phase-2" : true,
-		isCbtPhase1: mounted ? version === "cbt-phase-1" : false,
-		isCcbt: mounted ? version === "ccbt" : false,
-		isLegacy: mounted ? version === "legacy" : false,
+		version: mounted ? version : DATA_VERSIONS[0],
 		setVersion,
 		setVersionDirect,
 		isHydrated: mounted,
@@ -196,4 +178,8 @@ export function useDataVersion() {
 		throw new Error("useDataVersion must be used within a DataVersionProvider")
 	}
 	return context
+}
+
+export function selectVersionData<T>(version: DataVersion, dataMap: Record<DataVersion, T>): T {
+	return dataMap[version]
 }

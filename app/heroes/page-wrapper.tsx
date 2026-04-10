@@ -2,70 +2,32 @@
 
 import { HeroData } from "@/model/Hero"
 import HeroesClient from "@/app/heroes/client"
-import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
-import { useEffect, useMemo } from "react"
+import { useDataVersion } from "@/hooks/use-data-version"
+import { DataVersion } from "@/lib/constants"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesPageWrapperProps {
-	heroesCbtPhase2: HeroData[]
-	heroesCbtPhase1: HeroData[]
-	heroesCcbt: HeroData[]
-	heroesLegacy: HeroData[]
+	heroesMap: Record<DataVersion, HeroData[]>
 	heroClasses: Array<{
 		value: string
 		name: string
 		icon: string
 	}>
-	releaseOrderCbtPhase2: Record<string, string>
-	releaseOrderCbtPhase1: Record<string, string>
-	releaseOrderCcbt: Record<string, string>
-	releaseOrderLegacy: Record<string, string>
+	releaseOrderMap: Record<DataVersion, Record<string, string>>
 	saReverse: string[]
-	cbtPhase1HeroNames: string[]
-	ccbtHeroNames: string[]
+	// heroNamesMap: Record<DataVersion, string[]>
 }
 
 export default function HeroesPageWrapper({
-	heroesCbtPhase2,
-	heroesCbtPhase1,
-	heroesCcbt,
-	heroesLegacy,
+	heroesMap,
 	heroClasses,
-	releaseOrderCbtPhase2,
-	releaseOrderCbtPhase1,
-	releaseOrderCcbt,
-	releaseOrderLegacy,
+	releaseOrderMap,
 	saReverse,
+	// heroNamesMap,
 }: HeroesPageWrapperProps) {
 	const { version, isHydrated } = useDataVersion()
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-
-	useEffect(() => {
-		setShowToggle(true)
-		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
-		return () => setShowToggle(false)
-	}, [setShowToggle, setAvailableVersions])
-
-	const heroesMap: Record<DataVersion, HeroData[]> = useMemo(
-		() => ({
-			"cbt-phase-2": heroesCbtPhase2,
-			"cbt-phase-1": heroesCbtPhase1,
-			"ccbt": heroesCcbt,
-			"legacy": heroesLegacy,
-		}),
-		[heroesCbtPhase2, heroesCbtPhase1, heroesCcbt, heroesLegacy],
-	)
-
-	const releaseOrderMap: Record<DataVersion, Record<string, string>> = useMemo(
-		() => ({
-			"cbt-phase-2": releaseOrderCbtPhase2,
-			"cbt-phase-1": releaseOrderCbtPhase1,
-			"ccbt": releaseOrderCcbt,
-			"legacy": releaseOrderLegacy,
-		}),
-		[releaseOrderCbtPhase2, releaseOrderCbtPhase1, releaseOrderCcbt, releaseOrderLegacy],
-	)
+	useEnableVersionToggle()
 
 	const heroes = heroesMap[version]
 	const releaseOrder = releaseOrderMap[version]

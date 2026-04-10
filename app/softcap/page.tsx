@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import SoftcapPageWrapper from "@/app/softcap/page-wrapper"
+import { fetchAllVersions } from "@/lib/get-data"
 
 interface SoftcapData {
 	[statName: string]: {
@@ -31,19 +32,7 @@ async function getSoftcapData(version: string): Promise<SoftcapData> {
 }
 
 export default async function SoftcapPage() {
-	const [softcapLegacy, softcapCcbt, softcapCbtPhase2, softcapCbtPhase1] = await Promise.all([
-		getSoftcapData("legacy"),
-		getSoftcapData("ccbt"),
-		getSoftcapData("cbt-phase-2"),
-		getSoftcapData("cbt-phase-1"),
-	])
+	const softcapMap = await fetchAllVersions<SoftcapData>(async (version) => await getSoftcapData(version))
 
-	return (
-		<SoftcapPageWrapper
-			softcapLegacy={softcapLegacy}
-			softcapCcbt={softcapCcbt}
-			softcapCbtPhase2={softcapCbtPhase2}
-			softcapCbtPhase1={softcapCbtPhase1}
-		/>
-	)
+	return <SoftcapPageWrapper softcapMap={softcapMap} />
 }

@@ -2,7 +2,13 @@ import fs from "fs"
 import path from "path"
 import { HeroData } from "@/model/Hero"
 import { ArtifactData } from "@/model/Artifact"
-import { getData, getJsonDataList, getHeroReleaseOrder, getArtifactReleaseOrder } from "@/lib/get-data"
+import {
+	getData,
+	getJsonDataList,
+	getHeroReleaseOrder,
+	getArtifactReleaseOrder,
+	fetchAllVersions,
+} from "@/lib/get-data"
 import TeamBuilderClient from "@/app/team-builder/client"
 
 const heroClasses = [
@@ -62,20 +68,18 @@ async function getClassPerks(): Promise<{
 
 export default async function TeamBuilderPage() {
 	// Fetch all data versions
-	const heroesLegacy = (await getData("heroes", { dataVersion: "legacy" })) as HeroData[]
-	const heroesCcbt = (await getData("heroes", { dataVersion: "ccbt" })) as HeroData[]
-	const heroesCbtPhase2 = (await getData("heroes", { dataVersion: "cbt-phase-2" })) as HeroData[]
-	const heroesCbtPhase1 = (await getData("heroes", { dataVersion: "cbt-phase-1" })) as HeroData[]
+	const heroesMap = await fetchAllVersions<HeroData[]>(
+		async (version) => (await getData("heroes", { dataVersion: version })) as HeroData[],
+	)
 
 	const artifactsLegacy = (await getData("artifacts", { dataVersion: "legacy" })) as ArtifactData[]
 
 	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
 
 	// Fetch release orders
-	const releaseOrderLegacy = await getHeroReleaseOrder("legacy")
-	const releaseOrderCcbt = await getHeroReleaseOrder("ccbt")
-	const releaseOrderCbtPhase2 = await getHeroReleaseOrder("cbt-phase-2")
-	const releaseOrderCbtPhase1 = await getHeroReleaseOrder("cbt-phase-1")
+	const releaseOrderMap = await fetchAllVersions<Record<string, string>>(
+		async (version) => await getHeroReleaseOrder(version),
+	)
 
 	// Fetch artifact release order (artifacts only exist in legacy)
 	const artifactReleaseOrder = await getArtifactReleaseOrder("legacy")
@@ -84,19 +88,13 @@ export default async function TeamBuilderPage() {
 
 	return (
 		<TeamBuilderClient
-			heroesLegacy={heroesLegacy}
-			heroesCcbt={heroesCcbt}
-			heroesCbtPhase2={heroesCbtPhase2}
-			heroesCbtPhase1={heroesCbtPhase1}
+			heroesMap={heroesMap}
 			artifacts={artifactsLegacy}
 			artifactReleaseOrder={artifactReleaseOrder}
 			saReverse={saReverse}
 			classPerks={classPerks}
 			heroClasses={heroClasses}
-			releaseOrderLegacy={releaseOrderLegacy}
-			releaseOrderCcbt={releaseOrderCcbt}
-			releaseOrderCbtPhase2={releaseOrderCbtPhase2}
-			releaseOrderCbtPhase1={releaseOrderCbtPhase1}
+			releaseOrderMap={releaseOrderMap}
 		/>
 	)
 }

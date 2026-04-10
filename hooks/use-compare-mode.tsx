@@ -1,17 +1,17 @@
 "use client"
 
 import { createContext, useContext, useState, useCallback, ReactNode, useEffect } from "react"
-import { DataVersion } from "@/hooks/use-data-version"
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
 
 const STORAGE_KEY = "compareMode"
 const VERSIONS_KEY = "compareVersions"
 
 // All available versions
-export const ALL_VERSIONS: DataVersion[] = ["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"]
+export const ALL_VERSIONS: DataVersion[] = [...DATA_VERSIONS]
 
 // Validate if a string is a valid DataVersion
 function isValidVersion(version: string): version is DataVersion {
-	return version === "cbt-phase-2" || version === "cbt-phase-1" || version === "ccbt" || version === "legacy"
+	return DATA_VERSIONS.includes(version as DataVersion)
 }
 
 interface CompareModeContextType {
@@ -49,7 +49,7 @@ const CompareModeContext = createContext<CompareModeContextType | undefined>(und
 export function CompareModeProvider({ children }: { children: ReactNode }) {
 	const [isCompareMode, setIsCompareMode] = useState(false)
 	const [syncScroll, setSyncScroll] = useState(true)
-	const [compareVersions, setCompareVersions] = useState<DataVersion[]>(["cbt-phase-2", "legacy"])
+	const [compareVersions, setCompareVersions] = useState<DataVersion[]>(DATA_VERSIONS.slice(0, 2))
 	const [mounted, setMounted] = useState(false)
 
 	// Sync with localStorage after hydration
@@ -180,8 +180,8 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 	)
 
 	// Legacy support - first two versions for backward compatibility
-	const leftVersion = compareVersions[0] || "cbt-phase-2"
-	const rightVersion = compareVersions[1] || "legacy"
+	const leftVersion = compareVersions[0] || DATA_VERSIONS[0]
+	const rightVersion = compareVersions[1] || DATA_VERSIONS[1]
 
 	const setLeftVersion = useCallback(
 		(version: DataVersion) => {
@@ -201,7 +201,7 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		isCompareMode: mounted ? isCompareMode : false,
 		setCompareMode,
 		toggleCompareMode,
-		compareVersions: mounted ? compareVersions : (["cbt-phase-2", "legacy"] as DataVersion[]),
+		compareVersions: mounted ? compareVersions : ([...DATA_VERSIONS].slice(0, 2) as DataVersion[]),
 		addVersion,
 		removeVersion,
 		setVersionAtIndex,
@@ -210,8 +210,8 @@ export function CompareModeProvider({ children }: { children: ReactNode }) {
 		canAddMore,
 		isHydrated: mounted,
 		// Legacy support
-		leftVersion: mounted ? leftVersion : "cbt-phase-2",
-		rightVersion: mounted ? rightVersion : "legacy",
+		leftVersion: mounted ? leftVersion : DATA_VERSIONS[0],
+		rightVersion: mounted ? rightVersion : DATA_VERSIONS[1],
 		setLeftVersion,
 		setRightVersion,
 		syncScroll,

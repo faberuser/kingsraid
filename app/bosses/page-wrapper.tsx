@@ -2,50 +2,25 @@
 
 import { BossData } from "@/model/Boss"
 import BossesClient from "@/app/bosses/client"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { useDataVersion } from "@/hooks/use-data-version"
-import { useEffect, useMemo } from "react"
+import { DataVersion } from "@/lib/constants"
 
 interface BossesPageWrapperProps {
-	bossesLegacy: BossData[]
-	bossesCcbt: BossData[]
-	bossesCbtPhase2: BossData[]
-	bossesCbtPhase1: BossData[]
+	bossesMap: Record<DataVersion, BossData[]>
 	bossTypeMap: Record<string, string>
-	releaseOrder: Record<string, string>
+	releaseOrderMap: Record<DataVersion, Record<string, string>>
 }
 
-export default function BossesPageWrapper({
-	bossesLegacy,
-	bossesCcbt,
-	bossesCbtPhase2,
-	bossesCbtPhase1,
-	bossTypeMap,
-	releaseOrder,
-}: BossesPageWrapperProps) {
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
+export default function BossesPageWrapper({ bossesMap, bossTypeMap, releaseOrderMap }: BossesPageWrapperProps) {
 	const { version: dataVersion } = useDataVersion()
 
 	// Enable version toggle on mount - all versions available
-	useEffect(() => {
-		setAvailableVersions(["cbt-phase-2", "cbt-phase-1", "ccbt", "legacy"])
-		setShowToggle(true)
-		return () => setShowToggle(false)
-	}, [setAvailableVersions, setShowToggle])
+	useEnableVersionToggle()
 
 	// Select bosses data based on version
-	const bosses = useMemo(() => {
-		switch (dataVersion) {
-			case "cbt-phase-2":
-				return bossesCbtPhase2
-			case "cbt-phase-1":
-				return bossesCbtPhase1
-			case "ccbt":
-				return bossesCcbt
-			default:
-				return bossesLegacy
-		}
-	}, [dataVersion, bossesLegacy, bossesCcbt, bossesCbtPhase2, bossesCbtPhase1])
+	const bosses = bossesMap[dataVersion] || bossesMap["legacy"] || []
+	const releaseOrder = releaseOrderMap[dataVersion] || releaseOrderMap["legacy"] || {}
 
 	return <BossesClient bosses={bosses} bossTypeMap={bossTypeMap} releaseOrder={releaseOrder} />
 }

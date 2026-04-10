@@ -2,78 +2,37 @@
 
 import ArtifactCompareWrapper from "@/components/compare/artifact-compare-wrapper"
 import { ArtifactData } from "@/model/Artifact"
-import { useDataVersion, DataVersion } from "@/hooks/use-data-version"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
+import { useDataVersion } from "@/hooks/use-data-version"
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactPageWrapperProps {
-	artifactDataCbtPhase2: ArtifactData | null
-	artifactDataCbtPhase1: ArtifactData | null
-	artifactDataCcbt: ArtifactData | null
-	artifactDataLegacy: ArtifactData
+	artifactsMap: Record<DataVersion, ArtifactData | null>
 }
 
-export default function ArtifactPageWrapper({
-	artifactDataCbtPhase2,
-	artifactDataCbtPhase1,
-	artifactDataCcbt,
-	artifactDataLegacy,
-}: ArtifactPageWrapperProps) {
+export default function ArtifactPageWrapper({ artifactsMap }: ArtifactPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-
-	// Check which versions have data for this artifact
-	const artifactExistsInCbtPhase2 = artifactDataCbtPhase2 !== null
-	const artifactExistsInCbtPhase1 = artifactDataCbtPhase1 !== null
-	const artifactExistsInCcbt = artifactDataCcbt !== null
 
 	// Map of artifact data by version
-	const artifactDataMap: Record<DataVersion, ArtifactData | null> = useMemo(
-		() => ({
-			"cbt-phase-2": artifactDataCbtPhase2,
-			"cbt-phase-1": artifactDataCbtPhase1,
-			"ccbt": artifactDataCcbt,
-			"legacy": artifactDataLegacy,
-		}),
-		[artifactDataCbtPhase2, artifactDataCbtPhase1, artifactDataCcbt, artifactDataLegacy],
-	)
-
-	// Show toggle only if artifact exists in at least one non-legacy version
-	const showVersionToggle = artifactExistsInCbtPhase2 || artifactExistsInCbtPhase1 || artifactExistsInCcbt
+	const artifactDataMap = artifactsMap
 
 	// Determine available versions for this artifact
 	const availableVersions = useMemo(() => {
-		const versions: DataVersion[] = []
-		if (artifactExistsInCbtPhase2) versions.push("cbt-phase-2")
-		if (artifactExistsInCbtPhase1) versions.push("cbt-phase-1")
-		if (artifactExistsInCcbt) versions.push("ccbt")
-		versions.push("legacy")
-		return versions
-	}, [artifactExistsInCbtPhase2, artifactExistsInCbtPhase1, artifactExistsInCcbt])
+		return DATA_VERSIONS.filter((v) => artifactDataMap[v] !== null)
+	}, [artifactDataMap])
+
+	const showVersionToggle = availableVersions.length > 1
+
+	useEnableVersionToggle(availableVersions, showVersionToggle)
 
 	useEffect(() => {
-		setShowToggle(showVersionToggle)
-		setAvailableVersions(availableVersions)
-		return () => setShowToggle(false)
-	}, [showVersionToggle, setShowToggle, setAvailableVersions, availableVersions])
-
-	useEffect(() => {
-		// If user selects a version that doesn't have this artifact, fallback to another version
-		if (version === "cbt-phase-2" && !artifactExistsInCbtPhase2) {
-			if (artifactExistsInCbtPhase1) setVersion("cbt-phase-1")
-			else if (artifactExistsInCcbt) setVersion("ccbt")
-			else setVersion("legacy")
-		} else if (version === "cbt-phase-1" && !artifactExistsInCbtPhase1) {
-			if (artifactExistsInCbtPhase2) setVersion("cbt-phase-2")
-			else if (artifactExistsInCcbt) setVersion("ccbt")
-			else setVersion("legacy")
-		} else if (version === "ccbt" && !artifactExistsInCcbt) {
-			if (artifactExistsInCbtPhase2) setVersion("cbt-phase-2")
-			else if (artifactExistsInCbtPhase1) setVersion("cbt-phase-1")
-			else setVersion("legacy")
+		// If user selects a version that doesn't have this artifact, fallback to first available
+		if (!artifactDataMap[version] && availableVersions.length > 0) {
+			setVersion(availableVersions[0])
 		}
-	}, [version, artifactExistsInCbtPhase2, artifactExistsInCbtPhase1, artifactExistsInCcbt, setVersion])
+	}, [version, artifactDataMap, availableVersions, setVersion])
 
 	// Show loading while hydrating
 	if (!isHydrated) {
@@ -84,15 +43,14 @@ export default function ArtifactPageWrapper({
 		)
 	}
 
-	// Get the data for the current version, fallback to legacy if not available
-	const artifactData = artifactDataMap[version] || artifactDataLegacy
+	// Get the data for the current version, fallback to legacy if not available, or first available
+	const artifactData = artifactDataMap[version] || artifactDataMap.legacy || artifactDataMap[availableVersions[0]]
+
+	if (!artifactData) return null
 
 	return (
 		<ArtifactCompareWrapper
-			artifactDataCbtPhase2={artifactDataCbtPhase2}
-			artifactDataCbtPhase1={artifactDataCbtPhase1}
-			artifactDataCcbt={artifactDataCcbt}
-			artifactDataLegacy={artifactDataLegacy}
+			artifactsMap={artifactDataMap}
 			availableVersions={availableVersions}
 			currentArtifactData={artifactData}
 		/>

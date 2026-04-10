@@ -3,51 +3,43 @@
 import BossClient from "@/app/bosses/[...slug]/client"
 import { BossData } from "@/model/Boss"
 import { ModelFile } from "@/model/Hero_Model"
-import { useHeroToggle } from "@/contexts/version-toggle-context"
-import { useEffect, useMemo } from "react"
-import { DataVersion } from "@/hooks/use-data-version"
+import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
+import { useMemo } from "react"
+import { useDataVersion } from "@/hooks/use-data-version"
+import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
 
 // Boss models are now organized by variant (similar to hero costumes)
 type BossModelData = Record<string, ModelFile[]>
 
 interface BossPageWrapperProps {
-	bossData: BossData
+	bossDataMap: Record<DataVersion, BossData | null>
 	bossModels?: BossModelData
 	bossScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
-	existsInCbtPhase2?: boolean
-	existsInCbtPhase1?: boolean
-	existsInCcbt?: boolean
 }
 
 export default function BossPageWrapper({
-	bossData,
+	bossDataMap,
 	bossModels,
 	bossScenes = [],
 	enableModelsVoices = false,
-	existsInCbtPhase2 = false,
-	existsInCbtPhase1 = false,
-	existsInCcbt = false,
 }: BossPageWrapperProps) {
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
+	const { version } = useDataVersion()
+
+	// Determine available versions for this boss
+	const availableVersions = useMemo(() => {
+		return DATA_VERSIONS.filter((v) => bossDataMap[v] !== null)
+	}, [bossDataMap])
 
 	// Show toggle only if boss exists in at least one non-legacy version
-	const showVersionToggle = existsInCbtPhase2 || existsInCbtPhase1 || existsInCcbt // Determine available versions for this boss
-	const availableVersions = useMemo(() => {
-		const versions: DataVersion[] = []
-		if (existsInCbtPhase2) versions.push("cbt-phase-2")
-		if (existsInCbtPhase1) versions.push("cbt-phase-1")
-		if (existsInCcbt) versions.push("ccbt")
-		versions.push("legacy")
-		return versions
-	}, [existsInCbtPhase2, existsInCbtPhase1, existsInCcbt])
+	const showVersionToggle = availableVersions.length > 1
 
-	// Enable version toggle on mount - only if boss exists in other versions
-	useEffect(() => {
-		setAvailableVersions(availableVersions)
-		setShowToggle(showVersionToggle)
-		return () => setShowToggle(false)
-	}, [setAvailableVersions, setShowToggle, availableVersions, showVersionToggle])
+	// Enable version toggle on mount
+	useEnableVersionToggle(availableVersions, showVersionToggle)
+
+	const bossData = bossDataMap[version] || bossDataMap.legacy || bossDataMap[availableVersions[0]]
+
+	if (!bossData) return null
 
 	return (
 		<BossClient

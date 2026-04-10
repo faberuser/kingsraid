@@ -3,7 +3,8 @@
 import { ArrowLeftRight, Plus, X, Link, Unlink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DataVersion, DataVersionLabels } from "@/hooks/use-data-version"
+import { DataVersionLabels } from "@/hooks/use-data-version"
+import { DataVersion } from "@/lib/constants"
 import { useCompareMode } from "@/hooks/use-compare-mode"
 import { MobileTooltip } from "@/components/mobile-tooltip"
 

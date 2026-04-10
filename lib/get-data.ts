@@ -4,7 +4,7 @@ import { capitalize } from "@/lib/utils"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
 import { ArtifactData } from "@/model/Artifact"
-import { DataVersion } from "@/hooks/use-data-version"
+import { DATA_VERSIONS, DataVersion } from "@/lib/constants"
 
 export interface SlugPageProps {
 	params: Promise<{
@@ -14,99 +14,10 @@ export interface SlugPageProps {
 
 type DataItem = HeroData | BossData | ArtifactData
 
-// Map version to folder path for heroes
-function getHeroFolderForVersion(version: DataVersion): string {
-	switch (version) {
-		case "cbt-phase-2":
-			return "cbt-phase-2/heroes"
-		case "cbt-phase-2":
-			return "cbt-phase-2/heroes"
-		case "cbt-phase-2":
-			return "cbt-phase-2/heroes"
-		case "cbt-phase-1":
-			return "cbt-phase-1/heroes"
-		case "ccbt":
-			return "ccbt/heroes"
-		case "legacy":
-		default:
-			return "legacy/heroes"
-	}
-}
-
-// Map version to file path for artifacts
-function getArtifactFileForVersion(version: DataVersion): string {
-	switch (version) {
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifacts.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifacts.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifacts.json"
-		case "cbt-phase-1":
-			return "cbt-phase-1/artifacts.json"
-		case "ccbt":
-			return "ccbt/artifacts.json"
-		case "legacy":
-		default:
-			return "legacy/artifacts.json"
-	}
-}
-
-// Map version to file path for hero release order
-function getHeroReleaseOrderForVersion(version: DataVersion): string {
-	switch (version) {
-		case "cbt-phase-2":
-			return "cbt-phase-2/hero_release_order.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/hero_release_order.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/hero_release_order.json"
-		case "cbt-phase-1":
-			return "cbt-phase-1/hero_release_order.json"
-		case "ccbt":
-			return "ccbt/hero_release_order.json"
-		case "legacy":
-		default:
-			return "legacy/hero_release_order.json"
-	}
-}
-
-// Map version to file path for artifact release order
-function getArtifactReleaseOrderForVersion(version: DataVersion): string {
-	switch (version) {
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifact_release_order.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifact_release_order.json"
-		case "cbt-phase-2":
-			return "cbt-phase-2/artifact_release_order.json"
-		case "cbt-phase-1":
-			return "cbt-phase-1/artifact_release_order.json"
-		case "ccbt":
-			return "ccbt/artifact_release_order.json"
-		case "legacy":
-		default:
-			return "legacy/artifact_release_order.json"
-	}
-}
-
-// Map version to folder path for bosses
-function getBossFolderForVersion(version: DataVersion): string {
-	switch (version) {
-		case "cbt-phase-2":
-			return "cbt-phase-2/bosses"
-		case "cbt-phase-2":
-			return "cbt-phase-2/bosses"
-		case "cbt-phase-2":
-			return "cbt-phase-2/bosses"
-		case "cbt-phase-1":
-			return "cbt-phase-1/bosses"
-		case "ccbt":
-			return "ccbt/bosses"
-		case "legacy":
-		default:
-			return "legacy/bosses"
-	}
+// Map version to specific files/folders
+function getSourcePathForVersion(version: DataVersion, source: string): string {
+	const currentVersion = version || "legacy"
+	return `${currentVersion}/${source}`
 }
 
 // Read and parse JSON files
@@ -164,11 +75,11 @@ export async function getData(
 
 	// Apply version-specific paths for different data types
 	if (source === "heroes") {
-		actualSource = getHeroFolderForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "heroes")
 	} else if (source === "artifacts" || source === "artifacts.json") {
-		actualSource = getArtifactFileForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "artifacts.json")
 	} else if (source === "bosses") {
-		actualSource = getBossFolderForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "bosses")
 	}
 
 	const fullPath = buildPath("table-data", actualSource)
@@ -218,11 +129,11 @@ export async function findData(
 
 	// Apply version-specific paths for different data types
 	if (source === "heroes") {
-		actualSource = getHeroFolderForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "heroes")
 	} else if (source === "artifacts" || source === "artifacts.json") {
-		actualSource = getArtifactFileForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "artifacts.json")
 	} else if (source === "bosses") {
-		actualSource = getBossFolderForVersion(options.dataVersion ?? "legacy")
+		actualSource = getSourcePathForVersion(options.dataVersion || "legacy", "bosses")
 	}
 
 	const fullPath = buildPath("table-data", actualSource)
@@ -261,14 +172,14 @@ export async function findData(
 export async function heroExistsInVersion(heroName: string, version: DataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(heroName).toLowerCase().replace(/-/g, " ")
 	const capitalizedName = capitalize(normalizedName)
-	const folder = getHeroFolderForVersion(version)
+	const folder = getSourcePathForVersion(version, "heroes")
 	const filePath = buildPath("table-data", folder, `${capitalizedName}.json`)
 	return fs.existsSync(filePath)
 }
 
 // Get list of heroes that exist in a specific version's data folder
 export async function getHeroNamesForVersion(version: DataVersion): Promise<string[]> {
-	const folder = getHeroFolderForVersion(version)
+	const folder = getSourcePathForVersion(version, "heroes")
 	const heroesPath = buildPath("table-data", folder)
 
 	if (!fs.existsSync(heroesPath)) {
@@ -282,7 +193,7 @@ export async function getHeroNamesForVersion(version: DataVersion): Promise<stri
 // Check if an artifact exists in a specific version's data
 export async function artifactExistsInVersion(artifactName: string, version: DataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(artifactName).toLowerCase().replace(/-/g, " ")
-	const artifactFile = getArtifactFileForVersion(version)
+	const artifactFile = getSourcePathForVersion(version, "artifacts.json")
 	const filePath = buildPath("table-data", artifactFile)
 
 	const data = await readJsonFile<ArtifactData[]>(filePath)
@@ -299,14 +210,14 @@ export async function artifactExistsInVersion(artifactName: string, version: Dat
 export async function bossExistsInVersion(bossName: string, version: DataVersion): Promise<boolean> {
 	const normalizedName = decodeURIComponent(bossName).toLowerCase().replace(/-/g, " ")
 	const capitalizedName = capitalize(normalizedName)
-	const folder = getBossFolderForVersion(version)
+	const folder = getSourcePathForVersion(version, "bosses")
 	const filePath = buildPath("table-data", folder, `${capitalizedName}.json`)
 	return fs.existsSync(filePath)
 }
 
 // Get list of artifact names that exist in a specific version's data
 export async function getArtifactNamesForVersion(version: DataVersion): Promise<string[]> {
-	const artifactFile = getArtifactFileForVersion(version)
+	const artifactFile = getSourcePathForVersion(version, "artifacts.json")
 	const filePath = buildPath("table-data", artifactFile)
 
 	const data = await readJsonFile<ArtifactData[]>(filePath)
@@ -317,7 +228,7 @@ export async function getArtifactNamesForVersion(version: DataVersion): Promise<
 
 // Get hero release order for a specific version
 export async function getHeroReleaseOrder(version: DataVersion): Promise<Record<string, string>> {
-	const releaseOrderFile = getHeroReleaseOrderForVersion(version)
+	const releaseOrderFile = getSourcePathForVersion(version, "hero_release_order.json")
 	const filePath = buildPath("table-data", releaseOrderFile)
 	const data = await readJsonFile<Record<string, string>>(filePath)
 	return data ?? {}
@@ -325,18 +236,19 @@ export async function getHeroReleaseOrder(version: DataVersion): Promise<Record<
 
 // Get artifact release order for a specific version
 export async function getArtifactReleaseOrder(version: DataVersion): Promise<Record<string, string>> {
-	const releaseOrderFile = getArtifactReleaseOrderForVersion(version)
+	const releaseOrderFile = getSourcePathForVersion(version, "artifact_release_order.json")
 	const filePath = buildPath("table-data", releaseOrderFile)
 	const data = await readJsonFile<Record<string, string>>(filePath)
 	return data ?? {}
 }
 
-// Legacy function for backward compatibility - check if hero exists in CBT data
-export async function heroExistsInNewData(heroName: string): Promise<boolean> {
-	return heroExistsInVersion(heroName, "cbt-phase-2")
-}
-
-// Legacy function for backward compatibility - get CBT hero names
-export async function getNewDataHeroNames(): Promise<string[]> {
-	return getHeroNamesForVersion("cbt-phase-2")
+export async function fetchAllVersions<T>(
+	fetcher: (version: DataVersion) => Promise<T>,
+): Promise<Record<DataVersion, T>> {
+	const entries = await Promise.all(
+		DATA_VERSIONS.map(async (version) => {
+			return [version, await fetcher(version)] as const
+		}),
+	)
+	return Object.fromEntries(entries) as Record<DataVersion, T>
 }

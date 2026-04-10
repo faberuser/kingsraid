@@ -2,14 +2,13 @@ import fs from "fs"
 import path from "path"
 import { notFound } from "next/navigation"
 import HeroPageWrapper from "@/app/heroes/[...slug]/page-wrapper"
-import { SlugPageProps, findData, heroExistsInVersion } from "@/lib/get-data"
+import { SlugPageProps, findData, fetchAllVersions, getHeroNamesForVersion } from "@/lib/get-data"
 import { HeroData } from "@/model/Hero"
 import { getCostumeData } from "@/app/heroes/[...slug]/models/getCostumes"
 import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
 import { getVoiceFiles } from "@/app/heroes/[...slug]/models/getVoices"
 import { getAvailableScenes } from "@/app/heroes/[...slug]/models/getScenes"
 import { ClassPerksData } from "@/components/heroes/perks"
-import { getHeroNamesForVersion } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 const enableModelsVoices = process.env.NEXT_PUBLIC_ENABLE_MODELS_VOICES === "true"
@@ -85,58 +84,39 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		notFound()
 	}
 
-	// Check if hero exists in CBT Phase 1 and CCBT data and fetch if it does
-	const existsInCbtPhase2 = await heroExistsInVersion(heroName, "cbt-phase-2")
-	const existsInCbtPhase1 = await heroExistsInVersion(heroName, "cbt-phase-1")
-	const existsInCcbt = await heroExistsInVersion(heroName, "ccbt")
-
-	const heroDataCbtPhase2 = existsInCbtPhase2
-		? ((await findData(heroName, "heroes", { dataVersion: "cbt-phase-2" })) as HeroData | null)
-		: null
-	const heroDataCbtPhase1 = existsInCbtPhase1
-		? ((await findData(heroName, "heroes", { dataVersion: "cbt-phase-1" })) as HeroData | null)
-		: null
-	const heroDataCcbt = existsInCcbt
-		? ((await findData(heroName, "heroes", { dataVersion: "ccbt" })) as HeroData | null)
-		: null
+	// Fetch data for all versions
+	const heroDataMap = await fetchAllVersions<HeroData | null>(async (version) => {
+		if (version === "legacy") return heroDataLegacy
+		return (await findData(heroName, "heroes", { dataVersion: version })) as HeroData | null
+	})
 
 	// Get costume data server-side for all versions
-	const costumesLegacy = await getCostumeData(heroDataLegacy.costumes)
-	const costumesCbtPhase2 = heroDataCbtPhase2 ? await getCostumeData(heroDataCbtPhase2.costumes) : []
-	const costumesCbtPhase1 = heroDataCbtPhase1 ? await getCostumeData(heroDataCbtPhase1.costumes) : []
-	const costumesCcbt = heroDataCcbt ? await getCostumeData(heroDataCcbt.costumes) : []
+	const costumesMap = await fetchAllVersions(async (version) => {
+		const data = heroDataMap[version]
+		return data ? await getCostumeData(data.costumes) : []
+	})
 
 	// Get model data server-side (only if enabled)
-	const heroModelsLegacy = enableModelsVoices ? await getHeroModels(heroDataLegacy.profile.name) : {}
-	const heroModelsCbtPhase2 =
-		enableModelsVoices && heroDataCbtPhase2 ? await getHeroModels(heroDataCbtPhase2.profile.name) : {}
-	const heroModelsCbtPhase1 =
-		enableModelsVoices && heroDataCbtPhase1 ? await getHeroModels(heroDataCbtPhase1.profile.name) : {}
-	const heroModelsCcbt = enableModelsVoices && heroDataCcbt ? await getHeroModels(heroDataCcbt.profile.name) : {}
+	const heroModelsMap = await fetchAllVersions(async (version) => {
+		const data = heroDataMap[version]
+		return enableModelsVoices && data ? await getHeroModels(data.profile.name) : {}
+	})
 
 	// Get voice files server-side (only if enabled)
-	const voiceFilesLegacy = enableModelsVoices
-		? await getVoiceFiles(heroDataLegacy.profile.name)
-		: { en: [], jp: [], kr: [] }
-	const voiceFilesCbtPhase2 =
-		enableModelsVoices && heroDataCbtPhase2
-			? await getVoiceFiles(heroDataCbtPhase2.profile.name)
-			: { en: [], jp: [], kr: [] }
-	const voiceFilesCbtPhase1 =
-		enableModelsVoices && heroDataCbtPhase1
-			? await getVoiceFiles(heroDataCbtPhase1.profile.name)
-			: { en: [], jp: [], kr: [] }
-	const voiceFilesCcbt =
-		enableModelsVoices && heroDataCcbt ? await getVoiceFiles(heroDataCcbt.profile.name) : { en: [], jp: [], kr: [] }
-
-	// Get available scenes server-side (only if enabled)
-	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
+	const voiceFilesMap = await fetchAllVersions(async (version) => {
+		const data = heroDataMap[version]
+		return enableModelsVoices && data ? await getVoiceFiles(data.profile.name) : { en: [], jp: [], kr: [] }
+	})
 
 	// Get class perks for all versions
 	const classPerksLegacy = await getClassPerks("legacy")
-	const classPerksCbtPhase2 = existsInCbtPhase2 ? await getClassPerks("cbt-phase-2") : classPerksLegacy
-	const classPerksCbtPhase1 = existsInCbtPhase1 ? await getClassPerks("cbt-phase-1") : classPerksLegacy
-	const classPerksCcbt = existsInCcbt ? await getClassPerks("ccbt") : classPerksLegacy
+	const classPerksMap = await fetchAllVersions(async (version) => {
+		if (version === "legacy") return classPerksLegacy
+		return heroDataMap[version] ? await getClassPerks(version) : classPerksLegacy
+	})
+
+	// Get available scenes server-side (only if enabled)
+	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
 
 	// Get ordered list of all hero slugs for navigation
 	const allLegacyHeroes = await getHeroNamesForVersion("legacy")
@@ -146,28 +126,13 @@ export default async function SlugPage({ params }: SlugPageProps) {
 
 	return (
 		<HeroPageWrapper
-			heroDataCbtPhase2={heroDataCbtPhase2}
-			heroDataCbtPhase1={heroDataCbtPhase1}
-			heroDataCcbt={heroDataCcbt}
-			heroDataLegacy={heroDataLegacy}
-			costumesCbtPhase2={costumesCbtPhase2}
-			costumesCbtPhase1={costumesCbtPhase1}
-			costumesCcbt={costumesCcbt}
-			costumesLegacy={costumesLegacy}
-			heroModelsCbtPhase2={heroModelsCbtPhase2}
-			heroModelsCbtPhase1={heroModelsCbtPhase1}
-			heroModelsCcbt={heroModelsCcbt}
-			heroModelsLegacy={heroModelsLegacy}
-			voiceFilesCbtPhase2={voiceFilesCbtPhase2}
-			voiceFilesCbtPhase1={voiceFilesCbtPhase1}
-			voiceFilesCcbt={voiceFilesCcbt}
-			voiceFilesLegacy={voiceFilesLegacy}
+			heroDataMap={heroDataMap}
+			costumesMap={costumesMap}
+			heroModelsMap={heroModelsMap}
+			voiceFilesMap={voiceFilesMap}
+			classPerksMap={classPerksMap}
 			availableScenes={availableScenes}
 			enableModelsVoices={enableModelsVoices}
-			classPerksLegacy={classPerksLegacy}
-			classPerksCbtPhase2={classPerksCbtPhase2}
-			classPerksCbtPhase1={classPerksCbtPhase1}
-			classPerksCcbt={classPerksCcbt}
 			sortedHeroSlugs={sortedHeroSlugs}
 		/>
 	)

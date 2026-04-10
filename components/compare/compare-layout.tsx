@@ -1,7 +1,8 @@
 "use client"
 
 import { ReactNode, useEffect, useRef } from "react"
-import { DataVersion, DataVersionLabels } from "@/hooks/use-data-version"
+import { DataVersionLabels } from "@/hooks/use-data-version"
+import { DataVersion } from "@/lib/constants"
 import { useCompareMode } from "@/hooks/use-compare-mode"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
