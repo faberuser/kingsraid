@@ -69,8 +69,8 @@ jobs:
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
             ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max,compression=zstd,compression-level=3
+          cache-from: type=local,src=/var/tmp/.buildx-cache
+          cache-to: type=local,dest=/var/tmp/.buildx-cache-new,mode=max,compression=zstd,compression-level=3
           load: false
           provenance: false
           sbom: false
@@ -82,5 +82,5 @@ jobs:
       # stale blobs from previous builds do not accumulate.
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          rm -rf /var/tmp/.buildx-cache
+          mv /var/tmp/.buildx-cache-new /var/tmp/.buildx-cache
