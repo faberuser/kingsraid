@@ -34,6 +34,8 @@ export default function HeroCard({
 				width="0"
 				height="0"
 				sizes="40vw md:20vw"
+				// placeholder="blur"
+				// blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-transform duration-300`}
