@@ -19,8 +19,9 @@ ARG ASSETS_CACHE_VERSION=1
 RUN \
   if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" = "true" ]; then \
     echo "Cloning kingsraid-models and kingsraid-audio (NEXT_PUBLIC_ENABLE_MODELS_VOICES=true)..."; \
-    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git /tmp/kingsraid-models && \
-    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git /tmp/kingsraid-audio && \
+    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git /tmp/kingsraid-models & \
+    git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git /tmp/kingsraid-audio & \
+    wait && \
     find /tmp/kingsraid-models /tmp/kingsraid-audio -type d -name .git -prune -exec rm -rf {} +; \
   else \
     echo "Skipping models and audio clones (NEXT_PUBLIC_ENABLE_MODELS_VOICES not set to true)"; \
@@ -57,36 +58,31 @@ WORKDIR /usr/src/app
 FROM base AS install-dev
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+  cd /temp/dev && bun install --frozen-lockfile
 
 # install with --production (exclude devDependencies)
 FROM base AS install-prod
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production && \
-    bun add typescript --dev
+RUN --mount=type=cache,target=/root/.bun/install/cache \
+  cd /temp/prod && bun install --frozen-lockfile --production && \
+  bun add typescript --dev
 
 # copy node_modules from temp directory and source with populated submodules
 FROM base AS prerelease
-COPY --from=install-dev /temp/dev/node_modules node_modules
 # public/ is intentionally included here.
-#
 # The list pages (app/heroes, app/artifacts, app/bosses, etc.) are Next.js
 # App Router async server components that call lib/get-data.ts unconditionally
 # at build time — no isStaticExport guard. Next.js renders and caches them
 # statically during `bun run build`, so public/kingsraid-data must be present
 # or the lists are generated empty.
-#
-# This is safe: git-stage already strips kingsraid-models and kingsraid-audio,
-# so public/ here contains only kingsraid-data (a few MB of JSON) — no 35 GB.
-#
-# The original Dockerfile used --exclude=/usr/src/app/{public,out} which used
-# absolute paths that BuildKit never matched (it uses source-relative patterns),
-# making the exclusion a silent no-op. Restoring that behaviour intentionally.
+COPY --from=install-dev /temp/dev/node_modules node_modules
 COPY --exclude=out --from=git-stage /usr/src/app .
 
 # build the application
-RUN bun run build
+RUN --mount=type=cache,target=/usr/src/app/.next/cache \
+  bun run build
 
 # copy production dependencies and source code into final image
 FROM base AS release
