@@ -25,7 +25,7 @@ interface HeroSelectDialogProps {
 	team: TeamMember[]
 	onSelectHero: (hero: HeroData) => void
 	// Filter/sort props
-	heroClasses: HeroClass[]
+	heroClasses: readonly HeroClass[]
 	selectedClass: string
 	onClassChange: (value: string) => void
 	selectedDamageType: string
