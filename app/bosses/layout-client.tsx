@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { HeroesDialogShell } from "@/components/modal/heroes-dialog-shell"
+import { InterceptedDialog } from "@/components/modal/intercepted-dialog"
 
 export function BossesLayoutClient({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
 	const pathname = usePathname()
@@ -11,7 +11,7 @@ export function BossesLayoutClient({ children, modal }: { children: React.ReactN
 	return (
 		<>
 			<div className="main-content-list w-full">{children}</div>
-			<HeroesDialogShell hasModal={hasModal}>{modal}</HeroesDialogShell>
+			<InterceptedDialog hasModal={hasModal}>{modal}</InterceptedDialog>
 		</>
 	)
 }
