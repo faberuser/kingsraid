@@ -19,25 +19,24 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
-	const [loadingCard, setLoadingCard] = useState<string | null>(null)
-	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
-	const [reverseSort, setReverseSort] = useState(true)
+
+	// Lazy state initializers: read from localStorage only once (Rule 5.12)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
+		if (typeof window === "undefined") return "release"
+		const stored = localStorage.getItem("artifactsSortType")
+		return stored === "alphabetical" || stored === "release" ? stored : "release"
+	})
+	const [reverseSort, setReverseSort] = useState(() => {
+		if (typeof window === "undefined") return true
+		const stored = localStorage.getItem("artifactsReverseSort")
+		return stored !== null ? stored === "true" : true
+	})
 	const [mounted, setMounted] = useState(false)
 
-	// Load sort preferences from localStorage after hydration
+	// Signal hydration complete
 	useEffect(() => {
 		// eslint-disable-next-line
 		setMounted(true)
-		const storedSortType = localStorage.getItem("artifactsSortType")
-		const storedReverseSort = localStorage.getItem("artifactsReverseSort")
-
-		if (storedSortType === "alphabetical" || storedSortType === "release") {
-			setSortType(storedSortType)
-		}
-
-		if (storedReverseSort !== null) {
-			setReverseSort(storedReverseSort === "true")
-		}
 	}, [])
 
 	// Save sort state to localStorage when changed
@@ -82,6 +81,13 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 		if (reverseSort) {
 			result = result.reverse()
 		}
+
+		// Save the sorted/filtered list of artifact slugs to sessionStorage for next/prev navigation
+		if (typeof window !== "undefined") {
+			const slugs = result.map((a) => a.name.toLowerCase().replace(/\s+/g, "-"))
+			sessionStorage.setItem("currentArtifactList", JSON.stringify(slugs))
+		}
+
 		return result
 	}, [artifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder])
 
@@ -110,7 +116,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "alphabetical") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("alphabetical")
 									setReverseSort(false)
@@ -127,7 +133,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 							variant={`${sortType === "release" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "release") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("release")
 									setReverseSort(true)
@@ -163,8 +169,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 					<Link
 						key={artifact.name}
 						href={`/artifacts/${encodeURIComponent(artifact.name.toLowerCase().replace(/\s+/g, "-"))}`}
-						className="hover:scale-105 transition-transform duration-300"
-						onClick={() => setLoadingCard(artifact.name)}
+						className="hover:scale-105 transition-transform duration-300 grid-item-lazy"
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2 relative">
 							<CardHeader>
@@ -198,11 +203,6 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 									)}
 								</div>
 							</CardContent>
-							{loadingCard === artifact.name && (
-								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-									<Spinner className="size-8" />
-								</div>
-							)}
 						</Card>
 					</Link>
 				))}

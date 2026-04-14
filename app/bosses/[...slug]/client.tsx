@@ -1,14 +1,28 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
 import { ModelFile } from "@/model/Hero_Model"
-import BossModels from "@/components/bosses/models"
+import dynamic from "next/dynamic"
 import DataHeavyContent from "@/components/data-heavy-content"
+import { Spinner } from "@/components/ui/spinner"
+
+// Dynamic import for heavy 3D model viewer (Rule 2.4: Dynamic imports for heavy components)
+const BossModels = dynamic(() => import("@/components/bosses/models"), {
+	loading: () => (
+		<div className="flex items-center justify-center h-96">
+			<Spinner className="h-8 w-8" />
+		</div>
+	),
+	ssr: false,
+})
 
 // Boss models are now organized by variant (similar to hero costumes)
 type BossModelData = Record<string, ModelFile[]>
@@ -18,6 +32,7 @@ interface BossClientProps {
 	bossModels?: BossModelData
 	bossScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
+	sortedBossSlugs: string[]
 }
 
 export default function BossClient({
@@ -25,8 +40,52 @@ export default function BossClient({
 	bossModels,
 	bossScenes = [],
 	enableModelsVoices = false,
+	sortedBossSlugs,
 }: BossClientProps) {
+	const router = useRouter()
 	const { profile, skills } = bossData
+	const [isNavigating, startTransition] = useTransition()
+
+	const handleNavigate = useCallback(
+		(direction: "prev" | "next") => {
+			let slugs = sortedBossSlugs
+			if (typeof window !== "undefined") {
+				const stored = sessionStorage.getItem("currentBossList")
+				if (stored) {
+					try {
+						const parsed = JSON.parse(stored)
+						if (Array.isArray(parsed) && parsed.length > 0) slugs = parsed
+					} catch {
+						// fallback to alphabetical order
+					}
+				}
+			}
+
+			if (!slugs || slugs.length === 0) return
+			const currentSlug = profile.name.toLowerCase().replace(/\s+/g, "-")
+			const currentIndex = slugs.indexOf(currentSlug)
+			if (currentIndex === -1) return
+
+			let targetIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1
+			if (targetIndex < 0) targetIndex = slugs.length - 1
+			if (targetIndex >= slugs.length) targetIndex = 0
+
+			startTransition(() => {
+				router.replace(`/bosses/${slugs[targetIndex]}${window.location.hash}`)
+			})
+		},
+		[sortedBossSlugs, profile.name, router],
+	)
+
+	useEffect(() => {
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+			if (e.key === "ArrowLeft") handleNavigate("prev")
+			if (e.key === "ArrowRight") handleNavigate("next")
+		}
+		window.addEventListener("keydown", handleKeyDown)
+		return () => window.removeEventListener("keydown", handleKeyDown)
+	}, [handleNavigate])
 
 	// Helper function to get tab from hash
 	const getTabFromHash = () => {
@@ -52,13 +111,44 @@ export default function BossClient({
 	// Update URL hash when tab changes
 	const handleTabChange = (value: string) => {
 		setActiveTab(value)
-		window.history.pushState(null, "", `#${value}`)
+		window.history.replaceState(null, "", `#${value}`)
 	}
 
 	return (
-		<div>
+		<div className="relative">
+			{/* Full-dialog navigation loading overlay */}
+			{isNavigating && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+					<Spinner className="h-10 w-10" />
+				</div>
+			)}
 			{/* Boss Header */}
-			<div className="flex flex-row gap-4 items-center pb-2">
+			<div className="flex flex-row gap-4 items-center pb-2 relative">
+				{/* Navigation Buttons */}
+				{sortedBossSlugs && sortedBossSlugs.length > 0 && (
+					<div className="absolute top-0 right-0 flex gap-1 z-10">
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleNavigate("prev")}
+							title="Previous Boss"
+							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
+						>
+							<ChevronLeft className="h-5 w-5" />
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={() => handleNavigate("next")}
+							title="Next Boss"
+							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
+						>
+							<ChevronRight className="h-5 w-5" />
+						</Button>
+					</div>
+				)}
 				{/* Boss Image */}
 				<div className="shrink-0 relative">
 					<div className="w-16 h-16 md:w-20 md:h-20">

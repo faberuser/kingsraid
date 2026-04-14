@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import BossPageWrapper from "@/app/bosses/[...slug]/page-wrapper"
 import { BossData } from "@/model/Boss"
-import { SlugPageProps, findData, fetchAllVersions } from "@/lib/get-data"
+import { SlugPageProps, findData, fetchAllVersions, getBossNamesForVersion } from "@/lib/get-data"
 import { getBossModels } from "@/app/bosses/[...slug]/models/getBossModels"
 import { getBossScenes } from "@/app/bosses/[...slug]/models/getBossScenes"
 
@@ -59,12 +59,19 @@ export default async function SlugPage({ params }: SlugPageProps) {
 	// Get boss scenes server-side (only if enabled)
 	const bossScenes = enableModelsVoices ? await getBossScenes(bossDataLegacy.profile.name) : []
 
+	// Get ordered list of all boss slugs for prev/next navigation
+	const allLegacyBosses = await getBossNamesForVersion("legacy")
+	const sortedBossSlugs = allLegacyBosses
+		.sort((a, b) => a.localeCompare(b))
+		.map((name) => name.toLowerCase().replace(/\s+/g, "-"))
+
 	return (
 		<BossPageWrapper
 			bossDataMap={bossDataMap}
 			bossModels={bossModels}
 			bossScenes={bossScenes}
 			enableModelsVoices={enableModelsVoices}
+			sortedBossSlugs={sortedBossSlugs}
 		/>
 	)
 }

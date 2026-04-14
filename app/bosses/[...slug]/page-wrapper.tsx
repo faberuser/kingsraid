@@ -16,6 +16,7 @@ interface BossPageWrapperProps {
 	bossModels?: BossModelData
 	bossScenes?: Array<{ value: string; label: string }>
 	enableModelsVoices?: boolean
+	sortedBossSlugs: string[]
 }
 
 export default function BossPageWrapper({
@@ -23,6 +24,7 @@ export default function BossPageWrapper({
 	bossModels,
 	bossScenes = [],
 	enableModelsVoices = false,
+	sortedBossSlugs,
 }: BossPageWrapperProps) {
 	const { version } = useDataVersion()
 
@@ -47,6 +49,7 @@ export default function BossPageWrapper({
 			bossModels={bossModels}
 			bossScenes={bossScenes}
 			enableModelsVoices={enableModelsVoices}
+			sortedBossSlugs={sortedBossSlugs}
 		/>
 	)
 }

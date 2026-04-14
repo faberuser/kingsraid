@@ -1,23 +1,48 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react"
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useId } from "react"
 import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
+
+interface ToggleConfig {
+	id: string
+	showToggle: boolean
+	versions: DataVersion[]
+}
 
 interface HeroToggleContextType {
 	showToggle: boolean
-	setShowToggle: (show: boolean) => void
 	availableVersions: DataVersion[]
-	setAvailableVersions: (versions: DataVersion[]) => void
+	registerToggle: (config: ToggleConfig) => void
+	unregisterToggle: (id: string) => void
 }
 
 const HeroToggleContext = createContext<HeroToggleContextType | undefined>(undefined)
 
 export function HeroToggleProvider({ children }: { children: ReactNode }) {
-	const [showToggle, setShowToggle] = useState(false)
-	const [availableVersions, setAvailableVersions] = useState<DataVersion[]>([...DATA_VERSIONS])
+	const [configs, setConfigs] = useState<ToggleConfig[]>([])
+
+	const registerToggle = useCallback((config: ToggleConfig) => {
+		setConfigs((prev) => {
+			const filtered = prev.filter((c) => c.id !== config.id)
+			return [...filtered, config]
+		})
+	}, [])
+
+	const unregisterToggle = useCallback((id: string) => {
+		setConfigs((prev) => prev.filter((c) => c.id !== id))
+	}, [])
+
+	const activeConfig = configs.length > 0 ? configs[configs.length - 1] : null
 
 	return (
-		<HeroToggleContext.Provider value={{ showToggle, setShowToggle, availableVersions, setAvailableVersions }}>
+		<HeroToggleContext.Provider
+			value={{
+				showToggle: activeConfig ? activeConfig.showToggle : false,
+				availableVersions: activeConfig ? activeConfig.versions : [...DATA_VERSIONS],
+				registerToggle,
+				unregisterToggle,
+			}}
+		>
 			{children}
 		</HeroToggleContext.Provider>
 	)
@@ -32,18 +57,14 @@ export function useHeroToggle() {
 }
 
 export function useEnableVersionToggle(versions: DataVersion[] = [...DATA_VERSIONS], showToggle: boolean = true) {
-	const { setShowToggle, setAvailableVersions } = useHeroToggle()
-
+	const { registerToggle, unregisterToggle } = useHeroToggle()
+	const id = useId()
 	const versionsList = versions.join(",")
 
 	useEffect(() => {
-		setShowToggle(showToggle)
-		// "".split(",") returns [""] so we handle empty string specifically
-		if (versionsList === "") {
-			setAvailableVersions([])
-		} else {
-			setAvailableVersions(versionsList.split(",") as DataVersion[])
-		}
-		return () => setShowToggle(false)
-	}, [setShowToggle, setAvailableVersions, versionsList, showToggle])
+		const availableVersions = versionsList === "" ? [] : (versionsList.split(",") as DataVersion[])
+		registerToggle({ id, showToggle, versions: availableVersions })
+		return () => unregisterToggle(id)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [versionsList, showToggle, registerToggle, unregisterToggle])
 }

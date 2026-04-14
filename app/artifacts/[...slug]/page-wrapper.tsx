@@ -10,9 +10,10 @@ import { Spinner } from "@/components/ui/spinner"
 
 interface ArtifactPageWrapperProps {
 	artifactsMap: Record<DataVersion, ArtifactData | null>
+	sortedArtifactSlugs: string[]
 }
 
-export default function ArtifactPageWrapper({ artifactsMap }: ArtifactPageWrapperProps) {
+export default function ArtifactPageWrapper({ artifactsMap, sortedArtifactSlugs }: ArtifactPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
 
 	// Map of artifact data by version
@@ -53,6 +54,7 @@ export default function ArtifactPageWrapper({ artifactsMap }: ArtifactPageWrappe
 			artifactsMap={artifactDataMap}
 			availableVersions={availableVersions}
 			currentArtifactData={artifactData}
+			sortedArtifactSlugs={sortedArtifactSlugs}
 		/>
 	)
 }
