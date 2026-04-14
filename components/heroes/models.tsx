@@ -137,8 +137,8 @@ export default function Models({ heroModels, availableScenes = [], voiceFiles }:
 		<div className="space-y-6">
 			{/* Main content */}
 			{!selectedCostume ? (
-				<div className="justify-center items-center flex text-muted-foreground lg:h-200 lg:max-h-200 border rounded-lg">
-					Select a costume from the list to view the 3D model
+				<div className="justify-center items-center flex text-muted-foreground h-10 max-h-10 lg:h-200 lg:max-h-200 border rounded-lg">
+					Select a costume from the list to view 3D model
 				</div>
 			) : currentModels.length > 0 ? (
 				<ModelViewer
