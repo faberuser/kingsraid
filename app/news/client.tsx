@@ -75,11 +75,10 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 									<CardHeader>
 										<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
 											<div className="text-xl font-semibold">{news.title}</div>
-											{new Date().getTime() - new Date(news.date).getTime() <
-												7 * 24 * 60 * 60 * 1000 && <Badge className="text-xs">New</Badge>}
+											{news.isNew ? <Badge className="text-xs">New</Badge> : null}
 										</CardTitle>
 										<CardDescription className="text-sm whitespace-nowrap">
-											{new Date(news.date).toLocaleDateString()}
+											{news.formattedDate}
 										</CardDescription>
 									</CardHeader>
 									<CardContent>
@@ -138,9 +137,7 @@ export function NewsDetailDialog({
 			<DialogContent className="max-w-[90vw] md:min-w-[60vw] lg:min-w-[50vw] xl:min-w-[40vw] max-h-[90vh] overflow-y-auto custom-scrollbar">
 				<DialogHeader>
 					<DialogTitle className="text-2xl font-bold">{news.title}</DialogTitle>
-					<DialogDescription className="text-sm">
-						{new Date(news.date).toLocaleDateString()}
-					</DialogDescription>
+					<DialogDescription className="text-sm">{news.formattedDate}</DialogDescription>
 				</DialogHeader>
 
 				{imgSrc && (

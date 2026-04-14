@@ -127,10 +127,9 @@ function SteamRSS({ news }: SteamRSSProps) {
 								<CardHeader>
 									<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
 										{item.title}
-										{new Date().getTime() - new Date(item.date).getTime() <
-											7 * 24 * 60 * 60 * 1000 && <Badge className="text-xs">New</Badge>}
+										{item.isNew ? <Badge className="text-xs">New</Badge> : null}
 									</CardTitle>
-									<CardDescription>{new Date(item.date).toLocaleDateString()}</CardDescription>
+									<CardDescription>{item.formattedDate}</CardDescription>
 								</CardHeader>
 								<CardContent className="h-full">
 									<div

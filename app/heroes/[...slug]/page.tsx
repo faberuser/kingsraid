@@ -90,36 +90,43 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		return (await findData(heroName, "heroes", { dataVersion: version })) as HeroData | null
 	})
 
-	// Get costume data server-side for all versions
-	const costumesMap = await fetchAllVersions(async (version) => {
+	// Kick off independent data fetches in parallel (Rule 1.2: defer await, Rule 1.5: Promise.all)
+	const costumesMapPromise = fetchAllVersions(async (version) => {
 		const data = heroDataMap[version]
 		return data ? await getCostumeData(data.costumes) : []
 	})
 
-	// Get model data server-side (only if enabled)
-	const heroModelsMap = await fetchAllVersions(async (version) => {
+	const heroModelsMapPromise = fetchAllVersions(async (version) => {
 		const data = heroDataMap[version]
 		return enableModelsVoices && data ? await getHeroModels(data.profile.name) : {}
 	})
 
-	// Get voice files server-side (only if enabled)
-	const voiceFilesMap = await fetchAllVersions(async (version) => {
+	const voiceFilesMapPromise = fetchAllVersions(async (version) => {
 		const data = heroDataMap[version]
 		return enableModelsVoices && data ? await getVoiceFiles(data.profile.name) : { en: [], jp: [], kr: [] }
 	})
 
-	// Get class perks for all versions
 	const classPerksLegacy = await getClassPerks("legacy")
-	const classPerksMap = await fetchAllVersions(async (version) => {
+	const classPerksMapPromise = fetchAllVersions(async (version) => {
 		if (version === "legacy") return classPerksLegacy
 		return heroDataMap[version] ? await getClassPerks(version) : classPerksLegacy
 	})
 
-	// Get available scenes server-side (only if enabled)
-	const availableScenes = enableModelsVoices ? await getAvailableScenes() : []
+	const availableScenesPromise = enableModelsVoices ? getAvailableScenes() : Promise.resolve([])
+	const allLegacyHeroesPromise = getHeroNamesForVersion("legacy")
+
+	// Await all independent promises in parallel
+	const [costumesMap, heroModelsMap, voiceFilesMap, classPerksMap, availableScenes, allLegacyHeroes] =
+		await Promise.all([
+			costumesMapPromise,
+			heroModelsMapPromise,
+			voiceFilesMapPromise,
+			classPerksMapPromise,
+			availableScenesPromise,
+			allLegacyHeroesPromise,
+		])
 
 	// Get ordered list of all hero slugs for navigation
-	const allLegacyHeroes = await getHeroNamesForVersion("legacy")
 	const sortedHeroSlugs = allLegacyHeroes
 		.sort((a, b) => a.localeCompare(b))
 		.map((name) => name.toLowerCase().replace(/\s+/g, "-"))

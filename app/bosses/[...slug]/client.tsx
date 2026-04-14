@@ -7,8 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
 import { ModelFile } from "@/model/Hero_Model"
-import BossModels from "@/components/bosses/models"
+import dynamic from "next/dynamic"
 import DataHeavyContent from "@/components/data-heavy-content"
+import { Spinner } from "@/components/ui/spinner"
+
+// Dynamic import for heavy 3D model viewer (Rule 2.4: Dynamic imports for heavy components)
+const BossModels = dynamic(() => import("@/components/bosses/models"), {
+	loading: () => (
+		<div className="flex items-center justify-center h-96">
+			<Spinner className="h-8 w-8" />
+		</div>
+	),
+	ssr: false,
+})
 
 // Boss models are now organized by variant (similar to hero costumes)
 type BossModelData = Record<string, ModelFile[]>

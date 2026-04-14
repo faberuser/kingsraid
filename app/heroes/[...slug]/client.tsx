@@ -12,13 +12,24 @@ import Skills from "@/components/heroes/skills"
 import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
-import Models from "@/components/heroes/models"
+import dynamic from "next/dynamic"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { capitalize, classColorMapBadge } from "@/lib/utils"
 import Image from "@/components/next-image"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
 import { ClassPerksData } from "@/components/heroes/perks"
+import { Spinner } from "@/components/ui/spinner"
+
+// Dynamic import for heavy 3D model viewer (Rule 2.4: Dynamic imports for heavy components)
+const Models = dynamic(() => import("@/components/heroes/models"), {
+	loading: () => (
+		<div className="flex items-center justify-center h-96">
+			<Spinner className="h-8 w-8" />
+		</div>
+	),
+	ssr: false,
+})
 
 interface HeroClientProps {
 	heroData: HeroData
@@ -124,7 +135,7 @@ export default function HeroClient({
 			<div className="flex flex-row gap-4 items-center pb-2 relative">
 				{/* Navigation Buttons */}
 				{sortedHeroSlugs && sortedHeroSlugs.length > 0 && (
-					<div className="absolute top-0 right-0 hidden sm:flex gap-1 z-10">
+					<div className="absolute top-0 right-0 gap-1 z-10">
 						<Button
 							variant="ghost"
 							size="icon"

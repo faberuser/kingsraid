@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react"
+import { useState, useEffect, useRef, Suspense, useCallback, useMemo } from "react"
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei"
 import * as THREE from "three"
@@ -27,6 +27,8 @@ import {
 	VoiceLanguage,
 } from "@/components/models/types"
 import { findVoiceForAnimation } from "@/components/models/utils"
+
+const HERO_NAME_REGEX = /^Hero_([A-Za-z]+)/
 
 export function ModelViewer({
 	modelFiles,
@@ -77,13 +79,12 @@ export function ModelViewer({
 	// Extract hero name from model files path
 	// Path format: "Hero_Mitra_Vari05_Body/Hero_Mitra_Vari05_Body.FBX"
 	// We need to extract just "Mitra" from this
-	const heroName = (() => {
+	const heroName = useMemo(() => {
 		if (modelFiles.length === 0) return ""
 		const folderName = modelFiles[0].path.split("/")[0] // e.g., "Hero_Mitra_Vari05_Body"
-		// Extract hero name: remove "Hero_" prefix and everything after the hero name
-		const match = folderName.match(/^Hero_([A-Za-z]+)/)
+		const match = folderName.match(HERO_NAME_REGEX)
 		return match ? match[1] : ""
-	})()
+	}, [modelFiles])
 
 	// Stop and cleanup audio
 	const stopAudio = useCallback(() => {
@@ -136,30 +137,13 @@ export function ModelViewer({
 		[isMuted, voiceFiles, voiceLanguage, heroName, modelType, stopAudio],
 	)
 
-	// Play voice when animation changes
+	// Play voice when animation, mute state, or language changes
 	useEffect(() => {
-		// Reset the ref so the voice can play for this animation
 		lastPlayedAnimationRef.current = null
-		playVoiceForAnimation(selectedAnimation)
-	}, [selectedAnimation, playVoiceForAnimation])
-
-	// Play voice when unmuting (if there's an animation selected)
-	useEffect(() => {
 		if (!isMuted && selectedAnimation) {
-			lastPlayedAnimationRef.current = null
 			playVoiceForAnimation(selectedAnimation)
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isMuted])
-
-	// Replay voice when language changes (if not muted)
-	useEffect(() => {
-		if (!isMuted && selectedAnimation) {
-			lastPlayedAnimationRef.current = null
-			playVoiceForAnimation(selectedAnimation)
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [voiceLanguage])
+	}, [selectedAnimation, isMuted, voiceLanguage, playVoiceForAnimation])
 
 	// Cleanup audio on unmount
 	useEffect(() => {
@@ -252,7 +236,7 @@ export function ModelViewer({
 	}
 
 	const toggleRecording = () => {
-		setIsRecording(!isRecording)
+		setIsRecording((prev) => !prev)
 	}
 
 	const handleRecordingComplete = (blob: Blob) => {
@@ -325,7 +309,7 @@ export function ModelViewer({
 	}
 
 	const toggleFullscreen = () => {
-		setIsFullscreen(!isFullscreen)
+		setIsFullscreen((prev) => !prev)
 	}
 
 	const downloadModels = async () => {

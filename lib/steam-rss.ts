@@ -3,6 +3,10 @@ export interface NewsItem {
 	url: string
 	date: string
 	contents: string
+	/** Precomputed: whether the item is less than 7 days old */
+	isNew: boolean
+	/** Precomputed: formatted date string for display */
+	formattedDate: string
 }
 
 export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
@@ -17,6 +21,9 @@ export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
 		const items: NewsItem[] = []
 		const itemRegex = /<item>([\s\S]*?)<\/item>/g
 		let match
+
+		const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+		const now = Date.now()
 
 		while ((match = itemRegex.exec(text)) !== null) {
 			const itemContent = match[1]
@@ -44,12 +51,15 @@ export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
 			const url = extractCDATA("link", itemContent)
 			const date = extractCDATA("pubDate", itemContent)
 			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))
+			const dateMs = new Date(date).getTime()
 
 			items.push({
 				title,
 				url,
 				date,
 				contents,
+				isNew: now - dateMs < ONE_WEEK_MS,
+				formattedDate: new Date(date).toLocaleDateString(),
 			})
 		}
 

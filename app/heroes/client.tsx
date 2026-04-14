@@ -12,13 +12,23 @@ import { Search, ChevronDown, ChevronUp, Image as ImageIcon, Grid2x2 } from "luc
 import HeroCard, { ViewMode } from "@/components/heroes/card"
 import { Spinner } from "@/components/ui/spinner"
 
+// Hoisted static constants outside component to avoid re-creation each render (Rule 6.3)
+const damageTypes = [
+	{ value: "all", name: "All" },
+	{ value: "magical", name: "Magical" },
+	{ value: "physical", name: "Physical" },
+] as const
+
+// Hoisted RegExp to avoid re-creation in loops (Rule 7.10)
+const SLUG_REGEXP = /\s+/g
+
 interface HeroesClientProps {
 	heroes: HeroData[]
-	heroClasses: Array<{
-		value: string
-		name: string
-		icon: string
-	}>
+	heroClasses: readonly {
+		readonly value: string
+		readonly name: string
+		readonly icon: string
+	}[]
 	releaseOrder: Record<string, string>
 	saReverse: string[]
 }
@@ -27,30 +37,28 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedClass, setSelectedClass] = useState("all")
 	const [selectedDamageType, setSelectedDamageType] = useState("all")
-	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
-	const [reverseSort, setReverseSort] = useState(true)
-	const [viewMode, setViewMode] = useState<ViewMode>("splashart")
+	// Lazy state initializers: read from localStorage only once (Rule 5.12)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
+		if (typeof window === "undefined") return "release"
+		const stored = localStorage.getItem("heroesSortType")
+		return stored === "alphabetical" || stored === "release" ? stored : "release"
+	})
+	const [reverseSort, setReverseSort] = useState(() => {
+		if (typeof window === "undefined") return true
+		const stored = localStorage.getItem("heroesReverseSort")
+		return stored !== null ? stored === "true" : true
+	})
+	const [viewMode, setViewMode] = useState<ViewMode>(() => {
+		if (typeof window === "undefined") return "splashart"
+		const stored = localStorage.getItem("heroesViewMode")
+		return stored === "splashart" || stored === "icon" ? stored : "splashart"
+	})
 	const [mounted, setMounted] = useState(false)
 
-	// Load sort preferences from localStorage after hydration
+	// Signal hydration complete
 	useEffect(() => {
 		// eslint-disable-next-line
 		setMounted(true)
-		const storedSortType = localStorage.getItem("heroesSortType")
-		const storedReverseSort = localStorage.getItem("heroesReverseSort")
-		const storedViewMode = localStorage.getItem("heroesViewMode")
-
-		if (storedSortType === "alphabetical" || storedSortType === "release") {
-			setSortType(storedSortType)
-		}
-
-		if (storedReverseSort !== null) {
-			setReverseSort(storedReverseSort === "true")
-		}
-
-		if (storedViewMode === "splashart" || storedViewMode === "icon") {
-			setViewMode(storedViewMode)
-		}
 	}, [])
 
 	// Save sort state to localStorage when changed
@@ -111,18 +119,12 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 		// Save the sorted/filtered list of hero slugs to sessionStorage for next/prev navigation
 		if (typeof window !== "undefined") {
-			const slugs = result.map((h) => h.profile.name.toLowerCase().replace(/\s+/g, "-"))
+			const slugs = result.map((h) => h.profile.name.toLowerCase().replace(SLUG_REGEXP, "-"))
 			sessionStorage.setItem("currentHeroList", JSON.stringify(slugs))
 		}
 
 		return result
 	}, [heroes, searchQuery, fuse, selectedClass, selectedDamageType, sortType, reverseSort, releaseOrder])
-
-	const damageTypes = [
-		{ value: "all", name: "All" },
-		{ value: "magical", name: "Magical" },
-		{ value: "physical", name: "Physical" },
-	]
 
 	// Show loading spinner until hydrated
 	if (!mounted) {
@@ -147,7 +149,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "alphabetical") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("alphabetical")
 									setReverseSort(false)
@@ -164,7 +166,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 							variant={`${sortType === "release" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "release") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("release")
 									setReverseSort(true)
