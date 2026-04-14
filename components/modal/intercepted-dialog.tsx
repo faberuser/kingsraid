@@ -9,6 +9,11 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 let globalActiveDialogs = 0
 let globalIsFullPage = false
+let globalIsNavigating = false
+
+export function setDialogNavigating(value: boolean) {
+	globalIsNavigating = value
+}
 
 export function InterceptedDialog({ children }: { children: React.ReactNode }) {
 	const router = useRouter()
@@ -45,6 +50,8 @@ export function InterceptedDialog({ children }: { children: React.ReactNode }) {
 	const onOpenChange = React.useCallback(
 		(open: boolean) => {
 			if (!open) {
+				// Suppress close if we're navigating to another dialog
+				if (globalIsNavigating) return
 				setOpen(false)
 				router.back()
 			}

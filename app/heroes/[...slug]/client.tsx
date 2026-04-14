@@ -15,6 +15,7 @@ import Costumes from "@/components/heroes/costumes"
 import dynamic from "next/dynamic"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { capitalize, classColorMapBadge } from "@/lib/utils"
+import { setDialogNavigating } from "@/components/modal/intercepted-dialog"
 import Image from "@/components/next-image"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
@@ -111,7 +112,10 @@ export default function HeroClient({
 			if (targetIndex >= slugs.length) targetIndex = 0
 
 			const targetSlug = slugs[targetIndex]
+			setDialogNavigating(true)
 			router.replace(`/heroes/${targetSlug}${window.location.hash}`)
+			// Reset after navigation has had time to commit
+			setTimeout(() => setDialogNavigating(false), 500)
 		},
 		[sortedHeroSlugs, heroData.profile.name, router],
 	)
