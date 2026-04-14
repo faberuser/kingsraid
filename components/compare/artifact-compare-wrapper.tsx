@@ -11,12 +11,14 @@ interface ArtifactCompareWrapperProps {
 	artifactsMap: Record<DataVersion, ArtifactData | null>
 	availableVersions: DataVersion[]
 	currentArtifactData: ArtifactData
+	sortedArtifactSlugs: string[]
 }
 
 export default function ArtifactCompareWrapper({
 	artifactsMap,
 	availableVersions,
 	currentArtifactData,
+	sortedArtifactSlugs,
 }: ArtifactCompareWrapperProps) {
 	const { isCompareMode, isHydrated } = useCompareMode()
 
@@ -29,18 +31,18 @@ export default function ArtifactCompareWrapper({
 			if (!data) {
 				return null
 			}
-			return <ArtifactClient artifactData={data} />
+			return <ArtifactClient artifactData={data} sortedArtifactSlugs={sortedArtifactSlugs} />
 		},
-		[artifactDataMap],
+		[artifactDataMap, sortedArtifactSlugs],
 	)
 
 	if (!isHydrated || !isCompareMode) {
-		return <ArtifactClient artifactData={currentArtifactData} />
+		return <ArtifactClient artifactData={currentArtifactData} sortedArtifactSlugs={sortedArtifactSlugs} />
 	}
 
 	return (
 		<CompareLayout availableVersions={availableVersions} renderContent={getCompareData}>
-			<ArtifactClient artifactData={currentArtifactData} />
+			<ArtifactClient artifactData={currentArtifactData} sortedArtifactSlugs={sortedArtifactSlugs} />
 		</CompareLayout>
 	)
 }

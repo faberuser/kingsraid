@@ -8,6 +8,7 @@ import { cn, parseColoredText } from "@/lib/utils"
 import { TeamMember, PERK_COSTS, MIN_POINTS, MAX_POINTS } from "@/model/Team_Builder"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
 import { MobileTooltip } from "@/components/mobile-tooltip"
+import { DialogDescription } from "@radix-ui/react-dialog"
 
 interface PerksDialogProps {
 	member: TeamMember
@@ -39,10 +40,11 @@ export function PerksDialog({
 					Edit Perks
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+			<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-background/70 backdrop-blur-sm">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">{member.hero.profile.name}</DialogTitle>
 				</DialogHeader>
+				<DialogDescription className="sr-only">Edit the perks for {member.hero.profile.name}</DialogDescription>
 
 				{/* Points Display & Adjustment */}
 				<div className="flex items-center justify-between p-3 bg-muted rounded">

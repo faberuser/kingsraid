@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { HeroesLayoutClient } from "@/app/heroes/layout-client"
 
 export const metadata: Metadata = {
 	title: "Heroes - King's Raid",
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function HeroesLayout({ children }: { children: React.ReactNode }) {
-	return <>{children}</>
+export default function HeroesLayout({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
+	return <HeroesLayoutClient modal={modal}>{children}</HeroesLayoutClient>
 }

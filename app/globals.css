@@ -121,6 +121,11 @@
 	}
 }
 
+/* Hide the main content list ONLY on mobile when the intercepted dialog route is active */
+body.intercepted-mobile-open .main-content-list {
+	display: none !important;
+}
+
 @layer utilities {
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 5px;
@@ -152,5 +157,11 @@
 	.dark .skill-colored-text {
 		font-weight: 500;
 		filter: brightness(1.1) saturate(1);
+	}
+
+	/* content-visibility: auto for off-screen items in long grid lists (Rule 6.2) */
+	.grid-item-lazy {
+		content-visibility: auto;
+		contain-intrinsic-size: auto 300px;
 	}
 }

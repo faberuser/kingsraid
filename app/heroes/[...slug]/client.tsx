@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Suspense, useCallback } from "react"
+import { useEffect, useState, Suspense, useCallback, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,13 +12,24 @@ import Skills from "@/components/heroes/skills"
 import Perks from "@/components/heroes/perks"
 import Gear from "@/components/heroes/gear"
 import Costumes from "@/components/heroes/costumes"
-import Models from "@/components/heroes/models"
+import dynamic from "next/dynamic"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { capitalize, classColorMapBadge } from "@/lib/utils"
 import Image from "@/components/next-image"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
 import { ClassPerksData } from "@/components/heroes/perks"
+import { Spinner } from "@/components/ui/spinner"
+
+// Dynamic import for heavy 3D model viewer (Rule 2.4: Dynamic imports for heavy components)
+const Models = dynamic(() => import("@/components/heroes/models"), {
+	loading: () => (
+		<div className="flex items-center justify-center h-96">
+			<Spinner className="h-8 w-8" />
+		</div>
+	),
+	ssr: false,
+})
 
 interface HeroClientProps {
 	heroData: HeroData
@@ -42,6 +53,7 @@ export default function HeroClient({
 	sortedHeroSlugs,
 }: HeroClientProps) {
 	const router = useRouter()
+	const [isNavigating, startTransition] = useTransition()
 	// Helper function to get tab from hash
 	const getTabFromHash = () => {
 		if (typeof window === "undefined") return "skills"
@@ -69,7 +81,7 @@ export default function HeroClient({
 	// Update URL hash when tab changes
 	const handleTabChange = (value: string) => {
 		setActiveTab(value)
-		window.history.pushState(null, "", `#${value}`)
+		window.history.replaceState(null, "", `#${value}`)
 	}
 
 	const handleNavigate = useCallback(
@@ -100,7 +112,9 @@ export default function HeroClient({
 			if (targetIndex >= slugs.length) targetIndex = 0
 
 			const targetSlug = slugs[targetIndex]
-			router.push(`/heroes/${targetSlug}`)
+			startTransition(() => {
+				router.replace(`/heroes/${targetSlug}${window.location.hash}`)
+			})
 		},
 		[sortedHeroSlugs, heroData.profile.name, router],
 	)
@@ -119,18 +133,25 @@ export default function HeroClient({
 	}, [handleNavigate])
 
 	return (
-		<div>
+		<div className="relative">
+			{/* Full-dialog navigation loading overlay */}
+			{isNavigating && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center">
+					<Spinner className="h-10 w-10" />
+				</div>
+			)}
 			{/* Compact Hero Header */}
 			<div className="flex flex-row gap-4 items-center pb-2 relative">
 				{/* Navigation Buttons */}
 				{sortedHeroSlugs && sortedHeroSlugs.length > 0 && (
-					<div className="absolute top-0 right-0 hidden sm:flex gap-1 z-10">
+					<div className="absolute top-0 right-0 gap-1 z-10">
 						<Button
 							variant="ghost"
 							size="icon"
 							onClick={() => handleNavigate("prev")}
 							title="Previous Hero"
 							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
 						>
 							<ChevronLeft className="h-5 w-5" />
 						</Button>
@@ -140,6 +161,7 @@ export default function HeroClient({
 							onClick={() => handleNavigate("next")}
 							title="Next Hero"
 							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
 						>
 							<ChevronRight className="h-5 w-5" />
 						</Button>

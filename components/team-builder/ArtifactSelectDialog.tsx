@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { ArtifactData } from "@/model/Artifact"
 import { MobileTooltip } from "@/components/mobile-tooltip"
 import Fuse from "fuse.js"
+import { DialogDescription } from "@radix-ui/react-dialog"
 
 interface ArtifactSelectDialogProps {
 	artifacts: ArtifactData[]
@@ -133,7 +134,7 @@ export function ArtifactSelectDialog({
 				)}
 			</div>
 
-			<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+			<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col bg-background/70 backdrop-blur-sm">
 				<DialogHeader>
 					<DialogTitle className="flex items-baseline gap-4">
 						<span>Select Artifact</span>
@@ -142,6 +143,7 @@ export function ArtifactSelectDialog({
 						</span>
 					</DialogTitle>
 				</DialogHeader>
+				<DialogDescription className="sr-only">Select an artifact from the list below.</DialogDescription>
 
 				{/* Search and Sort Row */}
 				<div className="flex flex-row gap-2 items-start sm:items-center justify-between">

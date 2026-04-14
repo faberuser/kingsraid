@@ -9,11 +9,11 @@ import { Spinner } from "@/components/ui/spinner"
 
 interface HeroesPageWrapperProps {
 	heroesMap: Record<DataVersion, HeroData[]>
-	heroClasses: Array<{
-		value: string
-		name: string
-		icon: string
-	}>
+	heroClasses: readonly {
+		readonly value: string
+		readonly name: string
+		readonly icon: string
+	}[]
 	releaseOrderMap: Record<DataVersion, Record<string, string>>
 	saReverse: string[]
 	// heroNamesMap: Record<DataVersion, string[]>

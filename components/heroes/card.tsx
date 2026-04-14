@@ -1,7 +1,5 @@
 import Image from "@/components/next-image"
 import Link from "next/link"
-import { useState } from "react"
-import { Spinner } from "@/components/ui/spinner"
 
 export type ViewMode = "splashart" | "icon"
 
@@ -16,13 +14,6 @@ export default function HeroCard({
 	reverseSA: boolean
 	viewMode?: ViewMode
 }) {
-	const [isLoading, setIsLoading] = useState(false)
-
-	const handleClick = () => {
-		if (isLoading) return // Prevent multiple clicks
-		setIsLoading(true)
-	}
-
 	// Derive icon path from splashart path (replace sa.png with ico.png)
 	const iconPath = splashart.replace(/sa\.png$/, "ico.png")
 	const imagePath = viewMode === "icon" ? iconPath : splashart
@@ -36,7 +27,6 @@ export default function HeroCard({
 				isIconView ? "w-24 h-24 sm:w-28 sm:h-28" : "w-40 h-56 sm:w-48 sm:h-64"
 			}`}
 			href={`/heroes/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`}
-			onClick={handleClick}
 		>
 			<Image
 				src={"/kingsraid-data/assets/" + imagePath}
@@ -44,6 +34,8 @@ export default function HeroCard({
 				width="0"
 				height="0"
 				sizes="40vw md:20vw"
+				// placeholder="blur"
+				// blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-transform duration-300`}
@@ -55,11 +47,6 @@ export default function HeroCard({
 			>
 				{name}
 			</div>
-			{isLoading && (
-				<div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-					<Spinner className={isIconView ? "size-4" : "size-8"} />
-				</div>
-			)}
 		</Link>
 	)
 }

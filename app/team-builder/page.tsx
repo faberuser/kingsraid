@@ -10,17 +10,7 @@ import {
 	fetchAllVersions,
 } from "@/lib/get-data"
 import TeamBuilderClient from "@/app/team-builder/client"
-
-const heroClasses = [
-	{ value: "all", name: "All", icon: "All" },
-	{ value: "knight", name: "Knight", icon: "/kingsraid-data/assets/classes/knight.png" },
-	{ value: "warrior", name: "Warrior", icon: "/kingsraid-data/assets/classes/warrior.png" },
-	{ value: "archer", name: "Archer", icon: "/kingsraid-data/assets/classes/archer.png" },
-	{ value: "mechanic", name: "Mechanic", icon: "/kingsraid-data/assets/classes/mechanic.png" },
-	{ value: "wizard", name: "Wizard", icon: "/kingsraid-data/assets/classes/wizard.png" },
-	{ value: "assassin", name: "Assassin", icon: "/kingsraid-data/assets/classes/assassin.png" },
-	{ value: "priest", name: "Priest", icon: "/kingsraid-data/assets/classes/priest.png" },
-]
+import { HERO_CLASSES } from "@/lib/constants"
 
 interface ClassPerksData {
 	perks: {
@@ -67,24 +57,18 @@ async function getClassPerks(): Promise<{
 }
 
 export default async function TeamBuilderPage() {
-	// Fetch all data versions
-	const heroesMap = await fetchAllVersions<HeroData[]>(
-		async (version) => (await getData("heroes", { dataVersion: version })) as HeroData[],
-	)
-
-	const artifactsLegacy = (await getData("artifacts", { dataVersion: "legacy" })) as ArtifactData[]
-
-	const saReverse = (await getJsonDataList("table-data/sa_reverse.json")) as string[]
-
-	// Fetch release orders
-	const releaseOrderMap = await fetchAllVersions<Record<string, string>>(
-		async (version) => await getHeroReleaseOrder(version),
-	)
-
-	// Fetch artifact release order (artifacts only exist in legacy)
-	const artifactReleaseOrder = await getArtifactReleaseOrder("legacy")
-
-	const classPerks = await getClassPerks()
+	// Fetch all independent data in parallel (Rule 1.5: Promise.all for independent operations)
+	const [heroesMap, artifactsLegacy, saReverse, releaseOrderMap, artifactReleaseOrder, classPerks] =
+		await Promise.all([
+			fetchAllVersions<HeroData[]>(
+				(version) => getData("heroes", { dataVersion: version }) as Promise<HeroData[]>,
+			),
+			getData("artifacts", { dataVersion: "legacy" }) as Promise<ArtifactData[]>,
+			getJsonDataList("table-data/sa_reverse.json") as Promise<string[]>,
+			fetchAllVersions<Record<string, string>>((version) => getHeroReleaseOrder(version)),
+			getArtifactReleaseOrder("legacy"),
+			getClassPerks(),
+		])
 
 	return (
 		<TeamBuilderClient
@@ -93,7 +77,7 @@ export default async function TeamBuilderPage() {
 			artifactReleaseOrder={artifactReleaseOrder}
 			saReverse={saReverse}
 			classPerks={classPerks}
-			heroClasses={heroClasses}
+			heroClasses={HERO_CLASSES}
 			releaseOrderMap={releaseOrderMap}
 		/>
 	)

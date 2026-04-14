@@ -46,10 +46,10 @@ export interface TeamBuilderClientProps {
 		general: ClassPerksData
 		classes: Record<string, ClassPerksData>
 	}
-	heroClasses: Array<{
-		value: string
-		name: string
-		icon: string
-	}>
+	heroClasses: readonly {
+		readonly value: string
+		readonly name: string
+		readonly icon: string
+	}[]
 	releaseOrderMap: Record<DataVersion, Record<string, string>>
 }

@@ -4,7 +4,7 @@ import { HeroData } from "@/model/Hero"
 import Image from "@/components/next-image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Check, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -25,7 +25,7 @@ interface HeroSelectDialogProps {
 	team: TeamMember[]
 	onSelectHero: (hero: HeroData) => void
 	// Filter/sort props
-	heroClasses: HeroClass[]
+	heroClasses: readonly HeroClass[]
 	selectedClass: string
 	onClassChange: (value: string) => void
 	selectedDamageType: string
@@ -71,7 +71,7 @@ export function HeroSelectDialog({
 				if (!open) onSearchChange("")
 			}}
 		>
-			<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col">
+			<DialogContent className="sm:max-w-6xl max-h-[85vh] overflow-hidden flex flex-col bg-background/70 backdrop-blur-sm">
 				<DialogHeader>
 					<DialogTitle className="flex items-baseline gap-4">
 						<span>Select Heroes</span>
@@ -80,6 +80,7 @@ export function HeroSelectDialog({
 						</span>
 					</DialogTitle>
 				</DialogHeader>
+				<DialogDescription className="sr-only">Select a hero from the list below.</DialogDescription>
 
 				{/* Filters and Search */}
 				<div className="space-y-3">

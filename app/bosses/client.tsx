@@ -23,25 +23,24 @@ interface BossesClientProps {
 export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
-	const [loadingCard, setLoadingCard] = useState<string | null>(null)
-	const [sortType, setSortType] = useState<"alphabetical" | "release">("release")
-	const [reverseSort, setReverseSort] = useState(true)
+
+	// Lazy state initializers: read from localStorage only once (Rule 5.12)
+	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
+		if (typeof window === "undefined") return "release"
+		const stored = localStorage.getItem("bossesSortType")
+		return stored === "alphabetical" || stored === "release" ? stored : "release"
+	})
+	const [reverseSort, setReverseSort] = useState(() => {
+		if (typeof window === "undefined") return true
+		const stored = localStorage.getItem("bossesReverseSort")
+		return stored !== null ? stored === "true" : true
+	})
 	const [mounted, setMounted] = useState(false)
 
-	// Load sort preferences from localStorage after hydration
+	// Signal hydration complete
 	useEffect(() => {
 		// eslint-disable-next-line
 		setMounted(true)
-		const storedSortType = localStorage.getItem("bossesSortType")
-		const storedReverseSort = localStorage.getItem("bossesReverseSort")
-
-		if (storedSortType === "alphabetical" || storedSortType === "release") {
-			setSortType(storedSortType)
-		}
-
-		if (storedReverseSort !== null) {
-			setReverseSort(storedReverseSort === "true")
-		}
 	}, [])
 
 	// Save sort state to localStorage when changed
@@ -102,6 +101,13 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 		if (reverseSort) {
 			result = result.reverse()
 		}
+
+		// Save the sorted/filtered list of boss slugs to sessionStorage for next/prev navigation
+		if (typeof window !== "undefined") {
+			const slugs = result.map((b) => b.profile.name.toLowerCase().replace(/\s+/g, "-"))
+			sessionStorage.setItem("currentBossList", JSON.stringify(slugs))
+		}
+
 		return result
 	}, [bosses, searchQuery, fuse, selectedType, sortType, reverseSort, releaseOrder])
 
@@ -148,7 +154,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 							variant={`${sortType === "alphabetical" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "alphabetical") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("alphabetical")
 									setReverseSort(false)
@@ -165,7 +171,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 							variant={`${sortType === "release" ? "outline" : "ghost"}`}
 							onClick={() => {
 								if (sortType === "release") {
-									setReverseSort(!reverseSort)
+									setReverseSort((prev) => !prev)
 								} else {
 									setSortType("release")
 									setReverseSort(true)
@@ -231,8 +237,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 					<Link
 						key={boss.profile.name}
 						href={`/bosses/${encodeURIComponent(boss.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
-						className="hover:scale-105 transition-transform duration-300"
-						onClick={() => setLoadingCard(boss.profile.name)}
+						className="hover:scale-105 transition-transform duration-300 grid-item-lazy"
 					>
 						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
 							<CardHeader>
@@ -280,11 +285,6 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 									</div>
 								</div>
 							</CardContent>
-							{loadingCard === boss.profile.name && (
-								<div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
-									<Spinner className="size-8" />
-								</div>
-							)}
 						</Card>
 					</Link>
 				))}

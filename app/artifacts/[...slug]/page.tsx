@@ -3,7 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import ArtifactPageWrapper from "@/app/artifacts/[...slug]/page-wrapper"
 import { ArtifactData } from "@/model/Artifact"
-import { SlugPageProps, findData, fetchAllVersions } from "@/lib/get-data"
+import { SlugPageProps, findData, fetchAllVersions, getArtifactNamesForVersion } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 
@@ -64,5 +64,11 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		return (await findData(artifactName, "artifacts", { dataVersion: version })) as ArtifactData | null
 	})
 
-	return <ArtifactPageWrapper artifactsMap={artifactsMap} />
+	// Get ordered list of all artifact slugs for prev/next navigation
+	const allLegacyArtifacts = await getArtifactNamesForVersion("legacy")
+	const sortedArtifactSlugs = allLegacyArtifacts
+		.sort((a, b) => a.localeCompare(b))
+		.map((name) => name.toLowerCase().replace(/\s+/g, "-"))
+
+	return <ArtifactPageWrapper artifactsMap={artifactsMap} sortedArtifactSlugs={sortedArtifactSlugs} />
 }
