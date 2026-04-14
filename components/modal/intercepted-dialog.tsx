@@ -99,7 +99,7 @@ export function InterceptedDialog({ children, hasModal }: { children: React.Reac
 		<Dialog open={hasModal} onOpenChange={onOpenChange}>
 			<DialogContent
 				ref={dialogContentRef}
-				className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-y-auto custom-scrollbar sm:max-w-7xl bg-background/70 backdrop-blur-sm shadow-xl"
+				className="max-w-[95vw] w-full max-h-[95vh] h-full overflow-y-auto custom-scrollbar sm:max-w-7xl bg-background/70 backdrop-blur-sm"
 			>
 				<DialogTitle className="sr-only">View Item</DialogTitle>
 				<DialogDescription className="sr-only">Item Details</DialogDescription>
