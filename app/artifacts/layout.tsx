@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { ArtifactsLayoutClient } from "@/app/artifacts/layout-client"
 
 export const metadata: Metadata = {
 	title: "Artifacts - King's Raid",
@@ -10,10 +11,5 @@ export const metadata: Metadata = {
 }
 
 export default function ArtifactsLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
-	return (
-		<>
-			<div className="main-content-list w-full">{children}</div>
-			{modal}
-		</>
-	)
+	return <ArtifactsLayoutClient modal={modal}>{children}</ArtifactsLayoutClient>
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Suspense, useCallback } from "react"
+import { useEffect, useState, Suspense, useCallback, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,7 +15,6 @@ import Costumes from "@/components/heroes/costumes"
 import dynamic from "next/dynamic"
 import Voices, { VoiceFiles } from "@/components/heroes/voices"
 import { capitalize, classColorMapBadge } from "@/lib/utils"
-import { setDialogNavigating } from "@/components/modal/intercepted-dialog"
 import Image from "@/components/next-image"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
@@ -54,6 +53,7 @@ export default function HeroClient({
 	sortedHeroSlugs,
 }: HeroClientProps) {
 	const router = useRouter()
+	const [isNavigating, startTransition] = useTransition()
 	// Helper function to get tab from hash
 	const getTabFromHash = () => {
 		if (typeof window === "undefined") return "skills"
@@ -112,10 +112,9 @@ export default function HeroClient({
 			if (targetIndex >= slugs.length) targetIndex = 0
 
 			const targetSlug = slugs[targetIndex]
-			setDialogNavigating(true)
-			router.replace(`/heroes/${targetSlug}${window.location.hash}`)
-			// Reset after navigation has had time to commit
-			setTimeout(() => setDialogNavigating(false), 500)
+			startTransition(() => {
+				router.replace(`/heroes/${targetSlug}${window.location.hash}`)
+			})
 		},
 		[sortedHeroSlugs, heroData.profile.name, router],
 	)
@@ -134,7 +133,13 @@ export default function HeroClient({
 	}, [handleNavigate])
 
 	return (
-		<div>
+		<div className="relative">
+			{/* Full-dialog navigation loading overlay */}
+			{isNavigating && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-sm">
+					<Spinner className="h-10 w-10" />
+				</div>
+			)}
 			{/* Compact Hero Header */}
 			<div className="flex flex-row gap-4 items-center pb-2 relative">
 				{/* Navigation Buttons */}
@@ -146,6 +151,7 @@ export default function HeroClient({
 							onClick={() => handleNavigate("prev")}
 							title="Previous Hero"
 							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
 						>
 							<ChevronLeft className="h-5 w-5" />
 						</Button>
@@ -155,6 +161,7 @@ export default function HeroClient({
 							onClick={() => handleNavigate("next")}
 							title="Next Hero"
 							className="h-8 w-8 text-muted-foreground hover:text-foreground"
+							disabled={isNavigating}
 						>
 							<ChevronRight className="h-5 w-5" />
 						</Button>

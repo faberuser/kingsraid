@@ -226,6 +226,19 @@ export async function getArtifactNamesForVersion(version: DataVersion): Promise<
 	return data.map((artifact) => artifact.name)
 }
 
+// Get list of boss names that exist in a specific version's data folder
+export async function getBossNamesForVersion(version: DataVersion): Promise<string[]> {
+	const folder = getSourcePathForVersion(version, "bosses")
+	const bossesPath = buildPath("table-data", folder)
+
+	if (!fs.existsSync(bossesPath)) {
+		return []
+	}
+
+	const files = fs.readdirSync(bossesPath).filter((file) => file.endsWith(".json"))
+	return files.map((file) => file.replace(".json", ""))
+}
+
 // Get hero release order for a specific version
 export async function getHeroReleaseOrder(version: DataVersion): Promise<Record<string, string>> {
 	const releaseOrderFile = getSourcePathForVersion(version, "hero_release_order.json")

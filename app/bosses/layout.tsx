@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { BossesLayoutClient } from "@/app/bosses/layout-client"
 
 export const metadata: Metadata = {
 	title: "Bosses - King's Raid",
@@ -10,10 +11,5 @@ export const metadata: Metadata = {
 }
 
 export default function BossesLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
-	return (
-		<>
-			<div className="main-content-list w-full">{children}</div>
-			{modal}
-		</>
-	)
+	return <BossesLayoutClient modal={modal}>{children}</BossesLayoutClient>
 }

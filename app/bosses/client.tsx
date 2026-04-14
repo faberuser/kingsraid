@@ -101,6 +101,13 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 		if (reverseSort) {
 			result = result.reverse()
 		}
+
+		// Save the sorted/filtered list of boss slugs to sessionStorage for next/prev navigation
+		if (typeof window !== "undefined") {
+			const slugs = result.map((b) => b.profile.name.toLowerCase().replace(/\s+/g, "-"))
+			sessionStorage.setItem("currentBossList", JSON.stringify(slugs))
+		}
+
 		return result
 	}, [bosses, searchQuery, fuse, selectedType, sortType, reverseSort, releaseOrder])
 

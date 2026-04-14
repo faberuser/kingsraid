@@ -81,6 +81,13 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 		if (reverseSort) {
 			result = result.reverse()
 		}
+
+		// Save the sorted/filtered list of artifact slugs to sessionStorage for next/prev navigation
+		if (typeof window !== "undefined") {
+			const slugs = result.map((a) => a.name.toLowerCase().replace(/\s+/g, "-"))
+			sessionStorage.setItem("currentArtifactList", JSON.stringify(slugs))
+		}
+
 		return result
 	}, [artifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder])
 
