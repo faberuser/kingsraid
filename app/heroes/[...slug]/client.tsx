@@ -136,7 +136,7 @@ export default function HeroClient({
 		<div className="relative">
 			{/* Full-dialog navigation loading overlay */}
 			{isNavigating && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center">
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm">
 					<Spinner className="h-10 w-10" />
 				</div>
 			)}
