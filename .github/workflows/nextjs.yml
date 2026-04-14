@@ -42,11 +42,26 @@ jobs:
       - name: Temporarily move API routes (not supported in static export)
         run: mv app/api ../api-temp || true
 
+      - name: Temporarily remove intercepting routes (not supported in static export)
+        run: |
+          for dir in app/artifacts app/heroes app/bosses; do
+            mv "$dir/@modal" "../modal-temp-$(basename $dir)" || true
+            rm -f "$dir/default.tsx" || true
+          done
+
       - name: Build Next.js app
         run: bun run build
 
       - name: Restore API routes
         run: mv ../api-temp app/api || true
+        if: always()
+
+      - name: Restore intercepting routes
+        run: |
+          for dir in app/artifacts app/heroes app/bosses; do
+            mv "../modal-temp-$(basename $dir)" "$dir/@modal" || true
+          done
+          git checkout -- app/artifacts/default.tsx app/heroes/default.tsx app/bosses/default.tsx || true
         if: always()
 
       - name: Upload artifact

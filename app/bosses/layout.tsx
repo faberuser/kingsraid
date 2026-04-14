@@ -10,6 +10,6 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function BossesLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
+export default function BossesLayout({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
 	return <BossesLayoutClient modal={modal}>{children}</BossesLayoutClient>
 }

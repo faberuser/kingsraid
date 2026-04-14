@@ -10,6 +10,6 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function HeroesLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
+export default function HeroesLayout({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
 	return <HeroesLayoutClient modal={modal}>{children}</HeroesLayoutClient>
 }

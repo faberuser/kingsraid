@@ -10,6 +10,6 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function ArtifactsLayout({ children, modal }: { children: React.ReactNode; modal: React.ReactNode }) {
+export default function ArtifactsLayout({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
 	return <ArtifactsLayoutClient modal={modal}>{children}</ArtifactsLayoutClient>
 }
