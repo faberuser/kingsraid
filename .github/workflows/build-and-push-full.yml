@@ -26,23 +26,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      # Fetch the current HEAD commit hash of each assets repo.
-      # This value is passed to data-stage as ASSETS_CACHE_VERSION so that
-      # BuildKit's layer cache is automatically busted when either repo
-      # changes, without any manual intervention.
-      - name: Resolve assets cache version
-        id: assets-version
-        run: |
-          MODELS_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD \
-            2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown") &
-          PID1=$!
-          AUDIO_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD \
-            2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown") &
-          PID2=$!
-          wait $PID1 $PID2
-          VERSION="${MODELS_HASH}-${AUDIO_HASH}"
-          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -68,7 +51,6 @@ jobs:
           tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/kingsraid:latest
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
-            ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
           cache-from: type=local,src=/var/tmp/.buildx-cache
           cache-to: type=local,dest=/var/tmp/.buildx-cache-new,mode=max,oci-mediatypes=true,compression=zstd,compression-level=3
           # Remove unnecessary
