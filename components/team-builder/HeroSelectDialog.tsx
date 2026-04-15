@@ -193,6 +193,7 @@ export function HeroSelectDialog({
 				<div className="flex-1 overflow-y-auto custom-scrollbar mt-3">
 					<div className="flex flex-wrap justify-center gap-3 px-2 py-1">
 						{filteredHeroes.map((hero) => {
+							if (!hero.profile.thumbnail) return null
 							const alreadyInTeam = team.some((m) => m.hero?.profile.name === hero.profile.name)
 							return (
 								<button
