@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, startTransition } from "react"
 import Fuse from "fuse.js"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -23,6 +24,13 @@ interface BossesClientProps {
 export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: BossesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedType, setSelectedType] = useState("all")
+	const [loadingSlug, setLoadingSlug] = useState<string | null>(null)
+	const pathname = usePathname()
+
+	// Reset spinner if navigation is cancelled
+	useEffect(() => {
+		startTransition(() => setLoadingSlug(null))
+	}, [pathname])
 
 	// Lazy state initializers: read from localStorage only once (Rule 5.12)
 	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
@@ -233,61 +241,70 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 			</div>
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{filteredBosses.map((boss) => (
-					<Link
-						key={boss.profile.name}
-						href={`/bosses/${encodeURIComponent(boss.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
-						className="hover:scale-105 transition-transform duration-300 grid-item-lazy"
-					>
-						<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
-							<CardHeader>
-								<div className="flex items-center gap-4">
-									<div className="w-16 h-16 flex items-center justify-center">
-										<Image
-											src={`/kingsraid-data/assets/${boss.profile.thumbnail}`}
-											alt={boss.profile.name}
-											width="0"
-											height="0"
-											sizes="30vw md:10vw"
-											className="w-full h-auto rounded"
-										/>
+				{filteredBosses.map((boss) => {
+					const slug = boss.profile.name.toLowerCase().replace(/\s+/g, "-")
+					return (
+						<Link
+							key={boss.profile.name}
+							href={`/bosses/${encodeURIComponent(slug)}`}
+							className="hover:scale-105 transition-transform duration-300 grid-item-lazy"
+							onClick={() => setLoadingSlug(slug)}
+						>
+							<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
+								<CardHeader>
+									<div className="flex items-center gap-4">
+										<div className="w-16 h-16 flex items-center justify-center">
+											<Image
+												src={`/kingsraid-data/assets/${boss.profile.thumbnail}`}
+												alt={boss.profile.name}
+												width="0"
+												height="0"
+												sizes="30vw md:10vw"
+												className="w-full h-auto rounded"
+											/>
+										</div>
+										<div className="flex-1">
+											<CardTitle className="text-lg">{boss.profile.name}</CardTitle>
+											<CardDescription className="text-sm">{boss.profile.title}</CardDescription>
+										</div>
 									</div>
-									<div className="flex-1">
-										<CardTitle className="text-lg">{boss.profile.name}</CardTitle>
-										<CardDescription className="text-sm">{boss.profile.title}</CardDescription>
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-3">
-									<div className="flex flex-wrap gap-2">
-										{boss.profile.type.map((type) => (
-											<Badge key={type} variant="default">
-												{type}
+								</CardHeader>
+								<CardContent>
+									<div className="space-y-3">
+										<div className="flex flex-wrap gap-2">
+											{boss.profile.type.map((type) => (
+												<Badge key={type} variant="default">
+													{type}
+												</Badge>
+											))}
+											<Badge variant="secondary">{boss.profile.race}</Badge>
+											<Badge
+												variant="default"
+												className={
+													boss.profile.damage_type === "Physical"
+														? "bg-red-300"
+														: boss.profile.damage_type === "Magical"
+															? "bg-blue-300"
+															: "bg-yellow-400"
+												}
+											>
+												{boss.profile.damage_type}
 											</Badge>
-										))}
-										<Badge variant="secondary">{boss.profile.race}</Badge>
-										<Badge
-											variant="default"
-											className={
-												boss.profile.damage_type === "Physical"
-													? "bg-red-300"
-													: boss.profile.damage_type === "Magical"
-														? "bg-blue-300"
-														: "bg-yellow-400"
-											}
-										>
-											{boss.profile.damage_type}
-										</Badge>
+										</div>
+										<div className="text-sm text-muted-foreground line-clamp-3">
+											{boss.profile.characteristics}
+										</div>
 									</div>
-									<div className="text-sm text-muted-foreground line-clamp-3">
-										{boss.profile.characteristics}
+								</CardContent>
+								{loadingSlug === slug && (
+									<div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg z-10">
+										<Spinner className="h-8 w-8 text-white" />
 									</div>
-								</div>
-							</CardContent>
-						</Card>
-					</Link>
-				))}
+								)}
+							</Card>
+						</Link>
+					)
+				})}
 			</div>
 		</div>
 	)
