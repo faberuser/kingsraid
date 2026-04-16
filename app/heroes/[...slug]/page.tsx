@@ -90,7 +90,7 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		return (await findData(heroName, "heroes", { dataVersion: version })) as HeroData | null
 	})
 
-	// Kick off independent data fetches in parallel (Rule 1.2: defer await, Rule 1.5: Promise.all)
+	// Kick off independent data fetches in parallel
 	const costumesMapPromise = fetchAllVersions(async (version) => {
 		const data = heroDataMap[version]
 		return data ? await getCostumeData(data.costumes) : []

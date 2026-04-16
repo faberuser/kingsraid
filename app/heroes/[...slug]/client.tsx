@@ -21,7 +21,7 @@ import DataHeavyContent from "@/components/data-heavy-content"
 import { ClassPerksData } from "@/components/heroes/perks"
 import { Spinner } from "@/components/ui/spinner"
 
-// Dynamic import for heavy 3D model viewer (Rule 2.4: Dynamic imports for heavy components)
+// Dynamic import for heavy 3D model viewer
 const Models = dynamic(() => import("@/components/heroes/models"), {
 	loading: () => (
 		<div className="flex items-center justify-center h-96">

@@ -159,7 +159,7 @@ body.intercepted-mobile-open .main-content-list {
 		filter: brightness(1.1) saturate(1);
 	}
 
-	/* content-visibility: auto for off-screen items in long grid lists (Rule 6.2) */
+	/* content-visibility: auto for off-screen items in long grid lists */
 	.grid-item-lazy {
 		content-visibility: auto;
 		contain-intrinsic-size: auto 300px;

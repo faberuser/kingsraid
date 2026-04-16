@@ -4,7 +4,7 @@ import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions, getBlu
 import { HERO_CLASSES } from "@/lib/constants"
 
 export default async function HeroesPage() {
-	// Fetch all independent data in parallel (Rule 1.5: Promise.all for independent operations)
+	// Fetch all independent data in parallel
 	const [heroesMap, releaseOrderMap, saReverse] = await Promise.all([
 		fetchAllVersions<HeroData[]>((version) => getData("heroes", { dataVersion: version }) as Promise<HeroData[]>),
 		fetchAllVersions<Record<string, string>>((version) => getHeroReleaseOrder(version)),

@@ -3,7 +3,7 @@ import { BossData } from "@/model/Boss"
 import { getData, getJsonData, fetchAllVersions } from "@/lib/get-data"
 
 export default async function BossesPage() {
-	// Fetch all independent data in parallel (Rule 1.5: Promise.all for independent operations)
+	// Fetch all independent data in parallel
 	const [bossesMap, bossTypeMap, releaseOrderMap] = await Promise.all([
 		fetchAllVersions<BossData[]>((version) => getData("bosses", { dataVersion: version }) as Promise<BossData[]>),
 		getJsonData("table-data/legacy/boss_type.json"),

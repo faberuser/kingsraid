@@ -57,7 +57,7 @@ async function getClassPerks(): Promise<{
 }
 
 export default async function TeamBuilderPage() {
-	// Fetch all independent data in parallel (Rule 1.5: Promise.all for independent operations)
+	// Fetch all independent data in parallel
 	const [heroesMap, artifactsLegacy, saReverse, releaseOrderMap, artifactReleaseOrder, classPerks] =
 		await Promise.all([
 			fetchAllVersions<HeroData[]>(

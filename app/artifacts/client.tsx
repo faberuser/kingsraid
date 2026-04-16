@@ -28,7 +28,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 		startTransition(() => setLoadingSlug(null))
 	}, [pathname])
 
-	// Lazy state initializers: read from localStorage only once (Rule 5.12)
+	// Lazy state initializers: read from localStorage only once
 	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
 		if (typeof window === "undefined") return "release"
 		const stored = localStorage.getItem("artifactsSortType")
