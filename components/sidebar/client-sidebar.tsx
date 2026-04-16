@@ -23,7 +23,6 @@ import GlobalSearch from "@/components/sidebar/global-search"
 import { ArtifactData } from "@/model/Artifact"
 import { HeroData } from "@/model/Hero"
 import { BossData } from "@/model/Boss"
-import Image from "@/components/next-image"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
@@ -71,13 +70,8 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 					{state === "collapsed" ? null : (
 						<Link href="/" className="flex items-center space-x-2 group-data-[collapsible=icon]:hidden">
 							{mounted && (
-								<Image
-									src={logoSrc}
-									alt="King's Raid Logo"
-									width={160}
-									height={40}
-									style={{ width: "100%", height: "auto" }}
-								/>
+								// eslint-disable-next-line @next/next/no-img-element
+								<img src={logoSrc} alt="King's Raid Logo" style={{ width: "100%", height: "auto" }} />
 							)}
 						</Link>
 					)}
@@ -146,13 +140,8 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 				<Link target="_blank" rel="noreferrer" href="https://github.com/faberuser/kingsraid">
 					<Button variant="outline" size="icon" className="bg-background">
 						{mounted && (
-							<Image
-								src={githubSrc}
-								alt="GitHub Logo"
-								width={20}
-								height={20}
-								className="h-[1.2rem] w-[1.2rem]"
-							/>
+							// eslint-disable-next-line @next/next/no-img-element
+							<img src={githubSrc} alt="GitHub Logo" className="h-[1.2rem] w-[1.2rem]" />
 						)}
 						<div className="sr-only">GitHub</div>
 					</Button>
