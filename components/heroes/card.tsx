@@ -3,7 +3,7 @@
 import Image from "@/components/next-image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect, useRef, startTransition } from "react"
+import { useState, useEffect, useCallback, startTransition } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 export type ViewMode = "splashart" | "icon"
@@ -23,8 +23,6 @@ export default function HeroCard({
 }) {
 	const [loading, setLoading] = useState(false)
 	const [imageLoaded, setImageLoaded] = useState(false)
-	const [unoptimized, setUnoptimized] = useState(false)
-	const imgRef = useRef<HTMLImageElement>(null)
 	const pathname = usePathname()
 
 	// Reset spinner if navigation is cancelled or we return to the same page
@@ -32,12 +30,12 @@ export default function HeroCard({
 		startTransition(() => setLoading(false))
 	}, [pathname])
 
-	// If the image was already cached by the browser and loaded before React
-	// hydrated, onLoad will never fire. Check img.complete on mount as a fallback.
-	// Also guard naturalWidth > 0 — a broken/404 image also has complete=true.
-	useEffect(() => {
-		if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
-			startTransition(() => setImageLoaded(true))
+	// Callback ref — fires the instant the <img> DOM node is attached.
+	// If the image already loaded from cache before React hydrated,
+	// onLoad won't fire, so we catch it here immediately.
+	const imgRefCallback = useCallback((node: HTMLImageElement | null) => {
+		if (node?.complete && node.naturalWidth > 0) {
+			setImageLoaded(true)
 		}
 	}, [])
 
@@ -74,23 +72,16 @@ export default function HeroCard({
 				</div>
 			)}
 			<Image
-				ref={imgRef}
+				ref={imgRefCallback}
 				src={"/kingsraid-data/assets/" + imagePath}
 				alt={name}
 				width="0"
 				height="0"
 				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 512px, 160px"}
-				unoptimized={unoptimized}
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
 				onLoad={() => setImageLoaded(true)}
-				onError={() => {
-					// If the Next.js image optimizer fails, retry with the raw source file
-					if (!unoptimized) {
-						setUnoptimized(true)
-					}
-				}}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
