@@ -85,7 +85,7 @@ export default function HeroCard({
 				alt={name}
 				width="0"
 				height="0"
-				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 192px, 160px"}
+				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 512px, 384px"}
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-all duration-500 ${imageLoaded && !imageError ? "opacity-100" : "opacity-0"}`}
