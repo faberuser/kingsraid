@@ -3,7 +3,7 @@
 import Image from "@/components/next-image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect, startTransition } from "react"
+import { useState, useEffect, useRef, startTransition } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 export type ViewMode = "splashart" | "icon"
@@ -23,12 +23,21 @@ export default function HeroCard({
 }) {
 	const [loading, setLoading] = useState(false)
 	const [imageLoaded, setImageLoaded] = useState(false)
+	const imgRef = useRef<HTMLImageElement>(null)
 	const pathname = usePathname()
 
 	// Reset spinner if navigation is cancelled or we return to the same page
 	useEffect(() => {
 		startTransition(() => setLoading(false))
 	}, [pathname])
+
+	// If the image was already cached by the browser and loaded before React
+	// hydrated, onLoad will never fire. Check img.complete on mount as a fallback.
+	useEffect(() => {
+		if (imgRef.current?.complete) {
+			startTransition(() => setImageLoaded(true))
+		}
+	}, [])
 
 	// Derive icon path from splashart path (replace sa.png with ico.png)
 	const iconPath = splashart.replace(/sa\.png$/, "ico.png")
@@ -50,16 +59,20 @@ export default function HeroCard({
 			{/* Blur placeholder layer — sits behind the real image and is naturally
 			    covered as the real image fades in */}
 			{blurDataURL && !imageLoaded && (
-				<div
-					className="absolute inset-0"
-					style={{
-						backgroundImage: `url(${blurDataURL})`,
-						backgroundSize: "cover",
-						backgroundPosition: isIconView ? "center" : reverseSA ? "left" : "right",
-					}}
-				/>
+				<div className="absolute inset-0 overflow-hidden">
+					<div
+						className="absolute inset-0 scale-110"
+						style={{
+							backgroundImage: `url(${blurDataURL})`,
+							backgroundSize: "cover",
+							backgroundPosition: isIconView ? "center" : reverseSA ? "left" : "right",
+							filter: "blur(24px)",
+						}}
+					/>
+				</div>
 			)}
 			<Image
+				ref={imgRef}
 				src={"/kingsraid-data/assets/" + imagePath}
 				alt={name}
 				width="0"
