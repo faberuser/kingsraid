@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
-import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions } from "@/lib/get-data"
+import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions, getBlurDataURLMap } from "@/lib/get-data"
 import { HERO_CLASSES } from "@/lib/constants"
 
 export default async function HeroesPage() {
@@ -11,8 +11,19 @@ export default async function HeroesPage() {
 		getJsonDataList("table-data/sa_reverse.json") as Promise<string[]>,
 	])
 
-	// Get hero names for each version
-	// const heroNamesMap = await fetchAllVersions<string[]>(async (version) => await getHeroNamesForVersion(version))
+	// Collect all unique image paths (splashart + icon) across all versions and generate blur placeholders
+	const allSplasharts = new Set<string>()
+	for (const heroes of Object.values(heroesMap)) {
+		for (const hero of heroes) {
+			if (hero.splashart) {
+				const saPath = `/kingsraid-data/assets/${hero.splashart}`
+				const icoPath = `/kingsraid-data/assets/${hero.splashart.replace(/sa\.png$/, "ico.png")}`
+				allSplasharts.add(saPath)
+				allSplasharts.add(icoPath)
+			}
+		}
+	}
+	const blurDataURLMap = await getBlurDataURLMap(Array.from(allSplasharts))
 
 	return (
 		<HeroesPageWrapper
@@ -20,7 +31,7 @@ export default async function HeroesPage() {
 			heroClasses={HERO_CLASSES}
 			releaseOrderMap={releaseOrderMap}
 			saReverse={saReverse}
-			// heroNamesMap={heroNamesMap}
+			blurDataURLMap={blurDataURLMap}
 		/>
 	)
 }

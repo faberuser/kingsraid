@@ -13,13 +13,16 @@ export default function HeroCard({
 	splashart,
 	reverseSA = false,
 	viewMode = "splashart",
+	blurDataURLMap = {},
 }: {
 	name: string
 	splashart: string
 	reverseSA: boolean
 	viewMode?: ViewMode
+	blurDataURLMap?: Record<string, string>
 }) {
 	const [loading, setLoading] = useState(false)
+	const [imageLoaded, setImageLoaded] = useState(false)
 	const pathname = usePathname()
 
 	// Reset spinner if navigation is cancelled or we return to the same page
@@ -30,6 +33,8 @@ export default function HeroCard({
 	// Derive icon path from splashart path (replace sa.png with ico.png)
 	const iconPath = splashart.replace(/sa\.png$/, "ico.png")
 	const imagePath = viewMode === "icon" ? iconPath : splashart
+	const imageKey = `/kingsraid-data/assets/${imagePath}`
+	const blurDataURL = blurDataURLMap[imageKey]
 
 	const isIconView = viewMode === "icon"
 
@@ -50,7 +55,10 @@ export default function HeroCard({
 				sizes="40vw md:20vw"
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
-				} hover:scale-110 transition-transform duration-300`}
+				} hover:scale-110 transition-all duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
+				style={{ backgroundPosition: isIconView ? "center" : reverseSA ? "left" : "right" }}
+				onLoad={() => setImageLoaded(true)}
+				{...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
