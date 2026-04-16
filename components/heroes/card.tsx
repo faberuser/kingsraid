@@ -3,7 +3,7 @@
 import Image from "@/components/next-image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect, useCallback, startTransition } from "react"
+import { useState, useEffect, startTransition } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 export type ViewMode = "splashart" | "icon"
@@ -29,15 +29,6 @@ export default function HeroCard({
 	useEffect(() => {
 		startTransition(() => setLoading(false))
 	}, [pathname])
-
-	// Callback ref — fires the instant the <img> DOM node is attached.
-	// If the image already loaded from cache before React hydrated,
-	// onLoad won't fire, so we catch it here immediately.
-	const imgRefCallback = useCallback((node: HTMLImageElement | null) => {
-		if (node?.complete && node.naturalWidth > 0) {
-			setImageLoaded(true)
-		}
-	}, [])
 
 	// Derive icon path from splashart path (replace sa.png with ico.png)
 	const iconPath = splashart.replace(/sa\.png$/, "ico.png")
@@ -72,12 +63,11 @@ export default function HeroCard({
 				</div>
 			)}
 			<Image
-				ref={imgRefCallback}
 				src={"/kingsraid-data/assets/" + imagePath}
 				alt={name}
 				width="0"
 				height="0"
-				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 512px, 160px"}
+				sizes="40vw md:20vw"
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
