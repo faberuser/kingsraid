@@ -22,7 +22,6 @@ export default function HeroCard({
 	blurDataURLMap?: Record<string, string>
 }) {
 	const [loading, setLoading] = useState(false)
-	const [imageLoaded, setImageLoaded] = useState(false)
 	const pathname = usePathname()
 
 	// Reset spinner if navigation is cancelled or we return to the same page
@@ -47,21 +46,6 @@ export default function HeroCard({
 			href={`/heroes/${encodeURIComponent(name.toLowerCase().replace(/\s+/g, "-"))}`}
 			onClick={() => setLoading(true)}
 		>
-			{/* Blur placeholder layer — sits behind the real image and is naturally
-			    covered as the real image fades in */}
-			{blurDataURL && !imageLoaded && (
-				<div className="absolute inset-0 overflow-hidden">
-					<div
-						className="absolute inset-0 scale-110"
-						style={{
-							backgroundImage: `url(${blurDataURL})`,
-							backgroundSize: "cover",
-							backgroundPosition: isIconView ? "center" : reverseSA ? "left" : "right",
-							filter: "blur(24px)",
-						}}
-					/>
-				</div>
-			)}
 			<Image
 				src={"/kingsraid-data/assets/" + imagePath}
 				alt={name}
@@ -70,8 +54,8 @@ export default function HeroCard({
 				sizes="40vw md:20vw"
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
-				} hover:scale-110 transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
-				onLoad={() => setImageLoaded(true)}
+				} hover:scale-110 transition-all duration-500`}
+				{...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
