@@ -23,7 +23,7 @@ export default function HeroCard({
 }) {
 	const [loading, setLoading] = useState(false)
 	const [imageLoaded, setImageLoaded] = useState(false)
-	const [imageError, setImageError] = useState(false)
+	const [unoptimized, setUnoptimized] = useState(false)
 	const imgRef = useRef<HTMLImageElement>(null)
 	const pathname = usePathname()
 
@@ -60,7 +60,7 @@ export default function HeroCard({
 		>
 			{/* Blur placeholder layer — sits behind the real image and is naturally
 			    covered as the real image fades in */}
-			{blurDataURL && !imageLoaded && !imageError && (
+			{blurDataURL && !imageLoaded && (
 				<div className="absolute inset-0 overflow-hidden">
 					<div
 						className="absolute inset-0 scale-110"
@@ -73,24 +73,24 @@ export default function HeroCard({
 					/>
 				</div>
 			)}
-			{/* Styled fallback shown only when the image fails to load */}
-			{imageError && (
-				<div className="absolute inset-0 flex items-center justify-center bg-muted">
-					<span className="text-muted-foreground text-xs text-center px-1">{name}</span>
-				</div>
-			)}
 			<Image
 				ref={imgRef}
 				src={"/kingsraid-data/assets/" + imagePath}
 				alt={name}
 				width="0"
 				height="0"
-				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 192px, 160px"}
+				sizes={isIconView ? "(min-width: 640px) 112px, 96px" : "(min-width: 640px) 512px, 160px"}
+				unoptimized={unoptimized}
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
-				} hover:scale-110 transition-all duration-500 ${imageLoaded && !imageError ? "opacity-100" : "opacity-0"}`}
+				} hover:scale-110 transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
 				onLoad={() => setImageLoaded(true)}
-				onError={() => setImageError(true)}
+				onError={() => {
+					// If the Next.js image optimizer fails, retry with the raw source file
+					if (!unoptimized) {
+						setUnoptimized(true)
+					}
+				}}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
