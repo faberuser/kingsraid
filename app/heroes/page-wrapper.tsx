@@ -16,6 +16,7 @@ interface HeroesPageWrapperProps {
 	}[]
 	releaseOrderMap: Record<DataVersion, Record<string, string>>
 	saReverse: string[]
+	blurDataURLMap: Record<string, string>
 	// heroNamesMap: Record<DataVersion, string[]>
 }
 
@@ -24,6 +25,7 @@ export default function HeroesPageWrapper({
 	heroClasses,
 	releaseOrderMap,
 	saReverse,
+	blurDataURLMap,
 	// heroNamesMap,
 }: HeroesPageWrapperProps) {
 	const { version, isHydrated } = useDataVersion()
@@ -41,5 +43,13 @@ export default function HeroesPageWrapper({
 		)
 	}
 
-	return <HeroesClient heroes={heroes} heroClasses={heroClasses} releaseOrder={releaseOrder} saReverse={saReverse} />
+	return (
+		<HeroesClient
+			heroes={heroes}
+			heroClasses={heroClasses}
+			releaseOrder={releaseOrder}
+			saReverse={saReverse}
+			blurDataURLMap={blurDataURLMap}
+		/>
+	)
 }

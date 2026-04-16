@@ -52,6 +52,61 @@ function sortByName(data: DataItem[]): DataItem[] {
 	return data.sort((a, b) => getName(a).localeCompare(getName(b)))
 }
 
+// ---------------------------------------------------------------------------
+// Blur placeholder cache — module-level in-memory Map.
+// Populated once per server process; cleared automatically on server restart
+// or rebuild, so edited images are always picked up fresh.
+// ---------------------------------------------------------------------------
+
+const blurCache = new Map<string, string>()
+
+// Generate a base64 blur placeholder for a local public image using Plaiceholder.
+// `imagePath` should be the path as used in the <Image> src (e.g. "/kingsraid-data/assets/...").
+// Results are cached in memory for the lifetime of the server process.
+// Returns null if the file cannot be read (graceful degradation).
+export async function getBlurDataURL(imagePath: string): Promise<string | null> {
+	if (blurCache.has(imagePath)) return blurCache.get(imagePath)!
+
+	try {
+		const { getPlaiceholder } = await import("plaiceholder")
+		const absolutePath = path.join(process.cwd(), "public", imagePath)
+		if (!fs.existsSync(absolutePath)) return null
+		const buffer = fs.readFileSync(absolutePath)
+		const { base64 } = await getPlaiceholder(buffer)
+		blurCache.set(imagePath, base64)
+		return base64
+	} catch (err) {
+		console.warn(`[getBlurDataURL] Failed for ${imagePath}:`, err)
+		return null
+	}
+}
+
+// Generate blur placeholders for a list of image paths in parallel.
+// Returns a map of imagePath → base64 blur data URL.
+// Only uncached paths are processed; cached paths are resolved immediately.
+export async function getBlurDataURLMap(imagePaths: string[]): Promise<Record<string, string>> {
+	const uncached = imagePaths.filter((p) => !blurCache.has(p))
+
+	if (uncached.length > 0) {
+		const { getPlaiceholder } = await import("plaiceholder")
+		await Promise.all(
+			uncached.map(async (p) => {
+				try {
+					const absolutePath = path.join(process.cwd(), "public", p)
+					if (!fs.existsSync(absolutePath)) return
+					const buffer = fs.readFileSync(absolutePath)
+					const { base64 } = await getPlaiceholder(buffer)
+					blurCache.set(p, base64)
+				} catch (err) {
+					console.warn(`[getBlurDataURL] Failed for ${p}:`, err)
+				}
+			}),
+		)
+	}
+
+	return Object.fromEntries(imagePaths.filter((p) => blurCache.has(p)).map((p) => [p, blurCache.get(p)!]))
+}
+
 // Get JSON data as object (key-value pairs)
 export async function getJsonData(jsonFile: string): Promise<Record<string, string>> {
 	const filePath = buildPath(jsonFile)

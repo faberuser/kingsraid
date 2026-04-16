@@ -271,14 +271,20 @@ function TeamBuilderContent({
 
 	// Fuse search for heroes
 	const fuse = useMemo(() => {
-		return new Fuse(heroes, {
-			keys: ["profile.name", "profile.title", "aliases"],
-			threshold: 0.3,
-		})
+		return new Fuse(
+			heroes.filter((hero) => hero.profile?.thumbnail),
+			{
+				keys: ["profile.name", "profile.title", "aliases"],
+				threshold: 0.3,
+			},
+		)
 	}, [heroes])
 
 	const filteredHeroes = useMemo(() => {
 		let result = heroes
+
+		// Filter out heroes without profile thumbnail
+		result = result.filter((hero) => hero.profile?.thumbnail)
 
 		// Apply search filter
 		if (heroSearchQuery.trim()) {

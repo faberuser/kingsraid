@@ -12,14 +12,14 @@ import { Search, ChevronDown, ChevronUp, Image as ImageIcon, Grid2x2 } from "luc
 import HeroCard, { ViewMode } from "@/components/heroes/card"
 import { Spinner } from "@/components/ui/spinner"
 
-// Hoisted static constants outside component to avoid re-creation each render (Rule 6.3)
+// Hoisted static constants outside component to avoid re-creation each render
 const damageTypes = [
 	{ value: "all", name: "All" },
 	{ value: "magical", name: "Magical" },
 	{ value: "physical", name: "Physical" },
 ] as const
 
-// Hoisted RegExp to avoid re-creation in loops (Rule 7.10)
+// Hoisted RegExp to avoid re-creation in loops
 const SLUG_REGEXP = /\s+/g
 
 interface HeroesClientProps {
@@ -31,13 +31,20 @@ interface HeroesClientProps {
 	}[]
 	releaseOrder: Record<string, string>
 	saReverse: string[]
+	blurDataURLMap: Record<string, string>
 }
 
-export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReverse }: HeroesClientProps) {
+export default function HeroesClient({
+	heroes,
+	heroClasses,
+	releaseOrder,
+	saReverse,
+	blurDataURLMap,
+}: HeroesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedClass, setSelectedClass] = useState("all")
 	const [selectedDamageType, setSelectedDamageType] = useState("all")
-	// Lazy state initializers: read from localStorage only once (Rule 5.12)
+	// Lazy state initializers: read from localStorage only once
 	const [sortType, setSortType] = useState<"alphabetical" | "release">(() => {
 		if (typeof window === "undefined") return "release"
 		const stored = localStorage.getItem("heroesSortType")
@@ -72,16 +79,22 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
-		return new Fuse(heroes, {
-			keys: ["profile.name", "profile.title", "aliases"],
-			threshold: 0.3,
-			includeScore: true,
-		})
+		return new Fuse(
+			heroes.filter((hero) => hero.splashart),
+			{
+				keys: ["profile.name", "profile.title", "aliases"],
+				threshold: 0.3,
+				includeScore: true,
+			},
+		)
 	}, [heroes])
 
 	// Filter heroes by search query and class
 	const filteredHeroes = useMemo(() => {
 		let result = heroes
+
+		// Filter out heroes without splashart
+		result = result.filter((hero) => hero.splashart)
 
 		// Apply search filter
 		if (searchQuery.trim()) {
@@ -288,6 +301,7 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 								splashart={hero.splashart}
 								reverseSA={saReverse.includes(hero.profile.name)}
 								viewMode={viewMode}
+								blurDataURLMap={blurDataURLMap}
 							/>
 						),
 				)}
