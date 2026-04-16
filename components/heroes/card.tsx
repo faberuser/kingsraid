@@ -33,8 +33,9 @@ export default function HeroCard({
 
 	// If the image was already cached by the browser and loaded before React
 	// hydrated, onLoad will never fire. Check img.complete on mount as a fallback.
+	// Also guard naturalWidth > 0 — a broken/404 image also has complete=true.
 	useEffect(() => {
-		if (imgRef.current?.complete) {
+		if (imgRef.current?.complete && imgRef.current.naturalWidth > 0) {
 			startTransition(() => setImageLoaded(true))
 		}
 	}, [])
@@ -82,6 +83,7 @@ export default function HeroCard({
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-all duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"}`}
 				onLoad={() => setImageLoaded(true)}
+				onError={() => setImageLoaded(true)}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
