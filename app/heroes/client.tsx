@@ -72,16 +72,22 @@ export default function HeroesClient({ heroes, heroClasses, releaseOrder, saReve
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
-		return new Fuse(heroes, {
-			keys: ["profile.name", "profile.title", "aliases"],
-			threshold: 0.3,
-			includeScore: true,
-		})
+		return new Fuse(
+			heroes.filter((hero) => hero.splashart),
+			{
+				keys: ["profile.name", "profile.title", "aliases"],
+				threshold: 0.3,
+				includeScore: true,
+			},
+		)
 	}, [heroes])
 
 	// Filter heroes by search query and class
 	const filteredHeroes = useMemo(() => {
 		let result = heroes
+
+		// Filter out heroes without splashart
+		result = result.filter((hero) => hero.splashart)
 
 		// Apply search filter
 		if (searchQuery.trim()) {
