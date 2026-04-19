@@ -41,9 +41,6 @@ RUN \
 
 FROM oven/bun:alpine AS base
 
-# sharp native dependencies for Next.js image optimization
-RUN apk add --no-cache libc6-compat
-
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL

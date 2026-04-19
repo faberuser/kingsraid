@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "@/components/next-image"
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect, startTransition } from "react"
@@ -55,7 +55,8 @@ export default function HeroCard({
 				className={`w-full flex-1 object-cover ${
 					isIconView ? "object-center" : reverseSA ? "object-left" : "object-right"
 				} hover:scale-110 transition-all duration-500`}
-				{...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
+				// placeholder="blur"
+				// blurDataURL={blurDataURL}
 			/>
 			<div
 				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${

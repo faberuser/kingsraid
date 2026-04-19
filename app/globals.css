@@ -165,3 +165,11 @@ body.intercepted-mobile-open .main-content-list {
 		contain-intrinsic-size: auto 300px;
 	}
 }
+
+.invisible {
+	visibility: hidden;
+}
+
+.absolute {
+	position: absolute;
+}
