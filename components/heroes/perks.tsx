@@ -9,7 +9,7 @@ import { ChevronDown, LayoutGrid, LayoutList, Share2, Check } from "lucide-react
 import { useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import PerksBuilder from "./perks-builder"
+import PerksBuilder from "@/components/heroes/perks-builder"
 
 export interface ClassPerksData {
 	t1Perks: Record<string, string>
@@ -58,12 +58,12 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 					{viewMode === "list" ? (
 						<>
 							<LayoutGrid className="w-4 h-4" />
-							Builder
+							Transcends
 						</>
 					) : (
 						<>
 							<LayoutList className="w-4 h-4" />
-							List
+							Descriptions
 						</>
 					)}
 				</Button>
