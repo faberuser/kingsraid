@@ -10,31 +10,26 @@ import { useReducer } from "react"
  * https://github.com/vercel/next.js/issues/53329
  */
 
-export const LoadingImage: React.FC<LoadingImageProps> = ({ placeholder, ...props }) => {
+export const LoadingImage: React.FC<LoadingImageProps> = ({ blurDataURL, ...props }) => {
 	const [isLoading, stopLoading] = useReducer((_, ev) => (props.onLoad?.(ev), false), true)
 
-	// prettier-ignore
+	const blurProps = blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {}
+
 	return (
-    <>
-      {isLoading && placeholder &&
-        <Image
-          {...props}
-          placeholder={undefined}
-          src={placeholder}
-        />
-      }
-      <Image
-        {...props}
-        className={`${props.className} ${isLoading && 'absolute invisible'}`}
-        placeholder={undefined}
-        onLoad={stopLoading}
-      />
-    </>
-  )
+		<>
+			{isLoading && blurDataURL && <Image {...props} {...blurProps} />}
+			<Image
+				{...props}
+				{...blurProps}
+				className={`${props.className} ${isLoading && "absolute invisible"}`}
+				onLoad={stopLoading}
+			/>
+		</>
+	)
 }
 
 export type NextImageProps = Parameters<typeof Image>[0]
 
 export interface LoadingImageProps extends NextImageProps {
-	placeholder: NextImageProps["placeholder"]
+	blurDataURL?: string
 }
