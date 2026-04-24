@@ -36,11 +36,11 @@ interface HomeClientProps {
 
 export default function HomeClient({ steamNews }: HomeClientProps) {
 	return (
-		<div className="min-h-screen">
-			<div className="container mx-auto my-auto">
+		<div className="min-h-screen flex flex-col justify-center">
+			<div className="container mx-auto my-auto space-y-10">
 				{/* Hero Section */}
-				<div className="text-center mb-10 mt-0 md:mt-20 p-2 md:p-0">
-					<div className="text-3xl font-bold mb-4 bg-clip-text leading-[normal]">King&apos;s Raid Info</div>
+				<div className="text-center p-2 md:p-0 space-y-4">
+					<div className="text-3xl font-bold bg-clip-text leading-[normal]">King&apos;s Raid Info</div>
 					<div className="text-lg text-muted-foreground max-w-2xl mx-auto">
 						King&apos;s Raid was originally released in 2016 by Vespa Inc (changed to Anic Inc). Then End of
 						Service in 2025 and is undergoing a relaunch by Masangsoft in 2026.
@@ -51,8 +51,8 @@ export default function HomeClient({ steamNews }: HomeClientProps) {
 
 				{/* News Section */}
 				{steamNews.length > 0 && (
-					<div className="mb-10">
-						<div className="text-center mb-8">
+					<div className="space-y-4 p-2 md:p-0">
+						<div className="text-center">
 							<div className="text-2xl font-bold mb-2">Latest News</div>
 							<div className="text-muted-foreground">Steam Announcements</div>
 						</div>
@@ -61,8 +61,8 @@ export default function HomeClient({ steamNews }: HomeClientProps) {
 				)}
 
 				{/* Resources Grid */}
-				<div>
-					<div className="text-center mb-8">
+				<div className="space-y-4">
+					<div className="text-center">
 						<div className="text-2xl font-bold mb-2">Resources</div>
 						<div className="text-muted-foreground">King&apos;s Raid Communities</div>
 					</div>
