@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { ArrowRight, Plus, Trash2 } from "lucide-react"
 import { DiffRow } from "@/app/stats/components/diff-primitives"
 import { HeroSection } from "@/app/stats/components/hero-section"
@@ -182,12 +181,12 @@ export default function StatsClient({
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4 mt-1">
+			<div className="space-y-2 mb-4">
 				<div className="items-baseline">
-					<div className="text-xl font-bold">Version Stats (WIP)</div>
+					<div className="text-xl font-bold">
+						Version Stats <span className="text-sm font-normal text-red-500">(WIP)</span>
+					</div>
 				</div>
-
-				<Separator />
 			</div>
 
 			{/* Version Chain Selector */}

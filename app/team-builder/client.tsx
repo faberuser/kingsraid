@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Share2, Check, Trash2 } from "lucide-react"
 import { useDataVersion } from "@/hooks/use-data-version"
@@ -566,7 +565,7 @@ function TeamBuilderContent({
 		<TooltipProvider>
 			<div>
 				{/* Header */}
-				<div className="space-y-4 mb-4">
+				<div className="space-y-2 mb-4">
 					<div className="flex flex-row justify-between items-center">
 						<div className="flex flex-row gap-2 items-baseline">
 							<div className="text-xl font-bold">Team Builder</div>
@@ -583,8 +582,6 @@ function TeamBuilderContent({
 							</Button>
 						</div>
 					</div>
-
-					<Separator />
 				</div>
 
 				{/* Team Grid */}
