@@ -4,7 +4,6 @@ import { NewsItem } from "@/lib/steam-rss"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Separator } from "@/components/ui/separator"
 import Image from "@/components/next-image"
 import { Eye, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -37,82 +36,82 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 	}
 
 	return (
-		<div className="space-y-4 mb-4 mt-1">
-			{/* Header */}
-			<div className="flex flex-row gap-2 items-baseline">
-				<div className="text-xl font-bold">News Hub</div>
-				<div className="text-muted-foreground text-sm">Showing {steamNews.length} news</div>
-			</div>
-
-			<Separator />
-
-			{/* News Grid */}
-			<div className="grid grid-cols-1 gap-4">
-				{steamNews.map((news, index) => {
-					const imageSrc = getImage(news.contents)
-
-					return (
-						<Card
-							key={index}
-							className="overflow-hidden cursor-pointer flex flex-col lg:flex-row justify-between gap-0 hover:scale-102 transition-transform"
-							onClick={() => handleNewsClick(news)}
-						>
-							{imageSrc && (
-								<div className="w-full h-auto lg:w-150 lg:h-full flex items-center justify-center object-contain rounded px-6 mb-4 lg:mb-0 lg:px-0 lg:ml-6">
-									<Image
-										width="0"
-										height="0"
-										sizes="80vw md:40vw"
-										src={imageSrc}
-										alt={news.title}
-										className="w-full h-auto object-contain rounded"
-									/>
-								</div>
-							)}
-
-							<div className="flex flex-col justify-between gap-4 w-full">
-								<div className="flex flex-col gap-4">
-									<CardHeader>
-										<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
-											<div className="text-xl font-semibold">{news.title}</div>
-											{news.isNew ? <Badge className="text-xs">New</Badge> : null}
-										</CardTitle>
-										<CardDescription className="text-sm whitespace-nowrap">
-											{news.formattedDate}
-										</CardDescription>
-									</CardHeader>
-									<CardContent>
-										<div
-											className="text-muted-foreground line-clamp-5"
-											dangerouslySetInnerHTML={{ __html: getContent(news.contents) }}
-										/>
-									</CardContent>
-								</div>
-								<CardFooter className="flex items-center gap-2 text-sm text-muted-foreground">
-									<Eye className="w-4 h-4" />
-									View More
-								</CardFooter>
-							</div>
-						</Card>
-					)
-				})}
-			</div>
-
-			{/* No News Message */}
-			{steamNews.length === 0 && (
-				<div className="text-center py-16">
-					<div className="text-muted-foreground text-lg">No news available at the moment.</div>
+		<div>
+			<div className="space-y-4 mb-4">
+				{/* Header */}
+				<div className="flex flex-row gap-2 items-baseline">
+					<div className="text-xl font-bold">News Hub</div>
+					<div className="text-muted-foreground text-sm">Showing {steamNews.length} news</div>
 				</div>
-			)}
 
-			{/* News Detail Dialog */}
-			<NewsDetailDialog
-				news={selectedNews}
-				imgSrc={selectedNews ? getImage(selectedNews.contents) || undefined : undefined}
-				content={selectedNews ? getContent(selectedNews.contents) : undefined}
-				isOpen={isDialogOpen}
-				onOpenChange={setIsDialogOpen}
-			/>
+				{/* News Grid */}
+				<div className="grid grid-cols-1 gap-4">
+					{steamNews.map((news, index) => {
+						const imageSrc = getImage(news.contents)
+
+						return (
+							<Card
+								key={index}
+								className="overflow-hidden cursor-pointer flex flex-col lg:flex-row justify-between gap-0 hover:scale-102 transition-transform"
+								onClick={() => handleNewsClick(news)}
+							>
+								{imageSrc && (
+									<div className="w-full h-auto lg:w-150 lg:h-full flex items-center justify-center object-contain rounded px-6 mb-4 lg:mb-0 lg:px-0 lg:ml-6">
+										<Image
+											width="0"
+											height="0"
+											sizes="80vw md:40vw"
+											src={imageSrc}
+											alt={news.title}
+											className="w-full h-auto object-contain rounded"
+										/>
+									</div>
+								)}
+
+								<div className="flex flex-col justify-between gap-4 w-full">
+									<div className="flex flex-col gap-4">
+										<CardHeader>
+											<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
+												<div className="text-xl font-semibold">{news.title}</div>
+												{news.isNew ? <Badge className="text-xs">New</Badge> : null}
+											</CardTitle>
+											<CardDescription className="text-sm whitespace-nowrap">
+												{news.formattedDate}
+											</CardDescription>
+										</CardHeader>
+										<CardContent>
+											<div
+												className="text-muted-foreground line-clamp-5"
+												dangerouslySetInnerHTML={{ __html: getContent(news.contents) }}
+											/>
+										</CardContent>
+									</div>
+									<CardFooter className="flex items-center gap-2 text-sm text-muted-foreground">
+										<Eye className="w-4 h-4" />
+										View More
+									</CardFooter>
+								</div>
+							</Card>
+						)
+					})}
+				</div>
+
+				{/* No News Message */}
+				{steamNews.length === 0 && (
+					<div className="text-center py-16">
+						<div className="text-muted-foreground text-lg">No news available at the moment.</div>
+					</div>
+				)}
+
+				{/* News Detail Dialog */}
+				<NewsDetailDialog
+					news={selectedNews}
+					imgSrc={selectedNews ? getImage(selectedNews.contents) || undefined : undefined}
+					content={selectedNews ? getContent(selectedNews.contents) : undefined}
+					isOpen={isDialogOpen}
+					onOpenChange={setIsDialogOpen}
+				/>
+			</div>
 		</div>
 	)
 }

@@ -5,7 +5,6 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface SoftcapData {
@@ -85,18 +84,16 @@ export default function SoftcapClient({ softcapData }: SoftcapClientProps) {
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4 mt-1">
+			<div className="space-y-2 mb-4">
 				<div className="items-baseline">
 					<div className="text-xl font-bold">Softcap</div>
 				</div>
-
-				<Separator />
 			</div>
 
 			{!hasData ? (
 				<div className="text-center py-12 text-muted-foreground">
 					<p className="text-lg">No softcap data available for this data version.</p>
-					<p className="text-sm mt-2">Try switching to Legacy version.</p>
+					<p className="text-sm mt-2">Try switching to another version.</p>
 				</div>
 			) : (
 				<>

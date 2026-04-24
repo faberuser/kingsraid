@@ -6,7 +6,6 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import Image from "@/components/next-image"
 import { ArtifactData } from "@/model/Artifact"
 import { Button } from "@/components/ui/button"
@@ -110,7 +109,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4">
+			<div className="space-y-2 mb-4">
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Artifacts</div>
@@ -154,8 +153,6 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 						</Button>
 					</div>
 				</div>
-
-				<Separator />
 
 				{/* Search Input */}
 				<div className="w-full max-w-sm relative">

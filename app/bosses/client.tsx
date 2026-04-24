@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
@@ -132,17 +131,16 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 	if (bosses.length === 0) {
 		return (
 			<div>
-				<div className="space-y-4 mb-4 mt-1">
+				<div className="space-y-2 mb-4">
 					<div className="flex flex-row justify-between items-center">
 						<div className="flex flex-row gap-2 items-baseline">
 							<div className="text-xl font-bold">Bosses</div>
 						</div>
 					</div>
-					<Separator />
 				</div>
 				<div className="text-center py-12 text-muted-foreground">
 					<p className="text-lg">No boss data available for this data version.</p>
-					<p className="text-sm mt-2">Try switching to Legacy version.</p>
+					<p className="text-sm mt-2">Try switching to another version.</p>
 				</div>
 			</div>
 		)
@@ -150,7 +148,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4">
+			<div className="space-y-2 mb-4">
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Bosses</div>
@@ -192,8 +190,6 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 						</Button>
 					</div>
 				</div>
-
-				<Separator />
 
 				<div className="flex flex-col items-start xl:flex-row xl:items-center gap-4">
 					{/* Search Input */}

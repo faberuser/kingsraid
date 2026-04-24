@@ -5,7 +5,6 @@ import { useState, useEffect, useMemo } from "react"
 import Fuse from "fuse.js"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp, Image as ImageIcon, Grid2x2 } from "lucide-react"
@@ -150,7 +149,7 @@ export default function HeroesClient({
 
 	return (
 		<div>
-			<div className="space-y-4 mb-4">
+			<div className="space-y-2 mb-4">
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Heroes</div>
@@ -192,8 +191,6 @@ export default function HeroesClient({
 						</Button>
 					</div>
 				</div>
-
-				<Separator />
 
 				<div className="flex flex-col items-center justify-between xl:flex-row">
 					<div className="flex flex-col items-center xl:flex-row gap-4 w-full">
