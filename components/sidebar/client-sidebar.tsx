@@ -35,7 +35,7 @@ export const items = [
 	{ title: "Bosses", url: "/bosses", icon: ShieldHalf },
 	{ title: "Softcap", url: "/softcap", icon: Calculator },
 	{ title: "Team Builder", url: "/team-builder", icon: Users },
-	// { title: "Stats", url: "/stats", icon: BarChart2 },
+	{ title: "Stats", url: "/stats", icon: BarChart2 },
 ]
 
 interface ClientSidebarProps {

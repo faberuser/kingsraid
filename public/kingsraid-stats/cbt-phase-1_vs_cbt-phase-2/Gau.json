@@ -1,0 +1,78 @@
+{
+  "heroName": "Gau",
+  "versionA": "cbt-phase-1",
+  "versionB": "cbt-phase-2",
+  "generatedAt": "2026-04-24T01:24:08.475Z",
+  "skills": {
+    "2": {
+      "hasChanges": true,
+      "cooldown": {
+        "from": "16",
+        "to": "12"
+      },
+      "description": {
+        "from": "Removes all harmful effects from all allies and increases their Attack by 252*(0.7+(0.3*Skill Level*Awakening Coefficient)), Attack Speed by 10%, and Physical Defense by 91*(0.7+(0.3*Skill Level*Awakening Coefficient)) for 8sec.",
+        "to": "For 8 sec, increases the ATK of all allies by 302*(0.7+(0.3*Skill Level*Awakening Coefficient)), Attack Speed by 10%, and Physical DEF by 91*(0.7+(0.3*Skill Level*Awakening Coefficient))."
+      }
+    },
+    "3": {
+      "hasChanges": true,
+      "mana_cost": {
+        "from": "2",
+        "to": "4"
+      }
+    },
+    "4": {
+      "hasChanges": true,
+      "description": {
+        "from": "Every second, Attack increases by 16*(0.7+(0.3*Skill Level*Awakening Coefficient)), Status Resistance by 10, and damage dealt to non-hero enemies by 1%. This effect stacks up to 20 times.",
+        "to": "Every 1 sec, increases ATK by 10*(0.7+(0.3*Skill Level*Awakening Coefficient)), Status Resistance by 10, and damage dealt to non-hero enemies by 1%. This effect stacks up to 30 times."
+      }
+    }
+  },
+  "books": {
+    "4": {
+      "skillName": "Enrage",
+      "hasChanges": true,
+      "IV": {
+        "from": "Status Resistance increases by 30 for each stack.",
+        "to": "Status Resistance increases by 10 for each stack."
+      }
+    }
+  },
+  "perks_t3": {},
+  "uts": {
+    "1": {
+      "name": "King of Frost Helmet",
+      "hasChanges": true,
+      "description": {
+        "from": "[Smash] reduces the target’s ATK by 25% and increases the P.DMG they take by {0}% for 10 sec.",
+        "to": "[Smash] reduces the target's ATK by 25% and increases the P.DMG they take by {0}% for 10 sec."
+      },
+      "values": {}
+    },
+    "2": {
+      "name": "Fighter's Horn",
+      "hasChanges": true,
+      "description": {
+        "from": "[Battle Roar] Reduces Mana Cost by 1 and increases targets' Crit DMG by {0}% for the duration of Skill.",
+        "to": "[Battle Roar] Reduces Mana Cost by 1 and increases targets Crit DMG by {0}% for the duration of Skill."
+      },
+      "values": {}
+    },
+    "3": {
+      "name": "Barbarian Mug",
+      "hasChanges": true,
+      "description": {
+        "from": "[Vortex] increases DMG by {0}%, and its last hit increases the P.DMG the target takes by {1}% for 10 sec.",
+        "to": "[Vortex] increases DMG by {0}%, and its last hit increases the P.DMG the target takes by {1}% for 10 Sec."
+      },
+      "values": {
+        "2": {
+          "from": "10 / 12 / 14 / 17 / 21 / 25",
+          "to": ""
+        }
+      }
+    }
+  }
+}
