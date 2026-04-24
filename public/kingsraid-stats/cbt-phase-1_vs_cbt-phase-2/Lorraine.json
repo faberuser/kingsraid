@@ -1,0 +1,34 @@
+{
+  "heroName": "Lorraine",
+  "versionA": "cbt-phase-1",
+  "versionB": "cbt-phase-2",
+  "generatedAt": "2026-04-24T01:24:08.478Z",
+  "skills": {},
+  "books": {},
+  "perks_t3": {},
+  "uts": {
+    "2": {
+      "name": "Deadly Belladonna",
+      "hasChanges": true,
+      "description": {
+        "from": "[Seed of Belladonna] Reduces Mana Cost by 1, Mana of hit enemies by {0}, and recovers own Mana by {1}.",
+        "to": "[Seed of Belladonna] Reduces Mana Cost by 1, Mana of hit enemies by {0}, and recovers own Mana by {2}."
+      },
+      "values": {
+        "1": {
+          "from": "100 / 120 / 140 / 170 / 210 / 250",
+          "to": ""
+        }
+      }
+    }
+  },
+  "uw": {
+    "hasChanges": true,
+    "values": {
+      "0": {
+        "from": "120 / 150 / 175 / 200 / 225 / 250",
+        "to": "125 / 150 / 175 / 200 / 225 / 250"
+      }
+    }
+  }
+}

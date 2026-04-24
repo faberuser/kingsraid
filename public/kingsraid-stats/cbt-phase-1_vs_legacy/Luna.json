@@ -1,0 +1,151 @@
+{
+  "heroName": "Luna",
+  "versionA": "cbt-phase-1",
+  "versionB": "legacy",
+  "generatedAt": "2026-04-24T01:24:08.506Z",
+  "skills": {
+    "1": {
+      "hasChanges": true,
+      "mana_cost": {
+        "from": "1",
+        "to": "2"
+      },
+      "description": {
+        "from": "Unleashes an attack that bounces 4 times starting from the nearest enemy, dealing 684*(1+0.3Skill Level)+300% of Attack Power Magic Damage to each enemy hit. Damage increases by up to 100% the farther the enemy is. This attack is treated as a Normal Attack.",
+        "to": "Deals ??? M.DMG by shooting a bouncing projectile which bounces 3 times starting from the nearest enemy. The further the enemy, the more DMG inflicted."
+      }
+    },
+    "2": {
+      "hasChanges": true,
+      "name": {
+        "from": "Look out above!",
+        "to": "Look Out Above!"
+      },
+      "mana_cost": {
+        "from": "3",
+        "to": "2"
+      },
+      "description": {
+        "from": "Deals 792*(1+0.3Skill Level)+347.5% of Attack Power Magic Damage 2 time(s) to a random enemy and surrounding enemies, and stuns them for 1sec. Damage increases by up to 200% the farther the enemy is.",
+        "to": "Deals ??? M.DMG to enemies furthest away in a small range, and stuns them for 3 sec. The further the enemy, the more DMG they will take."
+      }
+    },
+    "3": {
+      "hasChanges": true,
+      "mana_cost": {
+        "from": "3",
+        "to": "1"
+      },
+      "description": {
+        "from": "Deals 342*(1+0.3Skill Level)+150% of Attack Power Magic Damage 6 time(s) to enemies within range, knocks them back for 1sec, and reduces their Critical Chance by 25% for 7sec. Damage increases by up to 150% the farther the enemy is.",
+        "to": "Deals ??? M.DMG to target enemies in range, and reduces target's Crit Chance by 100% for 7 sec."
+      }
+    },
+    "4": {
+      "hasChanges": true,
+      "cooldown": {
+        "from": "12",
+        "to": null
+      },
+      "description": {
+        "from": "Attacks the farthest enemy, dealing 799*(1+0.3Skill Level)+350% of Attack Power Magic Damage, knocking them back for 0.5sec, and increasing Magic Damage taken by 20% for 6sec. Damage increases by up to 200% the farther the enemy is.",
+        "to": "When inflicted by CC, dispels negative effects from self and attacks the farthest enemy, dealing ??? M.DMG and knocking it away for 2 sec."
+      }
+    }
+  },
+  "books": {},
+  "perks_t3": {
+    "1": {
+      "hasChanges": true,
+      "light": {
+        "from": "Damage increases by 50%.",
+        "to": "Gains immunity to CC for the duration of Skill."
+      },
+      "dark": {
+        "from": "Stuns enemies hit for 1 sec.",
+        "to": "Enemies hit are stunned for 2 sec."
+      }
+    },
+    "2": {
+      "hasChanges": true,
+      "light": {
+        "from": "Mana cost is increased by 2000, but the number of hits is increased by 2.",
+        "to": "In exchange for 2 additional Mana Cost, attacks random enemies 3 times."
+      },
+      "dark": {
+        "from": "Mana cost is increased by 1000, but targets the farthest enemy.",
+        "to": "Ignores enemy Block."
+      }
+    },
+    "3": {
+      "hasChanges": true,
+      "light": {
+        "from": "Damage increases by 50%.",
+        "to": "Reduces ACC of hit enemies by 150 for 7 sec."
+      },
+      "dark": {
+        "from": "For 7 sec, reduces Accuracy of enemies hit by 150.",
+        "to": "In exchange for 1 additional Mana Cost, knock back the enemy over a long distance."
+      }
+    }
+  },
+  "uts": {
+    "1": {
+      "name": "Golden Bell of Luck",
+      "hasChanges": true,
+      "description": {
+        "from": "[Pew!] Increases DMG by {0}%, and upon Critical Hit, recovers Mana by 200.",
+        "to": "[Pew!] Increases DMG by 20%, and upon Critical Hit, recovers Mana by {0}."
+      },
+      "values": {
+        "0": {
+          "from": "20 / 24 / 29 / 35 / 42 / 50",
+          "to": "200 / 240 / 290 / 350 / 420 / 500"
+        }
+      }
+    },
+    "3": {
+      "name": "Never-Melting Snow Flower",
+      "hasChanges": true,
+      "description": {
+        "from": "[Twinkle Twinkle] The Crit Chance Reduction effect becomes irremovable, and increases the duration by {0} sec.",
+        "to": "[Twinkle Twinkle] Crit Chance Reduction will not be dispelled, and the effect duration will increase by {0} sec."
+      },
+      "values": {}
+    },
+    "4": {
+      "name": "Carrot Cake",
+      "hasChanges": true,
+      "description": {
+        "from": "[Gotcha!] reduces Cooldown by {0} sec and cleanses self when affected by a CC once every 20 sec.",
+        "to": "[Gotcha!] Greatly increases the knockback range, and Cooldown is reduced by {0} sec."
+      },
+      "values": {
+        "0": {
+          "from": "2.5 / 3 / 3.5 / 4 / 4.5 / 5",
+          "to": "2 / 2.4 / 2.9 / 3.5 / 4.2 / 5"
+        }
+      }
+    }
+  },
+  "perks_t5": {
+    "hasChanges": true,
+    "dark": {
+      "from": "Damage dealt to non-hero enemies is increased by 10%, and damage taken is reduced by 10%.",
+      "to": "Grants Blessing of the Carrot. Blessing of the Carrot increases DMG dealt to Non-Hero enemies by 30%, and reduces DMG received by 30%."
+    }
+  },
+  "uw": {
+    "hasChanges": true,
+    "description": {
+      "from": "Critical Damage is increased by {0}%, Normal Attack damage by {1}%, and Attack Range by {2}%.",
+      "to": "Increases Crit DMG by {0}%, DMG of normal attacks by {1}% and the Range by {2}%."
+    },
+    "values": {
+      "2": {
+        "from": "12 / 14.4 / 17.2 / 21 / 25 / 30",
+        "to": "6 / 7.2 / 8.6 / 10.5 / 12.5 / 15"
+      }
+    }
+  }
+}
