@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { TeamBuilderLayoutClient } from "@/app/team-builder/layout-client"
 
 export const metadata: Metadata = {
 	title: "Team Builder - King's Raid",
@@ -9,6 +10,6 @@ export const metadata: Metadata = {
 	},
 }
 
-export default function TeamBuilderLayout({ children }: { children: React.ReactNode }) {
-	return <>{children}</>
+export default function TeamBuilderLayout({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
+	return <TeamBuilderLayoutClient modal={modal}>{children}</TeamBuilderLayoutClient>
 }
