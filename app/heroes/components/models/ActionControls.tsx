@@ -21,7 +21,7 @@ import {
 	Volume2,
 	VolumeX,
 } from "lucide-react"
-import { VoiceLanguage } from "@/components/models/types"
+import { VoiceLanguage } from "@/app/heroes/components/models/types"
 
 interface ActionControlsProps {
 	isLoading: boolean

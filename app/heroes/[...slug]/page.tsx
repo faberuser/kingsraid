@@ -8,7 +8,7 @@ import { getCostumeData } from "@/app/heroes/[...slug]/models/getCostumes"
 import { getHeroModels } from "@/app/heroes/[...slug]/models/getHeroModels"
 import { getVoiceFiles } from "@/app/heroes/[...slug]/models/getVoices"
 import { getAvailableScenes } from "@/app/heroes/[...slug]/models/getScenes"
-import { ClassPerksData } from "@/components/heroes/perks"
+import { ClassPerksData } from "@/app/heroes/components/perks"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
 const enableModelsVoices = process.env.NEXT_PUBLIC_ENABLE_MODELS_VOICES === "true"

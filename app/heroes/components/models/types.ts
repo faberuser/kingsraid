@@ -1,5 +1,5 @@
 import { ModelFile } from "@/model/Hero_Model"
-import { VoiceFiles } from "@/components/heroes/voices"
+import { VoiceFiles } from "@/app/heroes/components/voices"
 
 export const weaponTypes = [
 	"handle",

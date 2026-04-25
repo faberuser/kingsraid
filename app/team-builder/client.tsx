@@ -20,7 +20,7 @@ import {
 	decodeTeam,
 	extractVersionFromEncoded,
 } from "@/app/team-builder/utils"
-import { HeroCard, EmptySlot, HeroSelectDialog } from "@/components/team-builder"
+import { HeroCard, EmptySlot, HeroSelectDialog } from "@/app/team-builder/components"
 import { ArtifactData } from "@/model/Artifact"
 
 function TeamBuilderContent({
@@ -630,7 +630,8 @@ function TeamBuilderContent({
 				{/* Hero Select Dialog - rendered at parent level to persist across slot changes */}
 				<HeroSelectDialog
 					isOpen={heroDialogOpen}
-					onOpenChange={(open) => {
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					onOpenChange={(open: any) => {
 						setHeroDialogOpen(open)
 						if (!open) setHeroSearchQuery("")
 					}}

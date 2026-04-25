@@ -4,11 +4,11 @@ import { useCallback } from "react"
 import HeroClient from "@/app/heroes/[...slug]/client"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
-import { VoiceFiles } from "@/components/heroes/voices"
+import { VoiceFiles } from "@/app/heroes/components/voices"
 import { DataVersion } from "@/lib/constants"
 import { useCompareMode } from "@/hooks/use-compare-mode"
 import { CompareLayout } from "@/components/compare"
-import { ClassPerksData } from "@/components/heroes/perks"
+import { ClassPerksData } from "@/app/heroes/components/perks"
 
 interface HeroCompareWrapperProps {
 	heroDataMap: Record<DataVersion, HeroData | null>

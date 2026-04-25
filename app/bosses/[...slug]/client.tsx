@@ -15,7 +15,7 @@ import DataHeavyContent from "@/components/data-heavy-content"
 import { Spinner } from "@/components/ui/spinner"
 
 // Dynamic import for heavy 3D model viewer
-const BossModels = dynamic(() => import("@/components/bosses/models"), {
+const BossModels = dynamic(() => import("@/app/bosses/components/models"), {
 	loading: () => (
 		<div className="flex items-center justify-center h-96">
 			<Spinner className="h-8 w-8" />

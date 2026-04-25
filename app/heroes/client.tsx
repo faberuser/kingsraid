@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp, Image as ImageIcon, Grid2x2 } from "lucide-react"
-import HeroCard, { ViewMode } from "@/components/heroes/card"
+import HeroCard, { ViewMode } from "@/app/heroes/components/card"
 import { Spinner } from "@/components/ui/spinner"
 
 // Hoisted static constants outside component to avoid re-creation each render

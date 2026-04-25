@@ -3,13 +3,13 @@
 import HeroCompareWrapper from "@/components/compare/hero-compare-wrapper"
 import { HeroData } from "@/model/Hero"
 import { Costume, ModelFile } from "@/model/Hero_Model"
-import { VoiceFiles } from "@/components/heroes/voices"
+import { VoiceFiles } from "@/app/heroes/components/voices"
 import { useDataVersion } from "@/hooks/use-data-version"
 import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
 import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
 import { useEffect, useMemo } from "react"
 import { Spinner } from "@/components/ui/spinner"
-import { ClassPerksData } from "@/components/heroes/perks"
+import { ClassPerksData } from "@/app/heroes/components/perks"
 
 interface HeroPageWrapperProps {
 	heroDataMap: Record<DataVersion, HeroData | null>

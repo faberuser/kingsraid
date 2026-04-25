@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { ModelFile } from "@/model/Hero_Model"
-import { weaponTypes } from "@/components/models/types"
+import { weaponTypes } from "@/app/heroes/components/models/types"
 
 // Changed to return a record of model variants (similar to hero costumes)
 export type BossModelData = Record<string, ModelFile[]>

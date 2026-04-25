@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils"
 import { TeamMember } from "@/model/Team_Builder"
 import { ArtifactData } from "@/model/Artifact"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
-import { EquipmentSection } from "@/components/team-builder/EquipmentSection"
-import { PerksDialog } from "@/components/team-builder/PerksDialog"
-import { PerksCompactSummary } from "@/components/team-builder/PerksSummary"
+import { EquipmentSection } from "@/app/team-builder/components/EquipmentSection"
+import { PerksDialog } from "@/app/team-builder/components/PerksDialog"
+import { PerksCompactSummary } from "@/app/team-builder/components/PerksSummary"
 
 interface HeroCardProps {
 	member: TeamMember

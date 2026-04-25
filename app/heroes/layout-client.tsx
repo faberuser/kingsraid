@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
-import { InterceptedDialog } from "@/components/modal/intercepted-dialog"
+import { InterceptedDialog } from "@/components/intercepted-dialog"
 
 export function HeroesLayoutClient({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
 	const pathname = usePathname()
