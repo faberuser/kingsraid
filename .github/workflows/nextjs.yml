@@ -2,9 +2,9 @@ name: Deploy Next.js site to Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Temporarily remove intercepting routes (not supported in static export)
         run: |
-          for dir in app/artifacts app/heroes app/bosses; do
+          for dir in app/artifacts app/heroes app/bosses app/team-builder; do
             mv "$dir/@modal" "../modal-temp-$(basename $dir)" || true
             rm -f "$dir/default.tsx" || true
           done
@@ -58,7 +58,7 @@ jobs:
 
       - name: Restore intercepting routes
         run: |
-          for dir in app/artifacts app/heroes app/bosses; do
+          for dir in app/artifacts app/heroes app/bosses app/team-builder; do
             mv "../modal-temp-$(basename $dir)" "$dir/@modal" || true
           done
           git checkout -- app/artifacts/default.tsx app/heroes/default.tsx app/bosses/default.tsx || true
