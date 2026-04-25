@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { TeamMember } from "@/model/Team_Builder"
 import { ArtifactData } from "@/model/Artifact"
 import { MobileTooltip } from "@/components/mobile-tooltip"
-import { ArtifactSelectDialog } from "@/components/team-builder/ArtifactSelectDialog"
+import { ArtifactSelectDialog } from "@/app/team-builder/components/ArtifactSelectDialog"
 
 interface EquipmentSectionProps {
 	member: TeamMember

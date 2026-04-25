@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from "react"
 import { FBXLoader } from "three-stdlib"
 import { AnimationClip, Group } from "three"
 import { Card, CardContent } from "@/components/ui/card"
-import { ModelViewer } from "@/components/models/ModelViewer"
+import { ModelViewer } from "@/app/heroes/components/models/ModelViewer"
 import { ModelFile } from "@/model/Hero_Model"
-import { formatAnimationName } from "@/components/models/utils"
-import { ModelSelector } from "@/components/models/ModelSelector"
-import { formatModelName } from "@/components/models/utils"
+import { formatAnimationName } from "@/app/heroes/components/models/utils"
+import { ModelSelector } from "@/app/heroes/components/models/ModelSelector"
+import { formatModelName } from "@/app/heroes/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -84,7 +84,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 						(error) => {
 							clearTimeout(timeout)
 							reject(error)
-						}
+						},
 					)
 				})
 
@@ -102,7 +102,7 @@ export default function BossModels({ bossModels, bossScenes = [], bossName }: Bo
 
 						// Move idle animation to the top if it exists
 						const idleIndex = sortedAnimNames.findIndex(
-							(name) => name.includes("Idle") || name.includes("idle")
+							(name) => name.includes("Idle") || name.includes("idle"),
 						)
 						if (idleIndex > 0) {
 							const idle = sortedAnimNames.splice(idleIndex, 1)[0]

@@ -4,9 +4,9 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { InterceptedDialog } from "@/components/intercepted-dialog"
 
-export function HeroesLayoutClient({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
+export function TeamBuilderLayoutClient({ children, modal }: { children: React.ReactNode; modal?: React.ReactNode }) {
 	const pathname = usePathname()
-	const hasModal = pathname !== "/heroes" && pathname.startsWith("/heroes/")
+	const hasModal = pathname.startsWith("/heroes/")
 
 	return (
 		<>

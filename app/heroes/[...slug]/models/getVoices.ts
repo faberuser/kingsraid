@@ -1,6 +1,6 @@
 import fs from "fs"
 import path from "path"
-import { VoiceFiles } from "@/components/heroes/voices"
+import { VoiceFiles } from "@/app/heroes/components/voices"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 

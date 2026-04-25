@@ -7,22 +7,22 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { HeroData } from "@/model/Hero"
-import Profile from "@/components/heroes/profile"
-import Skills from "@/components/heroes/skills"
-import Perks from "@/components/heroes/perks"
-import Gear from "@/components/heroes/gear"
-import Costumes from "@/components/heroes/costumes"
+import Profile from "@/app/heroes/components/profile"
+import Skills from "@/app/heroes/components/skills"
+import Perks from "@/app/heroes/components/perks"
+import Gear from "@/app/heroes/components/gear"
+import Costumes from "@/app/heroes/components/costumes"
 import dynamic from "next/dynamic"
-import Voices, { VoiceFiles } from "@/components/heroes/voices"
+import Voices, { VoiceFiles } from "@/app/heroes/components/voices"
 import { capitalize, classColorMapBadge } from "@/lib/utils"
 import Image from "@/components/next-image"
 import { Costume, ModelFile } from "@/model/Hero_Model"
 import DataHeavyContent from "@/components/data-heavy-content"
-import { ClassPerksData } from "@/components/heroes/perks"
+import { ClassPerksData } from "@/app/heroes/components/perks"
 import { Spinner } from "@/components/ui/spinner"
 
 // Dynamic import for heavy 3D model viewer
-const Models = dynamic(() => import("@/components/heroes/models"), {
+const Models = dynamic(() => import("@/app/heroes/components/models"), {
 	loading: () => (
 		<div className="flex items-center justify-center h-96">
 			<Spinner className="h-8 w-8" />

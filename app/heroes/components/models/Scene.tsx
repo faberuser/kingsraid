@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
-import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
+import { loadBossOffsetConfig } from "@/app/heroes/components/models/bossOffsetConfig"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -61,7 +61,7 @@ export function Scene({ sceneName }: { sceneName: string | null }) {
 						fbx.position.set(
 							sceneOffset.position.x ?? 0,
 							sceneOffset.position.y ?? 0,
-							sceneOffset.position.z ?? 0
+							sceneOffset.position.z ?? 0,
 						)
 					}
 
@@ -70,7 +70,7 @@ export function Scene({ sceneName }: { sceneName: string | null }) {
 						fbx.rotation.set(
 							sceneOffset.rotation.x ?? 0,
 							sceneOffset.rotation.y ?? 0,
-							sceneOffset.rotation.z ?? 0
+							sceneOffset.rotation.z ?? 0,
 						)
 					}
 				}

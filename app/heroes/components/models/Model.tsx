@@ -6,9 +6,9 @@ import { useFrame } from "@react-three/fiber"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
 import { ModelFile } from "@/model/Hero_Model"
-import { weaponTypes } from "@/components/models/types"
-import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
-import { findNextInSequence, findSequenceStart } from "@/components/models/utils"
+import { weaponTypes } from "@/app/heroes/components/models/types"
+import { loadBossOffsetConfig } from "@/app/heroes/components/models/bossOffsetConfig"
+import { findNextInSequence, findSequenceStart } from "@/app/heroes/components/models/utils"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 

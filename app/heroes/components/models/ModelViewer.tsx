@@ -10,23 +10,23 @@ import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Model } from "@/components/models/Model"
-import { Scene } from "@/components/models/Scene"
-import { ScreenshotHandler } from "@/components/models/ScreenshotHandler"
-import { RecordingHandler } from "@/components/models/RecordingHandler"
-import { ScreenshotDialog } from "@/components/models/ScreenshotDialog"
-import { RecordingDialog } from "@/components/models/RecordingDialog"
-import { ControlsPanel } from "@/components/models/ControlsPanel"
-import { ActionControls } from "@/components/models/ActionControls"
-import { convertToGif } from "@/components/models/gifConverter"
+import { Model } from "@/app/heroes/components/models/Model"
+import { Scene } from "@/app/heroes/components/models/Scene"
+import { ScreenshotHandler } from "@/app/heroes/components/models/ScreenshotHandler"
+import { RecordingHandler } from "@/app/heroes/components/models/RecordingHandler"
+import { ScreenshotDialog } from "@/app/heroes/components/models/ScreenshotDialog"
+import { RecordingDialog } from "@/app/heroes/components/models/RecordingDialog"
+import { ControlsPanel } from "@/app/heroes/components/models/ControlsPanel"
+import { ActionControls } from "@/app/heroes/components/models/ActionControls"
+import { convertToGif } from "@/app/heroes/components/models/gifConverter"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
 	INITIAL_CAMERA_TARGET,
 	weaponTypes,
 	VoiceLanguage,
-} from "@/components/models/types"
-import { findVoiceForAnimation } from "@/components/models/utils"
+} from "@/app/heroes/components/models/types"
+import { findVoiceForAnimation } from "@/app/heroes/components/models/utils"
 
 const HERO_NAME_REGEX = /^Hero_([A-Za-z]+)/
 

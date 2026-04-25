@@ -1,7 +1,0 @@
-export { EquipmentSection } from "@/components/team-builder/EquipmentSection"
-export { PerksDialog } from "@/components/team-builder/PerksDialog"
-export { PerksSummary, PerksCompactSummary } from "@/components/team-builder/PerksSummary"
-export { HeroCard } from "@/components/team-builder/HeroCard"
-export { EmptySlot } from "@/components/team-builder/EmptySlot"
-export { HeroSelectDialog } from "@/components/team-builder/HeroSelectDialog"
-export { ArtifactSelectDialog } from "@/components/team-builder/ArtifactSelectDialog"

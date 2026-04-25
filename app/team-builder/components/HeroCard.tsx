@@ -1,19 +1,19 @@
 "use client"
 
 import Image from "@/components/next-image"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
-import { X, ExternalLink } from "lucide-react"
+import { X, Eye } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { TeamMember } from "@/model/Team_Builder"
 import { ArtifactData } from "@/model/Artifact"
 import { calculateUsedPoints } from "@/app/team-builder/utils"
-import { EquipmentSection } from "@/components/team-builder/EquipmentSection"
-import { PerksDialog } from "@/components/team-builder/PerksDialog"
-import { PerksCompactSummary } from "@/components/team-builder/PerksSummary"
+import { EquipmentSection } from "@/app/team-builder/components/EquipmentSection"
+import { PerksDialog } from "@/app/team-builder/components/PerksDialog"
+import { PerksCompactSummary } from "@/app/team-builder/components/PerksSummary"
 
 interface HeroCardProps {
 	member: TeamMember
@@ -65,6 +65,8 @@ export function HeroCard({
 	onDrop,
 	onDragEnd,
 }: HeroCardProps) {
+	const router = useRouter()
+
 	if (!member.hero) return null
 
 	return (
@@ -124,16 +126,14 @@ export function HeroCard({
 									variant="ghost"
 									size="icon"
 									className="h-6 w-6"
-									asChild
-									onClick={(e) => e.stopPropagation()}
+									onClick={(e) => {
+										e.stopPropagation()
+										router.push(
+											`/heroes/${encodeURIComponent(member.hero!.profile.name.toLowerCase().replace(/\s+/g, "-"))}`,
+										)
+									}}
 								>
-									<Link
-										href={`/heroes/${encodeURIComponent(member.hero.profile.name.toLowerCase().replace(/\s+/g, "-"))}`}
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										<ExternalLink className="h-4 w-4" />
-									</Link>
+									<Eye className="h-4 w-4" />
 								</Button>
 							</TooltipTrigger>
 							<TooltipContent>View Hero Details</TooltipContent>
