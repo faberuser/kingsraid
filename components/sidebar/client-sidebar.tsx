@@ -46,6 +46,8 @@ interface ClientSidebarProps {
 	}
 }
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+
 export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 	const pathname = usePathname()
 	const { resolvedTheme } = useTheme()
@@ -58,11 +60,12 @@ export default function ClientSidebar({ searchData }: ClientSidebarProps) {
 		return () => clearTimeout(timer)
 	}, [])
 
-	const logoSrc = mounted && resolvedTheme === "dark" ? "/images/logo-white.svg" : "/images/logo-black.svg"
+	const logoSrc =
+		mounted && resolvedTheme === "dark" ? `${basePath}/images/logo-white.svg` : `${basePath}/images/logo-black.svg`
 	const githubSrc =
 		mounted && resolvedTheme === "dark"
-			? "/images/GitHub_Invertocat_White.svg"
-			: "/images/GitHub_Invertocat_Black.svg"
+			? `${basePath}/images/GitHub_Invertocat_White.svg`
+			: `${basePath}/images/GitHub_Invertocat_Black.svg`
 
 	return (
 		<Sidebar collapsible="icon">
