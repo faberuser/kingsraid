@@ -30,7 +30,7 @@ interface HeroesClientProps {
 	}[]
 	releaseOrder: Record<string, string>
 	saReverse: string[]
-	blurDataURLMap: Record<string, string>
+	// blurDataURLMap: Record<string, string>
 }
 
 export default function HeroesClient({
@@ -38,7 +38,7 @@ export default function HeroesClient({
 	heroClasses,
 	releaseOrder,
 	saReverse,
-	blurDataURLMap,
+	// blurDataURLMap,
 }: HeroesClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
 	const [selectedClass, setSelectedClass] = useState("all")
@@ -298,7 +298,7 @@ export default function HeroesClient({
 								splashart={hero.splashart}
 								reverseSA={saReverse.includes(hero.profile.name)}
 								viewMode={viewMode}
-								blurDataURLMap={blurDataURLMap}
+								// blurDataURLMap={blurDataURLMap}
 							/>
 						),
 				)}

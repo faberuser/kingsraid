@@ -1,6 +1,6 @@
 import { HeroData } from "@/model/Hero"
 import HeroesPageWrapper from "@/app/heroes/page-wrapper"
-import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions, getBlurDataURLMap } from "@/lib/get-data"
+import { getData, getJsonDataList, getHeroReleaseOrder, fetchAllVersions } from "@/lib/get-data"
 import { HERO_CLASSES } from "@/lib/constants"
 
 export default async function HeroesPage() {
@@ -23,7 +23,7 @@ export default async function HeroesPage() {
 			}
 		}
 	}
-	const blurDataURLMap = await getBlurDataURLMap(Array.from(allSplasharts))
+	// const blurDataURLMap = await getBlurDataURLMap(Array.from(allSplasharts))
 
 	return (
 		<HeroesPageWrapper
@@ -31,7 +31,7 @@ export default async function HeroesPage() {
 			heroClasses={HERO_CLASSES}
 			releaseOrderMap={releaseOrderMap}
 			saReverse={saReverse}
-			blurDataURLMap={blurDataURLMap}
+			// blurDataURLMap={blurDataURLMap}
 		/>
 	)
 }
