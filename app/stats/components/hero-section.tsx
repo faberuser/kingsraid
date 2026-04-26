@@ -81,7 +81,6 @@ export function HeroSection({
 					width={32}
 					height={32}
 					className="rounded shrink-0 object-cover"
-					unoptimized
 				/>
 				<div className="flex flex-col min-w-0">
 					<span className="font-semibold text-sm">{heroName}</span>
