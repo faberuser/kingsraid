@@ -119,10 +119,10 @@ function SteamRSS({ news }: SteamRSSProps) {
 
 	return (
 		<>
-			<Carousel>
-				<CarouselContent>
+			<Carousel className="w-full h-full">
+				<CarouselContent className="w-full h-full">
 					{news.map((item, index) => (
-						<CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+						<CarouselItem key={index} className="md:basis-1/2 xl:basis-1/3">
 							<Card className="h-full gap-2 cursor-pointer" onClick={() => handleNewsClick(item)}>
 								<CardHeader>
 									<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
