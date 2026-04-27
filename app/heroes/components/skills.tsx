@@ -69,26 +69,28 @@ export default function Skills({ heroData }: SkillsProps) {
 											className="w-10 h-10 rounded"
 										/>
 									</div>
-									<div className="text-xl font-semibold flex items-center justify-center">
-										Skill {key}: {skill.name}
-									</div>
-									<div className="flex gap-2 text-sm items-center jusify-center">
-										{skill.cost && (
-											<Badge
-												variant="default"
-												className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900 h-fit"
-											>
-												Mana: {skill.cost}
-											</Badge>
-										)}
-										{skill.cooldown && (
-											<Badge
-												variant="default"
-												className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900 h-fit"
-											>
-												Cooldown: {skill.cooldown}s
-											</Badge>
-										)}
+									<div className="w-full flex flex-row justify-between md:justify-start items-center gap-2">
+										<div className="text-xl font-semibold flex items-center justify-center">
+											Skill {key}: {skill.name}
+										</div>
+										<div className="flex flex-col md:flex-row gap-2 text-sm items-center justify-center">
+											{skill.cost && (
+												<Badge
+													variant="default"
+													className="bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900 h-fit"
+												>
+													Mana: {skill.cost}
+												</Badge>
+											)}
+											{skill.cooldown && (
+												<Badge
+													variant="default"
+													className="bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900 h-fit"
+												>
+													Cooldown: {skill.cooldown}s
+												</Badge>
+											)}
+										</div>
 									</div>
 								</div>
 								<Separator className="mb-3" />
