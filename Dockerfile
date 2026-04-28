@@ -39,7 +39,7 @@ RUN \
   # remove .git folders from submodules so they don't bloat the image
   find public/ -type d -name .git -prune -exec rm -rf {} +
 
-FROM oven/bun:alpine AS base
+FROM oven/bun:1 AS base
 
 ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
