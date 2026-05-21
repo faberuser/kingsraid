@@ -2,13 +2,26 @@
 
 A web application that provides a number of data from the mobile game King's Raid.
 
-## Data and 3D Model Files
+## Features
+
+- **Hero Database**: Detailed information on heroes, including profile, skills, perks, unique weapons, unique treasures, soul weapons, splasharts, costumes, 3D models and voice lines.
+- **Artifacts & Bosses**: Comprehensive list of game artifacts and detailed boss information.
+- **Team Builder**: Plan and create your ideal team compositions.
+- **Softcaps**: View detailed statistics and softcap thresholds for optimized builds.
+- **Stats**: Compare stat numbers between versions.
+- **Compare Tool**: Compare different heroes or artifacts side-by-side.
+- **3D Model Viewer**: Web-based interactive 3D models of the heroes via Three.js.
+- **News Feed**: Catch up with the latest King's Raid news via Steam RSS.
+
+_Data being used includes before doomsday (Vespa) and verions being distributed by Masangsoft (Currently 3 CBTs)._
+
+## Getting Started
+
+### Data and 3D Model Files
 
 Data and illustrations are stored in [kingsraid-data](https://github.com/faberuser/kingsraid-data) (required). 3D model and audio files are in self-hosted Git servers [kingsraid-models](https://gitea.k-clowd.top/faberuser/kingsraid-models) and [kingsraid-audio](https://gitea.k-clowd.top/faberuser/kingsraid-audio) due to their large size (optional).
 
 **By default**, only the `kingsraid-data` submodule is used to keep the repository size manageable. The models and audio submodules are optional and only needed if you want the Models and Voices features (total size ~40GB).
-
-## Getting Started
 
 ### Prerequisites
 

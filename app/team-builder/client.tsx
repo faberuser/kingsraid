@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Share2, Check, Trash2 } from "lucide-react"
 import { useDataVersion } from "@/hooks/use-data-version"
 import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
@@ -53,6 +54,37 @@ function TeamBuilderContent({
 		return releaseOrderMap[dataVersion] || releaseOrderMap.legacy
 	}, [dataVersion, releaseOrderMap])
 
+	// Initialize teamSize from state (default 8)
+	const [teamSize, setTeamSizeState] = useState<number>(() => {
+		const encoded = searchParams.get("t")
+		if (encoded) {
+			const urlVersion = extractVersionFromEncoded(encoded) ?? "legacy"
+			// Safe initialization since we memoized getHeroesByVersion in the component
+			const heroesForVersion = heroesMap[urlVersion as DataVersion] || heroesMap.legacy
+			const result = decodeTeam(encoded, heroesForVersion)
+			if (result) {
+				return Math.min(8, Math.max(1, result.team.length))
+			}
+		}
+		return 8
+	})
+
+	const setTeamSize = useCallback((size: number) => {
+		setTeamSizeState(size)
+		localStorage.setItem("team-builder-size", size.toString())
+		setTeam((prev) => {
+			const newTeam = [...prev]
+			if (newTeam.length < size) {
+				while (newTeam.length < size) {
+					newTeam.push(createEmptyMember())
+				}
+			} else if (newTeam.length > size) {
+				newTeam.length = size
+			}
+			return newTeam
+		})
+	}, [])
+
 	// Initialize team from URL or empty (localStorage loaded in effect below)
 	const [team, setTeam] = useState<TeamMember[]>(() => {
 		// First try URL params (works on both server and client)
@@ -64,13 +96,14 @@ function TeamBuilderContent({
 			const result = decodeTeam(encoded, heroesForVersion)
 			if (result) {
 				const decodedTeam = result.team
-				while (decodedTeam.length < 8) {
+				// teamSize state is already properly calculated
+				while (decodedTeam.length < teamSize) {
 					decodedTeam.push(createEmptyMember())
 				}
-				return decodedTeam.slice(0, 8)
+				return decodedTeam.slice(0, teamSize)
 			}
 		}
-		return Array(8)
+		return Array(teamSize)
 			.fill(null)
 			.map(() => createEmptyMember())
 	})
@@ -88,7 +121,7 @@ function TeamBuilderContent({
 	useEffect(() => {
 		const handleTeamCleared = () => {
 			setTeam(
-				Array(8)
+				Array(teamSize)
 					.fill(null)
 					.map(() => createEmptyMember()),
 			)
@@ -97,7 +130,7 @@ function TeamBuilderContent({
 
 		window.addEventListener("team-cleared-by-version-switch", handleTeamCleared)
 		return () => window.removeEventListener("team-cleared-by-version-switch", handleTeamCleared)
-	}, [router])
+	}, [router, teamSize])
 
 	// Track if URL has been handled to avoid re-processing
 	const urlHandledRef = useRef(false)
@@ -124,10 +157,18 @@ function TeamBuilderContent({
 			const result = decodeTeam(encoded, heroesForVersion)
 			if (result) {
 				const decodedTeam = result.team
-				while (decodedTeam.length < 8) {
+				// On URL load, the incoming team size overrides local storage
+				const size = Math.min(8, Math.max(decodedTeam.length, 1))
+
+				setTeamSizeState(size)
+				if (typeof window !== "undefined") {
+					localStorage.setItem("team-builder-size", size.toString())
+				}
+
+				while (decodedTeam.length < size) {
 					decodedTeam.push(createEmptyMember())
 				}
-				setTeam(decodedTeam.slice(0, 8))
+				setTeam(decodedTeam.slice(0, size))
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,8 +184,21 @@ function TeamBuilderContent({
 			return
 		}
 
+		// Initialize size from localStorage if exist
+		let size = 8
+		if (typeof window !== "undefined") {
+			const savedSize = localStorage.getItem("team-builder-size")
+			if (savedSize) {
+				size = parseInt(savedSize, 10)
+				setTeamSizeState(size)
+			}
+		}
+
 		// Try localStorage
 		const saved = localStorage.getItem("team-builder-team")
+		let newTeam = Array(size)
+			.fill(null)
+			.map(() => createEmptyMember())
 		if (saved) {
 			try {
 				const parsed = JSON.parse(saved)
@@ -171,14 +225,19 @@ function TeamBuilderContent({
 						artifactName: undefined,
 					}
 				})
-				while (rehydrated.length < 8) {
+				while (rehydrated.length < size) {
 					rehydrated.push(createEmptyMember())
 				}
-				setTeam(rehydrated.slice(0, 8))
+				newTeam = rehydrated.slice(0, size)
 			} catch {
 				// Invalid saved data, ignore
 			}
+		} else {
+			// Adjust empty team strictly to `size`
+			// Handles case when `team` was instantiated as length 8 in useState but localStorage size is different and `saved` team null
 		}
+		setTeam(newTeam)
+
 		setInitialLoadDone(true)
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
@@ -486,7 +545,7 @@ function TeamBuilderContent({
 
 	// Clear all
 	const clearAll = () => {
-		const newTeam = Array(8)
+		const newTeam = Array(teamSize)
 			.fill(null)
 			.map(() => createEmptyMember())
 		setUserCleared(true) // Mark as user-initiated clear
@@ -565,18 +624,45 @@ function TeamBuilderContent({
 		<TooltipProvider>
 			<div>
 				{/* Header */}
-				<div className="space-y-2 mb-4">
-					<div className="flex flex-row justify-between items-center">
-						<div className="flex flex-row gap-2 items-baseline">
+				<div className="space-y-4 mb-6">
+					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+						<div className="flex flex-row gap-4 items-center">
 							<div className="text-xl font-bold">Team Builder</div>
-							<div className="text-muted-foreground text-sm">{activeCount} / 8 heroes</div>
+							<div className="flex items-center gap-2">
+								<span className="text-muted-foreground text-sm">{activeCount} /</span>
+								<Select
+									value={teamSize.toString()}
+									onValueChange={(val) => setTeamSize(parseInt(val, 10))}
+								>
+									<SelectTrigger className="w-25 h-8 text-sm">
+										<SelectValue placeholder="Size" />
+									</SelectTrigger>
+									<SelectContent>
+										{[...Array(8)].map((_, i) => (
+											<SelectItem key={i + 1} value={(i + 1).toString()}>
+												{i + 1} heroes
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
-						<div className="flex gap-2">
-							<Button variant="outline" onClick={copyShareLink} disabled={activeCount === 0}>
+						<div className="flex gap-2 w-full sm:w-auto">
+							<Button
+								variant="outline"
+								className="flex-1 sm:flex-none"
+								onClick={copyShareLink}
+								disabled={activeCount === 0}
+							>
 								{copied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
 								{copied ? "Copied!" : "Share"}
 							</Button>
-							<Button variant="destructive" onClick={clearAll} disabled={activeCount === 0}>
+							<Button
+								variant="destructive"
+								className="flex-1 sm:flex-none"
+								onClick={clearAll}
+								disabled={activeCount === 0}
+							>
 								<Trash2 className="h-4 w-4" />
 								Clear
 							</Button>
@@ -585,44 +671,52 @@ function TeamBuilderContent({
 				</div>
 
 				{/* Team Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div className="flex flex-wrap justify-center gap-4">
 					{team.map((member, index) =>
 						member.hero ? (
-							<HeroCard
+							<div
 								key={index}
-								member={member}
-								index={index}
-								perksDialogOpen={perksDialogOpen}
-								selectedSlot={selectedSlot}
-								artifacts={artifacts}
-								artifactReleaseOrder={artifactReleaseOrder}
-								onRemove={removeHero}
-								onToggleUW={toggleUW}
-								onSelectUT={selectUT}
-								onSelectArtifact={selectArtifact}
-								onPerksDialogChange={handlePerksDialogChange}
-								onPerkToggle={togglePerk}
-								onMaxPointsUpdate={updateMaxPoints}
-								t1Perks={t1Perks}
-								getT2Perks={getT2Perks}
-								isDragging={draggedIndex === index}
-								isDragOver={dragOverIndex === index}
-								onDragStart={handleDragStart}
-								onDragOver={handleDragOver}
-								onDragLeave={handleDragLeave}
-								onDrop={handleDrop}
-								onDragEnd={handleDragEnd}
-							/>
+								className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)] max-w-sm"
+							>
+								<HeroCard
+									member={member}
+									index={index}
+									perksDialogOpen={perksDialogOpen}
+									selectedSlot={selectedSlot}
+									artifacts={artifacts}
+									artifactReleaseOrder={artifactReleaseOrder}
+									onRemove={removeHero}
+									onToggleUW={toggleUW}
+									onSelectUT={selectUT}
+									onSelectArtifact={selectArtifact}
+									onPerksDialogChange={handlePerksDialogChange}
+									onPerkToggle={togglePerk}
+									onMaxPointsUpdate={updateMaxPoints}
+									t1Perks={t1Perks}
+									getT2Perks={getT2Perks}
+									isDragging={draggedIndex === index}
+									isDragOver={dragOverIndex === index}
+									onDragStart={handleDragStart}
+									onDragOver={handleDragOver}
+									onDragLeave={handleDragLeave}
+									onDrop={handleDrop}
+									onDragEnd={handleDragEnd}
+								/>
+							</div>
 						) : (
-							<EmptySlot
+							<div
 								key={index}
-								index={index}
-								onOpenDialog={handleOpenHeroDialog}
-								isDragOver={dragOverIndex === index}
-								onDragOver={handleDragOver}
-								onDragLeave={handleDragLeave}
-								onDrop={handleDrop}
-							/>
+								className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)] max-w-sm"
+							>
+								<EmptySlot
+									index={index}
+									onOpenDialog={handleOpenHeroDialog}
+									isDragOver={dragOverIndex === index}
+									onDragOver={handleDragOver}
+									onDragLeave={handleDragLeave}
+									onDrop={handleDrop}
+								/>
+							</div>
 						),
 					)}
 				</div>

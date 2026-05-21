@@ -278,12 +278,7 @@ export function decodeTeam(encoded: string, heroes: HeroData[]): DecodeResult | 
 			})
 		}
 
-		// Fill remaining slots
-		while (team.length < 8) {
-			team.push(createEmptyMember())
-		}
-
-		return { team: team.slice(0, 8), version }
+		return { team, version }
 	} catch {
 		return null
 	}
