@@ -163,7 +163,7 @@ export default function BossClient({
 					</div>
 				</div>
 				{/* Boss Name & Info */}
-				<div className="flex-grow min-w-0">
+				<div className="grow min-w-0">
 					<div className="flex flex-col">
 						<h1 className="text-2xl md:text-3xl font-bold truncate">{profile.name}</h1>
 						<span className="text-sm md:text-base text-muted-foreground">{profile.title}</span>

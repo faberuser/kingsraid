@@ -56,7 +56,7 @@ export default function Skills({ heroData }: SkillsProps) {
 							</div>
 
 							{/* Skill Details */}
-							<div className="flex-grow">
+							<div className="grow">
 								<div className="flex flex-row md:items-center gap-2 mb-2">
 									{/* Skill Icon */}
 									<div className="flex md:hidden flex-shrink-0 justify-center items-center">
