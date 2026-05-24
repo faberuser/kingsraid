@@ -32,7 +32,7 @@ export default function Gear({ heroData }: GearProps) {
 									/>
 								</div>
 
-								<div className="flex-grow">
+								<div className="grow">
 									<div className="flex flex-row md:items-center gap-2 mb-2">
 										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
 											<Image
@@ -127,7 +127,7 @@ export default function Gear({ heroData }: GearProps) {
 											/>
 										</div>
 
-										<div className="flex-grow">
+										<div className="grow">
 											<div className="flex flex-row md:items-center gap-2 mb-2">
 												<div className="flex-shrink-0 flex md:hidden justify-center items-center">
 													<Image
@@ -224,7 +224,7 @@ export default function Gear({ heroData }: GearProps) {
 									/>
 								</div>
 
-								<div className="flex-grow">
+								<div className="grow">
 									<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
 										<div className="flex flex-row md:items-center gap-2 mb-2">
 											<div className="flex-shrink-0 flex md:hidden justify-center items-center">

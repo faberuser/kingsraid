@@ -7,10 +7,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!slug || slug.length === 0) {
 		return {
-			title: "All Heroes - King's Raid",
+			title: "All Heroes",
 			description: "Discover heroes, skills, gears, and more.",
 			openGraph: {
-				title: "All Heroes - King's Raid",
+				title: "All Heroes",
 				description: "Discover heroes, skills, gears, and more.",
 			},
 		}
@@ -21,10 +21,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!heroData) {
 		return {
-			title: "Hero Not Found - King's Raid",
+			title: "Hero Not Found",
 			description: "The requested hero could not be found.",
 			openGraph: {
-				title: "Hero Not Found - King's Raid",
+				title: "Hero Not Found",
 				description: "The requested hero could not be found.",
 			},
 		}
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {
-		title: `${displayName} - Heroes - King's Raid`,
+		title: `${displayName} - Heroes`,
 		description: `View hero ${displayName} details.`,
 		openGraph: {
-			title: `${displayName} - Heroes - King's Raid`,
+			title: `${displayName} - Heroes`,
 			description: `View hero ${displayName} details.`,
 			type: "website",
 			images: thumbnail,

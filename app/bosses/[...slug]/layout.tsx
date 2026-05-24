@@ -7,10 +7,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!slug || slug.length === 0) {
 		return {
-			title: "All Bosses - King's Raid",
+			title: "All Bosses",
 			description: "Study boss skills, mechanics and strategies.",
 			openGraph: {
-				title: "All Bosses - King's Raid",
+				title: "All Bosses",
 				description: "Study boss skills, mechanics and strategies.",
 			},
 		}
@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!bossData) {
 		return {
-			title: "Boss Not Found - King's Raid",
+			title: "Boss Not Found",
 			description: "The requested boss could not be found.",
 			openGraph: {
-				title: "Boss Not Found - King's Raid",
+				title: "Boss Not Found",
 				description: "The requested boss could not be found.",
 			},
 		}
@@ -34,10 +34,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {
-		title: `${displayName} - Bosses - King's Raid`,
+		title: `${displayName} - Bosses`,
 		description: `View boss ${displayName} details.`,
 		openGraph: {
-			title: `${displayName} - Bosses - King's Raid`,
+			title: `${displayName} - Bosses`,
 			description: `View boss ${displayName} details.`,
 			type: "website",
 			images: thumbnail,

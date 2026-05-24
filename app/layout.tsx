@@ -27,10 +27,10 @@ const comfortaa = Comfortaa({
 
 export const metadata: Metadata = {
 	title: "krinfo",
-	description: "Comprehensive resource for Kings Raid",
+	description: "King's Raid Info - Comprehensive resource index for King's Raid",
 	openGraph: {
 		title: "krinfo",
-		description: "Comprehensive resource for King's Raid",
+		description: "King's Raid Info - Comprehensive resource index for King's Raid",
 		url: process.env.NEXT_PUBLIC_SITE_URL || "https://kingsraid.k-clowd.top",
 		siteName: "krinfo",
 	},

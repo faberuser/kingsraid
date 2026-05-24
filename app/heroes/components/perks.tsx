@@ -185,7 +185,7 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 																	</div>
 																</div>
 															)}
-															<div className="flex-grow flex items-center">
+															<div className="grow flex items-center">
 																<div>{parseColoredText(perk.effect)}</div>
 															</div>
 														</div>

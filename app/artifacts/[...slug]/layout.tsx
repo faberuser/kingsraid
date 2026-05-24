@@ -7,10 +7,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!slug || slug.length === 0) {
 		return {
-			title: "All Artifacts - King's Raid",
+			title: "All Artifacts",
 			description: "Browse through all artifact effects and synergies in King's Raid.",
 			openGraph: {
-				title: "All Artifacts - King's Raid",
+				title: "All Artifacts",
 				description: "Browse through all artifact effects and synergies in King's Raid.",
 			},
 		}
@@ -21,10 +21,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 
 	if (!artifactData) {
 		return {
-			title: "Artifact Not Found - King's Raid",
+			title: "Artifact Not Found",
 			description: "The requested artifact could not be found.",
 			openGraph: {
-				title: "Artifact Not Found - King's Raid",
+				title: "Artifact Not Found",
 				description: "The requested artifact could not be found.",
 			},
 		}
@@ -35,10 +35,10 @@ export async function generateMetadata({ params }: SlugPageProps): Promise<Metad
 	const thumbnail = `/_next/image?url=${encodeURIComponent(assetPath)}&w=1080&q=75`
 
 	return {
-		title: `${displayName} - Artifacts - King's Raid`,
+		title: `${displayName} - Artifacts`,
 		description: `View artifact ${displayName} details.`,
 		openGraph: {
-			title: `${displayName} - Artifacts - King's Raid`,
+			title: `${displayName} - Artifacts`,
 			description: `View artifact ${displayName} details.`,
 			type: "website",
 			images: thumbnail,
