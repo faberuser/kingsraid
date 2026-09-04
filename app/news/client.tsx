@@ -12,18 +12,28 @@ import { Badge } from "@/components/ui/badge"
 
 export const getImage = (html: string): string | null => {
 	const imgMatch = html.match(/<img[^>]*>/i)
-	if (!imgMatch) return ""
+	if (!imgMatch) return null
 	const srcMatch = imgMatch[0].match(/src=["']([^"']+)["']/i)
-	return srcMatch ? srcMatch[1] : ""
+	return srcMatch ? srcMatch[1] : null
 }
 
 export const getContent = (html: string): string => {
-	const imgMatch = getImage(html)
-	if (!imgMatch) {
-		return html
-	}
-	const contentWithoutImg = html.replace(imgMatch, "")
-	return contentWithoutImg
+	return html.replace(/<img[^>]*>/i, "").replace(/\u00a0|&nbsp;|&#160;/gi, " ")
+}
+
+export const getPreviewText = (html: string): string => {
+	return html
+		.replace(/<br\s*\/?>/gi, " ")
+		.replace(/<\/(?:p|div|li|h[1-6]|blockquote)>/gi, " ")
+		.replace(/<[^>]+>/g, " ")
+		.replace(/&nbsp;|&#160;/gi, " ")
+		.replace(/&amp;/gi, "&")
+		.replace(/&lt;/gi, "<")
+		.replace(/&gt;/gi, ">")
+		.replace(/&quot;/gi, '"')
+		.replace(/&#(?:39|x27);/gi, "'")
+		.replace(/\s+/g, " ")
+		.trim()
 }
 
 export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
@@ -48,28 +58,29 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 				<div className="grid grid-cols-1 gap-4">
 					{steamNews.map((news, index) => {
 						const imageSrc = getImage(news.contents)
+						const previewText = getPreviewText(news.contents)
 
 						return (
 							<Card
 								key={index}
-								className="overflow-hidden cursor-pointer flex flex-col lg:flex-row justify-between gap-0 hover:scale-102 transition-transform"
+								className="overflow-hidden cursor-pointer flex flex-col lg:h-80 lg:flex-row lg:py-0 justify-between gap-0 hover:scale-102 transition-transform"
 								onClick={() => handleNewsClick(news)}
 							>
 								{imageSrc && (
-									<div className="w-full h-auto lg:w-150 lg:h-full flex items-center justify-center object-contain rounded px-6 mb-4 lg:mb-0 lg:px-0 lg:ml-6">
+									<div className="flex h-56 w-full shrink-0 items-center justify-center px-6 mb-4 lg:mb-0 lg:ml-6 lg:h-full lg:w-[32rem] lg:max-w-[35%] lg:px-0">
 										<Image
 											width="0"
 											height="0"
-											sizes="80vw md:40vw"
+											sizes="(min-width: 1024px) 32rem, 100vw"
 											src={imageSrc}
 											alt={news.title}
-											className="w-full h-auto object-contain rounded"
+											className="h-full w-full object-contain rounded"
 										/>
 									</div>
 								)}
 
-								<div className="flex flex-col justify-between gap-4 w-full">
-									<div className="flex flex-col gap-4">
+								<div className="flex min-h-0 min-w-0 w-full flex-col justify-between gap-4 lg:py-6">
+									<div className="flex min-h-0 flex-col gap-4 overflow-hidden">
 										<CardHeader>
 											<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
 												<div className="text-xl font-semibold">{news.title}</div>
@@ -79,14 +90,11 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 												{news.formattedDate}
 											</CardDescription>
 										</CardHeader>
-										<CardContent>
-											<div
-												className="text-muted-foreground line-clamp-5"
-												dangerouslySetInnerHTML={{ __html: getContent(news.contents) }}
-											/>
+										<CardContent className="min-h-0 overflow-hidden">
+											<div className="text-muted-foreground line-clamp-5">{previewText}</div>
 										</CardContent>
 									</div>
-									<CardFooter className="flex items-center gap-2 text-sm text-muted-foreground">
+									<CardFooter className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
 										<Eye className="w-4 h-4" />
 										View More
 									</CardFooter>
@@ -133,9 +141,9 @@ export function NewsDetailDialog({
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
-			<DialogContent className="max-w-[90vw] md:min-w-[60vw] lg:min-w-[50vw] xl:min-w-[40vw] max-h-[90vh] overflow-y-auto custom-scrollbar">
+			<DialogContent className="max-w-[90vw] min-w-0 md:min-w-[60vw] lg:min-w-[50vw] xl:min-w-[40vw] max-h-[90vh] overflow-x-hidden overflow-y-auto custom-scrollbar">
 				<DialogHeader>
-					<DialogTitle className="text-2xl font-bold">{news.title}</DialogTitle>
+					<DialogTitle className="break-words pr-8 text-2xl font-bold">{news.title}</DialogTitle>
 					<DialogDescription className="text-sm">{news.formattedDate}</DialogDescription>
 				</DialogHeader>
 
@@ -150,7 +158,10 @@ export function NewsDetailDialog({
 					/>
 				)}
 
-				<div className="space-y-2" dangerouslySetInnerHTML={{ __html: content ?? "" }} />
+				<div
+					className="min-w-0 max-w-full space-y-2 break-words [&_a]:break-all [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
+					dangerouslySetInnerHTML={{ __html: content ?? "" }}
+				/>
 
 				<Button asChild>
 					<Link href={news.url} target="_blank" rel="noopener noreferrer">

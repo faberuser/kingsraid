@@ -6,7 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle, CardContent } from "@/com
 import Image from "@/components/next-image"
 import type { NewsItem } from "@/lib/steam-rss"
 import { useState } from "react"
-import { getImage, getContent, NewsDetailDialog } from "@/app/news/client"
+import { getImage, getContent, getPreviewText, NewsDetailDialog } from "@/app/news/client"
 import { Badge } from "@/components/ui/badge"
 
 const communities = [
@@ -78,29 +78,6 @@ export default function HomeClient({ steamNews }: HomeClientProps) {
 	)
 }
 
-// Helper function to process HTML content
-function processContent(html: string): string {
-	// Find the first <img> tag
-	const imgMatch = html.match(/<img[^>]*>/i)
-
-	if (!imgMatch) {
-		return `<div class="line-clamp-5">${html}</div>`
-	}
-
-	const imgTag = imgMatch[0]
-	// Remove the image from the HTML
-	const contentWithoutImg = html.replace(imgTag, "")
-
-	return `
-	<div class="h-full flex flex-col items-center justify-center mb- [&_img]:rounded">
-		${imgTag}
-	</div>
-	<div class="line-clamp-5">
-		${contentWithoutImg}
-	</div>
-	`
-}
-
 interface SteamRSSProps {
 	news: NewsItem[]
 }
@@ -125,26 +102,43 @@ function SteamRSS({ news }: SteamRSSProps) {
 	return (
 		<>
 			<Carousel className="w-full h-full">
-				<CarouselContent className="w-full h-full">
-					{news.map((item, index) => (
-						<CarouselItem key={index} className="md:basis-1/2 xl:basis-1/3">
-							<Card className="h-full gap-2 cursor-pointer" onClick={() => handleNewsClick(item)}>
-								<CardHeader>
-									<CardTitle className="line-clamp-2 flex justify-between items-center gap-2">
-										{item.title}
-										{item.isNew ? <Badge className="text-xs">New</Badge> : null}
-									</CardTitle>
-									<CardDescription>{item.formattedDate}</CardDescription>
-								</CardHeader>
-								<CardContent className="h-full">
-									<div
-										className="text-sm text-muted-foreground h-full flex flex-col justify-between"
-										dangerouslySetInnerHTML={{ __html: processContent(item.contents) }}
-									/>
-								</CardContent>
-							</Card>
-						</CarouselItem>
-					))}
+				<CarouselContent className="w-full items-stretch">
+					{news.map((item, index) => {
+						const imageSrc = getImage(item.contents)
+						const previewText = getPreviewText(item.contents)
+
+						return (
+							<CarouselItem key={index} className="flex md:basis-1/2 xl:basis-1/3">
+								<Card
+									className="h-full w-full gap-2 overflow-hidden cursor-pointer"
+									onClick={() => handleNewsClick(item)}
+								>
+									<CardHeader className="h-24 shrink-0">
+										<CardTitle className="flex items-start justify-between gap-2">
+											<span className="line-clamp-2">{item.title}</span>
+											{item.isNew ? <Badge className="shrink-0 text-xs">New</Badge> : null}
+										</CardTitle>
+										<CardDescription>{item.formattedDate}</CardDescription>
+									</CardHeader>
+									<CardContent className="flex flex-col gap-4 overflow-hidden">
+										<div className="flex aspect-video w-full shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted/20">
+											{imageSrc ? (
+												<Image
+													src={imageSrc}
+													alt={item.title}
+													width="0"
+													height="0"
+													sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+													className="h-full w-full object-cover object-center"
+												/>
+											) : null}
+										</div>
+										<div className="line-clamp-5 text-sm text-muted-foreground">{previewText}</div>
+									</CardContent>
+								</Card>
+							</CarouselItem>
+						)
+					})}
 				</CarouselContent>
 				<CarouselPrevious className="hidden md:flex" />
 				<CarouselNext className="hidden md:flex" />
