@@ -9,66 +9,173 @@ export interface NewsItem {
 	formattedDate: string
 }
 
-export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
+const APP_ID = 3689540
+const REVALIDATE_SECONDS = 60 * 60
+const REQUEST_TIMEOUT_MS = 10_000
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+
+// Steam exposes the same feed on two hosts. Querying both prevents a temporary
+// outage or block on one host from making the whole news section disappear.
+const RSS_URLS = [
+	`https://store.steampowered.com/feeds/news/app/${APP_ID}/?cc=us&l=english`,
+	`https://steamcommunity.com/games/${APP_ID}/rss/`,
+]
+
+const API_URL = `https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=${APP_ID}&count=100&maxlength=0&format=json`
+
+function decodeXmlEntities(value: string): string {
+	return value
+		.replace(/&#x([\da-f]+);/gi, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
+		.replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
+		.replace(/&lt;/g, "<")
+		.replace(/&gt;/g, ">")
+		.replace(/&quot;/g, '"')
+		.replace(/&apos;|&#39;/g, "'")
+		.replace(/&amp;/g, "&")
+}
+
+function extractXmlTag(tag: string, content: string): string {
+	const tagPattern = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, "i")
+	const match = content.match(tagPattern)
+	if (!match) return ""
+
+	const value = match[1].trim()
+	const cdataMatch = value.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/)
+	return (cdataMatch?.[1] ?? value).trim()
+}
+
+function createNewsItem(title: string, url: string, date: string, contents: string, now: number): NewsItem | null {
+	const dateMs = new Date(date).getTime()
+	if (!title || !url || !Number.isFinite(dateMs)) return null
+
+	return {
+		title,
+		url,
+		date,
+		contents,
+		isNew: now - dateMs >= 0 && now - dateMs < ONE_WEEK_MS,
+		formattedDate: new Date(dateMs).toLocaleDateString(),
+	}
+}
+
+export function parseSteamRss(xml: string, now = Date.now()): NewsItem[] {
+	if (!/<rss(?:\s|>)/i.test(xml)) {
+		throw new Error("Steam returned a response that is not RSS")
+	}
+
+	const items: NewsItem[] = []
+	const itemPattern = /<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi
+	let match: RegExpExecArray | null
+
+	while ((match = itemPattern.exec(xml)) !== null) {
+		const itemContent = match[1]
+		const item = createNewsItem(
+			decodeXmlEntities(extractXmlTag("title", itemContent)),
+			decodeXmlEntities(extractXmlTag("link", itemContent)),
+			decodeXmlEntities(extractXmlTag("pubDate", itemContent)),
+			decodeXmlEntities(extractXmlTag("description", itemContent)),
+			now,
+		)
+
+		if (item) items.push(item)
+	}
+
+	if (items.length === 0) throw new Error("Steam RSS response contained no valid news items")
+	return items
+}
+
+interface SteamApiNewsItem {
+	title?: string
+	url?: string
+	date?: number
+	contents?: string
+}
+
+interface SteamApiResponse {
+	appnews?: { newsitems?: SteamApiNewsItem[] }
+}
+
+function steamBbcodeToHtml(value: string): string {
+	return value
+		.replace(/\{STEAM_CLAN_IMAGE\}/g, "https://clan.cloudflare.steamstatic.com/images")
+		.replace(/\[img(?:\s+src=(["']))?([^\]"']+)\1?\]\[\/img\]/gi, '<img src="$2" alt="">')
+		.replace(/\[url=([^\]]+)\]([\s\S]*?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer">$2</a>')
+		.replace(/\[url\]([\s\S]*?)\[\/url\]/gi, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+		.replace(/\[(\/)?(b|i|u|p|h1|h2|h3|blockquote)\]/gi, "<$1$2>")
+		.replace(/\[br\]/gi, "<br>")
+		.replace(/\[\/br\]/gi, "")
+		.replace(/\[\*\]/g, "<li>")
+		.replace(/\[\/\*\]/g, "</li>")
+		.replace(/\[list\]/gi, "<ul>")
+		.replace(/\[\/list\]/gi, "</ul>")
+		.replace(/\[[^\]]+\]/g, "")
+}
+
+export function parseSteamApi(data: SteamApiResponse, now = Date.now()): NewsItem[] {
+	const apiItems = data.appnews?.newsitems
+	if (!Array.isArray(apiItems)) throw new Error("Steam News API returned an invalid response")
+
+	const items = apiItems.flatMap((apiItem) => {
+		const date = typeof apiItem.date === "number" ? new Date(apiItem.date * 1000).toISOString() : ""
+		const item = createNewsItem(
+			apiItem.title?.trim() ?? "",
+			apiItem.url?.trim() ?? "",
+			date,
+			steamBbcodeToHtml(apiItem.contents ?? ""),
+			now,
+		)
+		return item ? [item] : []
+	})
+
+	if (items.length === 0) throw new Error("Steam News API response contained no valid news items")
+	return items
+}
+
+async function fetchSteam(url: string, accept: string): Promise<Response> {
+	const controller = new AbortController()
+	const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
 	try {
-		const response = await fetch("https://store.steampowered.com/feeds/news/app/3689540/", {
-			next: { revalidate: 3600 }, // Revalidate every hour
+		const response = await fetch(url, {
+			headers: {
+				Accept: accept,
+				"User-Agent": "krinfo/1.0 (Steam news reader)",
+			},
+			next: { revalidate: REVALIDATE_SECONDS },
+			signal: controller.signal,
 		})
 
-		const text = await response.text()
+		if (!response.ok) throw new Error(`Steam request failed with HTTP ${response.status}`)
+		return response
+	} finally {
+		clearTimeout(timeout)
+	}
+}
 
-		// Parse RSS XML
-		const items: NewsItem[] = []
-		const itemRegex = /<item>([\s\S]*?)<\/item>/g
-		let match
+async function fetchRss(url: string): Promise<NewsItem[]> {
+	const response = await fetchSteam(url, "application/rss+xml, application/xml;q=0.9, text/xml;q=0.8")
+	return parseSteamRss(await response.text())
+}
 
-		const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
-		const now = Date.now()
+async function fetchApi(): Promise<NewsItem[]> {
+	const response = await fetchSteam(API_URL, "application/json")
+	return parseSteamApi((await response.json()) as SteamApiResponse)
+}
 
-		while ((match = itemRegex.exec(text)) !== null) {
-			const itemContent = match[1]
+export async function getSteamNews(limit?: number): Promise<NewsItem[]> {
+	try {
+		let items: NewsItem[]
 
-			// Extract CDATA content more precisely
-			const extractCDATA = (tag: string, content: string): string => {
-				const cdataMatch = content.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`, "s"))
-				if (cdataMatch) return cdataMatch[1].trim()
-
-				const regularMatch = content.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "s"))
-				return regularMatch ? regularMatch[1].trim() : ""
-			}
-
-			// Decode HTML entities on server side
-			const decodeHtmlEntities = (str: string): string => {
-				return str
-					.replace(/&lt;/g, "<")
-					.replace(/&gt;/g, ">")
-					.replace(/&quot;/g, '"')
-					.replace(/&#39;/g, "'")
-					.replace(/&amp;/g, "&")
-			}
-
-			const title = decodeHtmlEntities(extractCDATA("title", itemContent))
-			const url = extractCDATA("link", itemContent)
-			const date = extractCDATA("pubDate", itemContent)
-			const contents = decodeHtmlEntities(extractCDATA("description", itemContent))
-			const dateMs = new Date(date).getTime()
-
-			items.push({
-				title,
-				url,
-				date,
-				contents,
-				isNew: now - dateMs < ONE_WEEK_MS,
-				formattedDate: new Date(date).toLocaleDateString(),
-			})
+		try {
+			items = await Promise.any(RSS_URLS.map(fetchRss))
+		} catch (rssError) {
+			console.warn("Steam RSS endpoints failed; using the Steam News API fallback", rssError)
+			items = await fetchApi()
 		}
 
-		if (limit) {
-			return items.slice(0, limit) // Limit items
-		}
-		return items
+		return limit === undefined ? items : items.slice(0, Math.max(0, limit))
 	} catch (error) {
-		console.error("Error fetching Steam news:", error)
+		console.error("Error fetching Steam news from every source:", error)
 		return []
 	}
 }

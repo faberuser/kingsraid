@@ -13,7 +13,7 @@ A web application that provides a number of data from the mobile game King's Rai
 - **3D Model Viewer**: Web-based interactive 3D models of the heroes via Three.js.
 - **News Feed**: Catch up with the latest King's Raid news via Steam RSS.
 
-_Data being used includes before doomsday (Vespa) and verions being distributed by Masangsoft (Currently 3 CBTs)._
+_Data being used includes before doomsday (Vespa) and distributed by Masangsoft (currently 3 CBTs)._
 
 ## Getting Started
 
