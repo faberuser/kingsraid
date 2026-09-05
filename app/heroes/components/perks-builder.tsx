@@ -4,7 +4,7 @@ import { HeroData } from "@/model/Hero"
 import Image from "@/components/next-image"
 import { parseColoredText } from "@/lib/utils"
 import { ChevronDown, ChevronUp } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, type ReactNode } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MobileTooltip } from "@/components/mobile-tooltip"
@@ -17,9 +17,16 @@ interface PerksBuilderProps {
 	heroClass: string
 	t1PerksData: Record<string, string>
 	t2PerksData: Record<string, string>
+	headerActions?: ReactNode
 }
 
-export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2PerksData }: PerksBuilderProps) {
+export default function PerksBuilder({
+	heroData,
+	heroClass,
+	t1PerksData,
+	t2PerksData,
+	headerActions,
+}: PerksBuilderProps) {
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
@@ -121,48 +128,53 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 	}
 
 	return (
-		<div className="space-y-6 max-w-2xl mx-auto">
+		<div className="@container space-y-6 [--perk-builder-width:26rem]">
 			{/* Points Display & Adjustment */}
-			<div className="flex items-center justify-between p-3 bg-muted rounded">
-				<div className="flex items-center gap-4">
-					<span className="text-sm">Points:</span>
-					<span className="font-medium">{calculateUsedPoints(selectedPerks)}</span>
-					<span className="text-muted-foreground">/</span>
-					<div className="flex items-center gap-1">
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-6 w-6"
-							onClick={() => {
-								const newLimit = maxPoints - 5
-								setMaxPoints(Math.max(MIN_POINTS, newLimit))
-								// Reset perks if exceeding new limit
-								// For simplicity here, just clear if overflow
-								if (calculateUsedPoints(selectedPerks) > newLimit) {
-									setSelectedPerks({ t1: [], t2: [], t3: [], t5: [] })
-								}
-							}}
-							disabled={maxPoints <= MIN_POINTS}
-						>
-							<ChevronDown className="h-3 w-3" />
-						</Button>
-						<span className="w-8 text-center font-medium">{maxPoints}</span>
-						<Button
-							variant="outline"
-							size="icon"
-							className="h-6 w-6"
-							onClick={() => setMaxPoints(Math.min(MAX_POINTS, maxPoints + 5))}
-							disabled={maxPoints >= MAX_POINTS}
-						>
-							<ChevronUp className="h-3 w-3" />
-						</Button>
+			<div className="grid grid-cols-[1fr_minmax(0,var(--perk-builder-width))_1fr] items-start gap-y-4">
+				<div className="col-start-2 row-start-2 @min-[56rem]:row-start-1 flex flex-wrap items-center justify-between gap-2 p-3 bg-muted rounded">
+					<div className="flex items-center gap-1 sm:gap-4">
+						<span className="text-sm">Points:</span>
+						<span className="font-medium">{calculateUsedPoints(selectedPerks)}</span>
+						<span className="text-muted-foreground">/</span>
+						<div className="flex items-center gap-1">
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-6 w-6"
+								onClick={() => {
+									const newLimit = maxPoints - 5
+									setMaxPoints(Math.max(MIN_POINTS, newLimit))
+									// Reset perks if exceeding new limit
+									// For simplicity here, just clear if overflow
+									if (calculateUsedPoints(selectedPerks) > newLimit) {
+										setSelectedPerks({ t1: [], t2: [], t3: [], t5: [] })
+									}
+								}}
+								disabled={maxPoints <= MIN_POINTS}
+							>
+								<ChevronDown className="h-3 w-3" />
+							</Button>
+							<span className="w-8 text-center font-medium">{maxPoints}</span>
+							<Button
+								variant="outline"
+								size="icon"
+								className="h-6 w-6"
+								onClick={() => setMaxPoints(Math.min(MAX_POINTS, maxPoints + 5))}
+								disabled={maxPoints >= MAX_POINTS}
+							>
+								<ChevronUp className="h-3 w-3" />
+							</Button>
+						</div>
 					</div>
+					<div className="text-xs text-muted-foreground">T1: 10 | T2/T3/T5: 15</div>
 				</div>
-				<div className="text-xs text-muted-foreground">T1: 10 | T2/T3/T5: 15</div>
+				<div className="col-span-3 col-start-1 row-start-1 justify-self-end @min-[56rem]:col-span-1 @min-[56rem]:col-start-3">
+					{headerActions}
+				</div>
 			</div>
 
 			{/* T1 Perks */}
-			<div className="flex flex-row gap-4">
+			<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
 				<h4 className="font-medium flex items-center gap-2 sm:w-12">T1</h4>
 				<div className="flex flex-wrap gap-2">
 					{Object.entries(t1PerksData).map(([perkName, effect]) => {
@@ -203,7 +215,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 			</div>
 
 			{/* T2 Perks */}
-			<div className="flex flex-row gap-4">
+			<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
 				<h4 className="font-medium flex items-center gap-2 sm:w-12">T2</h4>
 				<div className="flex flex-wrap gap-2">
 					{Object.entries(t2PerksData).map(([perkName, effect]) => {
@@ -245,7 +257,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 
 			{/* T3 Perks */}
 			{heroData.perks?.t3 && (
-				<div className="flex flex-row gap-4">
+				<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
 					<h4 className="font-medium flex items-center gap-2 sm:w-12">T3</h4>
 					<div className="flex flex-col gap-2">
 						{/* Row 1: S1 Light, S1 Dark, S2 Light, S2 Dark */}
@@ -476,7 +488,7 @@ export default function PerksBuilder({ heroData, heroClass, t1PerksData, t2Perks
 
 			{/* T5 Perks */}
 			{heroData.perks?.t5 && (
-				<div className="flex flex-row gap-4">
+				<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
 					<h4 className="font-medium flex items-center gap-2 sm:w-12">T5</h4>
 					<div className="flex flex-wrap gap-2">
 						{/* Light */}

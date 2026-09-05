@@ -27,6 +27,7 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 
 	const [t1Open, setT1Open] = useState(false)
 	const [t2Open, setT2Open] = useState(false)
+	const [heroPerksOpen, setHeroPerksOpen] = useState<Record<string, boolean>>({ t3: true, t5: true })
 	const [viewMode, setViewMode] = useState<"list" | "builder">(hasPerksParam ? "builder" : "list")
 	const [copied, setCopied] = useState(false)
 
@@ -40,35 +41,37 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 		setTimeout(() => setCopied(false), 2000)
 	}
 
+	const headerActions = (
+		<div className="flex shrink-0 items-center gap-2">
+			{viewMode === "builder" && (
+				<Button variant="outline" size="sm" onClick={handleShare} className="flex items-center gap-2">
+					{copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
+					{copied ? "Copied!" : "Share"}
+				</Button>
+			)}
+			<Button
+				variant="outline"
+				size="sm"
+				onClick={() => setViewMode(viewMode === "list" ? "builder" : "list")}
+				className="flex items-center gap-2"
+			>
+				{viewMode === "list" ? (
+					<>
+						<LayoutGrid className="w-4 h-4" />
+						Transcends
+					</>
+				) : (
+					<>
+						<LayoutList className="w-4 h-4" />
+						Descriptions
+					</>
+				)}
+			</Button>
+		</div>
+	)
+
 	return (
 		<div className="space-y-4">
-			<div className="flex justify-end gap-2 mb-4">
-				{viewMode === "builder" && (
-					<Button variant="outline" size="sm" onClick={handleShare} className="flex items-center gap-2">
-						{copied ? <Check className="w-4 h-4 text-green-500" /> : <Share2 className="w-4 h-4" />}
-						{copied ? "Copied!" : "Share"}
-					</Button>
-				)}
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() => setViewMode(viewMode === "list" ? "builder" : "list")}
-					className="flex items-center gap-2"
-				>
-					{viewMode === "list" ? (
-						<>
-							<LayoutGrid className="w-4 h-4" />
-							Transcends
-						</>
-					) : (
-						<>
-							<LayoutList className="w-4 h-4" />
-							Descriptions
-						</>
-					)}
-				</Button>
-			</div>
-
 			{viewMode === "builder" ? (
 				<Suspense fallback={<div>Loading Perks Builder...</div>}>
 					<PerksBuilder
@@ -76,18 +79,22 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 						heroClass={heroClass}
 						t1PerksData={t1PerksData}
 						t2PerksData={t2PerksData}
+						headerActions={headerActions}
 					/>
 				</Suspense>
 			) : (
 				<>
 					{/* T1 Perks */}
 					<Collapsible open={t1Open} onOpenChange={setT1Open}>
-						<CollapsibleTrigger className="flex items-center justify-between w-full text-lg font-bold mb-2 hover:opacity-80 transition-opacity">
-							<span>T1 Perks</span>
-							<ChevronDown
-								className={`h-6 w-6 transition-transform duration-200 ${t1Open ? "rotate-180" : ""}`}
-							/>
-						</CollapsibleTrigger>
+						<div className="flex items-center gap-4 mb-2">
+							<CollapsibleTrigger className="flex flex-1 items-center justify-between text-lg font-bold hover:opacity-80 transition-opacity">
+								<span>T1 Perks</span>
+								<ChevronDown
+									className={`h-6 w-6 transition-transform duration-200 ${t1Open ? "rotate-180" : ""}`}
+								/>
+							</CollapsibleTrigger>
+							{headerActions}
+						</div>
 						<CollapsibleContent className="space-y-4">
 							<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
 								{Object.entries(t1PerksData).map(([perkName, effect]) => (
@@ -147,10 +154,19 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 					{/* Hero-specific perks (T3, T5) */}
 					{heroData.perks ? (
 						Object.entries(heroData.perks).map(([perkCategory, perks]) => (
-							<div key={perkCategory}>
-								<div className="text-lg font-bold capitalize mb-2">{perkCategory} Perks</div>
+							<Collapsible
+								key={perkCategory}
+								open={heroPerksOpen[perkCategory] ?? false}
+								onOpenChange={(open) => setHeroPerksOpen((prev) => ({ ...prev, [perkCategory]: open }))}
+							>
+								<CollapsibleTrigger className="flex items-center justify-between w-full text-lg font-bold mb-2 hover:opacity-80 transition-opacity">
+									<span>{perkCategory.toUpperCase()} Perks</span>
+									<ChevronDown
+										className={`h-6 w-6 transition-transform duration-200 ${heroPerksOpen[perkCategory] ? "rotate-180" : ""}`}
+									/>
+								</CollapsibleTrigger>
 
-								<div className="space-y-4">
+								<CollapsibleContent className="space-y-4">
 									{typeof perks === "object" &&
 										Object.entries(perks).map(([perkKey, perk]) => (
 											<Card key={perkKey} className="p-4 pt-3">
@@ -238,8 +254,8 @@ export default function Perks({ heroData, classPerks }: PerksProps) {
 												</CardContent>
 											</Card>
 										))}
-								</div>
-							</div>
+								</CollapsibleContent>
+							</Collapsible>
 						))
 					) : (
 						<div className="text-center text-gray-500 py-8">No perk data available</div>
