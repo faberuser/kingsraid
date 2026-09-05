@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
 	CommandDialog,
 	CommandEmpty,
@@ -41,8 +41,19 @@ interface GlobalSearchProps {
 export default function GlobalSearch({ searchData, state }: GlobalSearchProps) {
 	const [open, setOpen] = useState(false)
 	const [searchValue, setSearchValue] = useState("")
+	const pendingResultRef = useRef<{ url: string; listPath: string } | null>(null)
+	const pathname = usePathname()
 	const router = useRouter()
 	const listRef = useRef<HTMLDivElement>(null)
+
+	// Wait for the list route to commit so its modal slot can intercept the detail navigation.
+	useEffect(() => {
+		const pendingResult = pendingResultRef.current
+		if (!pendingResult || pathname !== pendingResult.listPath) return
+
+		pendingResultRef.current = null
+		router.push(pendingResult.url, { scroll: false })
+	}, [pathname, router])
 
 	// Handle keyboard shortcut
 	useEffect(() => {
@@ -125,7 +136,14 @@ export default function GlobalSearch({ searchData, state }: GlobalSearchProps) {
 	const handleSelect = (url: string) => {
 		setOpen(false)
 		setSearchValue("")
-		router.push(url)
+		const listPath = `/${url.split("/")[1]}`
+		if (pathname === listPath) {
+			pendingResultRef.current = null
+			router.push(url, { scroll: false })
+			return
+		}
+		pendingResultRef.current = { url, listPath }
+		router.push(listPath)
 	}
 
 	const getGroupTitle = (type: string) => {
