@@ -205,7 +205,7 @@ export default function GlobalSearch({ searchData, state }: GlobalSearchProps) {
 			<CommandDialog open={open} onOpenChange={handleOpenChange}>
 				<DialogTitle className="sr-only">Global Search</DialogTitle>
 				<CommandInput placeholder="Search globally..." value={searchValue} onValueChange={setSearchValue} />
-				<CommandList ref={listRef} className="max-h-[400px] overflow-y-auto custom-scrollbar">
+				<CommandList ref={listRef} className="max-h-100 overflow-y-auto custom-scrollbar">
 					<CommandEmpty>No results found.</CommandEmpty>
 
 					{Object.entries(groupedItems).map(([type, items]) => (

@@ -218,7 +218,7 @@ export function HeroSelectDialog({
 										sizes="40vw md:20vw"
 										className="w-full h-full object-cover"
 									/>
-									<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
+									<div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-1.5">
 										<div className="text-xs text-white truncate text-center font-medium">
 											{hero.profile.name}
 										</div>

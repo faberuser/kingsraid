@@ -212,7 +212,7 @@ export default function ImageZoomModal({
 											<ChevronLeft className="w-4 h-4" />
 										</Button>
 										{currentIndex !== undefined && totalCount !== undefined && (
-											<div className="text-sm font-medium min-w-[60px] text-center">
+											<div className="text-sm font-medium min-w-15 text-center">
 												{currentIndex + 1} / {totalCount}
 											</div>
 										)}
@@ -240,7 +240,7 @@ export default function ImageZoomModal({
 									>
 										<ZoomOut className="w-4 h-4" />
 									</Button>
-									<div className="text-sm font-medium min-w-[60px] text-center">
+									<div className="text-sm font-medium min-w-15 text-center">
 										{Math.round(zoomLevel * 100)}%
 									</div>
 									<Button

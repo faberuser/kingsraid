@@ -21,7 +21,7 @@ export default function Gear({ heroData }: GearProps) {
 					<Card>
 						<CardContent>
 							<div className="flex flex-col md:flex-row gap-6">
-								<div className="flex-shrink-0 hidden md:block">
+								<div className="shrink-0 hidden md:block">
 									<Image
 										src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
 										alt={heroData.uw.name}
@@ -34,7 +34,7 @@ export default function Gear({ heroData }: GearProps) {
 
 								<div className="grow">
 									<div className="flex flex-row md:items-center gap-2 mb-2">
-										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+										<div className="shrink-0 flex md:hidden justify-center items-center">
 											<Image
 												src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
 												alt={heroData.uw.name}
@@ -116,7 +116,7 @@ export default function Gear({ heroData }: GearProps) {
 							<Card key={utKey}>
 								<CardContent>
 									<div className="flex flex-col md:flex-row gap-4">
-										<div className="flex-shrink-0 hidden md:block">
+										<div className="shrink-0 hidden md:block">
 											<Image
 												src={`/kingsraid-data/assets/${ut.thumbnail}`}
 												alt={ut.name}
@@ -129,7 +129,7 @@ export default function Gear({ heroData }: GearProps) {
 
 										<div className="grow">
 											<div className="flex flex-row md:items-center gap-2 mb-2">
-												<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+												<div className="shrink-0 flex md:hidden justify-center items-center">
 													<Image
 														src={`/kingsraid-data/assets/${ut.thumbnail}`}
 														alt={ut.name}
@@ -213,7 +213,7 @@ export default function Gear({ heroData }: GearProps) {
 					<Card>
 						<CardContent>
 							<div className="flex flex-col md:flex-row gap-6">
-								<div className="flex-shrink-0 hidden md:block">
+								<div className="shrink-0 hidden md:block">
 									<Image
 										src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
 										alt="Soul Weapon"
@@ -227,7 +227,7 @@ export default function Gear({ heroData }: GearProps) {
 								<div className="grow">
 									<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
 										<div className="flex flex-row md:items-center gap-2 mb-2">
-											<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+											<div className="shrink-0 flex md:hidden justify-center items-center">
 												<Image
 													src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
 													alt="Soul Weapon"

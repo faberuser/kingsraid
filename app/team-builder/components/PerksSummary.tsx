@@ -16,7 +16,7 @@ export function PerksSummary({ member, t1Perks, getT2Perks }: PerksSummaryProps)
 	if (!member.hero) return null
 
 	return (
-		<div className="flex flex-wrap gap-0.5 mb-2 min-h-[24px]">
+		<div className="flex flex-wrap gap-0.5 mb-2 min-h-6">
 			{/* T1 Perks */}
 			{member.perks.t1.map((perkName) => {
 				const effect = t1Perks[perkName] || ""

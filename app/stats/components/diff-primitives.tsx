@@ -81,7 +81,7 @@ export function ValueRow({ label, children }: { label: string; children: ReactNo
 	return (
 		<div className="flex gap-2 text-sm py-0.5">
 			<span className="text-muted-foreground shrink-0 w-35 whitespace-nowrap">{label}</span>
-			<span className="leading-relaxed min-w-0 break-words">{children}</span>
+			<span className="leading-relaxed min-w-0 wrap-break-word">{children}</span>
 		</div>
 	)
 }
@@ -102,7 +102,7 @@ export function DiffRow({ field, from, to }: { field: string; from: string | nul
 			<span className="text-muted-foreground font-medium pt-0.5 shrink-0">{field}</span>
 			<div
 				className={cn(
-					"rounded px-2 py-1 whitespace-pre-wrap break-words min-w-0",
+					"rounded px-2 py-1 whitespace-pre-wrap wrap-break-word min-w-0",
 					from === null ? "text-muted-foreground italic" : "bg-red-500/10 text-red-700 dark:text-red-400",
 				)}
 			>
@@ -111,7 +111,7 @@ export function DiffRow({ field, from, to }: { field: string; from: string | nul
 			<ArrowRight className="w-3 h-3 text-muted-foreground shrink-0 mt-1.5" />
 			<div
 				className={cn(
-					"rounded px-2 py-1 whitespace-pre-wrap break-words min-w-0",
+					"rounded px-2 py-1 whitespace-pre-wrap wrap-break-word min-w-0",
 					to === null ? "text-muted-foreground italic" : "bg-green-500/10 text-green-700 dark:text-green-400",
 				)}
 			>

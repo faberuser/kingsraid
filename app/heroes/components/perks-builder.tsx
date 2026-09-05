@@ -295,7 +295,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "light",
 														)
@@ -309,7 +309,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-[50px]",
+															"rounded min-w-12.5",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "light",
 															) && "grayscale",
@@ -344,7 +344,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "dark",
 														)
@@ -358,7 +358,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-[50px]",
+															"rounded min-w-12.5",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "dark",
 															) && "grayscale",
@@ -406,7 +406,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "light",
 														)
@@ -420,7 +420,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-[50px]",
+															"rounded min-w-12.5",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "light",
 															) && "grayscale",
@@ -455,7 +455,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "dark",
 														)
@@ -469,7 +469,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-[50px]",
+															"rounded min-w-12.5",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "dark",
 															) && "grayscale",
@@ -521,7 +521,7 @@ export default function PerksBuilder({
 										calculateUsedPoints(selectedPerks) + PERK_COSTS.t5 > maxPoints
 									}
 									className={cn(
-										"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+										"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 										selectedPerks.t5.includes("light")
 											? "ring-2 ring-yellow-500"
 											: "hover:bg-muted",
@@ -533,7 +533,7 @@ export default function PerksBuilder({
 										width={50}
 										height={50}
 										className={cn(
-											"rounded min-w-[50px]",
+											"rounded min-w-12.5",
 											!selectedPerks.t5.includes("light") && "grayscale",
 										)}
 									/>
@@ -571,7 +571,7 @@ export default function PerksBuilder({
 										calculateUsedPoints(selectedPerks) + PERK_COSTS.t5 > maxPoints
 									}
 									className={cn(
-										"p-1 rounded transition-all flex items-center justify-center min-w-[58px]",
+										"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
 										selectedPerks.t5.includes("dark") ? "ring-2 ring-yellow-500" : "hover:bg-muted",
 									)}
 								>
@@ -581,7 +581,7 @@ export default function PerksBuilder({
 										width={50}
 										height={50}
 										className={cn(
-											"rounded min-w-[50px]",
+											"rounded min-w-12.5",
 											!selectedPerks.t5.includes("dark") && "grayscale",
 										)}
 									/>
