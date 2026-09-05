@@ -207,7 +207,7 @@ export function ArtifactSelectDialog({
 									content={
 										<>
 											<div className="font-bold">{artifact.name}</div>
-											<div className="text-xs mt-1 max-w-[200px]">{artifact.description}</div>
+											<div className="text-xs mt-1 max-w-50">{artifact.description}</div>
 										</>
 									}
 								>
@@ -231,7 +231,7 @@ export function ArtifactSelectDialog({
 											sizes="40vw md:20vw"
 											className="w-full h-full object-cover"
 										/>
-										<div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5 z-10">
+										<div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-1.5 z-10">
 											<div className="text-xs text-white truncate text-center font-medium">
 												{artifact.name}
 											</div>

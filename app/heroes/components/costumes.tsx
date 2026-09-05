@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { HeroData } from "@/model/Hero"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
@@ -21,6 +21,24 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	// Auto-select first costume when costumes are available
 	const [selectedCostume, setSelectedCostume] = useState<string | null>(costumes.length > 0 ? costumes[0].name : null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	useEffect(() => {
+		const currentIndex = costumes.findIndex((costume) => costume.name === selectedCostume)
+		if (currentIndex === -1) return
+
+		// Warm the original images used by the modal, rather than the optimized thumbnails.
+		const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+		const nearbyPaths = new Set(
+			[0, -1, 1].map((offset) => costumes[(currentIndex + offset + costumes.length) % costumes.length].path),
+		)
+
+		for (const path of nearbyPaths) {
+			const image = new window.Image()
+			image.src = `${basePath}/kingsraid-data/assets/${path}`
+			// Decode ahead of navigation too; a failed preload must not block browsing.
+			void image.decode().catch(() => {})
+		}
+	}, [costumes, selectedCostume])
 
 	const handleImageClick = () => {
 		setIsModalOpen(true)
@@ -170,7 +188,7 @@ function CostumeCard({ costume, heroName, isSelected, onClick }: CostumeCardProp
 				sizes="40vw md:20vw"
 				className="w-full flex-1 hover:scale-110 transition-transform duration-300 object-contain"
 			/>
-			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-gradient-to-t from-white/100 dark:from-black/70 to-transparent dark:text-white py-2 flex items-center justify-center">
+			<div className="text-sm font-bold w-full text-center absolute bottom-0 h-12 bg-linear-to-t from-white dark:from-black/70 to-transparent dark:text-white py-2 flex items-center justify-center">
 				{costume.displayName.replace("%", "?")}
 			</div>
 		</div>

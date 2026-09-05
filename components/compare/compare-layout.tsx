@@ -88,7 +88,7 @@ export default function CompareLayout({
 			<div className={cn("hidden lg:flex lg:flex-row gap-3 lg:h-[calc(100vh-140px)] w-full", className)}>
 				{/* Left Panel */}
 				<div className="flex-1 min-w-0 flex flex-col">
-					<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-2 mb-2 shrink-0">
+					<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 pb-2 mb-2 shrink-0">
 						<Badge variant="secondary" className="text-sm font-medium">
 							{DataVersionLabels[leftVersion]}
 						</Badge>
@@ -111,7 +111,7 @@ export default function CompareLayout({
 
 				{/* Right Panel */}
 				<div className="flex-1 min-w-0 flex flex-col">
-					<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-2 mb-2 shrink-0">
+					<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 pb-2 mb-2 shrink-0">
 						<Badge variant="secondary" className="text-sm font-medium">
 							{DataVersionLabels[rightVersion]}
 						</Badge>
@@ -143,7 +143,7 @@ export default function CompareLayout({
 
 				return (
 					<div key={version} className="flex-1 min-w-0 flex flex-col">
-						<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pb-2 mb-2 shrink-0">
+						<div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 pb-2 mb-2 shrink-0">
 							<Badge variant="secondary" className="text-sm font-medium">
 								{DataVersionLabels[version]}
 							</Badge>

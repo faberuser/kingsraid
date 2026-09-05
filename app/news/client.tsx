@@ -67,7 +67,7 @@ export default function NewsClient({ steamNews }: { steamNews: NewsItem[] }) {
 								onClick={() => handleNewsClick(news)}
 							>
 								{imageSrc && (
-									<div className="flex h-56 w-full shrink-0 items-center justify-center px-6 mb-4 lg:mb-0 lg:ml-6 lg:h-full lg:w-[32rem] lg:max-w-[35%] lg:px-0">
+									<div className="flex h-56 w-full shrink-0 items-center justify-center px-6 mb-4 lg:mb-0 lg:ml-6 lg:h-full lg:w-lg lg:max-w-[35%] lg:px-0">
 										<Image
 											width="0"
 											height="0"
@@ -143,7 +143,7 @@ export function NewsDetailDialog({
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-[90vw] min-w-0 md:min-w-[60vw] lg:min-w-[50vw] xl:min-w-[40vw] max-h-[90vh] overflow-x-hidden overflow-y-auto custom-scrollbar">
 				<DialogHeader>
-					<DialogTitle className="break-words pr-8 text-2xl font-bold">{news.title}</DialogTitle>
+					<DialogTitle className="wrap-break-word pr-8 text-2xl font-bold">{news.title}</DialogTitle>
 					<DialogDescription className="text-sm">{news.formattedDate}</DialogDescription>
 				</DialogHeader>
 
@@ -159,7 +159,7 @@ export function NewsDetailDialog({
 				)}
 
 				<div
-					className="min-w-0 max-w-full space-y-2 break-words [&_a]:break-all [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
+					className="min-w-0 max-w-full space-y-2 wrap-break-word [&_a]:break-all [&_iframe]:max-w-full [&_img]:h-auto [&_img]:max-w-full [&_table]:block [&_table]:max-w-full [&_table]:overflow-x-auto"
 					dangerouslySetInnerHTML={{ __html: content ?? "" }}
 				/>
 

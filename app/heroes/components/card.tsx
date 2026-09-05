@@ -58,7 +58,7 @@ export default function HeroCard({
 				// {...(blurDataURL ? { placeholder: "blur" as const, blurDataURL } : {})}
 			/>
 			<div
-				className={`font-bold w-full text-center absolute bottom-0 bg-gradient-to-t from-black/70 to-transparent text-white ${
+				className={`font-bold w-full text-center absolute bottom-0 bg-linear-to-t from-black/70 to-transparent text-white ${
 					isIconView ? "text-xs h-6 py-1" : "text-xl h-12 py-2"
 				}`}
 			>

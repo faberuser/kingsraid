@@ -50,7 +50,7 @@ async function getSearchData() {
 		}
 
 		// Load Bosses
-		const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "bosses")
+		const bossesDir = path.join(process.cwd(), "public", "kingsraid-data", "table-data", "legacy", "bosses")
 		if (fs.existsSync(bossesDir)) {
 			const bossFiles = fs.readdirSync(bossesDir).filter((file) => file.endsWith(".json"))
 

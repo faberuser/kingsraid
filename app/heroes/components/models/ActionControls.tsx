@@ -169,7 +169,7 @@ export function ActionControls({
 											onValueChange={(value) => setVoiceLanguage(value as VoiceLanguage)}
 											disabled={isLoading}
 										>
-											<SelectTrigger className="w-10 h-9 px-0 justify-center text-xs font-medium !bg-secondary hover:!bg-secondary/80 border-0 [&>svg]:hidden">
+											<SelectTrigger className="w-10 h-9 px-0 justify-center text-xs font-medium bg-secondary! hover:bg-secondary/80! border-0 [&>svg]:hidden">
 												<SelectValue>{languageLabels[voiceLanguage]}</SelectValue>
 											</SelectTrigger>
 											<SelectContent align="center">

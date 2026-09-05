@@ -34,7 +34,7 @@ export function RecordingDialog({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-h-[90vh] flex flex-col">
-				<DialogHeader className="flex-shrink-0">
+				<DialogHeader className="shrink-0">
 					<DialogTitle>Recording Complete</DialogTitle>
 					<DialogDescription>Choose your preferred format and download the animation.</DialogDescription>
 				</DialogHeader>
@@ -82,7 +82,7 @@ export function RecordingDialog({
 						)}
 					</div>
 				</div>
-				<DialogFooter className="flex gap-2 flex-shrink-0">
+				<DialogFooter className="flex gap-2 shrink-0">
 					<Button variant="outline" onClick={() => onOpenChange(false)} disabled={isConverting}>
 						Close
 					</Button>

@@ -580,9 +580,9 @@ Downloaded Models:
 			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
 				<div
 					ref={viewerContainerRef}
-					className={`relative w-full bg-gradient-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden transition-all duration-300 ${
+					className={`relative w-full bg-linear-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden transition-all duration-300 ${
 						isFullscreen
-							? "!fixed inset-0 z-50 !w-screen !h-screen !rounded-none"
+							? "fixed! inset-0 z-50 w-screen! h-screen! rounded-none!"
 							: "h-200 lg:h-auto rounded-lg"
 					}`}
 				>

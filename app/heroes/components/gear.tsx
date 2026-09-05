@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
 import { classColorMapText, classColorMapBg, parseColoredText } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import GearEnhancement from "./gear-enhancement"
 
 interface GearProps {
 	heroData: HeroData
@@ -21,7 +22,7 @@ export default function Gear({ heroData }: GearProps) {
 					<Card>
 						<CardContent>
 							<div className="flex flex-col md:flex-row gap-6">
-								<div className="flex-shrink-0 hidden md:block">
+								<div className="shrink-0 hidden md:block">
 									<Image
 										src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
 										alt={heroData.uw.name}
@@ -34,7 +35,7 @@ export default function Gear({ heroData }: GearProps) {
 
 								<div className="grow">
 									<div className="flex flex-row md:items-center gap-2 mb-2">
-										<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+										<div className="shrink-0 flex md:hidden justify-center items-center">
 											<Image
 												src={`/kingsraid-data/assets/${heroData.uw.thumbnail}`}
 												alt={heroData.uw.name}
@@ -53,40 +54,12 @@ export default function Gear({ heroData }: GearProps) {
 										</div>
 									</div>
 
-									<div className="mb-2">{parseColoredText(heroData.uw.description)}</div>
-
-									{/* UW Values */}
-									{heroData.uw.value && (
-										<div className="mb-3">
-											<div className="font-medium text-sm text-muted-foreground mb-2">
-												Enhancement Values
-											</div>
-											<div className="flex gap-4 text-xs">
-												{Object.entries(heroData.uw.value).map(([statKey, statValues]) => (
-													<div key={statKey} className="space-y-1">
-														<div className="font-medium">
-															Stat {"{"}
-															{statKey}
-															{"}"}
-														</div>
-														<div className="flex flex-wrap gap-1">
-															{Object.entries(statValues).map(([level, value]) => (
-																<Badge
-																	variant="secondary"
-																	key={level}
-																	className={`p-2 rounded text-center ${classColorMapBg(
-																		heroData.profile.class,
-																	)}`}
-																>
-																	★{level}: {value}
-																</Badge>
-															))}
-														</div>
-													</div>
-												))}
-											</div>
-										</div>
-									)}
+									<GearEnhancement
+										key={heroData.uw.name}
+										name={heroData.uw.name}
+										description={heroData.uw.description}
+										values={heroData.uw.value}
+									/>
 
 									{/* UW Story */}
 									<details className="cursor-pointer">
@@ -116,7 +89,7 @@ export default function Gear({ heroData }: GearProps) {
 							<Card key={utKey}>
 								<CardContent>
 									<div className="flex flex-col md:flex-row gap-4">
-										<div className="flex-shrink-0 hidden md:block">
+										<div className="shrink-0 hidden md:block">
 											<Image
 												src={`/kingsraid-data/assets/${ut.thumbnail}`}
 												alt={ut.name}
@@ -129,7 +102,7 @@ export default function Gear({ heroData }: GearProps) {
 
 										<div className="grow">
 											<div className="flex flex-row md:items-center gap-2 mb-2">
-												<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+												<div className="shrink-0 flex md:hidden justify-center items-center">
 													<Image
 														src={`/kingsraid-data/assets/${ut.thumbnail}`}
 														alt={ut.name}
@@ -148,42 +121,12 @@ export default function Gear({ heroData }: GearProps) {
 												</div>
 											</div>
 
-											<div className="mb-2">{parseColoredText(ut.description)}</div>
-
-											{/* UT Values */}
-											{ut.value && (
-												<div className="mb-3">
-													<div className="font-medium text-sm text-muted-foreground mb-2">
-														Enhancement Values
-													</div>
-													<div className="flex gap-4 text-xs">
-														{Object.entries(ut.value).map(([statKey, statValues]) => (
-															<div key={statKey} className="space-y-1">
-																<div className="font-medium">
-																	Stat {"{"}
-																	{statKey}
-																	{"}"}
-																</div>
-																<div className="flex flex-wrap gap-1">
-																	{Object.entries(statValues).map(
-																		([level, value]) => (
-																			<Badge
-																				variant="secondary"
-																				key={level}
-																				className={`p-2 rounded text-center ${classColorMapBg(
-																					heroData.profile.class,
-																				)}`}
-																			>
-																				★{level}: {value}
-																			</Badge>
-																		),
-																	)}
-																</div>
-															</div>
-														))}
-													</div>
-												</div>
-											)}
+											<GearEnhancement
+												key={ut.name}
+												name={ut.name}
+												description={ut.description}
+												values={ut.value}
+											/>
 
 											{/* UT Story */}
 											<details className="cursor-pointer">
@@ -213,7 +156,7 @@ export default function Gear({ heroData }: GearProps) {
 					<Card>
 						<CardContent>
 							<div className="flex flex-col md:flex-row gap-6">
-								<div className="flex-shrink-0 hidden md:block">
+								<div className="shrink-0 hidden md:block">
 									<Image
 										src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
 										alt="Soul Weapon"
@@ -227,7 +170,7 @@ export default function Gear({ heroData }: GearProps) {
 								<div className="grow">
 									<div className="flex flex-col md:flex-row md:items-center gap-2 mb-2">
 										<div className="flex flex-row md:items-center gap-2 mb-2">
-											<div className="flex-shrink-0 flex md:hidden justify-center items-center">
+											<div className="shrink-0 flex md:hidden justify-center items-center">
 												<Image
 													src={`/kingsraid-data/assets/${heroData.sw.thumbnail}`}
 													alt="Soul Weapon"

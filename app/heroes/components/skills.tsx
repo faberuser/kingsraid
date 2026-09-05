@@ -44,7 +44,7 @@ export default function Skills({ heroData }: SkillsProps) {
 					<Card key={key}>
 						<CardContent className="flex flex-row gap-4">
 							{/* Skill Icon */}
-							<div className="hidden md:block flex-shrink-0">
+							<div className="hidden md:block shrink-0">
 								<Image
 									src={`/kingsraid-data/assets/${skill.thumbnail}`}
 									alt={skill.name}
@@ -59,7 +59,7 @@ export default function Skills({ heroData }: SkillsProps) {
 							<div className="grow">
 								<div className="flex flex-row md:items-center gap-2 mb-2">
 									{/* Skill Icon */}
-									<div className="flex md:hidden flex-shrink-0 justify-center items-center">
+									<div className="flex md:hidden shrink-0 justify-center items-center">
 										<Image
 											src={`/kingsraid-data/assets/${skill.thumbnail}`}
 											alt={skill.name}
