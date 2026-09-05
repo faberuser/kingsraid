@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { HeroData } from "@/model/Hero"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
@@ -21,6 +21,24 @@ export default function Costumes({ heroData, costumes }: CostumesProps) {
 	// Auto-select first costume when costumes are available
 	const [selectedCostume, setSelectedCostume] = useState<string | null>(costumes.length > 0 ? costumes[0].name : null)
 	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	useEffect(() => {
+		const currentIndex = costumes.findIndex((costume) => costume.name === selectedCostume)
+		if (currentIndex === -1) return
+
+		// Warm the original images used by the modal, rather than the optimized thumbnails.
+		const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
+		const nearbyPaths = new Set(
+			[0, -1, 1].map((offset) => costumes[(currentIndex + offset + costumes.length) % costumes.length].path),
+		)
+
+		for (const path of nearbyPaths) {
+			const image = new window.Image()
+			image.src = `${basePath}/kingsraid-data/assets/${path}`
+			// Decode ahead of navigation too; a failed preload must not block browsing.
+			void image.decode().catch(() => {})
+		}
+	}, [costumes, selectedCostume])
 
 	const handleImageClick = () => {
 		setIsModalOpen(true)
