@@ -54,6 +54,7 @@ WORKDIR /usr/src/app
 FROM base AS install-dev
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
+COPY patches/ /temp/dev/patches/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
   cd /temp/dev && bun install --frozen-lockfile
 
@@ -61,6 +62,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 FROM base AS install-prod
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
+COPY patches/ /temp/prod/patches/
 RUN --mount=type=cache,target=/root/.bun/install/cache \
   cd /temp/prod && bun install --frozen-lockfile --production && \
   bun add typescript --dev
