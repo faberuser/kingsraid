@@ -28,7 +28,7 @@ interface ModelProps {
 	setIsLoading?: (loading: boolean) => void
 	setLoadingProgress?: (progress: number) => void
 	onAnimationDurationChange?: (duration: number) => void
-	modelType?: "heroes" | "bosses"
+	modelType?: "heroes" | "bosses" | "artifacts"
 	bossName?: string
 	availableAnimations?: string[]
 	onAnimationChange?: (animation: string) => void
@@ -324,6 +324,20 @@ export function Model({
 				} else {
 					// Default positioning for unknown types
 					fbx.position.set(0, 0, 0)
+				}
+
+				// Frame standalone items consistently in the shared viewer's camera.
+				if (modelType === "artifacts") {
+					fbx.updateMatrixWorld(true)
+					const bounds = new THREE.Box3().setFromObject(fbx)
+					const size = bounds.getSize(new THREE.Vector3())
+					const extent = Math.max(size.x, size.y, size.z)
+					if (Number.isFinite(extent) && extent > 0) {
+						fbx.scale.multiplyScalar(1.5 / extent)
+						fbx.updateMatrixWorld(true)
+						const center = new THREE.Box3().setFromObject(fbx).getCenter(new THREE.Vector3())
+						fbx.position.sub(center).add(new THREE.Vector3(0, 1, 0))
+					}
 				}
 
 				// Store shared animations from the first model that has them

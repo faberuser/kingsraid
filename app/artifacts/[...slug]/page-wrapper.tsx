@@ -2,6 +2,7 @@
 
 import ArtifactCompareWrapper from "@/components/compare/artifact-compare-wrapper"
 import { ArtifactData } from "@/model/Artifact"
+import type { ModelFile } from "@/model/Hero_Model"
 import { useDataVersion } from "@/hooks/use-data-version"
 import { DataVersion, DATA_VERSIONS } from "@/lib/constants"
 import { useEnableVersionToggle } from "@/contexts/version-toggle-context"
@@ -11,9 +12,14 @@ import { Spinner } from "@/components/ui/spinner"
 interface ArtifactPageWrapperProps {
 	artifactsMap: Record<DataVersion, ArtifactData | null>
 	sortedArtifactSlugs: string[]
+	artifactModels: ModelFile[]
 }
 
-export default function ArtifactPageWrapper({ artifactsMap, sortedArtifactSlugs }: ArtifactPageWrapperProps) {
+export default function ArtifactPageWrapper({
+	artifactsMap,
+	sortedArtifactSlugs,
+	artifactModels,
+}: ArtifactPageWrapperProps) {
 	const { version, setVersion, isHydrated } = useDataVersion()
 
 	// Map of artifact data by version
@@ -55,6 +61,7 @@ export default function ArtifactPageWrapper({ artifactsMap, sortedArtifactSlugs 
 			availableVersions={availableVersions}
 			currentArtifactData={artifactData}
 			sortedArtifactSlugs={sortedArtifactSlugs}
+			artifactModels={artifactModels}
 		/>
 	)
 }

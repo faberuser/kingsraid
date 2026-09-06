@@ -49,7 +49,7 @@ export interface ModelViewerProps {
 	availableScenes?: Array<{ value: string; label: string }>
 	visibleModels?: Set<string>
 	setVisibleModels?: React.Dispatch<React.SetStateAction<Set<string>>>
-	modelType?: "heroes" | "bosses"
+	modelType?: "heroes" | "bosses" | "artifacts"
 	bossName?: string
 	voiceFiles?: VoiceFiles
 }

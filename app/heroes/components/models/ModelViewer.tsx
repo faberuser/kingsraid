@@ -77,11 +77,11 @@ export function ModelViewer({
 	const lastPlayedAnimationRef = useRef<string | null>(null)
 
 	// Extract hero name from model files path
-	// Path format: "Hero_Mitra_Vari05_Body/Hero_Mitra_Vari05_Body.FBX"
+	// Path format: "Mitra/Hero_Mitra_Vari05_Body/Hero_Mitra_Vari05_Body.FBX"
 	// We need to extract just "Mitra" from this
 	const heroName = useMemo(() => {
 		if (modelFiles.length === 0) return ""
-		const folderName = modelFiles[0].path.split("/")[0] // e.g., "Hero_Mitra_Vari05_Body"
+		const folderName = modelFiles[0].path.split("/").at(-2) || "" // e.g., "Hero_Mitra_Vari05_Body"
 		const match = folderName.match(HERO_NAME_REGEX)
 		return match ? match[1] : ""
 	}, [modelFiles])
@@ -583,7 +583,9 @@ Downloaded Models:
 					className={`relative w-full bg-linear-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden transition-all duration-300 ${
 						isFullscreen
 							? "fixed! inset-0 z-50 w-screen! h-screen! rounded-none!"
-							: "h-200 lg:h-auto rounded-lg"
+							: modelType === "artifacts"
+								? "h-120 lg:h-auto rounded-lg"
+								: "h-200 lg:h-auto rounded-lg"
 					}`}
 				>
 					{renderViewerContent()}
