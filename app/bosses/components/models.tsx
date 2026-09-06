@@ -24,10 +24,7 @@ interface BossModelsProps {
 export default function BossModels({ bossModels, bossScenes = [], bossName }: BossModelsProps) {
 	const modelOptions = Object.keys(bossModels).sort()
 
-	const [selectedModel, setSelectedModel] = useState<string>(() => {
-		// Auto-select the first model if available
-		return modelOptions.length > 0 ? modelOptions[0] : ""
-	})
+	const [selectedModel, setSelectedModel] = useState<string>("")
 	const [availableAnimations, setAvailableAnimations] = useState<string[]>([])
 	const [selectedAnimation, setSelectedAnimation] = useState<string | null>(null)
 	const [isLoadingModels, setIsLoadingModels] = useState(false)
