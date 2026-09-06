@@ -3,6 +3,7 @@ import path from "path"
 import { notFound } from "next/navigation"
 import ArtifactPageWrapper from "@/app/artifacts/[...slug]/page-wrapper"
 import { ArtifactData } from "@/model/Artifact"
+import { getArtifactModels } from "@/lib/artifact-models"
 import { SlugPageProps, findData, fetchAllVersions, getArtifactNamesForVersion } from "@/lib/get-data"
 
 const isStaticExport = process.env.NEXT_STATIC_EXPORT === "true"
@@ -70,5 +71,12 @@ export default async function SlugPage({ params }: SlugPageProps) {
 		.sort((a, b) => a.localeCompare(b))
 		.map((name) => name.toLowerCase().replace(/\s+/g, "-"))
 
-	return <ArtifactPageWrapper artifactsMap={artifactsMap} sortedArtifactSlugs={sortedArtifactSlugs} />
+	const artifactModels = await getArtifactModels(artifactDataLegacy.name)
+	return (
+		<ArtifactPageWrapper
+			artifactsMap={artifactsMap}
+			sortedArtifactSlugs={sortedArtifactSlugs}
+			artifactModels={artifactModels}
+		/>
+	)
 }

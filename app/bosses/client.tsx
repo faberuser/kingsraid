@@ -11,7 +11,7 @@ import Image from "@/components/next-image"
 import { BossData } from "@/model/Boss"
 import { Button } from "@/components/ui/button"
 import { Search, ChevronDown, ChevronUp } from "lucide-react"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { SearchableFilter } from "@/components/searchable-filter"
 import { Spinner } from "@/components/ui/spinner"
 
 interface BossesClientProps {
@@ -66,6 +66,12 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 			includeScore: true,
 		})
 	}, [bosses])
+
+	// The data maps full names to codes; reverse it for filter labels.
+	const bossTypeLabels = useMemo(
+		() => Object.fromEntries(Object.entries(bossTypeMap).map(([label, code]) => [code, label])),
+		[bossTypeMap],
+	)
 
 	// Get all boss types from data
 	const bossTypes = useMemo(() => {
@@ -152,7 +158,11 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Bosses</div>
-						<div className="text-muted-foreground text-sm">Showing {filteredBosses.length} bosses</div>
+						<div className="text-muted-foreground text-sm">
+							<span className="hidden sm:inline">Showing </span>
+							{filteredBosses.length}
+							<span> bosses</span>
+						</div>
 					</div>
 					<div className="flex flex-row">
 						{/* Alphabetical Sort */}
@@ -191,9 +201,9 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 					</div>
 				</div>
 
-				<div className="flex flex-col items-start xl:flex-row xl:items-center gap-4">
+				<div className="flex flex-col items-start sm:flex-row sm:items-center gap-4">
 					{/* Search Input */}
-					<div className="w-full max-w-sm relative">
+					<div className="w-full sm:max-w-sm relative">
 						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
 							<Search className="h-4 w-4" />
 						</span>
@@ -207,31 +217,17 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 					</div>
 
 					{/* Boss Type Filter */}
-					<div>
-						<RadioGroup
+					<div className="w-full sm:w-auto">
+						<SearchableFilter
+							label="Filter by boss type"
+							searchPlaceholder="Search boss types..."
 							value={selectedType}
 							onValueChange={setSelectedType}
-							className="flex flex-row flex-wrap justify-center space-x-1 md:space-x-2"
-						>
-							<label
-								key="all"
-								htmlFor="all"
-								className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
-							>
-								<RadioGroupItem value="all" id="all" />
-								<span>All</span>
-							</label>
-							{bossTypes.map((type) => (
-								<label
-									key={type}
-									htmlFor={type}
-									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
-								>
-									<RadioGroupItem value={type} id={type} />
-									<span>{bossTypeMap[type] ?? type}</span>
-								</label>
-							))}
-						</RadioGroup>
+							options={[
+								{ value: "all", label: "All boss types" },
+								...bossTypes.map((type) => ({ value: type, label: bossTypeLabels[type] ?? type })),
+							]}
+						/>
 					</div>
 				</div>
 			</div>
@@ -246,7 +242,7 @@ export default function BossesClient({ bosses, bossTypeMap, releaseOrder }: Boss
 							className="hover:scale-105 transition-transform duration-300 grid-item-lazy"
 							onClick={() => setLoadingSlug(slug)}
 						>
-							<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-4 relative">
+							<Card className="hover:shadow-lg transition-shadow cursor-pointer h-full gap-2 relative">
 								<CardHeader>
 									<div className="flex items-center gap-4">
 										<div className="w-16 h-16 flex items-center justify-center">

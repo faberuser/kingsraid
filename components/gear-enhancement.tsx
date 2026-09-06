@@ -1,13 +1,12 @@
 "use client"
 
 import { Children, cloneElement, isValidElement, useId, useState, type ReactNode } from "react"
-import type { HeroData } from "@/model/Hero"
 import { parseColoredText } from "@/lib/utils"
 
 interface GearEnhancementProps {
 	name: string
 	description: string
-	values?: HeroData["uw"]["value"]
+	values?: Record<string, Record<string, string>>
 }
 
 export default function GearEnhancement({ name, description, values }: GearEnhancementProps) {

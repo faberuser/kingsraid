@@ -108,9 +108,11 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 
 	// Use mapped name if available
 	const mappedHeroName = nameDiff[heroName] || heroName
+	const heroDir = path.join(modelsDir, heroName)
 
 	try {
-		const modelFolders = await fs.promises.readdir(modelsDir, { withFileTypes: true })
+		if (!fs.existsSync(heroDir)) return heroModels
+		const modelFolders = await fs.promises.readdir(heroDir, { withFileTypes: true })
 
 		// Filter folders that belong to this hero
 		const heroFolders = modelFolders.filter(
@@ -176,7 +178,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 					continue
 				}
 
-				const folderPath = path.join(modelsDir, folderName)
+				const folderPath = path.join(heroDir, folderName)
 
 				try {
 					const files = await fs.promises.readdir(folderPath)
@@ -193,7 +195,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 
 						models.push({
 							name: `${costumeName}_${type}`,
-							path: `${folderName}/${fbxFile}`,
+							path: `${heroName}/${folderName}/${fbxFile}`,
 							type: type,
 							defaultPosition: defaultPos,
 						})
@@ -218,14 +220,14 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 				// Check hair_fallback.json for this costume
 				if (hairFallback[`Hero_${mappedHeroName}_${costumeName}`]) {
 					const fallbackFolder = hairFallback[`Hero_${mappedHeroName}_${costumeName}`]
-					const fallbackPath = path.join(modelsDir, fallbackFolder)
+					const fallbackPath = path.join(heroDir, fallbackFolder)
 					try {
 						const files = await fs.promises.readdir(fallbackPath)
 						const fbxFile = files.find((file) => file.endsWith(".fbx"))
 						if (fbxFile) {
 							found = {
 								name: `${costumeName}_hair`,
-								path: `${fallbackFolder}/${fbxFile}`,
+								path: `${heroName}/${fallbackFolder}/${fbxFile}`,
 								type: "hair",
 							}
 						}
@@ -292,7 +294,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 					const fallbackFolders = Array.isArray(fallbackValue) ? fallbackValue : [fallbackValue]
 
 					for (const fallbackFolder of fallbackFolders) {
-						const fallbackPath = path.join(modelsDir, fallbackFolder)
+						const fallbackPath = path.join(heroDir, fallbackFolder)
 						try {
 							const files = await fs.promises.readdir(fallbackPath)
 							const fbxFile = files.find((file) => file.endsWith(".fbx"))
@@ -303,7 +305,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 
 								const weaponModel: ModelFile = {
 									name: `${costumeName}_${type}`,
-									path: `${fallbackFolder}/${fbxFile}`,
+									path: `${heroName}/${fallbackFolder}/${fbxFile}`,
 									type: type,
 								}
 								models.push(weaponModel)

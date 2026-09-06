@@ -9,8 +9,12 @@ import { Input } from "@/components/ui/input"
 import Image from "@/components/next-image"
 import { ArtifactData } from "@/model/Artifact"
 import { Button } from "@/components/ui/button"
-import { Search, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, ChevronDown, ChevronUp, Check } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command"
 import { Spinner } from "@/components/ui/spinner"
+import { ArtifactEffectBadges } from "@/components/artifact-effect-badges"
+import { ARTIFACT_EFFECT_TAGS, getArtifactEffectTags, type ArtifactEffectTag } from "@/lib/artifact-tags"
 
 interface ArtifactsClientProps {
 	artifacts: ArtifactData[]
@@ -19,6 +23,19 @@ interface ArtifactsClientProps {
 
 export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsClientProps) {
 	const [searchQuery, setSearchQuery] = useState("")
+	const [effectFilterOpen, setEffectFilterOpen] = useState(false)
+	const [selectedEffect, setSelectedEffect] = useState<ArtifactEffectTag | "all">("all")
+	const taggedArtifacts = useMemo(
+		() => artifacts.map((artifact) => ({ ...artifact, effectTags: getArtifactEffectTags(artifact) })),
+		[artifacts],
+	)
+	const effectCounts = useMemo(() => {
+		const counts = new Map<ArtifactEffectTag, number>()
+		for (const artifact of taggedArtifacts) {
+			for (const tag of artifact.effectTags) counts.set(tag, (counts.get(tag) ?? 0) + 1)
+		}
+		return counts
+	}, [taggedArtifacts])
 	const [loadingSlug, setLoadingSlug] = useState<string | null>(null)
 	const pathname = usePathname()
 
@@ -56,21 +73,24 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 
 	// Configure Fuse.js for fuzzy search
 	const fuse = useMemo(() => {
-		return new Fuse(artifacts, {
-			keys: ["name", "aliases"],
+		return new Fuse(taggedArtifacts, {
+			keys: ["name", "aliases", "effectTags"],
 			threshold: 0.3,
 			includeScore: true,
 		})
-	}, [artifacts])
+	}, [taggedArtifacts])
 
 	// Filter and sort artifacts
 	const filteredArtifacts = useMemo(() => {
-		let result = artifacts
+		let result = taggedArtifacts
 
 		// Apply search filter
 		if (searchQuery.trim()) {
 			const searchResults = fuse.search(searchQuery)
 			result = searchResults.map((item) => item.item)
+		}
+		if (selectedEffect !== "all") {
+			result = result.filter((artifact) => artifact.effectTags.includes(selectedEffect))
 		}
 
 		// Sort by selected sort type
@@ -89,14 +109,13 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 			result = result.reverse()
 		}
 
-		// Save the sorted/filtered list of artifact slugs to sessionStorage for next/prev navigation
-		if (typeof window !== "undefined") {
-			const slugs = result.map((a) => a.name.toLowerCase().replace(/\s+/g, "-"))
-			sessionStorage.setItem("currentArtifactList", JSON.stringify(slugs))
-		}
-
 		return result
-	}, [artifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder])
+	}, [taggedArtifacts, searchQuery, fuse, sortType, reverseSort, releaseOrder, selectedEffect])
+
+	useEffect(() => {
+		const slugs = filteredArtifacts.map((a) => a.name.toLowerCase().replace(/\s+/g, "-"))
+		sessionStorage.setItem("currentArtifactList", JSON.stringify(slugs))
+	}, [filteredArtifacts])
 
 	// Show loading spinner until hydrated
 	if (!mounted) {
@@ -114,7 +133,9 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Artifacts</div>
 						<div className="text-muted-foreground text-sm">
-							Showing {filteredArtifacts.length} artifacts
+							<span className="hidden sm:inline">Showing </span>
+							{filteredArtifacts.length}
+							<span> artifacts</span>
 						</div>
 					</div>
 					<div className="flex flex-row">
@@ -154,20 +175,66 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 					</div>
 				</div>
 
-				{/* Search Input */}
-				<div className="w-full max-w-sm relative">
-					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-						<Search className="h-4 w-4" />
-					</span>
-					<Input
-						type="text"
-						placeholder="Search for artifacts..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="w-full pl-10"
-					/>
+				<div className="flex flex-col items-start sm:flex-row sm:items-center gap-4">
+					{/* Search Input */}
+					<div className="w-full sm:max-w-sm relative">
+						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+							<Search className="h-4 w-4" />
+						</span>
+						<Input
+							type="text"
+							placeholder="Search names, aliases, or effects..."
+							aria-label="Search artifacts"
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="w-full pl-10"
+						/>
+					</div>
+					<div className="flex w-full sm:w-auto flex-wrap items-center gap-2">
+						<Popover open={effectFilterOpen} onOpenChange={setEffectFilterOpen}>
+							<PopoverTrigger asChild>
+								<Button
+									variant="outline"
+									role="combobox"
+									aria-label="Filter by effect"
+									aria-expanded={effectFilterOpen}
+									className="w-full sm:w-64 min-w-0 justify-between font-normal"
+								>
+									<span className="truncate">
+										{selectedEffect === "all" ? "All effects" : `${selectedEffect} (${effectCounts.get(selectedEffect) ?? 0})`}
+									</span>
+									<ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent align="start" className="w-(--radix-popover-trigger-width) p-0">
+								<Command>
+									<CommandInput placeholder="Search effects..." aria-label="Search effects" />
+									<CommandList>
+										<CommandEmpty>No effects found.</CommandEmpty>
+										<CommandGroup>
+											<CommandItem value="All effects" onSelect={() => { setSelectedEffect("all"); setEffectFilterOpen(false) }}>
+												<Check className={selectedEffect === "all" ? "opacity-100" : "opacity-0"} />
+												All effects
+											</CommandItem>
+											{ARTIFACT_EFFECT_TAGS.filter((tag) => effectCounts.has(tag) || tag === selectedEffect).map((tag) => (
+												<CommandItem key={tag} value={tag} onSelect={() => { setSelectedEffect(tag); setEffectFilterOpen(false) }}>
+													<Check className={selectedEffect === tag ? "opacity-100" : "opacity-0"} />
+													{tag} ({effectCounts.get(tag) ?? 0})
+												</CommandItem>
+											))}
+										</CommandGroup>
+									</CommandList>
+								</Command>
+							</PopoverContent>
+						</Popover>
+					</div>
 				</div>
 			</div>
+			{filteredArtifacts.length === 0 ? (
+				<p role="status" className="py-12 text-center text-muted-foreground">
+					No artifacts match these filters. Try another effect or clear the filters.
+				</p>
+			) : null}
 
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{filteredArtifacts.map((artifact) => {
@@ -204,6 +271,7 @@ export default function ArtifactsClient({ artifacts, releaseOrder }: ArtifactsCl
 								</CardHeader>
 								<CardContent>
 									<div className="space-y-3">
+										<ArtifactEffectBadges artifact={artifact} />
 										{artifact.description && (
 											<p className="text-sm text-muted-foreground line-clamp-3">
 												{artifact.description}

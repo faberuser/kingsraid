@@ -274,7 +274,12 @@ export default function BossClient({
 							description="This tab contains large 3D model files and textures that may consume significant mobile data."
 							estimatedSize="30-60 MB"
 						>
-							<BossModels bossModels={bossModels} bossScenes={bossScenes} bossName={profile.name} />
+							<BossModels
+								key={profile.name}
+								bossModels={bossModels}
+								bossScenes={bossScenes}
+								bossName={profile.name}
+							/>
 						</DataHeavyContent>
 					</TabsContent>
 				)}

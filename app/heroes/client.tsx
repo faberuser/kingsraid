@@ -1,9 +1,8 @@
 "use client"
 
-import Image from "@/components/next-image"
 import { useState, useEffect, useMemo } from "react"
 import Fuse from "fuse.js"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { SearchableFilter } from "@/components/searchable-filter"
 import { Input } from "@/components/ui/input"
 import { HeroData } from "@/model/Hero"
 import { Button } from "@/components/ui/button"
@@ -153,7 +152,11 @@ export default function HeroesClient({
 				<div className="flex flex-row justify-between items-center">
 					<div className="flex flex-row gap-2 items-baseline">
 						<div className="text-xl font-bold">Heroes</div>
-						<div className="text-muted-foreground text-sm">Showing {filteredHeroes.length} heroes</div>
+						<div className="text-muted-foreground text-sm">
+							<span className="hidden sm:inline">Showing </span>
+							{filteredHeroes.length}
+							<span> heroes</span>
+						</div>
 					</div>
 					<div className="flex flex-row">
 						{/* Alphabetical Sort */}
@@ -193,9 +196,9 @@ export default function HeroesClient({
 				</div>
 
 				<div className="flex flex-col items-center justify-between xl:flex-row">
-					<div className="flex flex-col items-center xl:flex-row gap-4 w-full">
+					<div className="flex flex-wrap items-center gap-4 w-full">
 						{/* Search Input */}
-						<div className="w-full max-w-sm relative">
+						<div className="w-full sm:max-w-sm relative">
 							<span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
 								<Search className="h-4 w-4" />
 							</span>
@@ -208,70 +211,49 @@ export default function HeroesClient({
 							/>
 						</div>
 
-						{/* Class Filter */}
-						<RadioGroup
-							value={selectedClass}
-							onValueChange={setSelectedClass}
-							className="flex flex-row space-x-1 md:space-x-2"
-						>
-							{heroClasses.map((heroClass) => (
-								<label
-									key={heroClass.value}
-									htmlFor={heroClass.value}
-									className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
+						<div className="flex w-full sm:w-auto items-center gap-2">
+							<div className="min-w-0 flex-1 sm:flex-none">
+								{/* Class Filter */}
+								<SearchableFilter
+									label="Filter by class"
+									searchPlaceholder="Search classes..."
+									value={selectedClass}
+									onValueChange={setSelectedClass}
+									options={heroClasses.map((heroClass) => ({
+										value: heroClass.value,
+										label: heroClass.value === "all" ? "All classes" : heroClass.name,
+										icon: heroClass.value === "all" ? undefined : heroClass.icon,
+									}))}
+								/>
+							</div>
+	
+							<div className="contents sm:flex sm:items-center sm:gap-2">
+								{/* Damage Type Filter */}
+								<div className="min-w-0 flex-1 sm:flex-none">
+									<SearchableFilter
+										label="Filter by damage type"
+										searchPlaceholder="Search damage types..."
+										value={selectedDamageType}
+										onValueChange={setSelectedDamageType}
+										options={damageTypes.map((type) => ({ value: type.value, label: type.value === "all" ? "All damage types" : type.name }))}
+									/>
+								</div>
+	
+								{/* View Mode Toggle (mobile) */}
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => setViewMode(viewMode === "splashart" ? "icon" : "splashart")}
+									title={viewMode === "splashart" ? "Switch to icon view" : "Switch to splashart view"}
+									className="inline-flex shrink-0 xl:hidden"
 								>
-									<RadioGroupItem value={heroClass.value} id={heroClass.value} />
-									{heroClass.value !== "all" ? (
-										<Image
-											src={heroClass.icon}
-											alt={heroClass.name}
-											width="0"
-											height="0"
-											sizes="100vw"
-											className="w-auto h-full object-cover inline"
-										/>
+									{viewMode === "splashart" ? (
+										<Grid2x2 className="h-4 w-4" />
 									) : (
-										<div className="w-4 h-4 flex items-center justify-center text-xs font-bold">
-											All
-										</div>
+										<ImageIcon className="h-4 w-4" />
 									)}
-								</label>
-							))}
-						</RadioGroup>
-
-						<div className="flex flex-row items-center gap-2">
-							{/* Damage Type Filter */}
-							<RadioGroup
-								value={selectedDamageType}
-								onValueChange={setSelectedDamageType}
-								className="flex flex-row space-x-1 md:space-x-2"
-							>
-								{damageTypes.map((damageType) => (
-									<label
-										key={damageType.value}
-										htmlFor={`dmg-${damageType.value}`}
-										className="flex items-center space-x-1 md:space-x-2 cursor-pointer"
-									>
-										<RadioGroupItem value={damageType.value} id={`dmg-${damageType.value}`} />
-										<span className="text-sm">{damageType.name}</span>
-									</label>
-								))}
-							</RadioGroup>
-
-							{/* View Mode Toggle (mobile) */}
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => setViewMode(viewMode === "splashart" ? "icon" : "splashart")}
-								title={viewMode === "splashart" ? "Switch to icon view" : "Switch to splashart view"}
-								className="inline-flex xl:hidden"
-							>
-								{viewMode === "splashart" ? (
-									<Grid2x2 className="h-4 w-4" />
-								) : (
-									<ImageIcon className="h-4 w-4" />
-								)}
-							</Button>
+								</Button>
+							</div>
 						</div>
 					</div>
 
