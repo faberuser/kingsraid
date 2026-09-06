@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Image from "@/components/next-image"
 import { classColorMapText, classColorMapBg, parseColoredText } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import GearEnhancement from "./gear-enhancement"
+import GearEnhancement from "@/components/gear-enhancement"
 
 interface GearProps {
 	heroData: HeroData

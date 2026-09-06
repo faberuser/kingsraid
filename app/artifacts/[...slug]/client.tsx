@@ -4,7 +4,7 @@ import { useCallback, useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import GearEnhancement from "@/components/gear-enhancement"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import Image from "@/components/next-image"
@@ -18,6 +18,12 @@ interface ArtifactClientProps {
 export default function ArtifactClient({ artifactData, sortedArtifactSlugs }: ArtifactClientProps) {
 	const router = useRouter()
 	const [isNavigating, startTransition] = useTransition()
+	const enhancementValues = Object.fromEntries(
+		Object.entries(artifactData.value ?? {}).map(([statKey, values]) => [
+			statKey,
+			Object.fromEntries(values.split(",").map((value, level) => [String(level), value.trim()])),
+		]),
+	)
 
 	const handleNavigate = useCallback(
 		(direction: "prev" | "next") => {
@@ -122,38 +128,16 @@ export default function ArtifactClient({ artifactData, sortedArtifactSlugs }: Ar
 						<CardTitle>Effect</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="text-lg">{artifactData.description}</div>
+						<div className="text-lg">
+							<GearEnhancement
+								key={artifactData.name}
+								name={artifactData.name}
+								description={artifactData.description}
+								values={enhancementValues}
+							/>
+						</div>
 					</CardContent>
 				</Card>
-			</div>
-
-			{/* Values */}
-			<div className="mb-8">
-				<div className="text-lg font-bold mb-6">Enhancement Values</div>
-				<div className="grid gap-4">
-					{Object.entries(artifactData.value).map(([key, values]) => (
-						<Card key={key} className="gap-2">
-							<CardHeader>
-								<CardTitle className="flex items-center justify-between">
-									Stat {"{"}
-									{key}
-									{"}"}
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-									{values.split(", ").map((value, index) => (
-										<div key={index} className="text-center">
-											<Badge variant="secondary" className="p-2 w-full justify-center">
-												★{index}: {value.trim()}
-											</Badge>
-										</div>
-									))}
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
 			</div>
 
 			{/* Story */}
