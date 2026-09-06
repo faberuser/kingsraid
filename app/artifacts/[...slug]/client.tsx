@@ -12,6 +12,7 @@ import { Spinner } from "@/components/ui/spinner"
 import Image from "@/components/next-image"
 import { ArtifactData } from "@/model/Artifact"
 import type { ModelFile } from "@/model/Hero_Model"
+import { ArtifactEffectBadges } from "@/components/artifact-effect-badges"
 
 const ArtifactModels = dynamic(() => import("@/app/artifacts/components/models"), {
 	ssr: false,
@@ -23,7 +24,7 @@ const ArtifactModels = dynamic(() => import("@/app/artifacts/components/models")
 })
 
 function getTabFromHash() {
-	return typeof window !== "undefined" && window.location.hash === "#models" ? "models" : "effect"
+	return typeof window !== "undefined" && window.location.hash === "#models" ? "models" : "effects"
 }
 
 interface ArtifactClientProps {
@@ -152,20 +153,23 @@ export default function ArtifactClient({ artifactData, sortedArtifactSlugs, arti
 					<div className="flex flex-col">
 						<h1 className="text-2xl md:text-3xl font-bold">{artifactData.name}</h1>
 					</div>
+					<div className="mt-2">
+						<ArtifactEffectBadges artifact={artifactData} />
+					</div>
 				</div>
 			</div>
 
-			<Tabs value={hasModels ? activeTab : "effect"} onValueChange={handleTabChange} className="w-full mt-2">
+			<Tabs value={hasModels ? activeTab : "effects"} onValueChange={handleTabChange} className="w-full mt-2">
 				<TabsList className="w-full overflow-x-auto overflow-y-hidden flex-nowrap justify-start">
-					<TabsTrigger value="effect">Effect</TabsTrigger>
+					<TabsTrigger value="effects">Effects</TabsTrigger>
 					{hasModels ? <TabsTrigger value="models">Models</TabsTrigger> : null}
 				</TabsList>
-				<TabsContent value="effect" className="mt-4 space-y-4">
-					{/* Effect Description */}
+				<TabsContent value="effects" className="mt-4 space-y-4">
+					{/* Effects Description */}
 					<div>
 						<Card className="gap-2">
 							<CardHeader>
-								<CardTitle>Effect</CardTitle>
+								<CardTitle>Effects</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="text-lg">
