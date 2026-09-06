@@ -128,7 +128,7 @@ export default function PerksBuilder({
 	}
 
 	return (
-		<div className="@container space-y-6 [--perk-builder-width:26rem]">
+		<div className="@container space-y-6 [--perk-builder-width:26rem] [--perk-size:min(3.625rem,calc((100cqw-6rem)/5))]">
 			{/* Points Display & Adjustment */}
 			<div className="grid grid-cols-[1fr_minmax(0,var(--perk-builder-width))_1fr] items-start gap-y-4">
 				<div className="col-start-2 row-start-2 @min-[56rem]:row-start-1 flex flex-wrap items-center justify-between gap-2 p-3 bg-muted rounded">
@@ -175,8 +175,8 @@ export default function PerksBuilder({
 
 			{/* T1 Perks */}
 			<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
-				<h4 className="font-medium flex items-center gap-2 sm:w-12">T1</h4>
-				<div className="flex flex-wrap gap-2">
+				<h4 className="font-medium flex shrink-0 items-center gap-2 sm:w-12">T1</h4>
+				<div className="flex min-w-0 gap-2">
 					{Object.entries(t1PerksData).map(([perkName, effect]) => {
 						const isSelected = selectedPerks.t1.includes(perkName)
 						const canSelect = isSelected || calculateUsedPoints(selectedPerks) + PERK_COSTS.t1 <= maxPoints
@@ -196,7 +196,7 @@ export default function PerksBuilder({
 									onClick={() => handlePerkToggle("t1", perkName)}
 									disabled={!canSelect && !isSelected}
 									className={cn(
-										"p-1 rounded text-center transition-all flex items-center justify-center",
+										"size-(--perk-size) shrink-0 p-1 rounded text-center transition-all flex items-center justify-center",
 										isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
 									)}
 								>
@@ -205,7 +205,7 @@ export default function PerksBuilder({
 										alt={perkName}
 										width={50}
 										height={50}
-										className={cn("rounded", !isSelected && "grayscale")}
+										className={cn("rounded w-full h-auto min-w-0", !isSelected && "grayscale")}
 									/>
 								</button>
 							</MobileTooltip>
@@ -216,8 +216,8 @@ export default function PerksBuilder({
 
 			{/* T2 Perks */}
 			<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
-				<h4 className="font-medium flex items-center gap-2 sm:w-12">T2</h4>
-				<div className="flex flex-wrap gap-2">
+				<h4 className="font-medium flex shrink-0 items-center gap-2 sm:w-12">T2</h4>
+				<div className="flex min-w-0 gap-2">
 					{Object.entries(t2PerksData).map(([perkName, effect]) => {
 						const isSelected = selectedPerks.t2.includes(perkName)
 						const canSelect = isSelected || calculateUsedPoints(selectedPerks) + PERK_COSTS.t2 <= maxPoints
@@ -237,7 +237,7 @@ export default function PerksBuilder({
 									onClick={() => handlePerkToggle("t2", perkName)}
 									disabled={!canSelect && !isSelected}
 									className={cn(
-										"p-1 rounded text-center transition-all flex items-center justify-center",
+										"size-(--perk-size) shrink-0 p-1 rounded text-center transition-all flex items-center justify-center",
 										isSelected ? "ring-2 ring-yellow-500" : "hover:bg-muted",
 									)}
 								>
@@ -246,7 +246,7 @@ export default function PerksBuilder({
 										alt={perkName}
 										width={50}
 										height={50}
-										className={cn("rounded", !isSelected && "grayscale")}
+										className={cn("rounded w-full h-auto min-w-0", !isSelected && "grayscale")}
 									/>
 								</button>
 							</MobileTooltip>
@@ -258,7 +258,7 @@ export default function PerksBuilder({
 			{/* T3 Perks */}
 			{heroData.perks?.t3 && (
 				<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
-					<h4 className="font-medium flex items-center gap-2 sm:w-12">T3</h4>
+					<h4 className="font-medium flex shrink-0 items-center gap-2 sm:w-12">T3</h4>
 					<div className="flex flex-col gap-2">
 						{/* Row 1: S1 Light, S1 Dark, S2 Light, S2 Dark */}
 						<div className="flex gap-2">
@@ -295,7 +295,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+														"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "light",
 														)
@@ -309,7 +309,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-12.5",
+															"rounded w-full h-auto min-w-0",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "light",
 															) && "grayscale",
@@ -344,7 +344,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+														"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "dark",
 														)
@@ -358,7 +358,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-12.5",
+															"rounded w-full h-auto min-w-0",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "dark",
 															) && "grayscale",
@@ -406,7 +406,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+														"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "light",
 														)
@@ -420,7 +420,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-12.5",
+															"rounded w-full h-auto min-w-0",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "light",
 															) && "grayscale",
@@ -455,7 +455,7 @@ export default function PerksBuilder({
 														calculateUsedPoints(selectedPerks) + PERK_COSTS.t3 > maxPoints
 													}
 													className={cn(
-														"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+														"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 														selectedPerks.t3.find(
 															(p) => p.skill === skillNum && p.type === "dark",
 														)
@@ -469,7 +469,7 @@ export default function PerksBuilder({
 														width={50}
 														height={50}
 														className={cn(
-															"rounded min-w-12.5",
+															"rounded w-full h-auto min-w-0",
 															!selectedPerks.t3.find(
 																(p) => p.skill === skillNum && p.type === "dark",
 															) && "grayscale",
@@ -489,8 +489,8 @@ export default function PerksBuilder({
 			{/* T5 Perks */}
 			{heroData.perks?.t5 && (
 				<div className="flex flex-row gap-4 max-w-(--perk-builder-width) mx-auto">
-					<h4 className="font-medium flex items-center gap-2 sm:w-12">T5</h4>
-					<div className="flex flex-wrap gap-2">
+					<h4 className="font-medium flex shrink-0 items-center gap-2 sm:w-12">T5</h4>
+					<div className="flex min-w-0 gap-2">
 						{/* Light */}
 						{(heroData.perks.t5 as Record<string, { effect: string; thumbnail: string }>).light && (
 							<MobileTooltip
@@ -521,7 +521,7 @@ export default function PerksBuilder({
 										calculateUsedPoints(selectedPerks) + PERK_COSTS.t5 > maxPoints
 									}
 									className={cn(
-										"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+										"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 										selectedPerks.t5.includes("light")
 											? "ring-2 ring-yellow-500"
 											: "hover:bg-muted",
@@ -533,7 +533,7 @@ export default function PerksBuilder({
 										width={50}
 										height={50}
 										className={cn(
-											"rounded min-w-12.5",
+											"rounded w-full h-auto min-w-0",
 											!selectedPerks.t5.includes("light") && "grayscale",
 										)}
 									/>
@@ -571,7 +571,7 @@ export default function PerksBuilder({
 										calculateUsedPoints(selectedPerks) + PERK_COSTS.t5 > maxPoints
 									}
 									className={cn(
-										"p-1 rounded transition-all flex items-center justify-center min-w-14.5",
+										"size-(--perk-size) shrink-0 p-1 rounded transition-all flex items-center justify-center",
 										selectedPerks.t5.includes("dark") ? "ring-2 ring-yellow-500" : "hover:bg-muted",
 									)}
 								>
@@ -581,7 +581,7 @@ export default function PerksBuilder({
 										width={50}
 										height={50}
 										className={cn(
-											"rounded min-w-12.5",
+											"rounded w-full h-auto min-w-0",
 											!selectedPerks.t5.includes("dark") && "grayscale",
 										)}
 									/>
