@@ -584,8 +584,8 @@ Downloaded Models:
 						isFullscreen
 							? "fixed! inset-0 z-50 w-screen! h-screen! rounded-none!"
 							: modelType === "artifacts"
-								? "h-120 lg:h-auto rounded-lg"
-								: "h-200 lg:h-auto rounded-lg"
+								? "h-120 lg:h-auto rounded-md"
+								: "h-200 lg:h-auto rounded-md"
 					}`}
 				>
 					{renderViewerContent()}
