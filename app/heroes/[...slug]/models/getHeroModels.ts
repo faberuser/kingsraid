@@ -109,6 +109,9 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 	// Use mapped name if available
 	const mappedHeroName = nameDiff[heroName] || heroName
 	const heroDir = path.join(modelsDir, heroName)
+	const facialMetadataPath = fs.existsSync(path.join(modelsDir, "..", "hero-facial", `${heroName}.json`))
+		? `/kingsraid-models/models/hero-facial/${encodeURIComponent(heroName)}.json`
+		: undefined
 
 	try {
 		if (!fs.existsSync(heroDir)) return heroModels
@@ -197,6 +200,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 							name: `${costumeName}_${type}`,
 							path: `${heroName}/${folderName}/${fbxFile}`,
 							type: type,
+							...(type === "body" ? { facialMetadataPath } : {}),
 							defaultPosition: defaultPos,
 						})
 					}

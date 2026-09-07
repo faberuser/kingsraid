@@ -47,4 +47,5 @@ export interface ModelFile {
 		| "bag"
 		| "mask"
 	defaultPosition?: boolean
+	facialMetadataPath?: string
 }

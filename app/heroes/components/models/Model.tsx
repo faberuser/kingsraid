@@ -10,6 +10,7 @@ import { weaponTypes } from "@/app/heroes/components/models/types"
 import { loadBossOffsetConfig } from "@/app/heroes/components/models/bossOffsetConfig"
 import { findNextInSequence, findSequenceStart } from "@/app/heroes/components/models/utils"
 import { bindHeroSkeletons } from "@/app/heroes/components/models/bindHeroSkeletons"
+import { loadFacialAnimation } from "@/app/heroes/components/models/loadFacialAnimation"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -18,6 +19,7 @@ type HeroModel = THREE.Group & {
 	animations?: THREE.AnimationClip[]
 	handPointR?: THREE.Object3D
 	handPointL?: THREE.Object3D
+	facial?: Awaited<ReturnType<typeof loadFacialAnimation>>
 }
 
 interface ModelProps {
@@ -58,6 +60,7 @@ export function Model({
 	const currentProgressRef = useRef<number>(0)
 	const isLoadingRef = useRef<boolean>(false)
 	const previousModelFilesRef = useRef<ModelFile[]>([])
+	const loadGenerationRef = useRef(0)
 	const [bossConfig, setBossConfig] = useState<Awaited<ReturnType<typeof loadBossOffsetConfig>>>(null)
 	const attachedWeaponsRef = useRef<Set<string>>(new Set()) // Track which weapons have been attached
 	const frameCountRef = useRef<number>(0) // Count frames to wait for skeleton stability
@@ -78,6 +81,7 @@ export function Model({
 			previousModelFilesRef.current.some((prev, idx) => prev.path !== modelFiles[idx]?.path)
 
 		if (modelFilesChanged) {
+			loadGenerationRef.current++
 			// Reset everything when switching costumes
 			currentProgressRef.current = 0
 			isLoadingRef.current = false
@@ -89,6 +93,7 @@ export function Model({
 			frameCountRef.current = 0 // Reset frame counter for weapon attachment
 			previousModelFilesRef.current = [...modelFiles]
 		}
+		const loadGeneration = loadGenerationRef.current
 
 		const loadModel = async (modelFile: ModelFile, modelIndex: number, totalModels: number) => {
 			if (loadedModels.has(modelFile.name)) return
@@ -124,9 +129,23 @@ export function Model({
 				})
 
 				const modelWithAnimations = fbx as HeroModel
+				if (loadGeneration !== loadGenerationRef.current) return
 				modelWithAnimations.animations = fbx.animations || []
+				if (modelType === "heroes" && modelFile.facialMetadataPath) {
+					try {
+						modelWithAnimations.facial = await loadFacialAnimation(
+							fbx,
+							modelFile.path,
+							`${basePath}${modelFile.facialMetadataPath}`,
+							modelDir,
+						)
+					} catch (error) {
+						console.warn(`Facial animation unavailable for ${modelFile.name}`, error)
+					}
+				}
 
 				// Find hand attachment points for weapon attachment
+				if (loadGeneration !== loadGenerationRef.current) return
 				fbx.traverse((child) => {
 					const childNameLower = child.name.toLowerCase()
 					// Look for Point_hand_R/L (proper attachment points)
@@ -346,6 +365,7 @@ export function Model({
 				}
 
 				// Store shared animations from the first model that has them
+				if (loadGeneration !== loadGenerationRef.current) return
 				if (modelWithAnimations.animations.length > 0 && sharedAnimationsRef.current.length === 0) {
 					sharedAnimationsRef.current = modelWithAnimations.animations
 				}
@@ -389,6 +409,7 @@ export function Model({
 
 			for (let i = 0; i < modelsToLoad.length; i++) {
 				await loadModel(modelsToLoad[i], i, totalModels)
+				if (loadGeneration !== loadGenerationRef.current) return
 			}
 
 			// Ensure we reach 100% at the end
@@ -569,6 +590,7 @@ export function Model({
 						}
 
 						action.play()
+						model.facial?.play(action)
 						activeActionsRef.current.set(modelName, action)
 
 						// Report animation duration (only from body/non-weapon models)
@@ -632,6 +654,7 @@ export function Model({
 		// This ensures hand bones are in animated pose, not bind pose
 		if (!isPaused) {
 			mixersRef.current.forEach((mixer) => mixer.update(delta))
+			loadedModels.forEach((model) => model.facial?.update())
 		}
 
 		// Reattach weapons to hand points for the first 10 frames to ensure skeleton stability
