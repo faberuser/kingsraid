@@ -9,6 +9,7 @@ import { ModelFile } from "@/model/Hero_Model"
 import { weaponTypes } from "@/app/heroes/components/models/types"
 import { loadBossOffsetConfig } from "@/app/heroes/components/models/bossOffsetConfig"
 import { findNextInSequence, findSequenceStart } from "@/app/heroes/components/models/utils"
+import { bindHeroSkeletons } from "@/app/heroes/components/models/bindHeroSkeletons"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
@@ -146,14 +147,18 @@ export function Model({
 				})
 
 				// Bind skeleton for skinned meshes (crucial for AssetStudio FBX files)
-				fbx.traverse((child) => {
-					if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
-						const skinnedMesh = child as THREE.SkinnedMesh
-						if (skinnedMesh.skeleton) {
-							skinnedMesh.bind(skinnedMesh.skeleton)
+				if (modelType === "heroes") {
+					bindHeroSkeletons(fbx)
+				} else {
+					fbx.traverse((child) => {
+						if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
+							const skinnedMesh = child as THREE.SkinnedMesh
+							if (skinnedMesh.skeleton) {
+								skinnedMesh.bind(skinnedMesh.skeleton)
+							}
 						}
-					}
-				})
+					})
+				}
 
 				// Fix materials
 				fbx.traverse((child) => {
