@@ -165,9 +165,3 @@ Create a `.env` file for local usage. See `.env.example` for all available optio
 - `DOCKER_IMAGE`: Docker Compose's image, mostly for custom registry in case you want full build (optional, default: "ghcr.io/faberuser/krinfo:latest")
 - `CONTAINER_NAME`: Docker Compose's container name (optional, default: "krinfo")
 - `DOCKER_PORT`: Docker Compose's container port (optional, default: 3000)
-
-## Known Bugs
-
-- 3D models doesn't have face expressions.
-- There are several 3D models having face detached/wrong position
-  (Exported from AssetStudio, would appriciate if anyone know how to fix)
