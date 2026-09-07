@@ -10,23 +10,23 @@ import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { Model } from "@/app/heroes/components/models/Model"
-import { Scene } from "@/app/heroes/components/models/Scene"
-import { ScreenshotHandler } from "@/app/heroes/components/models/ScreenshotHandler"
-import { RecordingHandler } from "@/app/heroes/components/models/RecordingHandler"
-import { ScreenshotDialog } from "@/app/heroes/components/models/ScreenshotDialog"
-import { RecordingDialog } from "@/app/heroes/components/models/RecordingDialog"
-import { ControlsPanel } from "@/app/heroes/components/models/ControlsPanel"
-import { ActionControls } from "@/app/heroes/components/models/ActionControls"
-import { convertToGif } from "@/app/heroes/components/models/gifConverter"
+import { Model } from "@/components/models/Model"
+import { Scene } from "@/components/models/Scene"
+import { ScreenshotHandler } from "@/components/models/ScreenshotHandler"
+import { RecordingHandler } from "@/components/models/RecordingHandler"
+import { ScreenshotDialog } from "@/components/models/ScreenshotDialog"
+import { RecordingDialog } from "@/components/models/RecordingDialog"
+import { ControlsPanel } from "@/components/models/ControlsPanel"
+import { ActionControls } from "@/components/models/ActionControls"
+import { convertToGif } from "@/components/models/gifConverter"
 import {
 	ModelViewerProps,
 	INITIAL_CAMERA_POSITION,
 	INITIAL_CAMERA_TARGET,
 	weaponTypes,
 	VoiceLanguage,
-} from "@/app/heroes/components/models/types"
-import { findVoiceForAnimation } from "@/app/heroes/components/models/utils"
+} from "@/components/models/types"
+import { findVoiceForAnimation } from "@/components/models/utils"
 
 const HERO_NAME_REGEX = /^Hero_([A-Za-z]+)/
 
@@ -580,12 +580,14 @@ Downloaded Models:
 			<div className="space-y-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:h-200 lg:max-h-200">
 				<div
 					ref={viewerContainerRef}
+					// Clip the background and blurred controls together inside backdrop-filtered dialogs.
+					style={{ clipPath: isFullscreen ? "inset(0)" : "inset(0 round var(--radius-lg))" }}
 					className={`relative w-full bg-linear-to-b from-blue-100 to-blue-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden transition-all duration-300 ${
 						isFullscreen
 							? "fixed! inset-0 z-50 w-screen! h-screen! rounded-none!"
 							: modelType === "artifacts"
-								? "h-120 lg:h-auto rounded-md"
-								: "h-200 lg:h-auto rounded-md"
+								? "h-120 lg:h-auto rounded-lg"
+								: "h-200 lg:h-auto rounded-lg"
 					}`}
 				>
 					{renderViewerContent()}

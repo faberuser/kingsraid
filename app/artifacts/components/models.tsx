@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ModelViewer } from "@/app/heroes/components/models/ModelViewer"
-import { ModelSelector } from "@/app/heroes/components/models/ModelSelector"
+import { ModelViewer } from "@/components/models/ModelViewer"
+import { ModelSelector } from "@/components/models/ModelSelector"
 import type { ModelFile } from "@/model/Hero_Model"
 
 const animations: string[] = []
