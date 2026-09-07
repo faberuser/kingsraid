@@ -26,6 +26,22 @@ jobs:
         with:
           fetch-depth: 1
 
+      # Resolve these outside Docker: a command inside a cached RUN layer does
+      # not execute, so it cannot discover that an upstream repository changed.
+      # ls-remote reads refs only; it does not clone the large repositories.
+      - name: Resolve assets cache version
+        id: assets-version
+        shell: bash
+        run: |
+          set -euo pipefail
+          MODELS_HASH="$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD | cut -f1)"
+          AUDIO_HASH="$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD | cut -f1)"
+          test -n "$MODELS_HASH"
+          test -n "$AUDIO_HASH"
+          VERSION="${MODELS_HASH}-${AUDIO_HASH}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Assets cache version: ${MODELS_HASH:0:8}-${AUDIO_HASH:0:8}"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
@@ -51,6 +67,7 @@ jobs:
           tags: ${{ secrets.REGISTRY }}/${{ secrets.NAMESPACE }}/krinfo:latest
           build-args: |
             NEXT_PUBLIC_ENABLE_MODELS_VOICES=true
+            ASSETS_CACHE_VERSION=${{ steps.assets-version.outputs.version }}
           cache-from: type=local,src=/var/tmp/.buildx-cache
           cache-to: type=local,dest=/var/tmp/.buildx-cache-new,mode=max,oci-mediatypes=true,compression=zstd,compression-level=3
           # Remove unnecessary

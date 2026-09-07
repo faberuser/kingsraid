@@ -3,19 +3,11 @@
 # clone and cache the large model/audio repos for future builds
 FROM alpine/git AS data-stage
 ARG NEXT_PUBLIC_ENABLE_MODELS_VOICES=false
+ARG ASSETS_CACHE_VERSION=1
 
 RUN \
   if [ "$NEXT_PUBLIC_ENABLE_MODELS_VOICES" = "true" ]; then \
-    echo "Resolving HEAD hashes for cache-busting..."; \
-    MODELS_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-models.git HEAD \
-      2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown") & \
-    PID1=$!; \
-    AUDIO_HASH=$(git ls-remote https://gitea.k-clowd.top/faberuser/kingsraid-audio.git HEAD \
-      2>/dev/null | cut -f1 | cut -c1-8 || echo "unknown") & \
-    PID2=$!; \
-    wait $PID1 $PID2; \
-    echo "${MODELS_HASH}-${AUDIO_HASH}" > /tmp/.assets-version; \
-    echo "Assets version: $(cat /tmp/.assets-version)"; \
+    echo "Assets cache version: $ASSETS_CACHE_VERSION"; \
     echo "Cloning kingsraid-models and kingsraid-audio (NEXT_PUBLIC_ENABLE_MODELS_VOICES=true)..."; \
     git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-models.git /tmp/kingsraid-models & \
     git clone --depth=1 https://gitea.k-clowd.top/faberuser/kingsraid-audio.git /tmp/kingsraid-audio & \
