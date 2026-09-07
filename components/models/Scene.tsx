@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { FBXLoader } from "three-stdlib"
 import * as THREE from "three"
-import { loadBossOffsetConfig } from "@/app/heroes/components/models/bossOffsetConfig"
+import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
