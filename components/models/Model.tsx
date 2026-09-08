@@ -680,8 +680,12 @@ export function Model({
 				return
 			}
 
-			// Check if hand points exist and weapons are loaded
-			if (bodyModel.handPointR || bodyModel.handPointL) {
+			// Some heroes use a dedicated weapon socket instead of hand points.
+			const hasConfiguredSocket = modelType === "heroes" && modelFiles.some((file) => {
+				const socket = getHeroWeaponConfig(file)?.socket
+				return socket && bodyModel.getObjectByName(socket)
+			})
+			if (bodyModel.handPointR || bodyModel.handPointL || hasConfiguredSocket) {
 				const weaponsNeedingAttachment = modelFiles.filter(
 					(mf) => weaponTypes.includes(mf.type) && !mf.defaultPosition && !hasSceneAttachment(mf, modelType),
 				)

@@ -35,6 +35,8 @@ const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	{ pattern: "_WeaponPen", type: "weaponpen" },
 	{ pattern: "_WeaponScissors", type: "weaponscissors" },
 	{ pattern: "_WeaponSkein", type: "weaponskein" },
+	{ pattern: "_Weapon_Scissors", type: "weaponscissors" },
+	{ pattern: "_Weapon_Skein", type: "weaponskein" },
 	{ pattern: "_Handle", type: "handle" },
 	{ pattern: "_Weapon", type: "weapon" },
 	{ pattern: "_Shield", type: "shield" },
