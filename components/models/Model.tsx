@@ -11,7 +11,9 @@ import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
 import { findNextInSequence, findSequenceStart } from "@/components/models/utils"
 import { bindHeroSkeletons } from "@/components/models/bindHeroSkeletons"
 import { getHeroWeaponConfig, createWeaponVisibilitySync } from "@/components/models/heroWeaponConfig"
-import { loadFacialAnimation } from "@/components/models/loadFacialAnimation"
+import { loadFacialAnimation } from "@/components/models/facialAnimation"
+import { modelTextureOverrides } from "@/components/models/modelConfig"
+import { repairEyebrowTextures } from "./repairEyebrowTextures"
 import { advanceAnimationFrame, type SequencePlayback } from "@/components/models/advanceAnimationFrame"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
@@ -59,6 +61,18 @@ export function Model({
 }: ModelProps) {
 	const groupRef = useRef<THREE.Group>(null)
 	const [loadedModels, setLoadedModels] = useState<Map<string, HeroModel>>(new Map())
+	useEffect(() => {
+		if (modelType !== "heroes") return
+		const bodies: THREE.Object3D[] = []
+		const hairs: THREE.Object3D[] = []
+		for (const file of modelFiles) {
+			const model = loadedModels.get(file.name)
+			if (!model) continue
+			if (file.type === "body") bodies.push(model)
+			if (file.type === "hair") hairs.push(model)
+		}
+		repairEyebrowTextures(bodies, hairs)
+	}, [loadedModels, modelFiles, modelType])
 	const mixersRef = useRef<Map<string, THREE.AnimationMixer>>(new Map())
 	const activeActionsRef = useRef<Map<string, THREE.AnimationAction>>(new Map())
 	const sharedAnimationsRef = useRef<THREE.AnimationClip[]>([])
@@ -192,6 +206,22 @@ export function Model({
 							if (skinnedMesh.skeleton) {
 								skinnedMesh.bind(skinnedMesh.skeleton)
 							}
+						}
+					})
+				}
+
+				// Repair missing material maps using model-specific exported textures.
+				const textureOverrides = modelType === "heroes" ? modelTextureOverrides[modelFile.path] : undefined
+				if (textureOverrides) {
+					const textures = new Map(await Promise.all(Object.entries(textureOverrides).map(async ([name, texturePath]) => {
+						const texture = await new THREE.TextureLoader().loadAsync(`${modelDir}/${texturePath}`)
+						return [name, texture] as const
+					})))
+					fbx.traverse((child) => {
+						if (!(child instanceof THREE.Mesh)) return
+						for (const material of Array.isArray(child.material) ? child.material : [child.material]) {
+							const texture = textures.get(material.name)
+							if (texture && "map" in material) material.map = texture
 						}
 					})
 				}
@@ -420,7 +450,8 @@ export function Model({
 			})
 
 			// Load visible models AND all weapon models (even if hidden, we need them to check for animations)
-			const modelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name) || weaponTypes.includes(m.type))
+			const modelsToLoad = sortedModels.filter((m) => visibleModels.has(m.name) || weaponTypes.includes(m.type) ||
+				(modelType === "heroes" && m.type === "hair"))
 			const totalModels = modelsToLoad.length
 
 			for (let i = 0; i < modelsToLoad.length; i++) {
