@@ -1,6 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { ModelFile } from "@/model/Hero_Model"
+import { expandDualWeapons } from "@/components/models/expandDualWeapons"
 
 // Define type mappings (most specific patterns first)
 const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
@@ -322,6 +323,9 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 			}
 		}
 
+		for (const [costumeName, models] of Object.entries(heroModels)) {
+			heroModels[costumeName] = expandDualWeapons(heroName, models)
+		}
 		return heroModels
 	} catch (error) {
 		console.error(error)

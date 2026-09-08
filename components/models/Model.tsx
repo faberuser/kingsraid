@@ -15,6 +15,10 @@ import { loadFacialAnimation } from "@/components/models/loadFacialAnimation"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
 
+function hasSceneAttachment(modelFile: ModelFile, modelType: ModelProps["modelType"]) {
+	return modelType === "heroes" && getHeroWeaponConfig(modelFile)?.attachment === "scene"
+}
+
 type HeroModel = THREE.Group & {
 	mixer?: THREE.AnimationMixer
 	animations?: THREE.AnimationClip[]
@@ -342,9 +346,8 @@ export function Model({
 							fbx.visible = false
 						}
 
-						// Weapons will be attached to hand points later
-						// Keep at origin for now
-						fbx.position.set(0, 0, 0)
+						// Keep independently animated weapons in their exported scene position.
+						if (!hasSceneAttachment(modelFile, modelType)) fbx.position.set(0, 0, 0)
 					}
 				} else {
 					// Default positioning for unknown types
@@ -499,7 +502,7 @@ export function Model({
 				const shouldBeVisible = visibleModels.has(modelName)
 
 				// Don't make weapon visible if it hasn't been attached yet
-				if (shouldBeVisible && !attachedWeaponsRef.current.has(modelName)) {
+				if (shouldBeVisible && !hasSceneAttachment(modelFile, modelType) && !attachedWeaponsRef.current.has(modelName)) {
 					return
 				}
 
@@ -508,7 +511,7 @@ export function Model({
 				}
 			}
 		})
-	}, [visibleModels, loadedModels, modelFiles])
+	}, [visibleModels, loadedModels, modelFiles, modelType])
 
 	// Handle animation switching - preserve weapon visibility state (user controls it manually)
 	useEffect(() => {
@@ -546,14 +549,19 @@ export function Model({
 					// For weapons, try to find matching weapon animation
 					let animationToPlay = selectedAnimation
 
-					// Skip weapon animation logic for weapons with defaultPosition (they're part of the body)
-					if (isWeapon && !modelFile.defaultPosition) {
+					// Some independent weapon rigs use body clip names instead of _Weapon names.
+					const usesBodyClipNames =
+						modelFile && modelType === "heroes" && getHeroWeaponConfig(modelFile)?.animationNaming === "body"
+					if (isWeapon && !modelFile.defaultPosition && !usesBodyClipNames) {
 						// Convert body animation to weapon animation
 						// Handle two cases:
 						// 1. Regular: "Hero_Aisha@Astand_Astand" -> "Hero_Aisha_Weapon@Astand_Astand"
 						// 2. Facial: "Hero_Isaiah_Facial@Aimsword_Aimsword" -> "Hero_Isaiah_Weapon_Facial@Aimsword_Aimsword"
 						let weaponAnimName: string
-						if (selectedAnimation.includes("_Facial@")) {
+						if (
+							selectedAnimation.includes("_Facial@") &&
+							!(modelType === "heroes" && getHeroWeaponConfig(modelFile)?.animationNaming === "facialWeapon")
+						) {
 							weaponAnimName = selectedAnimation.replace(/_Facial@/, "_Weapon_Facial@")
 						} else {
 							weaponAnimName = selectedAnimation.replace(/@/, "_Weapon@")
@@ -648,7 +656,7 @@ export function Model({
 				mixer.removeEventListener("finished", handleAnimationFinished)
 			})
 		}
-	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, availableAnimations, onAnimationChange])
+	}, [selectedAnimation, loadedModels, onAnimationDurationChange, modelFiles, availableAnimations, onAnimationChange, modelType])
 
 	useFrame((state, delta) => {
 		// UPDATE ANIMATION MIXERS FIRST before weapon attachment
@@ -682,7 +690,7 @@ export function Model({
 			// Check if hand points exist and weapons are loaded
 			if (bodyModel.handPointR || bodyModel.handPointL) {
 				const weaponsNeedingAttachment = modelFiles.filter(
-					(mf) => weaponTypes.includes(mf.type) && !mf.defaultPosition,
+					(mf) => weaponTypes.includes(mf.type) && !mf.defaultPosition && !hasSceneAttachment(mf, modelType),
 				)
 				const allWeaponsLoaded = weaponsNeedingAttachment.every((mf) => loadedModels.has(mf.name))
 
@@ -692,7 +700,12 @@ export function Model({
 					// Reattach weapons every frame for first FRAMES_TO_REATTACH frames
 					loadedModels.forEach((weaponModel, weaponName) => {
 						const modelFile = modelFiles.find((m) => m.name === weaponName)
-						if (!modelFile || !weaponTypes.includes(modelFile.type) || modelFile.defaultPosition) return
+						if (
+							!modelFile ||
+							!weaponTypes.includes(modelFile.type) ||
+							modelFile.defaultPosition ||
+							hasSceneAttachment(modelFile, modelType)
+						) return
 
 						const heroWeaponConfig = modelType === "heroes" ? getHeroWeaponConfig(modelFile) : undefined
 						const isLeftHand = heroWeaponConfig?.hand
