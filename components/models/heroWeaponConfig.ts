@@ -1,5 +1,6 @@
 import type { Object3D } from "three"
 import type { ModelFile } from "@/model/Hero_Model"
+import { weaponConfigData, dualWeaponHeroNames, defaultPosHeroes, weaponFallback } from "./modelConfig"
 import { weaponTypes } from "./types"
 
 interface HeroWeaponConfig {
@@ -11,106 +12,53 @@ interface HeroWeaponConfig {
 	animationNaming?: "body" | "facialWeapon" | "weaponPen"
 }
 
-const medianaWeaponConfig: HeroWeaponConfig = {
-	recalculateBoneInverses: true,
-	rotation: { x: 0, y: 0, z: 0 },
+interface WeaponRule {
+	types?: string[]
+	folders?: string[]
+	config: Omit<HeroWeaponConfig, "rotation"> & {
+		rotationDegrees?: { x: number; y: number; z: number }
+	}
 }
 
-const leoBottleConfig: HeroWeaponConfig = { socket: "Bone_Inkbottle" }
-const leoPenConfig: HeroWeaponConfig = { hand: "right", animationNaming: "weaponPen" }
-
-const isaiahWeaponAConfig: HeroWeaponConfig = { hand: "left" }
-const isaiahWeaponBConfig: HeroWeaponConfig = {
-	hand: "right",
-	rotation: { x: 0, y: 0, z: 0 },
+interface HeroWeaponRules {
+	rules: WeaponRule[]
+	sheathedWeaponBone?: string
 }
 
-const gremoryWeaponConfig: HeroWeaponConfig = { attachment: "scene" }
-const nickyWeaponConfig: HeroWeaponConfig = { attachment: "scene", animationNaming: "body" }
-const kiberaWeaponConfig: HeroWeaponConfig = { attachment: "scene", animationNaming: "body" }
-const mirianneWeaponConfig: HeroWeaponConfig = { attachment: "scene" }
-const shamillaAlternateWeaponConfig: HeroWeaponConfig = { hand: "left", rotation: { x: 0, y: 0, z: 0 } }
-const reinaWeaponConfig: HeroWeaponConfig = { hand: "left", rotation: { x: Math.PI / 2, y: 0, z: 0 } }
-const reinaChristmasWeaponConfig: HeroWeaponConfig = { hand: "left", rotation: { x: 0, y: 0, z: 0 } }
-const seriaSwordConfig: HeroWeaponConfig = { hand: "right" }
-const seriaSheathConfig: HeroWeaponConfig = { hand: "left", animationNaming: "facialWeapon" }
-const swordConfig: HeroWeaponConfig = { hand: "right" }
-// These animated sheath rigs already run along socket Z. The default X
-// quarter-turn used for static swords would turn them across the grip.
-const sheathConfig: HeroWeaponConfig = { hand: "left", rotation: { x: 0, y: 0, z: 0 } }
+// Compile once: the viewer reads these rules during animation and attachment.
+const heroRules = Object.fromEntries(
+	Object.entries(weaponConfigData as Record<string, HeroWeaponRules>).map(([hero, entry]) => [
+		hero,
+		{
+			...entry,
+			rules: entry.rules.map(({ config, ...rule }) => {
+				const { rotationDegrees, ...settings } = config
+				const rotation = rotationDegrees && {
+					x: (rotationDegrees.x * Math.PI) / 180,
+					y: (rotationDegrees.y * Math.PI) / 180,
+					z: (rotationDegrees.z * Math.PI) / 180,
+				}
+				return { ...rule, config: { ...settings, ...(rotation ? { rotation } : {}) } }
+			}),
+		},
+	]),
+)
 
 export function getHeroWeaponConfig(modelFile: ModelFile): HeroWeaponConfig | undefined {
-	if (modelFile.path.startsWith("Leo/")) {
-		if (modelFile.type === "weaponbottle" || modelFile.type === "weaponb") return leoBottleConfig
-		if (modelFile.type === "weaponpen") return leoPenConfig
-	}
-	// All three blades have body-space motion in their _Weapon clips.
-	// Handle is a separate accessory and must not use the blade rig's placement.
-	if (modelFile.path.startsWith("Mirianne/") && modelFile.type === "weapon") {
-		return mirianneWeaponConfig
-	}
-	// These exports omit the internal -90-degree X parent found in the
-	// other Shamilla rigs, so they do not need the matching +90-degree turn.
-	if (
-		/^Shamilla\/Hero_Shamilla_(Cos19Casual|Cos20SL|Cos21Glory)_Weapon\//.test(modelFile.path) &&
-		modelFile.type === "weapon"
-	) {
-		return shamillaAlternateWeaponConfig
-	}
-	// A/B names do not imply a hand to the viewer. These heroes draw with
-	// the right hand while the left holds the separately animated sheath.
-	if (modelFile.path.startsWith("Ripine/") || modelFile.path.startsWith("Riheet/")) {
-		if (modelFile.type === "weapona" || modelFile.type === "weapon_a") return swordConfig
-		if (modelFile.type === "weaponb" || modelFile.type === "weapon_b") return sheathConfig
-	}
-	// Seria draws the sword with her right hand while the left holds the
-	// animated sheath. Costumes use both WeaponA/B and Weapon_A/B names.
-	if (modelFile.path.startsWith("Seria/")) {
-		if (modelFile.type === "weapona" || modelFile.type === "weapon_a") return seriaSwordConfig
-		if (modelFile.type === "weaponb" || modelFile.type === "weapon_b") return seriaSheathConfig
-	}
-	// The blade follows the thumb side of Reina's grip (socket +Z), not
-	// the finger direction. Christmas 2021 bakes in an extra X quarter-turn.
-	if (modelFile.path.startsWith("Reina/") && weaponTypes.includes(modelFile.type)) {
-		return modelFile.path.startsWith("Reina/Hero_Reina_Cos21Christmas_Weapon/")
-			? reinaChristmasWeaponConfig
-			: reinaWeaponConfig
-	}
-	// Kibera's single weapon FBX contains three blades with separate animated
-	// hand/back sockets. Keep the rig in scene space and use its body-named clips.
-	if (modelFile.path.startsWith("Kibera/") && weaponTypes.includes(modelFile.type)) {
-		return kiberaWeaponConfig
-	}
-	// Nicky's chain bones animate in scene space, using the body's clip names.
-	if (modelFile.path.startsWith("Nicky/") && weaponTypes.includes(modelFile.type)) {
-		return nickyWeaponConfig
-	}
-	// Gremory has no hand sockets: her weapon's own animation positions it
-	// alongside the body in the scene.
-	if (modelFile.path.startsWith("Gremory/") && weaponTypes.includes(modelFile.type)) {
-		return gremoryWeaponConfig
-	}
-	// Mediana's animated syringe rig uses the hand socket's axes directly.
-	// Its exported bone inverses also need rebuilding in the FBX bind pose.
-	if (modelFile.path.startsWith("Mediana/") && weaponTypes.includes(modelFile.type)) {
-		return medianaWeaponConfig
-	}
-	// Isaiah draws the sword with her left hand; the animated sheath belongs
-	// to the right socket and already uses its axes without the 90-degree turn.
-	if (modelFile.path.startsWith("Isaiah/")) {
-		if (modelFile.type === "weapon_a") return isaiahWeaponAConfig
-		if (modelFile.type === "weapon_b") return isaiahWeaponBConfig
-	}
-	return undefined
+	if (!weaponTypes.includes(modelFile.type)) return undefined
+	const [hero, folder] = modelFile.path.split("/")
+	// Specific costume rules precede general rules in the JSON.
+	return heroRules[hero]?.rules.find(
+		(rule) =>
+			(!rule.types || rule.types.includes(modelFile.type)) && (!rule.folders || rule.folders.includes(folder)),
+	)?.config
 }
 
-const sheathedWeaponBones: Record<string, string> = {
-	Seria: "Point_Weapon",
-	Isaiah: "Point_Weapon",
-	Ripine: "Point_Weapon",
-	// Despite its name, this bone controls the embedded sword grip, not the sheath.
-	Riheet: "Point_SeathScale",
-}
+const sheathedWeaponBones = Object.fromEntries(
+	Object.entries(heroRules).flatMap(([hero, entry]) =>
+		entry.sheathedWeaponBone ? [[hero, entry.sheathedWeaponBone]] : [],
+	),
+)
 
 export function createWeaponVisibilitySync(modelFiles: ModelFile[], loadedModels: ReadonlyMap<string, Object3D>) {
 	const swordFile = modelFiles.find(
@@ -143,4 +91,42 @@ export function createWeaponVisibilitySync(modelFiles: ModelFile[], loadedModels
 			) > 0.01
 		sword.visible = visibleModels.has(swordFile.name) && !embeddedSwordShown
 	}
+}
+
+const dualWeaponHeroes = new Set(dualWeaponHeroNames)
+const defaultPositionHeroes = new Set(defaultPosHeroes)
+
+export function usesDefaultWeaponPosition(mappedHeroName: string): boolean {
+	return defaultPositionHeroes.has(mappedHeroName)
+}
+
+export function getWeaponFallbackFolders(
+	mappedHeroName: string,
+	costumeName: string,
+	models: readonly ModelFile[],
+): readonly string[] {
+	// Preserve the existing fallback policy: named accessory parts do not
+	// block a costume's configured replacement weapon folders.
+	if (models.some((model) => ["weapon", "weapon01", "weapon02"].includes(model.type))) return []
+	const fallback = weaponFallback[`Hero_${mappedHeroName}_${costumeName}`]
+	return fallback ? (Array.isArray(fallback) ? fallback : [fallback]) : []
+}
+
+export function expandDualWeapons(heroName: string, models: ModelFile[]): ModelFile[] {
+	if (!dualWeaponHeroes.has(heroName)) return models
+	// Most Fluss costumes already export distinct left/right swords.
+	if (models.some((model) => model.type === "weapon_l" || model.type === "weapon_r")) return models
+	const weapon = models.find((model) => model.type === "weapon")
+	if (!weapon) return models
+
+	// These heroes reuse a single rigid mesh in both hands. Separate model
+	// entries give each instance its own transform and Parts toggle.
+	return models.flatMap((model) =>
+		model === weapon
+			? [
+					{ ...model, name: `${model.name}_r`, type: "weapon_r" as const },
+					{ ...model, name: `${model.name}_l`, type: "weapon_l" as const },
+				]
+			: [model],
+	)
 }

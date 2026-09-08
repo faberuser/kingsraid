@@ -9,12 +9,16 @@ import { Object3D } from "three"
 
 function loadTypeScript(filename) {
 	const compiled = new Module(filename)
-	compiled.require = (specifier) => specifier.startsWith(".")
-		? loadTypeScript(path.resolve(path.dirname(filename), `${specifier}.ts`))
-		: createRequire(filename)(specifier)
-	compiled._compile(ts.transpileModule(fs.readFileSync(filename, "utf8"), {
-		compilerOptions: { module: ts.ModuleKind.CommonJS },
-	}).outputText, filename)
+	compiled.require = (specifier) =>
+		specifier.startsWith(".") && !specifier.endsWith(".json")
+			? loadTypeScript(path.resolve(path.dirname(filename), `${specifier}.ts`))
+			: createRequire(filename)(specifier)
+	compiled._compile(
+		ts.transpileModule(fs.readFileSync(filename, "utf8"), {
+			compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
+		}).outputText,
+		filename,
+	)
 	return compiled.exports
 }
 const { createWeaponVisibilitySync } = loadTypeScript(
@@ -31,22 +35,29 @@ function setup(hero = "Seria", underscored = false) {
 		{ name: "sword", path: `${hero}/sword.fbx`, type: underscored ? "weapon_a" : "weapona" },
 		{ name: "sheath", path: `${hero}/sheath.fbx`, type: underscored ? "weapon_b" : "weaponb" },
 	]
-	const sync = createWeaponVisibilitySync(files, new Map([["sword", sword], ["sheath", sheath]]))
+	const sync = createWeaponVisibilitySync(
+		files,
+		new Map([
+			["sword", sword],
+			["sheath", sheath],
+		]),
+	)
 	return { sword, sheath, bone, sync }
 }
 
 test("animated sheathing and drawing show only one sword for both costume naming styles", () => {
-	for (const hero of ["Seria", "Isaiah", "Ripine", "Riheet"]) for (const underscored of [false, true]) {
-		const { sword, bone, sync } = setup(hero, underscored)
-		const visible = new Set(["sword", "sheath"])
-		const attached = new Set(["sword", "sheath"])
-		for (const scale of [1, 0.5, 0.001, 0.001, 1]) {
-			bone.scale.setScalar(scale)
-			sync(visible, attached)
-			assert.equal(sword.visible, scale <= 0.01)
+	for (const hero of ["Seria", "Isaiah", "Ripine", "Riheet"])
+		for (const underscored of [false, true]) {
+			const { sword, bone, sync } = setup(hero, underscored)
+			const visible = new Set(["sword", "sheath"])
+			const attached = new Set(["sword", "sheath"])
+			for (const scale of [1, 0.5, 0.001, 0.001, 1]) {
+				bone.scale.setScalar(scale)
+				sync(visible, attached)
+				assert.equal(sword.visible, scale <= 0.01)
+			}
+			assert.deepEqual([...visible], ["sword", "sheath"], "animation must not change toggle selection")
 		}
-		assert.deepEqual([...visible], ["sword", "sheath"], "animation must not change toggle selection")
-	}
 })
 
 test("manual toggles and hidden sheath restore the standalone sword without advancing animation", () => {
