@@ -1,6 +1,6 @@
 import type { ModelFile } from "@/model/Hero_Model"
 
-const dualWeaponHeroes = new Set(["Mitra", "Fluss", "Laudia", "Tanya", "Roi", "Shakmeh"])
+const dualWeaponHeroes = new Set(["Mitra", "Fluss", "Laudia", "Tanya", "Roi", "Shakmeh", "Theo", "Gau", "Dosarta"])
 
 export function expandDualWeapons(heroName: string, models: ModelFile[]): ModelFile[] {
 	if (!dualWeaponHeroes.has(heroName)) return models

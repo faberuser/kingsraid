@@ -566,6 +566,10 @@ export function Model({
 						// 2. Facial: "Hero_Isaiah_Facial@Aimsword_Aimsword" -> "Hero_Isaiah_Weapon_Facial@Aimsword_Aimsword"
 						let weaponAnimName: string
 						if (
+							modelType === "heroes" && getHeroWeaponConfig(modelFile)?.animationNaming === "weaponPen"
+						) {
+							weaponAnimName = animationName.replace(/(?:_Facial)?@/, "_WeaponPen@")
+						} else if (
 							animationName.includes("_Facial@") &&
 							!(modelType === "heroes" && getHeroWeaponConfig(modelFile)?.animationNaming === "facialWeapon")
 						) {
@@ -704,8 +708,10 @@ export function Model({
 								modelFile.type === "weaponl" ||
 								modelFile.type === "weapon02"
 
-						let handPoint = isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
-						if (!handPoint) {
+						let handPoint = heroWeaponConfig?.socket
+							? bodyModel.getObjectByName(heroWeaponConfig.socket)
+							: isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
+						if (!handPoint && !heroWeaponConfig?.socket) {
 							handPoint = isLeftHand ? bodyModel.handPointR : bodyModel.handPointL
 						}
 

@@ -23,6 +23,7 @@ const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	{ pattern: "_Weapon_A", type: "weapon_a" },
 	{ pattern: "_Weapon_B", type: "weapon_b" },
 	{ pattern: "_WeaponA", type: "weapona" },
+	{ pattern: "_WeaponBottle", type: "weaponbottle" },
 	{ pattern: "_WeaponB", type: "weaponb" },
 	{ pattern: "_Weapon_L", type: "weapon_l" },
 	{ pattern: "_Weapon_R", type: "weapon_r" },
@@ -30,7 +31,6 @@ const TYPE_PATTERNS: Array<{ pattern: string; type: ModelFile["type"] }> = [
 	{ pattern: "_WeaponR", type: "weaponr" },
 	{ pattern: "_Weapon01", type: "weapon01" },
 	{ pattern: "_Weapon02", type: "weapon02" },
-	{ pattern: "_WeaponBottle", type: "weaponbottle" },
 	{ pattern: "_WeaponPen", type: "weaponpen" },
 	{ pattern: "_WeaponScissors", type: "weaponscissors" },
 	{ pattern: "_WeaponSkein", type: "weaponskein" },
@@ -305,8 +305,7 @@ export async function getHeroModels(heroName: string): Promise<{ [costume: strin
 							const fbxFile = files.find((file) => file.endsWith(".fbx"))
 							if (fbxFile) {
 								// Determine weapon type from folder name
-								let type: ModelFile["type"] = "weapon"
-								if (fallbackFolder.includes("_Weapon")) type = "weapon"
+								const type = getModelType(fallbackFolder) ?? "weapon"
 
 								const weaponModel: ModelFile = {
 									name: `${costumeName}_${type}`,
