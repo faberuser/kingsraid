@@ -10,6 +10,7 @@ import { weaponTypes } from "@/components/models/types"
 import { loadBossOffsetConfig } from "@/components/models/bossOffsetConfig"
 import { findNextInSequence, findSequenceStart } from "@/components/models/utils"
 import { bindHeroSkeletons } from "@/components/models/bindHeroSkeletons"
+import { getHeroWeaponConfig } from "@/components/models/heroWeaponConfig"
 import { loadFacialAnimation } from "@/components/models/loadFacialAnimation"
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || ""
@@ -167,7 +168,7 @@ export function Model({
 
 				// Bind skeleton for skinned meshes (crucial for AssetStudio FBX files)
 				if (modelType === "heroes") {
-					bindHeroSkeletons(fbx)
+					bindHeroSkeletons(fbx, getHeroWeaponConfig(modelFile)?.recalculateBoneInverses)
 				} else {
 					fbx.traverse((child) => {
 						if ((child as THREE.SkinnedMesh).isSkinnedMesh) {
@@ -693,11 +694,13 @@ export function Model({
 						const modelFile = modelFiles.find((m) => m.name === weaponName)
 						if (!modelFile || !weaponTypes.includes(modelFile.type) || modelFile.defaultPosition) return
 
-						const isLeftHand =
-							modelFile.type === "shield" ||
-							modelFile.type === "weapon_l" ||
-							modelFile.type === "weaponl" ||
-							modelFile.type === "weapon02"
+						const heroWeaponConfig = modelType === "heroes" ? getHeroWeaponConfig(modelFile) : undefined
+						const isLeftHand = heroWeaponConfig?.hand
+							? heroWeaponConfig.hand === "left"
+							: modelFile.type === "shield" ||
+								modelFile.type === "weapon_l" ||
+								modelFile.type === "weaponl" ||
+								modelFile.type === "weapon02"
 
 						let handPoint = isLeftHand ? bodyModel.handPointL : bodyModel.handPointR
 						if (!handPoint) {
@@ -710,8 +713,10 @@ export function Model({
 								weaponModel.parent.remove(weaponModel)
 							}
 
-							// Use weapon rotation from config if available, otherwise default to 90 degrees
-							const weaponRotation = bossConfig?.weapon?.rotation || { x: Math.PI / 2, y: 0, z: 0 }
+							// Use the hero or boss weapon correction, otherwise default to 90 degrees.
+							const weaponRotation =
+								(modelType === "heroes" ? heroWeaponConfig?.rotation : bossConfig?.weapon?.rotation) ||
+								{ x: Math.PI / 2, y: 0, z: 0 }
 
 							weaponModel.position.set(0, 0, 0)
 							weaponModel.scale.set(1, 1, 1)
